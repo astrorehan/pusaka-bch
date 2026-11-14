@@ -1,0 +1,17 @@
+{
+  "name": "proto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cashc vault.cash -o vault.json && node test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cashc": "^0.14.0",
+    "cashscript": "^0.14.0"
+  }
+}
