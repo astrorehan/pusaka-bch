@@ -10,7 +10,7 @@
 
 Judges score the work done during the hackathon, so here is exactly what existed before it started.
 
-- **Pusaka on Monad (earlier hackathon, Solidity):** [repo](https://github.com/astrorehan/pusaka) · [demo](https://pusaka-faraid.vercel.app). Reused here: the product idea and the faraid share calculator.
+- **Pusaka on Monad (earlier hackathon, Solidity):** [repo](https://github.com/astrorehan/pusaka) · [demo](https://pusaka-faraid.vercel.app). Reused here: the product idea, the faraid share calculator and the flower logo (`brand/`).
 - **This repo at the start of BLAZE:** tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start), made before 14 Nov 2026 14:00 UTC. It holds only `prototype/`, a test contract.
 - **Everything after `blaze-start`** is BLAZE work.
 
