@@ -41,7 +41,19 @@ The goal is the one the BLAZE judges set: **instant, slick, and it just works**.
   - `favicon.svg`: switches between the two with `prefers-color-scheme`.
 - In the app, inline the logo and colour it with `--text` (petals) and `--gold` (seed), so that it follows the in-app theme toggle and not only the system setting.
 - Give the logo clear space of at least half its width on every side. The smallest size is 16 px (favicon); in the header it is 24 to 28 px, next to the word "Pusaka".
-- Don't recolour the petals green, add glows or shadows to the logo, or rotate it.
+- Don't recolour the petals green, add glows or shadows to the logo, or rotate it. The only motion the logo has is the bloom below.
+
+### The bloom (logo animation)
+
+The logo is the app's one piece of character animation. It tells the product story in a second: the seed is the owner's BCH, and the four petals are the heirs it grows into.
+
+- **The motion:** the seed appears first (an opacity fade plus `scale` from 0.6 to 1, 200 ms). Then the four petals unfold from the centre one after another, clockwise from the top right. Each petal fades in, slides out from the seed, and scales from 0.8 to 1 over 240 ms, starting 80 ms after the previous one. The whole bloom takes about 700 ms. It uses only `transform` and `opacity`, with `--ease-out`.
+- **Where it plays:**
+  - **Splash:** on first load the app shows a centred logo, 72 px on phones and 96 px on desktop, on `--bg`. Under it is a thin progress line, 120 px wide and 2 px high, with a `--border` track and a `--gold` fill. The splash appears only if loading takes longer than 300 ms, and it is never added just to show the animation. If loading finishes during the bloom, the bloom completes and then the splash fades out (150 ms).
+  - **Waiting state:** while the app waits for a wallet signature or for the network, a 40 px logo blooms, closes and blooms again. It pauses for 600 ms between cycles and sits above the status text ("Waiting for your wallet…", "Sending…").
+  - **Plan created and Sent to heirs:** the bloom plays once, at 120 px, above the success message. Each petal takes the colour of one heir. With more than four heirs, the petals use the first four heir colours and the heir list below shows everyone.
+- **Reduced motion:** with `prefers-reduced-motion: reduce`, the logo appears whole with a 150 ms fade. The waiting state shows a static logo with its text, and the progress line still moves, because it carries information.
+- The splash is plain HTML and CSS inlined in `index.html`, so it appears before any JavaScript has loaded. The app removes it when it is ready.
 
 ## Colour
 
