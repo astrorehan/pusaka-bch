@@ -1,0 +1,46 @@
+pragma solidcash ^0.50.0;
+
+// Stateless fallback, ported from ../prototype/vault.cash (pre-hackathon); only the pragma and one int cast changed.
+contract VaultStateless(
+    bytes20 ownerPkh,
+    int inactivityBlocks,
+    int totalShares,
+    int feeBudget,
+    bytes heirs            // N entries of 24 bytes: pkh (20) + share (4, little-endian)
+) {
+    // Owner proves control by co-spending one of their own P2PKH coins at input 1.
+    // The vault coin is re-created at the same address, which resets its age.
+    function checkIn() {
+        require(this.activeInputIndex == 0, "vault must be input 0");
+        require(tx.inputs.length == 2, "exactly two inputs");
+        require(tx.inputs[1].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "input 1 must be the owner");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to the vault");
+        require(tx.outputs[0].value >= tx.inputs[0].value, "vault balance may not shrink");
+        require(tx.outputs[0].tokenCategory == 0x, "no tokens");
+    }
+
+    // Owner takes the money back out, any time.
+    function withdraw() {
+        require(this.activeInputIndex == 0, "vault must be input 0");
+        require(tx.inputs.length == 2, "exactly two inputs");
+        require(tx.inputs[1].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "input 1 must be the owner");
+    }
+
+    // Anyone may trigger this once the vault coin is old enough. No signature needed.
+    function distribute() {
+        require(this.age >= inactivityBlocks, "owner is still within the check-in period");
+        require(this.activeInputIndex == 0, "vault must be input 0");
+        require(tx.inputs.length == 1, "exactly one input");
+        int n = int(heirs.length) / 24;
+        require(tx.outputs.length == n, "one output per heir");
+        int pot = tx.inputs[0].value - feeBudget;
+        for (int i = 0; i < n; i++) {
+            bytes entry = heirs.slice(i * 24, i * 24 + 24);
+            bytes pkhBytes, bytes shareBytes = entry.split(20);
+            int share = int(shareBytes);
+            require(tx.outputs[i].lockingBytecode == new LockingBytecodeP2PKH(unsafe_bytes20(pkhBytes)), "wrong heir address");
+            require(tx.outputs[i].value >= pot * share / totalShares, "heir is paid less than their share");
+            require(tx.outputs[i].tokenCategory == 0x, "no tokens");
+        }
+    }
+}

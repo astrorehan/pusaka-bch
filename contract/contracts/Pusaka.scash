@@ -1,0 +1,63 @@
+pragma solidcash ^0.50.0;
+
+// Pusaka: inheritance vault. Stateful SolidCash contract (BLAZE 2026 work).
+// distribute() pays up to MAX_HEIRS heirs through unrolled slots: in solidcash 0.50 a loop of
+// this.transfer cannot be combined with a locktime (see docs/solidcash-dx-log.md).
+
+struct Heir {
+    bytes20 pkh;
+    int share;
+}
+
+event CheckedIn(int newDeadline);
+event Distributed(int heirs, int pot);
+
+error StillAlive(int deadline);
+
+contract Pusaka(bytes20 ownerPkh, int period, int totalShares, int feeBudget) {
+    int public deadline;
+    Heir[] public heirs;
+
+    constructor(int firstDeadline, Heir[] initialHeirs) {
+        require(int(initialHeirs.length) >= 1 && int(initialHeirs.length) <= 10, "1 to 10 heirs");
+        this.heirs = initialHeirs;
+        this.deadline = firstDeadline;
+    }
+
+    modifier ownerCoSpends() {
+        require(tx.origin == new LockingBytecodeP2PKH(ownerPkh), "owner coin must be co-spent");
+        _;
+    }
+
+    function checkIn() public ownerCoSpends {
+        require(tx.locktime >= 500000000, "use a timestamp locktime");
+        this.deadline = tx.locktime + period;
+        emit CheckedIn(this.deadline);
+    }
+
+    function withdraw() public ownerCoSpends {
+        this.transfer(new LockingBytecodeP2PKH(ownerPkh), this.balance);
+    }
+
+    function payHeir(int i, int pot) internal {
+        if (i < int(this.heirs.length)) {
+            this.transfer(new LockingBytecodeP2PKH(this.heirs[i].pkh), pot * this.heirs[i].share / totalShares);
+        }
+    }
+
+    function distribute() public {
+        require(tx.time >= this.deadline);
+        int pot = this.balance - feeBudget;
+        payHeir(0, pot);
+        payHeir(1, pot);
+        payHeir(2, pot);
+        payHeir(3, pot);
+        payHeir(4, pot);
+        payHeir(5, pot);
+        payHeir(6, pot);
+        payHeir(7, pot);
+        payHeir(8, pot);
+        payHeir(9, pot);
+        emit Distributed(int(this.heirs.length), pot);
+    }
+}
