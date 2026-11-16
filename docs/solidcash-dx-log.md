@@ -103,6 +103,10 @@ The web app cannot hold keys, so every transaction must be signed by the user's 
 - `ElectrumNetworkProvider` has no `getBalance`; sum `getUtxos(address)`.
 - **WizardConnect** (`@wizardconnect/dapp` 0.2.x) carries the same `WcSignTransactionRequest` plus `inputPaths: [inputIndex, "receive" | "change", addressIndex]`, and the relay chunks large messages. It is an HD session (xpubs), while `Signer.external` and the contract's owner check name one address. An HD wallet moves change to new addresses, so the app must keep the owner's coins at the plan's owner address or consolidate them there before a call.
 
+**The upstream form of the fix on Chipnet (16 Nov, about 05:14-05:17 UTC)**
+
+The fix prepared for upstream (`D:/project/lomba/solidcash-upstream`, branch `fix/external-signer-stateful-calls`: rebuilt 0.50.1 sources, the fix, and 4 regression tests) was compiled, swapped into the published `dist` with our patch removed, and run through `external-signing-spike.ts` on Chipnet: deploy `abacf5dee5eee019da552d549ef52f13d04928f9b35001218c37b1b15d8a9969`, check-in `f88794544ba68b4b91373943f2c3a0900a493dddbd918e6706f6e58ac3935b92` (deadline moved by exactly the period), withdraw `9e08246c0b5b26c50e7fbddedb94cfd9d54294f6dbde70eb1cd81fd267bab941`, payout by another wallet `a212685bd010dd1fa19d3b782cd6dbfccc3efcebbc2ffdd36197a690d53066b0`. The SDK's default Chipnet Electrum server (`chipnet.bch.ninja`) dropped or timed out several connections during the run; `chipnet.imaginary.cash` worked (the spike takes `ELECTRUM_HOST`).
+
 **The app's own chain layer on Chipnet (`app/scripts/chain-e2e.ts`, 16 Nov, about 03:42-03:48 UTC)**
 
 The web app's `src/lib/chain` code, driven from Node with a stand-in WizardConnect manager that signs by `inputPaths`:

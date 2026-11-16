@@ -18,7 +18,9 @@ const FARAID = [15n, 20n, 20n, 26n, 26n, 13n];
 const TOTAL = 120n;
 const log = (...a: unknown[]) => console.log(new Date().toISOString().slice(11, 19), ...a);
 
-const provider = new ElectrumNetworkProvider('chipnet');
+const provider = process.env.ELECTRUM_HOST
+  ? new ElectrumNetworkProvider('chipnet', { hostname: process.env.ELECTRUM_HOST })
+  : new ElectrumNetworkProvider('chipnet');
 
 /** A stand-in for a WalletConnect wallet: signs its own empty P2PKH inputs, as bch_signTransaction asks. */
 function fakeWallet(name: string, privateKey: Uint8Array): ExternalTransactionSigner {
