@@ -10,7 +10,7 @@ import { heirColor, type FlowerHeir } from './flowerMath';
 import { OpenLinkDialog } from './OpenLinkDialog';
 import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL } from './links';
-import '../../components/button.css';
+import { Button, ButtonLink } from '../../components/Button';
 import './home.css';
 
 interface Preset {
@@ -71,8 +71,8 @@ export function HomeScreen() {
             in between.
           </p>
           <div className="home-hero__ctas">
-            <Link to="/try" className="btn btn--primary btn--lg">Try it now</Link>
-            <Link to="/new" className="btn btn--secondary btn--lg">Create a plan</Link>
+            <ButtonLink to="/try" size="lg">Try it now</ButtonLink>
+            <ButtonLink to="/new" variant="secondary" size="lg">Create a plan</ButtonLink>
           </div>
           <div className="home-hero__more">
             <button type="button" className="home-textlink" onClick={() => setLinkOpen(true)}>
@@ -113,13 +113,15 @@ export function HomeScreen() {
               </div>
               <ShareBar heirs={p.heirs} />
               <p className="split-card__example num">{p.example}</p>
-              <Link
+              <ButtonLink
                 to={`/new?split=${p.mode}`}
-                className="btn btn--secondary btn--block split-card__btn"
+                variant="secondary"
+                block
+                className="split-card__btn"
                 aria-label={`Start with this: ${p.title}`}
               >
                 Start with this
-              </Link>
+              </ButtonLink>
             </li>
           ))}
         </ul>
@@ -153,10 +155,9 @@ export function HomeScreen() {
               Open the plan link they gave you to see your share, and when it can be sent to you.
             </p>
           </div>
-          <button type="button" className="btn btn--secondary btn--lg heir-band__btn" onClick={() => setLinkOpen(true)}>
-            <span className="btn__icon" aria-hidden><Link2 /></span>
-            <span className="btn__label">Open a plan link</span>
-          </button>
+          <Button type="button" variant="secondary" size="lg" icon={<Link2 />} className="heir-band__btn" onClick={() => setLinkOpen(true)}>
+            Open a plan link
+          </Button>
         </div>
       </section>
 
