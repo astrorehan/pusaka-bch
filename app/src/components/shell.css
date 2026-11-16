@@ -1,32 +1,142 @@
 .shell { min-height: 100dvh; display: flex; flex-direction: column; }
 
+/* Keyboard only: jump past the banner and header. */
+.skip-link {
+  position: absolute; left: var(--gutter); top: var(--space-2); z-index: 60;
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-button);
+  background: var(--primary); color: var(--on-primary); font-weight: 500; text-decoration: none;
+  transform: translateY(-150%); opacity: 0;
+}
+.skip-link:focus-visible { transform: none; opacity: 1; }
+
 .testnet-badge {
-  text-align: center; font-size: var(--text-13); padding: var(--space-1) var(--gutter);
+  text-align: center; font-size: var(--text-13); line-height: 1.4; padding: var(--space-1) var(--gutter);
   background: var(--warning-soft); color: var(--warning); font-weight: 500;
 }
 
+/* ---------------------------------------------------------------- header */
+
 .header {
+  position: relative; z-index: 20;
   display: flex; align-items: center; gap: var(--space-4);
   padding: var(--space-3) var(--gutter); max-width: 1200px; width: 100%; margin: 0 auto;
 }
-.brand { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text); text-decoration: none; min-height: 44px; }
-.brand__name { font-family: var(--font-heading); font-size: var(--text-20); font-weight: 500; }
-.header__links { display: none; gap: var(--space-6); margin-left: var(--space-6); }
-.header__links a { color: var(--text-muted); text-decoration: none; font-size: var(--text-15); }
-.header__links a:hover { color: var(--text); }
-.header__actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
-@media (min-width: 768px) { .header__links { display: flex; } }
+.brand {
+  display: inline-flex; align-items: center; gap: var(--space-2); flex: none;
+  color: var(--text); text-decoration: none; min-height: 44px; border-radius: var(--radius-input);
+}
+.brand__name { font-family: var(--font-heading); font-size: var(--text-20); font-weight: 500; letter-spacing: -0.01em; }
+
+.header__links { display: none; gap: var(--space-1); margin-left: var(--space-4); }
+.header__links a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-3);
+  border-radius: var(--radius-button);
+  color: var(--text-muted); text-decoration: none; font-size: var(--text-15);
+  transition: color 150ms ease;
+}
+.header__links a[aria-current='page'] { color: var(--text); }
+@media (hover: hover) and (pointer: fine) { .header__links a:hover { color: var(--text); } }
+
+.header__actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-1); }
+.header__actions .header__theme { display: none; }
+@media (min-width: 360px) { .header__actions { gap: var(--space-2); } }
+@media (min-width: 768px) {
+  .header__links { display: flex; }
+  .header__actions .header__theme { display: inline-grid; }
+  .phone-menu { display: none; }
+}
 
 .icon-btn {
-  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-button);
+  position: relative;
+  display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: var(--radius-button);
   background: transparent; border: 0; color: var(--text-muted);
-  transition: transform var(--dur-press) var(--ease-out), background-color 150ms ease;
+  transition: transform var(--dur-press) var(--ease-out), background-color 150ms ease, color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .icon-btn:active { transform: scale(0.97); }
 .icon-btn svg { width: 20px; height: 20px; stroke-width: 1.5; }
+.icon-btn[aria-expanded='true'] { color: var(--text); background: var(--surface-hover); }
 @media (hover: hover) and (pointer: fine) { .icon-btn:hover { background: var(--surface-hover); color: var(--text); } }
 
+/* Two icons in one place (menu/close, moon/sun): a quick crossfade, never a jump. */
+.icon-swap { grid-area: 1 / 1; display: inline-flex; opacity: 0; transform: scale(0.8) rotate(-30deg); transition: opacity 150ms ease, transform 150ms var(--ease-out); }
+.icon-swap[data-on] { opacity: 1; transform: none; }
+
+/* ---------------------------------------------------------------- phone menu */
+
+/* The panel lines up with the header's right edge (the header is its positioned parent). */
+.phone-menu { position: static; }
+.phone-menu__panel { width: min(300px, calc(100vw - 2 * var(--gutter))); right: var(--gutter); top: calc(100% - var(--space-2)); }
+
+.menu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.menu-item {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%;
+  min-height: 48px; padding: 0 var(--space-3); border-radius: var(--radius-button);
+  border: 0; background: transparent; color: var(--text);
+  font-size: var(--text-16); font-weight: 500; text-align: left; text-decoration: none;
+  transition: background-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item:active { background: var(--surface-hover); }
+.menu-item[aria-current='page'] { background: var(--surface-2); }
+.menu-item__ext { margin-left: auto; width: 16px; height: 16px; stroke-width: 1.5; color: var(--text-muted); }
+.menu-item__icon { width: 20px; height: 20px; stroke-width: 1.5; color: var(--text-muted); }
+@media (hover: hover) and (pointer: fine) { .menu-item:hover { background: var(--surface-hover); } }
+.menu-sep { height: 1px; background: var(--border); margin: var(--space-2) var(--space-3); }
+
+/* A plain switch: track and thumb. Only the thumb moves. */
+.switch {
+  margin-left: auto; flex: none; position: relative;
+  width: 36px; height: 22px; border-radius: var(--radius-full);
+  background: var(--border-strong); transition: background-color 150ms ease;
+}
+.switch__thumb {
+  position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 150ms var(--ease-out);
+}
+.menu-item--switch[aria-checked='true'] .switch { background: var(--accent-text); }
+.menu-item--switch[aria-checked='true'] .switch__thumb { transform: translateX(14px); }
+
+/* ---------------------------------------------------------------- wallet */
+
+.wallet { position: relative; flex: none; }
+.wallet-btn { padding: 0 var(--space-3); }
+@media (min-width: 360px) { .wallet-btn { padding: 0 var(--space-4); } }
+.wallet-btn--on .btn__icon { position: relative; }
+/* green = alive: a small dot on the wallet icon once connected (the address next to it says the same in words) */
+.wallet-btn--on .btn__icon::after {
+  content: ''; position: absolute; right: -2px; top: -1px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 2px var(--surface);
+}
+.wallet-btn .mono { font-size: var(--text-15); }
+
+.wallet-popover { width: min(320px, calc(100vw - 2 * var(--gutter))); }
+.wallet-panel { padding: var(--space-2); display: grid; gap: var(--space-3); }
+.wallet-panel__head { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-15); color: var(--text-muted); }
+.wallet-panel__head strong { color: var(--text); font-weight: 600; }
+.wallet-panel__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+.wallet-panel__addr {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  padding-left: var(--space-3); border-radius: var(--radius-input); background: var(--surface-2);
+}
+.wallet-panel__addr .mono { font-size: var(--text-15); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wallet-panel__bal { font-size: var(--text-16); }
+.wallet-panel__bal strong { font-weight: 600; }
+
+.wallet-note-live { position: absolute; right: 0; top: calc(100% + var(--space-2)); z-index: 40; }
+.wallet-note {
+  width: max-content; max-width: min(280px, calc(100vw - 2 * var(--gutter)));
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-button);
+  background: var(--primary); color: var(--on-primary); font-size: var(--text-15); line-height: 1.4;
+  box-shadow: var(--shadow);
+  transform-origin: top right; animation: popover-in 150ms var(--ease-out) both;
+}
+
+/* ---------------------------------------------------------------- main */
+
 .main { flex: 1; width: 100%; }
+.main:focus { outline: none; }
 
 /* The flow column: at most 560 px, centred. */
 .column { max-width: calc(var(--column) + 2 * var(--gutter)); margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-16); }

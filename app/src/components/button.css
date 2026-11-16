@@ -2,24 +2,39 @@
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   min-height: 44px; padding: 0 var(--space-4);
   border-radius: var(--radius-button); border: 1px solid transparent;
-  font-weight: 500; font-size: var(--text-15); white-space: nowrap;
+  font-weight: 500; font-size: var(--text-15); line-height: 1.2; white-space: nowrap;
+  text-decoration: none; user-select: none;
   transition: transform var(--dur-press) var(--ease-out), background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
   -webkit-tap-highlight-color: transparent;
 }
-.btn:active:not(:disabled) { transform: scale(0.97); }
+/* Press: scale down while held, release a little faster than the press. */
+.btn:active:not(:disabled) { transform: scale(0.97); transition-duration: 160ms, 150ms, 150ms, 150ms; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn[aria-busy='true']:disabled { opacity: 1; cursor: progress; }
 .btn--lg { min-height: 52px; padding: 0 var(--space-6); font-size: var(--text-16); }
 .btn--block { width: 100%; }
 .btn__icon { display: inline-flex; }
+.btn__label { display: inline-block; }
 .btn__icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
 
-.btn--primary { background: var(--primary); color: var(--on-primary); }
-.btn--secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
-.btn--ghost { background: transparent; color: var(--text); }
-.btn--danger { background: var(--surface); color: var(--danger); border-color: var(--border); }
+/* A new label (Sign, Sending…, Sent) fades in; the button never jumps between states. */
+.btn__label--swap { animation: btn-label-in 200ms var(--ease-out) both; }
+@keyframes btn-label-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+.btn--primary, .btn--primary:visited { background: var(--primary); color: var(--on-primary); }
+.btn--secondary, .btn--secondary:visited { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn--ghost, .btn--ghost:visited { background: transparent; color: var(--text); }
+.btn--danger, .btn--danger:visited { background: var(--surface); color: var(--danger); border-color: var(--border); }
 
 @media (hover: hover) and (pointer: fine) {
   .btn--primary:hover:not(:disabled) { background: var(--primary-hover); }
   .btn--secondary:hover:not(:disabled), .btn--ghost:hover:not(:disabled) { background: var(--surface-hover); }
+  .btn--secondary:hover:not(:disabled) { border-color: var(--border-strong); }
   .btn--danger:hover:not(:disabled) { background: var(--danger-soft); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:disabled) { transform: none; }
+  .btn__label--swap { animation-name: btn-label-fade; }
+  @keyframes btn-label-fade { from { opacity: 0; } to { opacity: 1; } }
 }

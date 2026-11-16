@@ -12,9 +12,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// Remove the splash once the app has rendered.
-const splash = document.getElementById('splash');
-if (splash) {
-  splash.classList.add('done');
-  setTimeout(() => splash.remove(), 200);
-}
+// Hand over from the splash (index.html) once the first frame has painted. It lets a running bloom finish.
+requestAnimationFrame(() => {
+  const w = window as Window & { __pusakaSplash?: { hide(): void } };
+  if (w.__pusakaSplash) w.__pusakaSplash.hide();
+  else document.getElementById('splash')?.remove();
+});

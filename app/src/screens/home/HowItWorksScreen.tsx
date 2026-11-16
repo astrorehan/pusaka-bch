@@ -8,7 +8,7 @@ import { formatUsd } from '../../lib/format';
 import { MAX_HEIRS } from '../../lib/shares';
 import { HomeFooter } from './HomeFooter';
 import { CONTRACT_URL, DX_LOG_URL, REPO_URL, SOLIDCASH_URL, TESTS_URL } from './links';
-import '../../components/button.css';
+import { ButtonLink } from '../../components/Button';
 import './how-it-works.css';
 
 /** Measured on Chipnet: every plan action is a 9 to 12 KB transaction at about 1 satoshi per byte. */
@@ -281,7 +281,7 @@ export function HowItWorksScreen() {
           <h2>See it work</h2>
           <p>Open a sample plan whose waiting time has passed, and send it to its heirs.</p>
           <div className="hiw-cta__btns">
-            <Link to="/try" className="btn btn--primary btn--lg">Try it now</Link>
+            <ButtonLink to="/try" size="lg">Try it now</ButtonLink>
             <Link to="/new" className="hiw-cta__link">
               Create a plan <ArrowRight aria-hidden />
             </Link>

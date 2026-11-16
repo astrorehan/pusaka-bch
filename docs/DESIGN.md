@@ -33,6 +33,7 @@ The goal is the one the BLAZE judges set: **instant, slick, and it just works**.
 - Errors say what went wrong and how to fix it: "This amount is too small. Each heir must get at least 546 satoshis (about $0.003)." Never show a raw error code alone. If there is a code, it goes in a collapsible "Details".
 - Faraid is named once, as a preset: "Islamic inheritance (faraid)". The product is for every family. Faraid is never the headline.
 - On Chipnet the app shows a permanent "Test network: no real money" badge. On mainnet it shows nothing extra.
+- The hackathon banner is the one place that may say "BCH BLAZE 2026", "Before BLAZE" and show a CashTokens address, because the organiser requires those words there (see [Shell](#shell)).
 
 ## Brand
 
@@ -51,11 +52,11 @@ The logo is the app's one piece of character animation. It tells the product sto
 
 - **The motion:** the seed appears first (an opacity fade plus `scale` from 0.6 to 1, 200 ms). Then the four petals unfold from the centre one after another, clockwise from the top right. Each petal fades in, slides out from the seed, and scales from 0.8 to 1 over 240 ms, starting 80 ms after the previous one. The whole bloom takes about 700 ms. It uses only `transform` and `opacity`, with `--ease-out`.
 - **Where it plays:**
-  - **Splash:** on first load the app shows a centred logo, 72 px on phones and 96 px on desktop, on `--bg`. Under it is a thin progress line, 120 px wide and 2 px high, with a `--border` track and a `--gold` fill. The splash appears only if loading takes longer than 300 ms, and it is never added just to show the animation. If loading finishes during the bloom, the bloom completes and then the splash fades out (150 ms).
+  - **Splash:** on first load the app shows a centred logo, 72 px on phones and 96 px on desktop, on `--bg`. Under it is a thin progress line, 120 px wide and 2 px high, with a `--border` track and a `--gold` fill. The splash appears only if loading takes longer than 300 ms, and it is never added just to show the animation. If loading finishes during the bloom, the bloom completes and then the splash fades out (150 ms). The app can't know its real progress, so the fill creeps toward 85% and fills only when the app is ready.
   - **Waiting state:** while the app waits for a wallet signature or for the network, a 40 px logo blooms, closes and blooms again. It pauses for 600 ms between cycles and sits above the status text ("Waiting for your wallet…", "Sending…").
   - **Plan created and Sent to heirs:** the bloom plays once, at 120 px, above the success message. Each petal takes the colour of one heir. With more than four heirs, the petals use the first four heir colours and the heir list below shows everyone.
 - **Reduced motion:** with `prefers-reduced-motion: reduce`, the logo appears whole with a 150 ms fade. The waiting state shows a static logo with its text, and the progress line still moves, because it carries information.
-- The splash is plain HTML and CSS inlined in `index.html`, so it appears before any JavaScript has loaded. The app removes it when it is ready.
+- The splash is plain HTML and CSS inlined in `index.html`, so it appears before any JavaScript has loaded. The app calls `window.__pusakaSplash.hide()` when it has rendered. Its colours repeat the token values, because `tokens.css` has not loaded yet: it is the only place raw hex is allowed. A tiny inline script applies the saved theme before first paint, so neither the splash nor the app flashes the wrong theme.
 
 ## Colour
 
@@ -87,9 +88,10 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 - **Body and UI:** Geist (self-hosted through `@fontsource-variable/geist`), at 16 px base. Inputs are never below 16 px, so iOS does not zoom on focus.
 - **Headings:** Fraunces, a serif for the heirloom feel, used only for headings 24 px and up. Smaller headings use Geist at weight 600.
 - **Mono:** Geist Mono.
-- Mono is used only for BCH addresses and transaction IDs.
+- Mono is used only for BCH addresses, transaction IDs, and code excerpts on the technical How it works page. Why: code set in a proportional font reads wrong, and that page is the only one allowed to show code.
 - **Numbers:** all amounts, percentages and countdowns use `font-variant-numeric: tabular-nums`, so digits don't jump.
 - Scale: 13 / 15 / 16 / 20 / 24 / 32 / 40 px. Line height is 1.5 for body and 1.2 for headings.
+- **Display: 56 px (`--text-56`), only for the home hero headline from 1280 px.** Why: the judges asked for "enormous text" on the first screen; below 1280 px the hero keeps 40 px so the headline stays at two or three lines.
 
 ## Money and addresses
 
@@ -107,16 +109,16 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 - The flow content column is at most 560 px wide and centred. Side gutters are 16 px on phones and 24 px from 768 px.
 - Spacing comes from a 4-px scale: 4, 8, 12, 16, 24, 32, 48, 64. Radius: 8 (inputs), 12 (buttons), 16 (cards), 24 (sheets), full (badges).
 - Touch targets are at least 44 × 44 px.
-- The wallet button is always at the top right, because the organiser asks for it there.
+- The wallet button is always at the top right, the rightmost control on every width, because the organiser asks for it there. Under 360 px it reads "Connect" (its accessible name stays "Connect wallet").
 - Each screen has one primary button, placed where the thumb reaches: on phones it sits at the bottom of the content, full width.
 
 ## Home page
 
 The home page is the app's front door and its landing page. There is no separate marketing site, so a visitor is one tap away from trying it.
 
-1. **Header:** the logo and "Pusaka" on the left, at most three text links ("How it works", "Docs", "GitHub"), and the wallet button on the right. On phones the links move into a menu, but the wallet button stays visible.
+1. **Header:** the logo and "Pusaka" on the left, at most three text links ("How it works", "Docs", "GitHub"), and the wallet button on the right. On phones the links and the theme switch move into a menu, but the wallet button stays visible (see [Shell](#shell)).
 2. **Hero:**
-   - One headline promise in plain words, for example "Your BCH reaches your family. Even if you can't." The headline is at most 8 words.
+   - One headline promise in plain words, at most 8 words, for example "Leave your BCH to the people you love." Why 8: a headline that short reads in one glance, which is all a judge gives the first screen.
    - One supporting sentence under it, for example "Choose your heirs and their shares. If you stop checking in, they receive it automatically, with no company in between."
    - Two buttons: **Try it now** (primary; it leads to the judge path) and **Watch the demo** (secondary, with a play icon).
    - One large illustration built from the logo: the flower as a family tree, with each petal standing for one heir. On phones it sits above the headline and takes at most 40% of the screen height.
@@ -153,6 +155,31 @@ Rules:
 - *Heir or visitor:* who gets what, and "Send to heirs" once the waiting time has passed.
 
 **Judge path.** The home page has one "Try it now" entry that reaches a plan whose waiting time has already passed. Pressing "Send to heirs" there makes a real mainnet transaction.
+
+## Shell
+
+The frame around every page, in `app/src/components/` (`AppShell`, `Banner`, `Sheet`, `Popover`, `Button`, `CopyButton`). Screens use these and don't rebuild them.
+
+**From the top:** the hackathon banner, the Chipnet strip (only on Chipnet), the header, then the page. `--shell-top` holds the measured height of all three, so a screen can fill the first view exactly (`min-height: calc(100svh - var(--shell-top))`). A "Skip to content" link appears on keyboard focus.
+
+**Hackathon banner** (organiser's rule: top of every page, with the code and demo before and after BLAZE, the slides and a CashTokens address):
+
+- One calm 13 px strip on `--surface-2`: muted group labels, `--text` links with a soft underline, groups split by thin rules. No colour, no icons, and no close button: judges must always see it.
+- Groups: "BCH BLAZE 2026 entry", "Slides", "Before BLAZE: Code, Demo", "Now: Code, Demo", "Donations" with the shortened address and a copy button.
+- Under 1024 px it folds into one 40 px line ("BCH BLAZE 2026 entry · Code and demos" and a chevron) that opens a panel over the page with every link as a 44 px row. The full-width line is the one exception to the 44 px touch target, to keep the first screen for the product.
+- Values live in `banner-config.ts`. An empty value hides its entry.
+
+**Header:** on phones (under 768 px) the menu button sits just left of the wallet button and opens a panel with How it works, Docs, GitHub and a "Dark theme" switch. From 768 px the links show inline, the current page in `--text`, and the theme toggle is an icon button.
+
+**Wallet button:** "Connect wallet", then "Connecting…" (crossfade, busy) with a 20 px looping bloom in place of the wallet icon. Under 360 px the label stays "Connect" while connecting, so the button never changes width under the finger. Connected, it shows the address shortened in mono with a green dot on the wallet icon, and opens a small panel: wallet name, address with copy, balance (BCH first, dollars "≈"), Disconnect. Disconnect is never one tap from the header. "Cancelled in your wallet. You can connect any time." appears under the button for 5 s and is read out politely.
+
+**Popover** (menus and small panels): drops from its trigger, scale 0.96 to 1 from that corner, 150 ms in and out. Closes on Escape (at once, focus back on the trigger), a click outside, focus leaving, or a page change.
+
+**Sheet** (anything that asks or shows on top of the page): a bottom sheet under 768 px (slides up 300 ms with `--ease-drawer`, grabber, drag down or flick to dismiss) and a centred dialog from 768 px (scale 0.96 to 1, 200 ms). The title is required; the primary button goes in its footer, full width. Escape closes at once; the scrim and the close button close with a 150 ms leave. `dismissible={false}` is for gates such as the plan-link screen: only the sheet's own buttons close it, and every other attempt calls `onDismissAttempt`, so the screen can ask "Leave without saving?". The page behind never scrolls. API at the top of `Sheet.tsx`.
+
+**Buttons:** `Button` for actions, `ButtonLink` for links that look like buttons (`to` for app routes, `href` with `external` for other sites). Same variants, sizes, icon slot and press. Never hand-write `btn` classes.
+
+**Copy:** `CopyButton` next to every address or link worth copying. The icon turns into a green check for 1.5 s and "Copied" is announced.
 
 ## States
 
