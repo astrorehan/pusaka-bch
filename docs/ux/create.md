@@ -100,3 +100,9 @@ network instead (a `bchtest:` address on mainnet is refused with a plain message
 3. `src/App.tsx`: move to `createBrowserRouter` so screens can use `useBlocker`. The create flow's gate then
    needs no history trick. Until then it uses a pushed history entry and a click guard on links.
 4. `src/lib/wallet.tsx`: expose the wallet's network (or an address prefix) so the flow can show "wrong network".
+5. `src/components/AppShell.tsx` / `shell.css`: at 320 px the header's "Connect wallet" button pushes the page
+   35 px wide (horizontal scroll on every screen while disconnected). Suggest showing only the wallet icon
+   (with `aria-label="Connect wallet"`) below 360 px, or dropping the theme toggle into a menu there.
+6. Mock `connectWallet` returns a `bitcoincash:` owner address while `NETWORK` defaults to chipnet. Heir
+   addresses are checked against `NETWORK`, so the mock owner never matches them; harmless, but the real
+   wallet layer should return the address for the app's network.

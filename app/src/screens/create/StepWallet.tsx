@@ -54,10 +54,8 @@ export function StepWallet({ onDone, usd }: Props) {
             <Button size="lg" block onClick={onDone}>Continue</Button>
             <Button variant="ghost" block onClick={() => disconnect()}>Use another wallet</Button>
           </>
-        ) : (
-          <Button size="lg" block onClick={onConnect} loading={status === 'connecting'}>
-            {status === 'connecting' ? 'Connecting…' : 'Connect wallet'}
-          </Button>
+        ) : status === 'connecting' ? null : (
+          <Button size="lg" block onClick={onConnect}>Connect wallet</Button>
         )}
       </div>
     </div>

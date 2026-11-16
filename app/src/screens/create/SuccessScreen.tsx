@@ -47,10 +47,11 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
   const [released, setReleased] = useState(false);
   const gated = !saved && !released;
   const gatedRef = useRef(gated);
-  gatedRef.current = gated;
+  useEffect(() => { gatedRef.current = gated; }, [gated]);
 
   const { amounts } = heirAmounts(amount, plan.heirs.map((h) => h.share), plan.shareTotal);
-  const end = BigInt(Math.floor(Date.now() / 1000)) + plan.period - 3600n;
+  const [now] = useState(() => BigInt(Math.floor(Date.now() / 1000)));
+  const end = now + plan.period - 3600n;
   const petals = plan.heirs.slice(0, 4).map((_, i) => heirColor(i));
 
   const saveFile = useCallback(() => {

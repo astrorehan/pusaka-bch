@@ -411,3 +411,6 @@
 }
 :root[data-theme='dark'] .cr-tabs__tab[aria-checked='true'],
 :root[data-theme='dark'] .cr-seg button[aria-checked='true'] { background: var(--border-strong); }
+
+.cr-head__sub, .cr-success__lead, .cr-tabs__about, .cr-card__sub, .cr-small, .cr-notice__text { text-wrap: pretty; }
+.cr-head__title, .cr-success__title, .cr-dialog__title { text-wrap: balance; }

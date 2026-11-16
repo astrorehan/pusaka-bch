@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../components/Button';
 import { formatBch, formatDate, formatUsd } from '../../lib/format';
 import { planService, type WalletInfo } from '../../lib/planService';
@@ -33,28 +33,28 @@ export function StepReview({ draft, resolved, amounts, leftover, usd, wallet, wa
   const [tx, setTx] = useState<Tx>({ s: 'idle' });
   const [attempt, setAttempt] = useState(0);
   const owner = wallet?.address ?? '';
+  const [now] = useState(() => BigInt(Math.floor(Date.now() / 1000)));
+  const plan = useMemo(() => buildPlan(draft, network, owner), [draft, network, owner]);
 
   useEffect(() => {
     let live = true;
-    setPreview(null); setPreviewError(false); setSlow(false);
     const t = setTimeout(() => live && setSlow(true), 300);
-    planService.previewCreate(buildPlan(draft, network, owner), amount)
+    planService.previewCreate(plan, amount)
       .then((p) => { if (live) setPreview(p); })
       .catch(() => { if (live) setPreviewError(true); })
       .finally(() => clearTimeout(t));
     return () => { live = false; clearTimeout(t); };
-  }, [attempt, owner]);
+  }, [plan, amount, attempt]);
 
   const outTotal = preview ? preview.lines.reduce((s, l) => s + l.amount, 0n) + preview.networkFee : null;
   const tooMuch = wallet && outTotal !== null && outTotal > wallet.balance;
   const period = periodSeconds(draft) ?? 0n;
-  const end = BigInt(Math.floor(Date.now() / 1000)) + period - LAG;
+  const end = now + period - LAG;
   const usdOf = (s: bigint) => formatUsd(s, usd);
 
   async function sign() {
     if (!wallet) return;
     setTx({ s: 'waiting' });
-    const plan = buildPlan(draft, network, wallet.address);
     try {
       const r = await planService.createPlan(plan, amount);
       if (r.ok) onCreated(r.plan, r.txid, amount);
@@ -94,7 +94,7 @@ export function StepReview({ draft, resolved, amounts, leftover, usd, wallet, wa
       <section className="cr-card" aria-labelledby="rv-now" aria-busy={!preview && !previewError}>
         <h2 id="rv-now" className="cr-card__title">Leaving your wallet now</h2>
         {previewError ? (
-          <Notice tone="danger" title="We couldn't work out the fees." action={<Button variant="secondary" onClick={() => setAttempt((n) => n + 1)}>Try again</Button>}>
+          <Notice tone="danger" title="We couldn't work out the fees." action={<Button variant="secondary" onClick={() => { setPreviewError(false); setSlow(false); setAttempt((n) => n + 1); }}>Try again</Button>}>
             Check your connection. Nothing was sent.
           </Notice>
         ) : !preview ? (

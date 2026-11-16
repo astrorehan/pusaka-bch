@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { CircleAlert } from 'lucide-react';
+import { fieldId } from './model';
 
-export const fieldId = (key: string) => `f-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
 
 interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'id'> {
   fkey: string;

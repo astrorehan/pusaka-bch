@@ -3,10 +3,10 @@ import { Button } from '../../components/Button';
 import { MAX_HEIRS } from '../../lib/shares';
 import type { SplitMode } from '../../lib/types';
 import { FARAID_MAX_HEIRS, type Family } from './faraid';
-import { Field, fieldId } from './Field';
+import { Field } from './Field';
 import { ShareBar } from './ShareBar';
 import { Notice, Stepper, Toggle } from './Bits';
-import { equalPercents, formatHundredths, heirColor, newHeir, percentOf, type Draft, type Resolved } from './model';
+import { equalPercents, fieldId, formatHundredths, heirColor, newHeir, percentOf, resolve, type Draft, type Resolved } from './model';
 import type { Vis } from './CreateScreen';
 
 interface Props {
@@ -55,16 +55,26 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
     });
   }
 
+  /** Custom % still at the equal split (untouched)? Then adding or removing an heir re-splits equally. */
+  const isEqualSplit = (d: Draft) => d.heirs.map((h) => h.percent.trim()).join('|') === equalPercents(d.heirs.length).join('|');
+
   function addHeir() {
     update((d) => {
-      const h = newHeir();
-      if (d.mode === 'custom' && resolved.customSum !== undefined && resolved.customSum < 10000n) h.percent = formatHundredths(10000n - resolved.customSum);
-      return { ...d, heirs: [...d.heirs, h] };
+      const heirs = [...d.heirs, newHeir()];
+      if (d.mode !== 'custom') return { ...d, heirs };
+      if (isEqualSplit(d)) { const p = equalPercents(heirs.length); return { ...d, heirs: heirs.map((h, i) => ({ ...h, percent: p[i] })) }; }
+      const sum = resolve(d).customSum ?? 0n;
+      if (sum < 10000n) heirs[heirs.length - 1].percent = formatHundredths(10000n - sum);
+      return { ...d, heirs };
     });
   }
 
   function removeHeir(id: string) {
-    update((d) => ({ ...d, heirs: d.heirs.filter((h) => h.id !== id) }));
+    update((d) => {
+      const heirs = d.heirs.filter((h) => h.id !== id);
+      if (d.mode === 'custom' && isEqualSplit(d)) { const p = equalPercents(heirs.length); return { ...d, heirs: heirs.map((h, i) => ({ ...h, percent: p[i] })) }; }
+      return { ...d, heirs };
+    });
   }
 
   function setFamily(patch: Partial<Family>) {
@@ -83,7 +93,7 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
   const fam = draft.family;
 
   return (
-    <div className="cr-stack">
+    <form className="cr-stack" noValidate onSubmit={(e) => { e.preventDefault(); onContinue(); }}>
       <div>
         <div className="cr-tabs" role="radiogroup" aria-label="How to split">
           {MODES.map((m) => (
@@ -133,7 +143,7 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
         <div data-problem><Notice
           tone="danger"
           title={fr.kind === 'too-many' ? 'Too many heirs for one plan' : 'This family is outside what Pusaka can work out'}
-          action={<Button variant="secondary" onClick={() => setMode('custom')}>Use Custom % instead</Button>}
+          action={<Button type="button" variant="secondary" onClick={() => setMode('custom')}>Use Custom % instead</Button>}
         >
           {fr.message}
         </Notice></div>
@@ -215,7 +225,7 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
 
       {mode !== 'faraid' && (
         <div className="cr-add">
-          <Button variant="secondary" block icon={<Plus />} onClick={addHeir} disabled={draft.heirs.length >= MAX_HEIRS}>Add heir</Button>
+          <Button type="button" variant="secondary" block icon={<Plus />} onClick={addHeir} disabled={draft.heirs.length >= MAX_HEIRS}>Add heir</Button>
           {draft.heirs.length >= MAX_HEIRS && <p className="cr-small muted">Pusaka can pay up to {MAX_HEIRS} heirs in one plan.</p>}
         </div>
       )}
@@ -245,8 +255,8 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
       {vis.show('family') && !(fr && !fr.ok && fr.kind !== 'empty') && <div role="alert" data-problem><Notice tone="danger">{vis.show('family')}</Notice></div>}
 
       <div className="cr-actions">
-        <Button size="lg" block onClick={onContinue}>Continue</Button>
+        <Button size="lg" block type="submit">Continue</Button>
       </div>
-    </div>
+    </form>
   );
 }

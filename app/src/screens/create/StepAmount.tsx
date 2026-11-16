@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CalendarClock } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { formatBch, formatDate, formatUsd } from '../../lib/format';
@@ -29,16 +30,17 @@ const CHOICES: { id: PeriodChoice; label: string }[] = [
 const NETWORK_LAG_SECONDS = 3600n;
 
 export function StepAmount({ draft, update, resolved, vis, amounts, usd, wallet, onContinue }: Props) {
+  const [now] = useState(() => BigInt(Math.floor(Date.now() / 1000)));
   const amount = parseAmount(draft.amount);
   const amountUsd = amount !== null && amount > 0n ? formatUsd(amount, usd) : null;
   const period = periodSeconds(draft);
   const periodError = vis.show('period');
-  const end = period !== null && !periodError ? BigInt(Math.floor(Date.now() / 1000)) + period - NETWORK_LAG_SECONDS : null;
+  const end = period !== null && !periodError ? now + period - NETWORK_LAG_SECONDS : null;
 
   const set = (patch: Partial<Draft>) => update((d) => ({ ...d, ...patch }));
 
   return (
-    <div className="cr-stack">
+    <form className="cr-stack" noValidate onSubmit={(e) => { e.preventDefault(); onContinue(); }}>
       <section className="cr-card" aria-labelledby="amount-title">
         <h2 id="amount-title" className="cr-card__title">Amount</h2>
         <Field
@@ -111,8 +113,8 @@ export function StepAmount({ draft, update, resolved, vis, amounts, usd, wallet,
       </section>
 
       <div className="cr-actions">
-        <Button size="lg" block onClick={onContinue}>Review plan</Button>
+        <Button size="lg" block type="submit">Review plan</Button>
       </div>
-    </div>
+    </form>
   );
 }

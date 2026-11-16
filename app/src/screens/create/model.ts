@@ -38,7 +38,9 @@ export const newId = () => `h${Date.now().toString(36)}${(seq++).toString(36)}`;
 export const newHeir = (): HeirDraft => ({ id: newId(), name: '', address: '', percent: '' });
 
 export function emptyDraft(mode: SplitMode = 'equal'): Draft {
-  return { step: 1, mode, heirs: [newHeir()], family: { ...EMPTY_FAMILY }, contacts: {}, amount: '', period: '1y', customCount: '', customUnit: 'months' };
+  const heir = newHeir();
+  if (mode === 'custom') heir.percent = '100';
+  return { step: 1, mode, heirs: [heir], family: { ...EMPTY_FAMILY }, contacts: {}, amount: '', period: '1y', customCount: '', customUnit: 'months' };
 }
 
 // ------------------------------------------------------------ draft storage (survives a tab reload mid-flow)
@@ -79,7 +81,7 @@ export interface Resolved {
 
 /** "33.33" -> 3333n hundredths; null if not a number with up to 2 decimals. */
 export function parsePercent(s: string): bigint | null {
-  const t = s.trim().replace(',', '.');
+  const t = s.trim().replace(',', '.').replace(/\s*%$/, '');
   if (!/^\d{1,3}(\.\d{0,2})?$/.test(t)) return null;
   const [w, f = ''] = t.split('.');
   return BigInt(w) * 100n + BigInt(f.padEnd(2, '0'));
@@ -171,8 +173,15 @@ export function minimumAmount(shares: bigint[], total: bigint): bigint {
   return min;
 }
 
+/** "0,5" (comma decimal, as typed in much of the world) and "1,000.5" both work. */
+export function normalizeAmount(s: string): string {
+  const t = s.trim().replace(/\s/g, '');
+  if (t.includes(',') && !t.includes('.') && /^\d*,\d+$/.test(t)) return t.replace(',', '.');
+  return t.replace(/,/g, '');
+}
+
 export function parseAmount(s: string): bigint | null {
-  const t = s.trim().replace(/,/g, '');
+  const t = normalizeAmount(s);
   if (!/^\d*(\.\d{0,8})?$/.test(t) || t === '' || t === '.') return null;
   const [w, f = ''] = t.split('.');
   return BigInt(w || '0') * 100_000_000n + BigInt(f.padEnd(8, '0'));
@@ -180,7 +189,7 @@ export function parseAmount(s: string): bigint | null {
 
 export function validateAmount(d: Draft, usd: number | null, balance?: bigint): string | null {
   if (!d.amount.trim()) return 'Enter how much BCH goes into the plan.';
-  if (/^\d*\.\d{9,}$/.test(d.amount.trim())) return 'BCH has at most 8 decimals. Shorten the amount.';
+  if (/^\d*\.\d{9,}$/.test(normalizeAmount(d.amount))) return 'BCH has at most 8 decimals. Shorten the amount.';
   const a = parseAmount(d.amount);
   if (a === null) return 'Enter an amount in BCH, for example 0.1.';
   if (a === 0n) return 'Enter an amount above zero.';
@@ -259,3 +268,6 @@ export function heirPayouts(d: Draft): { amounts: bigint[]; leftover: bigint } |
 }
 
 export const heirColor = (i: number) => `var(--heir-${(i % 5) + 1})`;
+
+/** DOM id of a field, from its key ("h1.address" -> "f-h1-address"). */
+export const fieldId = (key: string) => `f-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;

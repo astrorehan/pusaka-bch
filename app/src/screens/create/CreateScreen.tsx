@@ -8,7 +8,6 @@ import { planService } from '../../lib/planService';
 import type { PlanData, SplitMode } from '../../lib/types';
 import { useWallet } from '../../lib/wallet';
 import { Notice } from './Bits';
-import { fieldId } from './Field';
 import { Progress } from './Progress';
 import { StepWallet } from './StepWallet';
 import { StepHeirs } from './StepHeirs';
@@ -16,7 +15,7 @@ import { StepAmount } from './StepAmount';
 import { StepReview } from './StepReview';
 import { SuccessScreen } from './SuccessScreen';
 import {
-  clearDraft, emptyDraft, equalPercents, heirPayouts, loadDraft, resolve, saveDraft,
+  clearDraft, emptyDraft, equalPercents, fieldId, heirPayouts, loadDraft, resolve, saveDraft,
   validateAmount, validateHeirs, validatePeriod, type Draft, type Errors, type Step,
 } from './model';
 import './create.css';
@@ -68,6 +67,13 @@ export function CreateScreen() {
   const firstRender = useRef(true);
 
   const update = useCallback((fn: (d: Draft) => Draft) => setDraft(fn), []);
+
+  // Connected from the header while on step 1: move on, as the step's own button would.
+  const prevStatus = useRef(status);
+  useEffect(() => {
+    if (prevStatus.current !== 'connected' && status === 'connected') setDraft((d) => (d.step === 1 ? { ...d, step: 2 } : d));
+    prevStatus.current = status;
+  }, [status]);
 
   useEffect(() => { planService.usdPerBch().then(setUsd).catch(() => setUsd(null)); }, []);
   useEffect(() => { if (!created) saveDraft(draft); }, [draft, created]);
