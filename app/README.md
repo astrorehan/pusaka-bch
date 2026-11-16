@@ -14,7 +14,8 @@ npm run build    # type-check + production build
 |---|---|
 | `src/styles/tokens.css` | Colour, type, spacing, radius and motion tokens, light and dark. Components use tokens, never raw hex. |
 | `src/lib/types.ts` | `PlanData` (what the plan link carries), `PlanState` (live view), `TxPreview`, `TxResult`. Money is `bigint` satoshis. |
-| `src/lib/planService.ts` | The only door to the network. Screens call `planService`. Today it is a mock; the real SolidCash + wallet layer replaces it without screen changes. |
+| `src/lib/planService.ts` | The only door to the network. Screens call `planService`: the real chain layer (`src/lib/chain/`, loaded lazily), or the mock in development. |
+| `src/lib/chain/` | The Pusaka SolidCash contract, signed by the user's WizardConnect wallet. `scripts/chain-e2e.ts` runs it end to end on Chipnet from Node. |
 | `src/lib/planLink.ts` | Encodes a plan into `/plan#<data>` and back. No server ever sees it. |
 | `src/lib/format.ts`, `src/lib/shares.ts` | BCH/USD formatting, address shortening, share math identical to the contract (floor per heir). |
 | `src/lib/wallet.tsx` | `useWallet()`: connect state for the top-right wallet button. |
@@ -25,7 +26,7 @@ npm run build    # type-check + production build
 
 ## Mock knobs
 
-Add to any URL while working on states: `?mock=cancel` (wallet cancels), `?mock=fail` (network refuses), `?mock=slow` (4 s waits).
+In the dev server only, add to any URL: `?mock=1` (simulated wallet and network), `?mock=cancel` (wallet cancels), `?mock=fail` (network refuses), `?mock=slow` (4 s waits). Production builds ignore `?mock`.
 
 ## Facts the UI must respect (from the Chipnet run, 15 Nov)
 

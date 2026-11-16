@@ -157,11 +157,13 @@ export const mockPlanService: PlanService = {
 // ---------------------------------------------------------------- selection
 
 /**
- * Mock mode: any `?mock` in the URL (e.g. `?mock=1`, `?mock=cancel`) or `VITE_MOCK=1`. It sticks for the browser
- * tab, so it survives in-app navigation that drops the query string.
+ * Mock mode, for UI work only: `VITE_MOCK=1`, or in the dev server any `?mock` in the URL (e.g. `?mock=1`,
+ * `?mock=cancel`), which sticks for the tab. A production build ignores `?mock`, so a shared link can never
+ * show simulated results as if they were real.
  */
 export function isMockMode(): boolean {
   if (import.meta.env.VITE_MOCK === '1') return true;
+  if (!import.meta.env.DEV) return false;
   try {
     if (new URLSearchParams(window.location.search).has('mock')) sessionStorage.setItem('pusaka-mock', '1');
     return sessionStorage.getItem('pusaka-mock') === '1';
