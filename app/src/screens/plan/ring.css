@@ -1,0 +1,34 @@
+.ring {
+  position: relative;
+  width: 220px; height: 220px;
+  margin: 0 auto;
+}
+@media (min-width: 1024px) { .ring { width: 248px; height: 248px; } }
+
+.ring__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ring__track { fill: none; stroke: var(--surface-2); stroke-width: 10; }
+.ring__arc { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; }
+.ring--warn .ring__arc { stroke: var(--warning); }
+
+.ring__centre {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 var(--space-8);
+}
+.ring__value {
+  font-size: 56px; line-height: 1; font-weight: 500; letter-spacing: -0.03em;
+}
+.ring__word {
+  font-family: var(--font-heading); font-size: var(--text-32); line-height: 1.1; font-weight: 500; letter-spacing: -0.01em;
+}
+.ring__unit { margin-top: var(--space-2); font-size: var(--text-15); color: var(--text-muted); line-height: 1.3; }
+.ring__unit--strong { color: var(--text); font-weight: 500; }
+.ring__rest { margin-top: 2px; font-size: var(--text-13); color: var(--text-muted); }
+.ring--warn .ring__unit { color: var(--warning); }
+
+.ring__check {
+  display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-full);
+  background: var(--accent); color: var(--on-accent);
+}
+.ring__check svg { width: 28px; height: 28px; stroke-width: 1.5; }
+.ring__word--below { margin-top: var(--space-3); }
