@@ -162,7 +162,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
                 data-autofocus={action === 'takeback' ? undefined : true}
                 disabled={!preview || short}
                 loading={walletStatus === 'connecting'}
-                icon={!wallet ? <Wallet /> : undefined}
+                icon={!wallet ? (walletStatus === 'connecting' ? <Logo size={20} bloom="loop" /> : <Wallet />) : undefined}
                 onClick={confirm}
               >
                 {!wallet ? (walletStatus === 'connecting' ? 'Connecting…' : 'Connect wallet') : TITLES[action]}

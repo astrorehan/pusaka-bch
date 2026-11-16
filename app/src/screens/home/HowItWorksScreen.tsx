@@ -52,6 +52,10 @@ function payHeir(int i, int pot) internal {
 
 export function HowItWorksScreen() {
   const usd = useUsdPerBch();
+  useEffect(() => {
+    document.title = 'How it works · Pusaka';
+    return () => { document.title = 'Pusaka'; };
+  }, []);
   const feeUsd = formatUsd(FEE_HIGH, usd);
   const fee = (
     <>
