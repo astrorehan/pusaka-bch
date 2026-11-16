@@ -85,7 +85,7 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
       const at = Math.max(Date.now() + 3600_000, deadlineMs - periodS * 100);
       downloadIcs({
         title: "Pusaka: press I'm still here",
-        description: `Open your inheritance plan and press "I'm still here", so your heirs keep waiting. Otherwise they can receive from about ${formatDateTime(deadlineMs)}.`,
+        description: `Open your inheritance plan and press “I’m still here”, so your heirs keep waiting. Otherwise they can receive from about ${formatDateTime(deadlineMs)}.`,
         url, at, alertMinutes: 0,
       }, 'pusaka-im-still-here.ics');
     } else {
@@ -155,7 +155,7 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
             <div className="pl-quiet">
               <Clock aria-hidden />
               <div>
-                <p><b>Nothing to do yet.</b> Come back after {formatDay(deadlineMs)}. If the owner is still here, they will press "I'm still here" before then.</p>
+                <p><b>Nothing to do yet.</b> Come back after {formatDay(deadlineMs)}. If the owner is still here, they will press “I’m still here” before then.</p>
                 {!wallet && (
                   <button type="button" className="pl-textbtn" onClick={() => connect()} disabled={walletStatus === 'connecting'}>
                     {walletStatus === 'connecting' ? 'Connecting…' : 'Is this your plan? Connect your wallet'}
@@ -203,7 +203,7 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
           </dl>
           <p className="pl-fine">
             Times are approximate, give or take an hour: the network's clock runs a little behind real time.
-            Only the owner's wallet can press "I'm still here" or take the BCH back. Anyone can send to the heirs once the waiting time has passed, and the shares can't be changed.
+            Only the owner's wallet can press “I’m still here” or take the BCH back. Anyone can send to the heirs once the waiting time has passed, and the shares can't be changed.
           </p>
         </Disclosure>
       </div>
@@ -236,14 +236,14 @@ function headline(status: PlanStatus, c: CopyCtx): { title: string; text: string
   switch (status) {
     case 'active':
       return c.isOwner
-        ? { title: 'Your heirs are waiting', text: `If you don't press "I'm still here" by about ${c.day}, your ${c.bch} goes to your ${heirs}.` }
-        : { title: `Heirs receive in ${c.left}`, text: `If the owner doesn't press "I'm still here" by about ${c.day}, ${c.bch} goes to these ${heirs}, split by the shares below.` };
+        ? { title: 'Your heirs are waiting', text: `If you don't press “I’m still here” by about ${c.day}, your ${c.bch} goes to your ${heirs}.` }
+        : { title: `Heirs receive in ${c.left}`, text: `If the owner doesn't press “I’m still here” by about ${c.day}, ${c.bch} goes to these ${heirs}, split by the shares below.` };
     case 'ending-soon':
       return c.isOwner
-        ? { title: 'Your waiting time ends soon', text: `Press "I'm still here" before about ${c.when}, or your ${c.bch} goes to your ${heirs}.` }
-        : { title: 'Waiting time ends soon', text: `If the owner doesn't press "I'm still here" by about ${c.when}, ${c.bch} goes to these ${heirs}.` };
+        ? { title: 'Your waiting time ends soon', text: `Press “I’m still here” before about ${c.when}, or your ${c.bch} goes to your ${heirs}.` }
+        : { title: 'Waiting time ends soon', text: `If the owner doesn't press “I’m still here” by about ${c.when}, ${c.bch} goes to these ${heirs}.` };
     case 'claimable':
-      if (c.isOwner) return { title: 'Your waiting time has passed', text: `Anyone with your plan link can now send your ${c.bch} to your ${heirs}. If you're still here, press "I'm still here" to start the waiting time again.` };
+      if (c.isOwner) return { title: 'Your waiting time has passed', text: `Anyone with your plan link can now send your ${c.bch} to your ${heirs}. If you're still here, press “I’m still here” to start the waiting time again.` };
       if (c.demo) return { title: `${heirs} can receive now`, text: `The owner of this example plan stopped checking in, so the waiting time has passed. One press sends ${c.bch} to all ${heirs}, each by their share, in a single transaction.` };
       return { title: `${heirs} can receive now`, text: `The owner stopped checking in and the waiting time has passed. Anyone with this link can now send ${c.bch} to the ${heirs}, in one transaction.` };
     case 'sent':

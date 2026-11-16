@@ -340,7 +340,7 @@ function Sent({ action, plan, state, usd, preview, txid, titleId, onClose, onRem
       <div className="ax-phase ax-centre" key="sent">
         <span className="ax-icon ax-icon--ok"><Check aria-hidden /></span>
         <h2 id={titleId} className="ax-status">Your heirs keep waiting</h2>
-        <p className="ax-sub">They can receive from about <b className="num">{formatDateTime(deadlineMs)}</b>. Press "I'm still here" again before then.</p>
+        <p className="ax-sub">They can receive from about <b className="num">{formatDateTime(deadlineMs)}</b>. Press “I’m still here” again before then.</p>
         {explorer}
         <div className="ax-buttons ax-buttons--row">
           <Button variant="secondary" size="lg" block icon={<CalendarPlus />} onClick={onReminder}>Add a reminder</Button>

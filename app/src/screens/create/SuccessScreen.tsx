@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Check, Copy, Download, ExternalLink, Link2, Share2 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
-import { Button } from '../../components/Button';
+import { Button, ButtonLink } from '../../components/Button';
 import { explorerTxUrl, formatBch, formatDate, formatDuration, formatUsd } from '../../lib/format';
 import { planUrl } from '../../lib/planLink';
 import { heirAmounts, sharePercent } from '../../lib/shares';
@@ -47,6 +47,9 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
   const [released, setReleased] = useState(false);
   const gated = !saved && !released;
   const gatedRef = useRef(gated);
+  // Screen readers hear the result first; the page starts at the top.
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { titleRef.current?.focus({ preventScroll: true }); }, []);
   useEffect(() => { gatedRef.current = gated; }, [gated]);
 
   const { amounts } = heirAmounts(amount, plan.heirs.map((h) => h.share), plan.shareTotal);
@@ -139,7 +142,7 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
     <div className="cr-success">
       <div className="cr-success__hero">
         <Logo size={120} bloom="once" petalColors={petals} title="Pusaka" />
-        <h1 className="cr-success__title" tabIndex={-1}>Your plan is ready</h1>
+        <h1 ref={titleRef} className="cr-success__title" tabIndex={-1}>Your plan is ready</h1>
         <p className="cr-success__lead">
           <strong className="num">{formatBch(amount)} BCH</strong> is set aside for {plan.heirs.length === 1 ? 'your heir' : `your ${plan.heirs.length} heirs`}.
           If you don't say “I’m still here” for {formatDuration(plan.period)}, they can receive it, from about {formatDate(end)}.
@@ -163,7 +166,7 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
             </>
           ) : (
             <>
-              <Link to={path} className="btn btn--primary btn--lg btn--block"><span className="btn__label">Open my plan</span></Link>
+              <ButtonLink to={path} size="lg" block>Open my plan</ButtonLink>
               <div className="cr-linkcard__more">
                 <Button variant="ghost" icon={<Download />} onClick={saveFile}>Save again</Button>
                 <Button variant="ghost" icon={<Share2 />} onClick={share}>Share</Button>
@@ -182,7 +185,7 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
           {plan.heirs.map((h, i) => (
             <li key={i}>
               <span className="cr-dot" style={{ background: heirColor(i) }} aria-hidden />
-              <span className="cr-legend__name">{h.name}</span>
+              <span className="cr-legend__name">{h.name}{h.relation && <span className="cr-legend__rel">{h.relation.charAt(0).toUpperCase() + h.relation.slice(1)}</span>}</span>
               <span className="cr-legend__value num">
                 <strong>{formatBch(amounts[i])} BCH</strong>
                 <span className="cr-legend__sub">{sharePercent(h.share, plan.shareTotal)}%{usd ? ` · ${formatUsd(amounts[i], usd)}` : ''}</span>
@@ -195,7 +198,7 @@ export function SuccessScreen({ plan, txid, amount, usd }: Props) {
         </a>
       </section>
 
-      {leaving && <LeaveDialog onStay={stay} onSave={() => { setLeaving(null); saveFile(); }} onLeave={leave} />}
+      <LeaveDialog open={!!leaving} onStay={stay} onSave={() => { setLeaving(null); saveFile(); }} onLeave={leave} />
     </div>
   );
 }

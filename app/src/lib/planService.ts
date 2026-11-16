@@ -87,6 +87,8 @@ function mockMode(): string {
     return fromUrl ?? '';
   }
 }
+// Remember a knob from the URL the tab opened with, before any in-app navigation drops the query.
+if (import.meta.env.DEV || import.meta.env.VITE_MOCK === '1') mockMode();
 
 async function signAndSend(): Promise<TxResult> {
   await sleep(mockMode() === 'slow' ? 4000 : 1200);
