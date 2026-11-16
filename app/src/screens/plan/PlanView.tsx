@@ -13,7 +13,8 @@ import { CountdownRing } from './CountdownRing';
 import { HeirList, ShareBar } from './HeirList';
 import { SharePanel } from './SharePanel';
 import { ActionSheet, type PlanAction } from './ActionSheet';
-import { Address, Disclosure, heirColor, useNow } from './bits';
+import { Address, Disclosure } from './bits';
+import { heirColor, useNow } from './util';
 import { downloadIcs } from './ics';
 import { countdown, formatDateTime, formatDay } from './time';
 
@@ -56,9 +57,10 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
   }, [running, secondsLeft, refresh]);
 
   // Remember what each heir gets while there is money in the plan, so "Paid" rows keep their amounts.
-  const lastPot = useRef<bigint | null>(null);
-  const pot = state.balance > 0n ? state.balance - plan.feeBudget : lastPot.current;
-  if (state.balance > 0n) lastPot.current = pot;
+  const livePot = state.balance > 0n ? state.balance - plan.feeBudget : null;
+  const [knownPot, setKnownPot] = useState<bigint | null>(livePot);
+  if (livePot != null && livePot !== knownPot) setKnownPot(livePot);
+  const pot = livePot ?? knownPot;
   const amounts = useMemo(() => (pot != null && pot > 0n ? heirAmounts(pot, plan.heirs.map((h) => h.share), plan.shareTotal).amounts : null), [pot, plan]);
   const total = pot != null && pot > 0n ? pot : null;
 

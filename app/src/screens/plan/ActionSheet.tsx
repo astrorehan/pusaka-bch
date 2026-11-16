@@ -1,6 +1,6 @@
 // Every action goes through here: review (every coin that moves, where, and the network fee) ->
 // waiting for the wallet -> sending (the plan is read again) -> sent, cancelled or failed.
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { AlertCircle, ArrowUpRight, CalendarPlus, Check, Undo2, Wallet } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Logo } from '../../components/Logo';
@@ -8,7 +8,8 @@ import { planService } from '../../lib/planService';
 import { useWallet } from '../../lib/wallet';
 import { explorerTxUrl, formatBch } from '../../lib/format';
 import type { PlanData, PlanState, TxPreview, TxResult } from '../../lib/types';
-import { Address, Amount, Disclosure, heirColor } from './bits';
+import { Address, Amount, Disclosure } from './bits';
+import { heirColor } from './util';
 import { Sheet } from './Sheet';
 import { formatDateTime } from './time';
 
@@ -43,7 +44,11 @@ export function ActionSheet(props: Props) {
   // Keep the last action while the sheet animates out.
   // Each opening starts a fresh flow; closing keeps the last one on screen while it animates out.
   const [shown, setShown] = useState<{ action: PlanAction; id: number } | null>(null);
-  useEffect(() => { if (action) setShown((s) => ({ action, id: (s?.id ?? 0) + 1 })); }, [action]);
+  const [prevAction, setPrevAction] = useState<PlanAction | null>(null);
+  if (action !== prevAction) {
+    setPrevAction(action);
+    if (action) setShown({ action, id: (shown?.id ?? 0) + 1 });
+  }
   const [busy, setBusy] = useState(false);
   const titleId = useId();
 
@@ -70,6 +75,16 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
 
   useEffect(() => { setBusy(phase === 'waiting' || phase === 'sending'); }, [phase, setBusy]);
   useEffect(() => () => setBusy(false), [setBusy]);
+
+  // Move focus with the phase: to its main button when there is one, else to the dialog itself.
+  const root = useRef<HTMLDivElement>(null);
+  const previewReady = preview != null;
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const target = el.querySelector<HTMLElement>('[data-autofocus]:not([disabled])') ?? el.closest<HTMLElement>('[role="dialog"]');
+    target?.focus({ preventScroll: true });
+  }, [phase, previewReady]);
 
   const fee = preview?.networkFee ?? 0n;
   const short = wallet != null && preview != null && wallet.balance < fee;
@@ -101,7 +116,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
     phase === 'failed' ? "This didn't go through. Nothing was sent." : '';
 
   return (
-    <div className="ax">
+    <div className="ax" ref={root}>
       <p className="sr-only" aria-live="polite" role="status">{live}</p>
 
       {phase === 'review' && (
@@ -138,13 +153,13 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
             )}
             {wallet && !short && <p className="ax-sign">Your wallet will ask you to sign. Nothing moves until you do.</p>}
             <div className="ax-buttons">
-              {action === 'takeback' && <Button variant="secondary" size="lg" block onClick={onClose}>Keep my plan</Button>}
+              {action === 'takeback' && <Button variant="secondary" size="lg" block onClick={onClose} data-autofocus>Keep my plan</Button>}
               <Button
                 variant="primary"
                 className={action === 'takeback' && wallet ? 'ax-btn-danger' : ''}
                 size="lg"
                 block
-                data-autofocus
+                data-autofocus={action === 'takeback' ? undefined : true}
                 disabled={!preview || short}
                 loading={walletStatus === 'connecting'}
                 icon={!wallet ? <Wallet /> : undefined}
@@ -225,7 +240,8 @@ function Review({ action, plan, state, preview, usd }: { action: PlanAction; pla
   const fromPlan = preview.lines;
   const paidOut = fromPlan.reduce((a, l) => a + l.amount, 0n);
   const leftover = action === 'send' ? state.balance - plan.feeBudget - paidOut : 0n;
-  const newDeadline = Date.now() + Number(plan.period) * 1000;
+  const [openedAt] = useState(() => Date.now());
+  const newDeadline = openedAt + Number(plan.period) * 1000;
 
   return (
     <>
@@ -275,7 +291,7 @@ function Review({ action, plan, state, preview, usd }: { action: PlanAction; pla
           <span className="ax-row__label">
             <span className="ax-row__who">
               <span>Network fee</span>
-              <span className="ax-row__hint">{action === 'send' ? 'Paid by whoever presses the button, not the heirs' : 'Paid by your wallet'}</span>
+              <span className="ax-row__hint">{action === 'send' ? 'Paid by you, not the heirs' : 'Paid by your wallet'}</span>
             </span>
           </span>
           <Amount sats={preview.networkFee} usd={usd} />
@@ -286,6 +302,7 @@ function Review({ action, plan, state, preview, usd }: { action: PlanAction; pla
 }
 
 function Sent({ action, plan, state, usd, preview, txid, titleId, onClose, onReminder }: { action: PlanAction; plan: PlanData; state: PlanState; usd: number | null; preview: TxPreview | null; txid: string; titleId: string; onClose(): void; onReminder(): void }) {
+  const [sentAt] = useState(() => Date.now());
   const explorer = (
     <a className="ax-link" href={explorerTxUrl(txid, plan.network)} target="_blank" rel="noreferrer">
       View on explorer <ArrowUpRight aria-hidden />
@@ -318,7 +335,7 @@ function Sent({ action, plan, state, usd, preview, txid, titleId, onClose, onRem
   }
 
   if (action === 'checkin') {
-    const deadlineMs = Date.now() + Number(state.deadline - state.networkTime) * 1000;
+    const deadlineMs = sentAt + Number(state.deadline - state.networkTime) * 1000;
     return (
       <div className="ax-phase ax-centre" key="sent">
         <span className="ax-icon ax-icon--ok"><Check aria-hidden /></span>

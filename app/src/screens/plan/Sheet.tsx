@@ -37,14 +37,14 @@ export function Sheet({ open, closable, onClose, labelledBy, children }: Props) 
       restore.current?.focus?.();
     }, LEAVE_MS);
     return () => clearTimeout(id);
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps -- only the open flag drives the animation
 
   // Focus the panel on open, lock page scroll while mounted.
   useEffect(() => {
     if (!mounted) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const first = panel.current?.querySelector<HTMLElement>('[data-autofocus]') ?? panel.current;
+    const first = panel.current?.querySelector<HTMLElement>('[data-autofocus]:not([disabled])') ?? panel.current;
     first?.focus({ preventScroll: true });
     return () => { document.body.style.overflow = prev; };
   }, [mounted]);

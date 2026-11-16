@@ -99,6 +99,12 @@ service's own knobs, e.g. `/try?mock=cancel` or `/plan?state=active#...`.
 
 ## Requests for shared files
 
+- `src/components/AppShell.tsx` / `shell.css`: at 320 px the header is 355 px wide (logo, theme toggle and
+  "Connect wallet" don't fit), so every page scrolls sideways. Suggested: under 360 px hide `.brand__name`,
+  or show the wallet button as icon only (`aria-label="Connect wallet"`).
+- `src/lib/planService.ts` (mock): `?mock=cancel` also cancels the wallet connection, so the "cancelled in
+  your wallet" transaction state is only reachable by connecting first and then adding the knob. A separate
+  knob (`?mock=cancel-tx`) would make it easier to check.
 - `src/lib/types.ts`: none needed. Nice to have: `PlanState.lastCheckIn?: bigint` so the owner view can say
   "You last pressed I'm still here on 2 Nov".
 - The demo plan in `screens/plan/demoPlan.ts` carries placeholder addresses; the lead swaps in the real

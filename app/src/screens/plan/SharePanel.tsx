@@ -1,7 +1,7 @@
 // The plan-link card: copy, the native share sheet where there is one, and a calendar reminder.
 import { useEffect, useRef, useState } from 'react';
 import { CalendarPlus, Check, Copy, Share } from 'lucide-react';
-import { copyText } from './bits';
+import { copyText } from './util';
 
 interface Props {
   url: string;
@@ -44,8 +44,9 @@ export function SharePanel({ url, isOwner, finished, onReminder, reminderLabel }
           : 'Anyone with this link can see the plan, and send it to the heirs once the waiting time has passed.'}
       </p>
       <div className="pl-link__url" title={url}>{url.replace(/^https?:\/\//, '')}</div>
+      <p className="sr-only" role="status">{copied ? 'Plan link copied' : ''}</p>
       <div className="pl-link__actions">
-        <button type="button" className="pl-chip" onClick={copy} aria-live="polite">
+        <button type="button" className="pl-chip" onClick={copy}>
           <span className="pl-chip__icon">
             <span className="pl-swap" data-on={!copied}><Copy aria-hidden /></span>
             <span className="pl-swap" data-on={copied}><Check aria-hidden /></span>

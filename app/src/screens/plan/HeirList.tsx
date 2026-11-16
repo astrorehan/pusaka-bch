@@ -3,7 +3,8 @@ import { Check } from 'lucide-react';
 import type { PlanData } from '../../lib/types';
 import { sharePercent } from '../../lib/shares';
 import { formatBch, formatUsd } from '../../lib/format';
-import { Address, capitalise, heirColor } from './bits';
+import { Address } from './bits';
+import { capitalise, heirColor } from './util';
 
 interface Props {
   plan: PlanData;
