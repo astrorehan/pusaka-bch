@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarCheck, Link2, Play, Send, UsersRound } from 'lucide-react';
 import type { SplitMode } from '../../lib/types';
 import { HeroFlower } from './HeroFlower';
-import { ShareFlower, heirColor, type FlowerHeir } from './ShareFlower';
+import { ShareFlower } from './ShareFlower';
+import { heirColor, type FlowerHeir } from './flowerMath';
 import { OpenLinkDialog } from './OpenLinkDialog';
 import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL } from './links';
@@ -96,7 +97,7 @@ export function HomeScreen() {
       <section className="home-section" aria-labelledby="split-title">
         <header className="home-section__head">
           <h2 id="split-title">Choose how to split</h2>
-          <p>Every family is different. Start from the split that fits yours, and change any share later in the plan.</p>
+          <p>Every family is different. Start from the split that fits yours, and adjust any share before you sign.</p>
         </header>
         <ul className="split-cards">
           {PRESETS.map((p, i) => (
@@ -129,10 +130,9 @@ export function HomeScreen() {
           <h2 id="how-title">How it works</h2>
         </header>
         <ol className="home-steps">
-          {STEPS.map(({ icon: Icon, title, line }, i) => (
+          {STEPS.map(({ icon: Icon, title, line }) => (
             <li key={title} className="home-step">
               <span className="home-step__icon" aria-hidden><Icon /></span>
-              <span className="home-step__num num" aria-hidden>{i + 1}</span>
               <h3 className="home-step__title">{title}</h3>
               <p className="home-step__line">{line}</p>
             </li>

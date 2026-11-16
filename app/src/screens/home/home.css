@@ -87,8 +87,8 @@
 
 .home-section { max-width: var(--page); margin: 0 auto; padding: var(--space-16) var(--gutter) 0; }
 .home-section__head { max-width: 560px; margin: 0 auto var(--space-8); text-align: center; }
-.home-section__head h2 { font-size: var(--text-32); }
-.home-section__head p { margin-top: var(--space-3); color: var(--text-muted); }
+.home-section__head h2 { font-size: var(--text-32); text-wrap: balance; }
+.home-section__head p { margin-top: var(--space-3); color: var(--text-muted); text-wrap: pretty; }
 .home-section__more { margin-top: var(--space-6); text-align: center; }
 
 .home-arrowlink {
@@ -100,7 +100,7 @@
 
 /* ---------------------------------------------------------------- split cards */
 
-.split-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+.split-cards { list-style: none; margin: 0 auto; padding: 0; display: grid; gap: var(--space-4); max-width: 560px; }
 .split-card {
   display: flex; flex-direction: column;
   padding: var(--space-6);
@@ -120,8 +120,8 @@
 .share-bar { display: flex; gap: 2px; height: 8px; border-radius: var(--radius-full); overflow: hidden; }
 .share-bar span { flex-basis: 0; min-width: 4px; }
 
-@media (min-width: 768px) {
-  .split-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (min-width: 960px) {
+  .split-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; }
   .split-card__head { grid-template-columns: 1fr; gap: var(--space-4); }
   .split-card__art { width: 88px; height: 88px; }
 }
@@ -140,11 +140,10 @@
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
 }
 .home-step__icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
-.home-step__num { display: none; }
 .home-step__title { font-size: var(--text-16); font-weight: 600; padding-top: 2px; }
 .home-step__line { color: var(--text-muted); font-size: var(--text-15); }
 
-@media (min-width: 768px) {
+@media (min-width: 960px) {
   .home-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; gap: var(--space-8); }
   .home-step { grid-template-columns: 1fr; text-align: center; justify-items: center; row-gap: var(--space-2); }
   .home-step__icon { grid-row: auto; width: 56px; height: 56px; margin-bottom: var(--space-2); }
@@ -155,7 +154,7 @@
 /* ---------------------------------------------------------------- for heirs */
 
 .heir-band {
-  display: grid; gap: var(--space-6);
+  display: grid; gap: var(--space-6); max-width: 560px; margin: 0 auto;
   padding: var(--space-8) var(--space-6);
   border-radius: var(--radius-card);
   background: var(--surface); border: 1px solid var(--border);
@@ -165,12 +164,12 @@
 .heir-band::before {
   content: ''; position: absolute; left: var(--space-6); top: -1px; width: 48px; height: 2px; background: var(--gold);
 }
-.heir-band__title { font-size: var(--text-24); }
+.heir-band__title { font-size: var(--text-24); text-wrap: balance; }
 .heir-band__line { margin-top: var(--space-2); color: var(--text-muted); }
 .heir-band__btn { width: 100%; }
 
-@media (min-width: 768px) {
-  .heir-band { grid-template-columns: 1fr auto; align-items: center; padding: var(--space-8); }
+@media (min-width: 960px) {
+  .heir-band { grid-template-columns: 1fr auto; align-items: center; padding: var(--space-8); max-width: none; }
   .heir-band::before { left: var(--space-8); }
   .heir-band__btn { width: auto; }
 }

@@ -115,3 +115,8 @@ The dollar value of the fee comes from `planService.usdPerBch()`; if the price i
    their usage notes, so "Built on" can show real logos.
 7. **`Button.tsx`**: an `as="link"` / `to` option, so links styled as buttons don't need to repeat the
    `btn btn--primary` class names (the home page does that today with `<Link className="btn …">`).
+8. **Header overflows at 320 px** (`AppShell.tsx`, `shell.css`): logo + theme toggle + "Connect wallet" measure
+   355 px, so every page scrolls sideways on a 320 px phone. Suggested: below 360 px show the wallet button as
+   "Connect" (or icon only with an `aria-label`), and drop the gap between the toggle and the button to 4 px.
+9. **`DESIGN.md` Type / `tokens.css`**: a display size (56 px) for the desktop hero headline. The judges asked for
+   "enormous text"; 40 px is the scale's top, so the hero uses 40 px today.
