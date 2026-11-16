@@ -103,8 +103,6 @@
 .wallet { position: relative; flex: none; }
 .wallet-btn { padding: 0 var(--space-3); }
 @media (min-width: 360px) { .wallet-btn { padding: 0 var(--space-4); } }
-.wallet-btn--icon { width: 44px; padding: 0; }
-.wallet-btn--icon .btn__label { display: none; }
 .wallet-btn--on .btn__icon { position: relative; }
 /* green = alive: a small dot on the wallet icon once connected (the address next to it says the same in words) */
 .wallet-btn--on .btn__icon::after {

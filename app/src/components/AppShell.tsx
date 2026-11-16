@@ -114,14 +114,16 @@ function WalletButton() {
     );
   } else {
     const connecting = status === 'connecting';
-    const text = connecting ? (narrow ? '' : 'Connecting…') : narrow ? 'Connect' : 'Connect wallet';
+    // Under 360 px the label stays "Connect" while connecting, so the button never changes width under the
+    // finger; the blooming logo in place of the wallet icon says it is waiting (DESIGN "Waiting state").
+    const text = narrow ? 'Connect' : connecting ? 'Connecting…' : 'Connect wallet';
     button = (
       <Button
         variant="secondary"
-        className={`wallet-btn${connecting && narrow ? ' wallet-btn--icon' : ''}`}
+        className="wallet-btn"
         onClick={onConnect}
         loading={connecting}
-        icon={<Wallet />}
+        icon={connecting ? <Logo size={20} bloom="loop" /> : <Wallet />}
         aria-label={connecting ? 'Connecting wallet' : 'Connect wallet'}
       >
         {text}

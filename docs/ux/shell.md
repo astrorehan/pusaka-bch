@@ -33,8 +33,9 @@ slides and a CashTokens address that receives prizes and votes). It must not hur
 - **Phones: logo + "Pusaka", then a menu button and the wallet button.** The wallet stays the rightmost control on
   every width (organiser's rule). The menu holds How it works, Docs, GitHub and the theme switch, which moves out of
   the header on phones to make room.
-- **320 px fits:** under 360 px the wallet reads "Connect" (aria-label "Connect wallet"), connecting shows only the
-  wallet icon with an accessible name, and the gap between controls drops to 4 px.
+- **320 px fits:** under 360 px the wallet reads "Connect" (aria-label "Connect wallet") and the gap between controls
+  drops to 4 px. While connecting the label stays, so the button never shrinks under the finger (an icon-only
+  version moved the menu button under the pointer); the wallet icon turns into the looping bloom.
 - **Connected wallet opens a small panel** instead of disconnecting on click (a one-tap disconnect was a trap):
   wallet name, address shortened with copy, balance in BCH first and dollars "≈", then Disconnect.
 - **Cancelled in the wallet is not an error:** a small note under the button, "Cancelled in your wallet. You can
@@ -47,7 +48,7 @@ slides and a CashTokens address that receives prizes and votes). It must not hur
 | Area | State | Shown as |
 |---|---|---|
 | Wallet | not connected | "Connect wallet" / "Connect" under 360 px |
-| Wallet | connecting | label crossfades to "Connecting…", button busy; icon only under 360 px |
+| Wallet | connecting | label crossfades to "Connecting…", the icon becomes the looping bloom; "Connect" under 360 px |
 | Wallet | connected | short address in mono; tap opens the wallet panel |
 | Wallet | rejected in wallet | note under the button (`?mock=cancel`) |
 | Wallet | wrong network, disconnected mid-flow | not exposed by `useWallet` yet; see requests |

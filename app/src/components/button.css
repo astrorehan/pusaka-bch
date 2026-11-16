@@ -10,7 +10,7 @@
 /* Press: scale down while held, release a little faster than the press. */
 .btn:active:not(:disabled) { transform: scale(0.97); transition-duration: 160ms, 150ms, 150ms, 150ms; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn[aria-busy='true']:disabled { opacity: 0.7; cursor: progress; }
+.btn[aria-busy='true']:disabled { opacity: 1; cursor: progress; }
 .btn--lg { min-height: 52px; padding: 0 var(--space-6); font-size: var(--text-16); }
 .btn--block { width: 100%; }
 .btn__icon { display: inline-flex; }

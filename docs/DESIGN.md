@@ -171,7 +171,7 @@ The frame around every page, in `app/src/components/` (`AppShell`, `Banner`, `Sh
 
 **Header:** on phones (under 768 px) the menu button sits just left of the wallet button and opens a panel with How it works, Docs, GitHub and a "Dark theme" switch. From 768 px the links show inline, the current page in `--text`, and the theme toggle is an icon button.
 
-**Wallet button:** "Connect wallet", then "Connecting…" (crossfade, busy). Connected, it shows the address shortened in mono with a green dot on the wallet icon, and opens a small panel: wallet name, address with copy, balance (BCH first, dollars "≈"), Disconnect. Disconnect is never one tap from the header. "Cancelled in your wallet. You can connect any time." appears under the button for 5 s and is read out politely.
+**Wallet button:** "Connect wallet", then "Connecting…" (crossfade, busy) with a 20 px looping bloom in place of the wallet icon. Under 360 px the label stays "Connect" while connecting, so the button never changes width under the finger. Connected, it shows the address shortened in mono with a green dot on the wallet icon, and opens a small panel: wallet name, address with copy, balance (BCH first, dollars "≈"), Disconnect. Disconnect is never one tap from the header. "Cancelled in your wallet. You can connect any time." appears under the button for 5 s and is read out politely.
 
 **Popover** (menus and small panels): drops from its trigger, scale 0.96 to 1 from that corner, 150 ms in and out. Closes on Escape (at once, focus back on the trigger), a click outside, focus leaving, or a page change.
 
