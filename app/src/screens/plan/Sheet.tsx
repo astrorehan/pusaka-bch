@@ -67,12 +67,12 @@ export function Sheet({ open, closable, onClose, labelledBy, children }: Props) 
   }
 
   return createPortal(
-    <div className={`sheet${leaving ? ' is-leaving' : ''}`} onKeyDown={onKeyDown}>
-      <div className="sheet__scrim" onClick={() => closable && onClose()} aria-hidden />
-      <div className="sheet__panel" ref={panel} role="dialog" aria-modal="true" aria-labelledby={labelledBy} tabIndex={-1}>
-        <span className="sheet__grabber" aria-hidden />
+    <div className={`pl-sheet${leaving ? ' is-leaving' : ''}`} onKeyDown={onKeyDown}>
+      <div className="pl-sheet__scrim" onClick={() => closable && onClose()} aria-hidden />
+      <div className="pl-sheet__panel" ref={panel} role="dialog" aria-modal="true" aria-labelledby={labelledBy} tabIndex={-1}>
+        <span className="pl-sheet__grabber" aria-hidden />
         {closable && (
-          <button type="button" className="sheet__close" onClick={onClose} aria-label="Close">
+          <button type="button" className="pl-sheet__close" onClick={onClose} aria-label="Close">
             <X aria-hidden />
           </button>
         )}

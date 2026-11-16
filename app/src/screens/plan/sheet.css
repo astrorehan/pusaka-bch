@@ -1,56 +1,56 @@
-.sheet { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.pl-sheet { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
 
-.sheet__scrim {
+.pl-sheet__scrim {
   position: absolute; inset: 0; background: var(--scrim);
-  animation: sheet-fade var(--dur-sheet) ease both;
+  animation: pl-sheet-fade var(--dur-sheet) ease both;
 }
-.sheet__panel {
+.pl-sheet__panel {
   position: relative; width: 100%; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain;
   background: var(--surface); color: var(--text);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   padding: var(--space-6) var(--gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
   box-shadow: var(--shadow);
-  animation: sheet-up var(--dur-sheet) var(--ease-drawer) both;
+  animation: pl-sheet-up var(--dur-sheet) var(--ease-drawer) both;
 }
-.sheet__panel:focus { outline: none; }
+.pl-sheet__panel:focus { outline: none; }
 
-.sheet__grabber {
+.pl-sheet__grabber {
   position: absolute; top: 8px; left: 50%; width: 36px; height: 4px; margin-left: -18px;
   border-radius: var(--radius-full); background: var(--border);
 }
-.sheet__close {
+.pl-sheet__close {
   position: absolute; top: var(--space-2); right: var(--space-2);
   display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: var(--radius-button);
   background: transparent; color: var(--text-muted);
   transition: transform var(--dur-press) var(--ease-out), background-color 150ms ease;
 }
-.sheet__close:active { transform: scale(0.97); }
-.sheet__close svg { width: 20px; height: 20px; stroke-width: 1.5; }
-@media (hover: hover) and (pointer: fine) { .sheet__close:hover { background: var(--surface-hover); color: var(--text); } }
+.pl-sheet__close:active { transform: scale(0.97); }
+.pl-sheet__close svg { width: 20px; height: 20px; stroke-width: 1.5; }
+@media (hover: hover) and (pointer: fine) { .pl-sheet__close:hover { background: var(--surface-hover); color: var(--text); } }
 
-.sheet.is-leaving .sheet__scrim { animation: sheet-fade-out 200ms ease both; }
-.sheet.is-leaving .sheet__panel { animation: sheet-down 200ms var(--ease-drawer) both; }
+.pl-sheet.is-leaving .pl-sheet__scrim { animation: pl-sheet-fade-out 200ms ease both; }
+.pl-sheet.is-leaving .pl-sheet__panel { animation: pl-sheet-down 200ms var(--ease-drawer) both; }
 
-@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sheet-fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
-@keyframes sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes pl-sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pl-sheet-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pl-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes pl-sheet-down { from { transform: none; } to { transform: translateY(100%); } }
 
 @media (min-width: 768px) {
-  .sheet { align-items: center; padding: var(--space-6); }
-  .sheet__panel {
+  .pl-sheet { align-items: center; padding: var(--space-6); }
+  .pl-sheet__panel {
     max-width: 480px; border-radius: var(--radius-sheet);
     padding: var(--space-8) var(--space-8) var(--space-6);
-    animation: dialog-in 200ms var(--ease-out) both;
+    animation: pl-dialog-in 200ms var(--ease-out) both;
   }
-  .sheet__grabber { display: none; }
-  .sheet__close { top: var(--space-3); right: var(--space-3); }
-  .sheet.is-leaving .sheet__panel { animation: dialog-out 150ms ease both; }
+  .pl-sheet__grabber { display: none; }
+  .pl-sheet__close { top: var(--space-3); right: var(--space-3); }
+  .pl-sheet.is-leaving .pl-sheet__panel { animation: pl-dialog-out 150ms ease both; }
 }
-@keyframes dialog-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
-@keyframes dialog-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.98); } }
+@keyframes pl-dialog-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes pl-dialog-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.98); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet__panel, .sheet.is-leaving .sheet__panel { animation-name: sheet-fade; }
-  .sheet.is-leaving .sheet__panel { animation-name: sheet-fade-out; }
+  .pl-sheet__panel, .pl-sheet.is-leaving .pl-sheet__panel { animation-name: pl-sheet-fade; }
+  .pl-sheet.is-leaving .pl-sheet__panel { animation-name: pl-sheet-fade-out; }
 }
