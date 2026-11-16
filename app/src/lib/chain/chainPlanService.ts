@@ -34,8 +34,11 @@ export function setWizardManager(manager: DappConnectionManager | null, network:
   wallet = manager ? new WizardWallet(manager, network) : null;
 }
 
+/** A problem the user can fix themselves; its message is shown as is. */
+export class UserFixableError extends Error {}
+
 function requireWallet(): WizardWallet {
-  if (!wallet) throw new Error('Connect your wallet first.');
+  if (!wallet) throw new UserFixableError('Connect your wallet first.');
   return wallet;
 }
 
@@ -103,6 +106,7 @@ export class NotEnoughFundsError extends Error {
 
 function toResult(e: unknown): Extract<TxResult, { ok: false }> {
   if (e instanceof WalletCancelledError) return { ok: false, reason: 'cancelled', message: e.message };
+  if (e instanceof UserFixableError) return { ok: false, reason: 'failed', message: e.message };
   if (e instanceof NotEnoughFundsError) {
     return { ok: false, reason: 'failed', message: 'Your wallet does not hold enough BCH for this, including the network fee.', details: e.message };
   }
@@ -119,7 +123,8 @@ const canPayOut = (deadline: bigint, now: bigint) => now > deadline;
 async function statusOf(plan: PlanData, deadline: bigint, balance: bigint, now: bigint): Promise<PlanState['status']> {
   // After a payout the plan keeps its fee budget plus rounding dust (under one satoshi per heir), so "empty"
   // means nothing is left for the heirs, not a zero balance. Take back empties it completely.
-  if (balance === 0n && !canPayOut(deadline, now)) return 'taken-back';
+  // Take back empties the plan completely; a payout leaves the fee budget and rounding dust behind.
+  if (balance === 0n) return 'taken-back';
   if (balance - plan.feeBudget < BigInt(plan.heirs.length)) return 'sent';
   if (canPayOut(deadline, now)) return 'claimable';
   if (deadline - now < plan.period / 10n) return 'ending-soon';
@@ -201,8 +206,11 @@ export const chainPlanService: PlanService = {
         medianTimePast(plan.network),
       ]);
       return { status: await statusOf(plan, deadline, balance, now), balance, deadline, networkTime: now };
-    } catch {
-      return null;
+    } catch (e) {
+      // Only a plan whose records are not on the network is "not found"; anything else is a network problem.
+      const message = e instanceof Error ? e.message : String(e);
+      if (/data NFT|no SolidCash|not found|missing its plan id/i.test(message)) return null;
+      throw e;
     }
   },
 
@@ -233,7 +241,7 @@ export const chainPlanService: PlanService = {
   async takeBack(plan) {
     try {
       const w = requireWallet();
-      if (w.ownerAddress() !== plan.ownerAddress) throw new Error('Only the wallet that made this plan can take the BCH back.');
+      if (w.ownerAddress() !== plan.ownerAddress) throw new UserFixableError('Only the wallet that made this plan can take the BCH back. Connect that wallet and try again.');
       await ensureCoinsAtOwner(w, CALL_COINS_NEEDED);
       const sc = attach(plan, externalSigner(w, 'Pusaka: take my BCH back'));
       const tx = await sc.call.withdraw().send();
