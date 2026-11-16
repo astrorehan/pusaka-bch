@@ -43,10 +43,22 @@ const now = () => BigInt(Math.floor(Date.now() / 1000));
 /** Network clock lag seen on Chipnet: median time past is about 74 minutes behind. */
 const NETWORK_LAG = 4449n;
 const STATEFUL_CALL_FEE = 12_000n; // measured: 9-12 KB per call at 1 sat/byte
-const DEMO_OWNER = 'bitcoincash:qz7m2nq4y8j9k3l5x0w6e2r8t4y6u8i0o2p4a6s8d0';
+/** A valid address on the app's network, so heir checks ("this is your own address") behave as for real. */
+const DEMO_OWNER = import.meta.env.VITE_NETWORK === 'mainnet'
+  ? 'bitcoincash:qq9nq4t6nlzwjr3ntp7693lvzym9hq99egut9wk68z'
+  : 'bchtest:qq9nq4t6nlzwjr3ntp7693lvzym9hq99egcepf5dq7';
 
 interface MockRecord { state: PlanState; plan: PlanData }
+/** Kept in sessionStorage, so a plan made in this tab still opens as itself after a reload or a pasted link. */
+const STORE_KEY = 'pusaka-mock-store';
 const store = new Map<string, MockRecord>();
+try {
+  const raw = sessionStorage.getItem(STORE_KEY);
+  if (raw) for (const [k, v] of JSON.parse(raw, (_k, v) => (typeof v === 'string' && /^-?\d+n$/.test(v) ? BigInt(v.slice(0, -1)) : v))) store.set(k, v);
+} catch { /* private mode or old data: start empty */ }
+function persist() {
+  try { sessionStorage.setItem(STORE_KEY, JSON.stringify([...store], (_k, v) => (typeof v === 'bigint' ? `${v}n` : v))); } catch { /* private mode */ }
+}
 let currentWallet: WalletInfo | null = null;
 
 function key(plan: PlanData) { return plan.contractAddress ?? ''; }
@@ -60,12 +72,27 @@ function status(rec: MockRecord): PlanState['status'] {
   return 'active';
 }
 
-/** Mock knobs for UI work: `?mock=cancel` makes the wallet cancel, `?mock=fail` makes sends fail, `?mock=slow` adds delay. */
-function mockMode(): string { return new URLSearchParams(window.location.search).get('mock') ?? ''; }
+/**
+ * Mock knobs for UI work: `?mock=cancel` makes the wallet cancel (connecting and signing), `?mock=cancel-tx`
+ * connects but cancels every signature, `?mock=fail` makes sends fail, `?mock=slow` adds delay.
+ * The knob sticks for the tab, so it survives in-app navigation (home -> Try it now); `?mock=1` resets it.
+ */
+const KNOB_KEY = 'pusaka-mock-knob';
+function mockMode(): string {
+  const fromUrl = new URLSearchParams(window.location.search).get('mock');
+  try {
+    if (fromUrl !== null) sessionStorage.setItem(KNOB_KEY, fromUrl === '1' ? '' : fromUrl);
+    return sessionStorage.getItem(KNOB_KEY) ?? '';
+  } catch {
+    return fromUrl ?? '';
+  }
+}
+// Remember a knob from the URL the tab opened with, before any in-app navigation drops the query.
+if (import.meta.env.DEV || import.meta.env.VITE_MOCK === '1') mockMode();
 
 async function signAndSend(): Promise<TxResult> {
   await sleep(mockMode() === 'slow' ? 4000 : 1200);
-  if (mockMode() === 'cancel') return { ok: false, reason: 'cancelled', message: 'Cancelled in your wallet. Nothing was sent.' };
+  if (mockMode() === 'cancel' || mockMode() === 'cancel-tx') return { ok: false, reason: 'cancelled', message: 'Cancelled in your wallet. Nothing was sent.' };
   if (mockMode() === 'fail') return { ok: false, reason: 'failed', message: 'The network did not accept this transaction. Nothing was sent.', details: 'mock: Program failed an OP_VERIFY operation' };
   return { ok: true, txid: fakeTxid() };
 }
@@ -74,7 +101,7 @@ export const mockPlanService: PlanService = {
   async usdPerBch() { return 449.6; },
 
   async connectWallet() {
-    await sleep(900);
+    await sleep(mockMode() === 'slow' ? 3000 : 900);
     if (mockMode() === 'cancel') return { cancelled: true };
     currentWallet = { address: DEMO_OWNER, balance: 52_000_000n, name: 'Paytaca' };
     return currentWallet;
@@ -100,19 +127,21 @@ export const mockPlanService: PlanService = {
       // `amount` is what the heirs share; the fee budget sits in the plan on top of it.
       state: { status: 'active', balance: amount + plan.feeBudget, deadline: now() - NETWORK_LAG + plan.period, networkTime: now() - NETWORK_LAG, lastTxid: r.txid },
     });
+    persist();
     return { ok: true, plan: created, txid: r.txid };
   },
 
   async readPlan(plan) {
-    await sleep(500);
+    await sleep(mockMode() === 'slow' ? 3000 : 500);
     if (!plan.contractAddress) return null;
     let rec = store.get(key(plan));
     if (!rec) {
       // Unknown plan from a link: pretend it exists, already past its waiting time (the judge path).
-      rec = { plan, state: { status: 'claimable', balance: 60_000n, deadline: now() - NETWORK_LAG - 3600n, networkTime: now() - NETWORK_LAG } };
+      rec = { plan, state: { status: 'claimable', balance: 1_200_000n + plan.feeBudget, deadline: now() - NETWORK_LAG - 3600n, networkTime: now() - NETWORK_LAG } };
       store.set(key(plan), rec);
     }
     rec.state = { ...rec.state, networkTime: now() - NETWORK_LAG, status: status(rec) };
+    persist();
     return { ...rec.state };
   },
 
@@ -123,6 +152,7 @@ export const mockPlanService: PlanService = {
     const r = await signAndSend();
     const rec = store.get(key(plan));
     if (r.ok && rec) rec.state = { ...rec.state, deadline: now() - NETWORK_LAG + plan.period, lastTxid: r.txid };
+    persist();
     return r;
   },
 
@@ -134,6 +164,7 @@ export const mockPlanService: PlanService = {
     const r = await signAndSend();
     const rec = store.get(key(plan));
     if (r.ok && rec) rec.state = { ...rec.state, status: 'taken-back', balance: 0n, lastTxid: r.txid };
+    persist();
     return r;
   },
 
@@ -150,6 +181,7 @@ export const mockPlanService: PlanService = {
     const r = await signAndSend();
     const rec = store.get(key(plan));
     if (r.ok && rec) rec.state = { ...rec.state, status: 'sent', balance: 0n, lastTxid: r.txid };
+    persist();
     return r;
   },
 };

@@ -52,6 +52,10 @@ function payHeir(int i, int pot) internal {
 
 export function HowItWorksScreen() {
   const usd = useUsdPerBch();
+  useEffect(() => {
+    document.title = 'How it works · Pusaka';
+    return () => { document.title = 'Pusaka'; };
+  }, []);
   const feeUsd = formatUsd(FEE_HIGH, usd);
   const fee = (
     <>
@@ -171,8 +175,8 @@ export function HowItWorksScreen() {
               That includes Send to heirs, so whoever sends needs a little BCH in their own wallet.
             </li>
             <li>
-              <strong>Making a plan has a small Pusaka fee</strong> of about $1, paid once. You see it, with every
-              other amount, before your wallet asks you to sign.
+              <strong>Pusaka takes no fee of its own.</strong> Making a plan costs only the network fee, and you see
+              every amount before your wallet asks you to sign.
             </li>
             <li>
               <strong>Dates are right to about an hour.</strong> The Bitcoin Cash network's clock runs about an hour

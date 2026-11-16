@@ -45,7 +45,7 @@ export function StepWallet({ onDone, usd }: Props) {
       </div>
 
       {cancelled && status !== 'connecting' && (
-        <div role="status"><Notice title="Connection cancelled in your wallet.">Nothing was shared. Try again when you're ready.</Notice></div>
+        <div role="status"><Notice title="Cancelled in your wallet.">Nothing was shared. Connect again when you're ready.</Notice></div>
       )}
 
       <div className="cr-actions">

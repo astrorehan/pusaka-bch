@@ -1,8 +1,8 @@
 // Wallet state shared by every screen. The wallet button lives at the top right (organiser's rule).
 // Real mode pairs a wallet over WizardConnect (QR code or wiz:// link); mock mode (`?mock`) simulates one.
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { useWizardConnect, WizardConnectQRDialog } from '@wizardconnect/react';
-import { isMockMode, loadChain, planService, setChainWallet, type WalletInfo } from './planService';
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { isMockMode, planService, type WalletInfo } from './planService';
+import type { BridgeApi, BridgeProps } from './wizardBridge';
 import type { NetworkName } from './types';
 
 type WalletStatus = 'disconnected' | 'connecting' | 'connected';
@@ -43,98 +43,81 @@ function MockWalletProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={{ status, wallet, connect, disconnect }}>{children}</Ctx.Provider>;
 }
 
+/** WizardConnect loads after the first paint (or at once when someone presses Connect), see wizardBridge.tsx. */
+const WizardBridge = lazy(() =>
+  import('./wizardBridge').catch(() => ({
+    // Offline or a failed deploy: say "not connected" instead of breaking the page.
+    default: function Unavailable({ onState, onSettle }: BridgeProps) {
+      useEffect(() => {
+        onState({ wallet: null, connecting: false });
+        onSettle(false);
+      }, [onState, onSettle]);
+      return null;
+    },
+  })),
+);
+
+const whenIdle = (fn: () => void) => {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+  if (w.requestIdleCallback) {
+    const id = w.requestIdleCallback(fn, { timeout: 2000 });
+    return () => w.cancelIdleCallback?.(id);
+  }
+  const id = window.setTimeout(fn, 600);
+  return () => window.clearTimeout(id);
+};
+
 function WizardWalletProvider({ children }: { children: ReactNode }) {
-  const wiz = useWizardConnect({
-    dappName: 'Pusaka',
-    dappIcon: `${window.location.origin}/favicon.svg`,
-  });
-  const [wallet, setWallet] = useState<WalletInfo | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [load, setLoad] = useState(false);
+  const [session, setSession] = useState<{ wallet: WalletInfo | null; connecting: boolean }>({ wallet: null, connecting: false });
+  /** connect() was pressed before WizardConnect finished loading */
+  const [waitingForBridge, setWaitingForBridge] = useState(false);
+  const api = useRef<BridgeApi | null>(null);
   const pending = useRef<((ok: boolean) => void) | null>(null);
 
-  const settle = useCallback((ok: boolean) => {
+  // Load WizardConnect once the page has drawn, so a saved session comes back without slowing the first screen.
+  useEffect(() => whenIdle(() => setLoad(true)), []);
+
+  const onReady = useCallback((a: BridgeApi) => {
+    const first = !api.current;
+    api.current = a;
+    if (first && pending.current) {
+      setWaitingForBridge(false);
+      a.connect();
+    }
+  }, []);
+  const onSettle = useCallback((ok: boolean) => {
+    setWaitingForBridge(false);
     pending.current?.(ok);
     pending.current = null;
-    setDialogOpen(false);
   }, []);
 
-  // A session is usable once the wallet has shared its receive path (wallet_ready, or restored on reload).
-  useEffect(() => {
-    const manager = wiz.manager;
-    if (wiz.state !== 'connected' || !manager) {
-      if (wiz.state === 'disconnected' || wiz.state === 'idle') {
-        setWallet(null);
-        setChainWallet(null);
-        void loadChain().then((c) => c.setWizardManager(null, NETWORK));
-      }
-      return;
-    }
-    let cancelled = false;
-    const ready = async () => {
-      if (!manager.hasPath(0) || cancelled) return;
-      const chain = await loadChain();
-      chain.setWizardManager(manager, NETWORK);
-      const info = chain.chainPlanService.wallet();
-      if (cancelled || !info) return;
-      setChainWallet(info);
-      setWallet(info);
-      settle(true);
-    };
-    void ready();
-    manager.on('walletready', ready);
-    return () => {
-      cancelled = true;
-      manager.off('walletready', ready);
-    };
-  }, [wiz.state, wiz.manager, settle]);
-
   const connect = useCallback(() => {
-    if (wallet) return Promise.resolve(true);
+    if (session.wallet) return Promise.resolve(true);
     return new Promise<boolean>((resolve) => {
       pending.current = resolve;
-      setDialogOpen(true);
-      if (wiz.state !== 'connecting') wiz.connect();
+      if (api.current) api.current.connect();
+      else {
+        setWaitingForBridge(true);
+        setLoad(true);
+      }
     });
-  }, [wallet, wiz]);
+  }, [session.wallet]);
 
   const disconnect = useCallback(async () => {
-    await wiz.disconnect();
-    setWallet(null);
-    setChainWallet(null);
-    (await loadChain()).setWizardManager(null, NETWORK);
-  }, [wiz]);
+    await api.current?.disconnect();
+    setSession({ wallet: null, connecting: false });
+  }, []);
 
-  const status: WalletStatus = wallet ? 'connected' : wiz.state === 'connecting' || dialogOpen ? 'connecting' : 'disconnected';
+  const status: WalletStatus = session.wallet ? 'connected' : session.connecting || waitingForBridge ? 'connecting' : 'disconnected';
 
   return (
-    <Ctx.Provider value={{ status, wallet, connect, disconnect }}>
+    <Ctx.Provider value={{ status, wallet: session.wallet, connect, disconnect }}>
       {children}
-      {wiz.uri && wiz.qrUri && (
-        <WizardConnectQRDialog
-          show={dialogOpen && !wallet}
-          onClose={() => {
-            void wiz.disconnect();
-            settle(false);
-          }}
-          uri={wiz.uri}
-          qrUri={wiz.qrUri}
-          title="Connect your wallet"
-          subtitle="Scan with a WizardConnect wallet, or open the link on this device."
-          theme={{
-            backdropColor: 'var(--scrim)',
-            dialogBackground: 'var(--surface)',
-            headerBackground: 'var(--surface)',
-            titleColor: 'var(--text)',
-            subtitleColor: 'var(--text-muted)',
-            qrForeground: '#131B33',
-            qrBackground: '#FFFFFF',
-            uriRowBackground: 'var(--surface-2)',
-            uriTextColor: 'var(--text-muted)',
-            borderColor: 'var(--border)',
-            closeButtonColor: 'var(--text-muted)',
-            copyButtonColor: 'var(--text-muted)',
-          }}
-        />
+      {load && (
+        <Suspense fallback={null}>
+          <WizardBridge network={NETWORK} onReady={onReady} onState={setSession} onSettle={onSettle} />
+        </Suspense>
       )}
     </Ctx.Provider>
   );

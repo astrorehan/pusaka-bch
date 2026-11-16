@@ -31,6 +31,7 @@
 .ax-row__hint { font-size: var(--text-13); color: var(--text-muted); }
 .ax-row__value { text-align: right; font-weight: 500; }
 .ax-row--muted { color: var(--text-muted); font-size: var(--text-13); }
+.ax-row--muted > .num { white-space: nowrap; }
 .ax-dot { flex: none; width: 10px; height: 10px; border-radius: var(--radius-full); margin-top: 6px; }
 
 .ax-foot {

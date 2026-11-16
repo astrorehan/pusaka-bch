@@ -145,7 +145,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
                 <span>Connect a BCH wallet, such as Paytaca or Cashonize. It pays the network fee{preview ? <> of <b className="num">{formatBch(fee)} BCH</b></> : null}.{action === 'send' ? " The heirs' shares are not touched." : ''}</span>
               </p>
             )}
-            {connectCancelled && !wallet && <p className="ax-note ax-note--muted" role="status">Connection cancelled. Try again when you're ready.</p>}
+            {connectCancelled && !wallet && <p className="ax-note ax-note--muted" role="status">Cancelled in your wallet. Nothing was shared. Connect again when you're ready.</p>}
             {short && wallet && (
               <p className="ax-note ax-note--danger" role="alert">
                 Your wallet has {formatBch(wallet.balance)} BCH. It needs at least {formatBch(fee)} BCH for the network fee. Add a little BCH, then try again.
@@ -162,7 +162,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
                 data-autofocus={action === 'takeback' ? undefined : true}
                 disabled={!preview || short}
                 loading={walletStatus === 'connecting'}
-                icon={!wallet ? <Wallet /> : undefined}
+                icon={!wallet ? (walletStatus === 'connecting' ? <Logo size={20} bloom="loop" /> : <Wallet />) : undefined}
                 onClick={confirm}
               >
                 {!wallet ? (walletStatus === 'connecting' ? 'Connecting…' : 'Connect wallet') : TITLES[action]}
@@ -279,7 +279,7 @@ function Review({ action, plan, state, preview, usd }: { action: PlanAction; pla
           {leftover > 0n && (
             <div className="ax-row ax-row--muted">
               <span className="ax-row__label">Left over from rounding, added to the network fee</span>
-              <span className="num">{leftover.toLocaleString('en-US')} sats</span>
+              <span className="num">{leftover.toLocaleString('en-US')} {leftover === 1n ? 'satoshi' : 'satoshis'}</span>
             </div>
           )}
         </div>
@@ -340,7 +340,7 @@ function Sent({ action, plan, state, usd, preview, txid, titleId, onClose, onRem
       <div className="ax-phase ax-centre" key="sent">
         <span className="ax-icon ax-icon--ok"><Check aria-hidden /></span>
         <h2 id={titleId} className="ax-status">Your heirs keep waiting</h2>
-        <p className="ax-sub">They can receive from about <b className="num">{formatDateTime(deadlineMs)}</b>. Press "I'm still here" again before then.</p>
+        <p className="ax-sub">They can receive from about <b className="num">{formatDateTime(deadlineMs)}</b>. Press “I’m still here” again before then.</p>
         {explorer}
         <div className="ax-buttons ax-buttons--row">
           <Button variant="secondary" size="lg" block icon={<CalendarPlus />} onClick={onReminder}>Add a reminder</Button>

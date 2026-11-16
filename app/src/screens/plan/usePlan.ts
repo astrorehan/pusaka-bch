@@ -91,6 +91,13 @@ export function usePlan(demo: boolean, hash: string) {
         state = dv;
         const usd = await usdP;
         if (my !== seq.current) return;
+        // The chain layer answers null for any failed read; offline is not "not found".
+        if (!state && typeof navigator !== 'undefined' && navigator.onLine === false) {
+          if (!silent) setLoad({ kind: 'error', offline: true });
+          return;
+        }
+        // A quiet re-read that comes back empty is more likely a network hiccup than a vanished plan: keep the page.
+        if (!state && silent) return;
         if (!state) { setLoad({ kind: 'missing', plan }); return; }
         current.current = plan;
         setLoad((prev) => ({

@@ -35,21 +35,33 @@ export function shortAddress(address: string, head = 4, tail = 4): string {
   return `${prefix ? prefix + ':' : ''}${body.slice(0, head)}…${body.slice(-tail)}`;
 }
 
-/** Seconds -> "30 days", "2 hours". */
+/**
+ * Seconds -> "1 year", "18 months", "30 days", "2 hours". Years and months are used only when the period is a
+ * whole number of them, so 18 months never reads as "1 year".
+ */
 export function formatDuration(seconds: bigint): string {
   const s = Number(seconds < 0n ? -seconds : seconds);
-  const units: [number, string][] = [[86400 * 365, 'year'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+  const DAY = 86400;
+  const word = (n: number, name: string) => `${n} ${name}${n === 1 ? '' : 's'}`;
+  const whole = (size: number, slack: number) => {
+    const n = Math.round(s / size);
+    return n >= 1 && Math.abs(s - n * size) <= slack ? n : 0;
+  };
+  // Average Gregorian year and month, as the create flow counts; 365 days still reads as a year.
+  const years = whole(31_556_952, 6 * 3600);
+  if (years) return word(years, 'year');
+  const months = whole(2_629_746, 3600);
+  if (months) return word(months, 'month');
+  const units: [number, string][] = [[DAY, 'day'], [3600, 'hour'], [60, 'minute']];
   for (const [size, name] of units) {
-    if (s >= size) {
-      const n = Math.floor(s / size);
-      return `${n} ${name}${n === 1 ? '' : 's'}`;
-    }
+    if (s >= size) return word(Math.floor(s / size), name);
   }
-  return 'less than a minute';
+  return s === 1 ? '1 second' : `${s} seconds`;
 }
 
+/** "17 May 2028": day first, the same order as the plan page's dates. */
 export function formatDate(unixSeconds: bigint): string {
-  return new Date(Number(unixSeconds) * 1000).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(Number(unixSeconds) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 export function explorerTxUrl(txid: string, network: 'mainnet' | 'chipnet'): string {

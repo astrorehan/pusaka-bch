@@ -76,6 +76,10 @@ export function CreateScreen() {
   }, [status]);
 
   useEffect(() => { planService.usdPerBch().then(setUsd).catch(() => setUsd(null)); }, []);
+  useEffect(() => {
+    document.title = 'Create a plan · Pusaka';
+    return () => { document.title = 'Pusaka'; };
+  }, []);
   useEffect(() => { if (!created) saveDraft(draft); }, [draft, created]);
 
   const resolved = useMemo(() => resolve(draft), [draft]);

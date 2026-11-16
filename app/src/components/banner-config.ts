@@ -27,8 +27,9 @@ export const BANNER = {
   },
 
   /**
-   * A token-aware address you control (Paytaca shows it as bitcoincash:z…). TODO: set before submitting.
-   * Note: screens/home/links.ts has DONATION_ADDRESS for the footer; keep the two the same.
+   * A token-aware address you control (Paytaca shows it as bitcoincash:z…): prizes, EMBER2026 votes and the
+   * BLAZE Builder airdrop. The one listed as the donation and prize address in the project notes; the home
+   * footer reads it from here (screens/home/links.ts), so the two can't drift apart.
    */
-  cashTokensAddress: '',
+  cashTokensAddress: 'bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux',
 };
