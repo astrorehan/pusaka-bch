@@ -1,0 +1,17 @@
+/* Full-area states: centred in what is left of the first view under the shell. (StateMessage.tsx) */
+.state-msg {
+  min-height: calc(100svh - var(--shell-top, 140px) - var(--space-16));
+  max-width: 440px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  padding: var(--space-8) 0;
+}
+.state-msg__icon {
+  display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-full);
+  background: var(--surface-2); color: var(--text-muted); margin-bottom: var(--space-6);
+}
+.state-msg__icon svg { width: 24px; height: 24px; stroke-width: 1.5; }
+.state-msg__title { font-size: var(--text-24); text-wrap: balance; }
+@media (min-width: 768px) { .state-msg__title { font-size: var(--text-32); } }
+.state-msg__text { margin-top: var(--space-3); color: var(--text-muted); text-wrap: pretty; }
+.state-msg__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-6); width: 100%; }
+@media (max-width: 479px) { .state-msg__actions > * { flex: 1 1 100%; } }

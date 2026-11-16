@@ -1,11 +1,27 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Compass } from 'lucide-react';
+import { ButtonLink } from '../components/Button';
+import { StateMessage } from '../components/StateMessage';
 
 export function NotFoundScreen() {
+  useEffect(() => {
+    document.title = 'Page not found · Pusaka';
+    return () => { document.title = 'Pusaka'; };
+  }, []);
+
   return (
-    <div className="column enter" style={{ textAlign: 'center', paddingTop: 96 }}>
-      <h1>This page doesn't exist</h1>
-      <p className="muted" style={{ marginTop: 12 }}>Check the link, or start from the home page.</p>
-      <p style={{ marginTop: 24 }}><Link to="/">Go home</Link></p>
+    <div className="column">
+      <StateMessage
+        icon={<Compass />}
+        title="This page doesn't exist"
+        text="The link may be mistyped or out of date. A plan link always has /plan# in it."
+        actions={
+          <>
+            <ButtonLink to="/" size="lg">Back to home</ButtonLink>
+            <ButtonLink to="/try" variant="secondary" size="lg">Try it now</ButtonLink>
+          </>
+        }
+      />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 // Full-area states: no link, broken link, plan not found, other network, offline or network error. And the loading skeleton.
-import { useId, useState, type ReactNode } from 'react';
+import { useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CloudOff, Link2, Link2Off, Network, SearchX, WifiOff } from 'lucide-react';
+import { CircleAlert, CloudOff, FileUp, Link2, Link2Off, Network, SearchX, WifiOff } from 'lucide-react';
 import { Button } from '../../components/Button';
-import { decodePlan } from '../../lib/planLink';
+import { StateMessage } from '../../components/StateMessage';
+import { NETWORK } from '../../components/AppShell';
+import { checkPlanLink } from '../home/readPlanLink';
 
 export type MessageKind = 'empty' | 'broken' | 'missing' | 'other-network' | 'offline' | 'error';
 
@@ -23,7 +25,7 @@ export function PlanMessage({ kind, planNetwork, onRetry }: Props) {
   let icon: ReactNode, title: string, text: string;
   switch (kind) {
     case 'empty':
-      icon = <Link2 />; title = 'Open a plan link'; text = 'Paste the plan link you saved, or the one someone shared with you.'; break;
+      icon = <Link2 />; title = 'Open a plan link'; text = 'Paste the plan link you saved, or the one someone shared with you. It stays in your browser.'; break;
     case 'broken':
       icon = <Link2Off />; title = "This plan link doesn't work";
       text = 'Part of the link may be missing. Copy the whole link again, or ask the person who shared it to send it once more.'; break;
@@ -45,38 +47,50 @@ export function PlanMessage({ kind, planNetwork, onRetry }: Props) {
   const retry = kind === 'offline' || kind === 'error';
 
   return (
-    <div className="pl-msg enter">
-      <span className="pl-msg__icon" aria-hidden>{icon}</span>
-      <h1 className="pl-msg__title">{title}</h1>
-      <p className="pl-msg__text">{text}</p>
-      {opening ? (
-        <OpenLink onOpen={(hash) => navigate({ pathname: '/plan', hash })} />
-      ) : null}
-      <div className="pl-msg__actions">
-        {retry && <Button size="lg" onClick={onRetry}>Try again</Button>}
-        {!retry && !opening && <Button size="lg" onClick={() => setOpening(true)}>Open another link</Button>}
-        <Button variant="secondary" size="lg" onClick={() => navigate('/new')}>Create a plan</Button>
-      </div>
-    </div>
+    <StateMessage
+      icon={icon}
+      title={title}
+      text={text}
+      actions={
+        <>
+          {retry && <Button size="lg" onClick={onRetry}>Try again</Button>}
+          {!retry && !opening && <Button size="lg" onClick={() => setOpening(true)}>Open another link</Button>}
+          <Button variant="secondary" size="lg" onClick={() => navigate('/new')}>Create a plan</Button>
+        </>
+      }
+    >
+      {opening && <OpenLink autoFocus={kind !== 'empty'} onOpen={(hash) => navigate({ pathname: '/plan', hash })} />}
+    </StateMessage>
   );
 }
 
-function OpenLink({ onOpen }: { onOpen(hash: string): void }) {
+/** Paste a plan link or choose the saved file. Same checks and words as the home page's "Open a plan link". */
+function OpenLink({ onOpen, autoFocus }: { onOpen(hash: string): void; autoFocus: boolean }) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+  const file = useRef<HTMLInputElement>(null);
   const id = useId();
 
-  function submit(e: React.FormEvent) {
+  function submit(e: FormEvent) {
     e.preventDefault();
-    const v = value.trim();
-    const i = v.indexOf('#');
-    const frag = i >= 0 ? v.slice(i + 1) : v;
-    if (!frag || !decodePlan(frag)) {
-      setError(`This doesn't look like a plan link. A plan link starts with ${window.location.host}/plan#`);
+    const r = checkPlanLink(value, NETWORK);
+    if (!r.ok) {
+      setError(r.error);
+      input.current?.focus();
       return;
     }
     setError('');
-    onOpen('#' + frag);
+    onOpen('#' + r.fragment);
+  }
+
+  async function onFile(f: File | undefined) {
+    if (!f) return;
+    let content = '';
+    try { content = f.size > 1_000_000 ? '' : await f.text(); } catch { content = ''; }
+    const r = checkPlanLink(content, NETWORK, 'file');
+    if (r.ok) onOpen('#' + r.fragment);
+    else setError(r.error);
   }
 
   return (
@@ -84,22 +98,34 @@ function OpenLink({ onOpen }: { onOpen(hash: string): void }) {
       <label htmlFor={id} className="sr-only">Plan link</label>
       <div className="pl-open__row">
         <input
+          ref={input}
           id={id}
           className="pl-open__input"
-          type="url"
+          type="text"
           inputMode="url"
           autoComplete="off"
+          autoCapitalize="off"
           spellCheck={false}
-          placeholder={`${window.location.host}/plan#…`}
+          placeholder="https://…/plan#…"
           value={value}
           onChange={(e) => { setValue(e.target.value); if (error) setError(''); }}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? id + '-err' : undefined}
-          autoFocus
+          autoFocus={autoFocus}
         />
-        <Button type="submit" size="lg" disabled={!value.trim()}>Open</Button>
+        <Button type="submit" size="lg">Open</Button>
       </div>
-      {error && <p id={id + '-err'} className="pl-open__error" role="alert">{error}</p>}
+      {error && <p id={id + '-err'} className="pl-open__error" role="alert"><CircleAlert aria-hidden />{error}</p>}
+      <Button type="button" variant="ghost" block className="pl-open__file" icon={<FileUp />} onClick={() => file.current?.click()}>
+        Choose the saved file
+      </Button>
+      <input
+        ref={file}
+        type="file"
+        accept=".html,.htm,.txt,.url,text/html,text/plain"
+        hidden
+        onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ''; }}
+      />
     </form>
   );
 }
