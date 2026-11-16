@@ -160,7 +160,10 @@ export function faraid(input: Family): FaraidResult {
   if (cmp(fardSum, ONE) > 0) {
     // Awl: fixed shares pass the whole, every fixed share shrinks in proportion; nothing is left for the rest.
     adjustment = 'awl';
-    for (const g of groups) groupShare.set(g, div(g.fard, fardSum));
+    for (const g of groups) {
+      groupShare.set(g, div(g.fard, fardSum));
+      if (g.relation === 'father' && g.restWeight > 0 && g.fard.n > 0n) g.reason = '1/6, as there are daughters. Nothing is left over';
+    }
   } else {
     const rest = sub(ONE, fardSum);
     for (const g of groups) groupShare.set(g, g.fard);
