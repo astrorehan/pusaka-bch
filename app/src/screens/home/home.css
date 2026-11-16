@@ -65,6 +65,10 @@
   .home-hero__text { justify-items: start; max-width: 540px; justify-self: end; }
   .home-hero__ctas, .home-hero__more { justify-content: flex-start; }
 }
+/* Display size: "enormous text" for the desktop first impression (DESIGN.md "Type"). */
+@media (min-width: 1280px) {
+  .home-hero__title { font-size: var(--text-56); line-height: 1.06; letter-spacing: -0.025em; }
+}
 
 /* ---------------------------------------------------------------- built with */
 

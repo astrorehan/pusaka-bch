@@ -21,9 +21,10 @@ slides and a CashTokens address that receives prizes and votes). It must not hur
 - **Grouped, not a run-on line:** `BCH BLAZE 2026 entry` | `Slides` | `Before BLAZE: Code · Demo` |
   `Now: Code · Demo` | `Donations bitcoincash:z…` + copy. Group labels are muted, links are `--text` with a soft
   underline, groups are split by thin rules. "Now: Demo" points to this app, so the four links are literally there.
-- **Phones (under 768 px): one line**, "BCH BLAZE 2026 entry" and "Code and demos" with a chevron. Tapping opens a
+- **Under 1024 px: one line**, "BCH BLAZE 2026 entry" and "Code and demos" with a chevron. Tapping opens a
   panel over the page (no layout shift) that lists every link as a 44 px row with its group label. It never
-  disappears, it only folds.
+  disappears, it only folds. (At 768 px the full line wrapped onto a second row with an orphan divider, so
+  tablets get the folded line too.)
 - **Config in one file**, `banner-config.ts`. Empty values hide their entry (slides and address are not known yet).
   A group with no entries left disappears with it.
 
@@ -80,8 +81,9 @@ Sending…, Sent"), except on first render.
 - **Mono for code on How it works: yes.** Code in a proportional font reads wrong; it is the one page allowed to show code.
 - **Headline rule stays at 8 words; the example changes** to the shipped "Leave your BCH to the people you love."
   The rule is what keeps the hero readable in one glance; the old example broke it.
-- **56 px display size for the hero from 1024 px: yes,** as `--text-56`, used only by the home headline. Judges asked
-  for "enormous text"; on phones 40 px stays the top so the headline keeps to two or three lines.
+- **56 px display size for the hero from 1280 px: yes,** as `--text-56`, used only by the home headline. Judges asked
+  for "enormous text". At 1024 px, in the two-column hero, 56 px broke the headline into three heavy lines, so
+  40 px stays below 1280 px.
 
 ## Rejected
 
