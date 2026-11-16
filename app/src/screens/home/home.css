@@ -2,10 +2,10 @@
 
 /* ---------------------------------------------------------------- hero */
 
-/* The first screen holds only the header and the hero (about 96 px of header and test-network badge). */
+/* The first screen holds only the header and the hero. --shell-top is the measured height of the banner and header. */
 .home-hero {
   max-width: var(--page); margin: 0 auto;
-  min-height: calc(100svh - 96px);
+  min-height: calc(100svh - var(--shell-top, 96px));
   padding: var(--space-2) var(--gutter) var(--space-12);
   display: grid; align-content: center; justify-items: center; gap: var(--space-4);
   text-align: center;
