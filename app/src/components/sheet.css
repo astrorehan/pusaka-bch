@@ -1,0 +1,73 @@
+/* Phones: a bottom sheet that slides up. From 768 px: a centred dialog. (Sheet.tsx) */
+.sheet {
+  padding: 0; border: 0;
+  margin: auto 0 0; width: 100%; max-width: 100%;
+  max-height: calc(100dvh - var(--space-8));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--surface); color: var(--text);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  /* no fill after entering, so a drag can move it with an inline transform */
+  animation: sheet-up var(--dur-sheet) var(--ease-drawer);
+}
+.sheet:not([open]) { display: none; }
+.sheet::backdrop { background: var(--scrim); animation: sheet-fade-in var(--dur-sheet) ease both; }
+.sheet--leaving { animation: sheet-down var(--dur-leave) ease forwards; pointer-events: none; }
+.sheet--leaving::backdrop { animation: sheet-fade-out var(--dur-leave) ease forwards; }
+
+/* The page behind never scrolls while a sheet is open. */
+html:has(.sheet[open]) { overflow: hidden; }
+
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes sheet-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+.sheet__inner { display: flex; flex-direction: column; max-height: inherit; outline: none; }
+
+.sheet__top { flex: none; padding: var(--space-2) var(--gutter) 0; touch-action: none; }
+.sheet__grabber { width: 36px; height: 4px; border-radius: var(--radius-full); background: var(--border-strong); margin: 0 auto var(--space-2); }
+.sheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 44px; }
+.sheet__title { font-size: var(--text-24); text-wrap: balance; }
+.sheet__close { margin-right: -10px; flex: none; }
+.sheet__desc { color: var(--text-muted); font-size: var(--text-15); margin-top: var(--space-1); text-wrap: pretty; }
+
+.sheet__body {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--space-4) var(--gutter) var(--space-6);
+}
+.sheet__body:last-child { padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); }
+.sheet__top:has(+ .sheet__footer), .sheet__top:last-child { padding-bottom: var(--space-4); }
+
+.sheet__footer {
+  flex: none; display: grid; gap: var(--space-2);
+  padding: var(--space-4) var(--gutter) calc(var(--space-4) + env(safe-area-inset-bottom));
+  border-top: 1px solid transparent; background: var(--surface);
+  transition: border-color 150ms ease;
+}
+.sheet--overflow .sheet__footer { border-top-color: var(--border); }
+
+@media (min-width: 768px) {
+  .sheet {
+    margin: auto; width: calc(100% - 2 * var(--gutter));
+    max-height: min(720px, calc(100dvh - var(--space-16)));
+    border-radius: var(--radius-sheet);
+    animation: sheet-pop-in var(--dur-enter) var(--ease-out);
+  }
+  .sheet--sm { max-width: 420px; }
+  .sheet--md { max-width: 560px; }
+  .sheet--leaving { animation: sheet-pop-out var(--dur-leave) ease forwards; }
+  .sheet__grabber { display: none; }
+  .sheet__top { padding: var(--space-6) var(--space-6) 0; touch-action: auto; }
+  .sheet__body { padding: var(--space-4) var(--space-6) var(--space-6); }
+  .sheet__body:last-child { padding-bottom: var(--space-6); }
+  .sheet__footer { padding: var(--space-4) var(--space-6) var(--space-6); }
+  .sheet__top:has(+ .sheet__footer), .sheet__top:last-child { padding-bottom: var(--space-2); }
+  @keyframes sheet-pop-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+  @keyframes sheet-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.96); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .sheet--leaving { animation: sheet-fade-in 150ms ease; }
+  .sheet--leaving { animation-name: sheet-fade-out; animation-fill-mode: forwards; }
+}
