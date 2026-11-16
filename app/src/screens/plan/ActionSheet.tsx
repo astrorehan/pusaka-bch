@@ -145,7 +145,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
                 <span>Connect a BCH wallet, such as Paytaca or Cashonize. It pays the network fee{preview ? <> of <b className="num">{formatBch(fee)} BCH</b></> : null}.{action === 'send' ? " The heirs' shares are not touched." : ''}</span>
               </p>
             )}
-            {connectCancelled && !wallet && <p className="ax-note ax-note--muted" role="status">Connection cancelled. Try again when you're ready.</p>}
+            {connectCancelled && !wallet && <p className="ax-note ax-note--muted" role="status">Cancelled in your wallet. Nothing was shared. Connect again when you're ready.</p>}
             {short && wallet && (
               <p className="ax-note ax-note--danger" role="alert">
                 Your wallet has {formatBch(wallet.balance)} BCH. It needs at least {formatBch(fee)} BCH for the network fee. Add a little BCH, then try again.
