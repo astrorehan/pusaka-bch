@@ -117,7 +117,10 @@ function toResult(e: unknown): Extract<TxResult, { ok: false }> {
 const canPayOut = (deadline: bigint, now: bigint) => now > deadline;
 
 async function statusOf(plan: PlanData, deadline: bigint, balance: bigint, now: bigint): Promise<PlanState['status']> {
-  if (balance === 0n) return canPayOut(deadline, now) ? 'sent' : 'taken-back';
+  // After a payout the plan keeps its fee budget plus rounding dust (under one satoshi per heir), so "empty"
+  // means nothing is left for the heirs, not a zero balance. Take back empties it completely.
+  if (balance === 0n && !canPayOut(deadline, now)) return 'taken-back';
+  if (balance - plan.feeBudget < BigInt(plan.heirs.length)) return 'sent';
   if (canPayOut(deadline, now)) return 'claimable';
   if (deadline - now < plan.period / 10n) return 'ending-soon';
   return 'active';
