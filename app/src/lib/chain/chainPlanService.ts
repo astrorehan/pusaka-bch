@@ -55,7 +55,7 @@ function attach(plan: PlanData, runner?: Signer): any {
   const provider = getProvider(plan.network);
   const base = new Contract(ART, staticArgs(plan) as never, { provider });
   const sc = new StatefulContract(base as never, plan.categoryId) as any;
-  return runner ? sc.connect(runner) : sc;
+  return sc.connect(runner ?? provider);
 }
 
 /**
@@ -110,9 +110,15 @@ function toResult(e: unknown): Extract<TxResult, { ok: false }> {
   return { ok: false, reason: 'failed', message: 'The network did not accept this transaction. Nothing was sent.', details };
 }
 
+/**
+ * Heirs can be paid once a transaction can carry a locktime at or past the deadline. A timestamp locktime is
+ * final only while it is below the network clock (median time past), so the clock must be strictly past it.
+ */
+const canPayOut = (deadline: bigint, now: bigint) => now > deadline;
+
 async function statusOf(plan: PlanData, deadline: bigint, balance: bigint, now: bigint): Promise<PlanState['status']> {
-  if (balance === 0n) return now >= deadline ? 'sent' : 'taken-back';
-  if (now >= deadline) return 'claimable';
+  if (balance === 0n) return canPayOut(deadline, now) ? 'sent' : 'taken-back';
+  if (canPayOut(deadline, now)) return 'claimable';
   if (deadline - now < plan.period / 10n) return 'ending-soon';
   return 'active';
 }
@@ -246,6 +252,12 @@ export const chainPlanService: PlanService = {
   async sendToHeirs(plan) {
     try {
       const w = requireWallet();
+      // Check before the wallet is asked for anything: never have someone sign what the network will refuse.
+      const reader = attach(plan);
+      const [deadline, now] = await Promise.all([reader.state.deadline() as Promise<bigint>, medianTimePast(plan.network)]);
+      if (!canPayOut(deadline, now)) {
+        return { ok: false, reason: 'failed', message: 'The waiting time has not passed on the network yet. Nothing was sent. Try again in a few minutes.' };
+      }
       await ensureCoinsAtOwner(w, CALL_COINS_NEEDED);
       const sc = attach(plan, externalSigner(w, 'Pusaka: send to heirs'));
       const balance: bigint = await sc.getBalance();
