@@ -1,0 +1,66 @@
+.hero-flower { margin: 0; width: 100%; display: grid; place-items: center; }
+
+.hero-flower__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  container-type: inline-size;
+}
+
+/* A quiet plate behind the flower, like a medallion. Its rim is the waiting-time ring. */
+.hero-flower__ring { position: absolute; inset: 11%; width: 78%; height: 78%; overflow: visible; }
+.hero-flower__plate { fill: var(--surface); stroke: var(--border); stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.hero-flower__arc { fill: none; stroke: var(--accent); stroke-width: 3px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+.hero-flower__svg { position: absolute; left: 15%; top: 15%; width: 70%; height: 70%; }
+
+/* Name chips at the petal tips. They enter after their petal (fade + 8 px rise). */
+.hero-chip {
+  position: absolute;
+  left: calc(50% + var(--x));
+  top: calc(50% + var(--y));
+  translate: -50% -50%;
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: 6px 12px 6px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  font-size: var(--text-13);
+  line-height: 1.2;
+  white-space: nowrap;
+  animation: hero-enter 200ms var(--ease-out) both;
+  animation-delay: calc(360ms + var(--i) * 80ms);
+}
+.hero-chip__dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.hero-chip__name { font-weight: 500; color: var(--text); }
+.hero-chip__pct { color: var(--text-muted); }
+
+/* The timer: the second half of the idea. */
+.hero-wait {
+  position: absolute; left: 50%; bottom: 1.5%;
+  translate: -50% 0;
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: 6px 12px 6px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: var(--text-13);
+  color: var(--text-muted);
+  white-space: nowrap;
+  animation: hero-enter 200ms var(--ease-out) both;
+  animation-delay: 760ms;
+}
+.hero-wait__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+
+@keyframes hero-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@container (min-width: 380px) {
+  .hero-chip, .hero-wait { font-size: var(--text-15); padding: 8px 14px 8px 12px; }
+  .hero-chip__dot, .hero-wait__dot { width: 10px; height: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes hero-enter { from { opacity: 0; } to { opacity: 1; } }
+  .hero-chip, .hero-wait { animation-delay: 0ms; animation-duration: 150ms; }
+}

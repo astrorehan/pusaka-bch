@@ -1,0 +1,20 @@
+.sf { display: block; flex: none; overflow: visible; }
+
+/* Each petal grows from its inner end, next to the seed. */
+.sf__petal { transform-box: fill-box; transform-origin: 50% 100%; }
+.sf__seed { transform-box: fill-box; transform-origin: center; }
+
+/* The bloom (DESIGN "The bloom"): seed first, then petals clockwise, 80 ms apart. */
+@keyframes sf-seed { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes sf-petal { from { opacity: 0; transform: translateY(2px) scale(0.8); } to { opacity: 1; transform: none; } }
+
+.sf--bloom .sf__seed { animation: sf-seed 200ms var(--ease-out) both; animation-delay: var(--sf-delay, 0ms); }
+.sf--bloom .sf__petal {
+  animation: sf-petal 240ms var(--ease-out) both;
+  animation-delay: calc(var(--sf-delay, 0ms) + 200ms + var(--i) * 80ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes sf-fade { from { opacity: 0; } to { opacity: 1; } }
+  .sf--bloom .sf__seed, .sf--bloom .sf__petal { animation: sf-fade 150ms ease both; animation-delay: 0ms; }
+}

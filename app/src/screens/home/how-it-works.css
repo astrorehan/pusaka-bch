@@ -1,0 +1,116 @@
+/* A reading column: prose, so a little wider than the 560 px flow column. */
+.hiw__col { max-width: calc(640px + 2 * var(--gutter)); margin: 0 auto; padding: var(--space-8) var(--gutter) 0; }
+
+.hiw-eyebrow {
+  font-size: var(--text-13); font-weight: 500; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.hiw__intro h1 { margin-top: var(--space-3); font-size: var(--text-32); letter-spacing: -0.02em; text-wrap: balance; }
+.hiw__lead { margin-top: var(--space-4); font-size: var(--text-20); line-height: 1.45; color: var(--text-muted); text-wrap: pretty; }
+@media (min-width: 768px) { .hiw__intro h1 { font-size: var(--text-40); } .hiw__col { padding-top: var(--space-12); } }
+
+.hiw-section { margin-top: var(--space-16); }
+.hiw-section > h2 { font-size: var(--text-24); }
+@media (min-width: 768px) { .hiw-section > h2 { font-size: var(--text-32); } }
+.hiw-section__lead { margin-top: var(--space-2); color: var(--text-muted); }
+.hiw-section h3 { font-size: var(--text-16); font-weight: 600; }
+.hiw-section p { text-wrap: pretty; }
+.hiw-section strong { font-weight: 600; }
+
+.hiw code, .hiw pre { font-family: var(--font-mono); font-size: 0.875em; }
+.hiw p code, .hiw dd code {
+  padding: 1px 5px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border);
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+
+/* ------------------------------------------------ timeline */
+
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline__step { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); padding-bottom: var(--space-8); }
+.timeline__step:last-child { padding-bottom: 0; }
+/* the thread between steps */
+.timeline__step:not(:last-child)::before {
+  content: ''; position: absolute; left: 21.5px; top: 48px; bottom: 4px; width: 1px; background: var(--border-strong);
+}
+.timeline__step p, .anytime p { margin-top: var(--space-1); color: var(--text-muted); }
+.timeline__step strong, .anytime strong { color: var(--text); }
+.timeline__step h3, .anytime h3 { padding-top: 10px; }
+
+.timeline__icon {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+}
+.timeline__icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+.timeline__icon--done { background: var(--accent-soft); border-color: transparent; color: var(--accent-text); }
+
+.anytime {
+  margin-top: var(--space-8);
+  display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4);
+  padding: var(--space-4); margin-left: calc(-1 * var(--space-4)); margin-right: calc(-1 * var(--space-4));
+  border: 1px dashed var(--border-strong); border-radius: var(--radius-card);
+}
+.anytime h3 { padding-top: 10px; }
+
+/* ------------------------------------------------ facts (if Pusaka disappears) */
+
+.facts { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-3); }
+.facts li {
+  position: relative; padding: var(--space-6) var(--space-6) var(--space-6);
+  border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--border);
+}
+.facts li::before { content: ''; position: absolute; left: var(--space-6); top: -1px; width: 32px; height: 2px; background: var(--gold); }
+.facts p { margin-top: var(--space-1); color: var(--text-muted); }
+
+/* ------------------------------------------------ limits */
+
+.limits { margin: var(--space-6) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
+.limits li { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+.limits strong { color: var(--text); }
+
+/* ------------------------------------------------ technical */
+
+.hiw-tech { padding-top: var(--space-12); border-top: 1px solid var(--border); }
+.hiw-tech > h2 { margin-top: var(--space-2); }
+
+.hiw-ext { display: inline-flex; align-items: baseline; gap: 3px; color: var(--accent-text); text-underline-offset: 3px; }
+.hiw-ext svg { width: 13px; height: 13px; stroke-width: 1.5; align-self: center; flex: none; }
+
+.tech { margin: var(--space-6) 0 0; display: grid; gap: 0; border-top: 1px solid var(--border); }
+.tech > div { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); display: grid; gap: var(--space-1); }
+.tech dt { font-weight: 600; font-size: var(--text-15); }
+.tech dd { margin: 0; color: var(--text-muted); }
+@media (min-width: 768px) {
+  .tech > div { grid-template-columns: 180px 1fr; gap: var(--space-6); }
+}
+
+.code { margin: var(--space-8) 0 0; }
+.code figcaption { font-size: var(--text-13); color: var(--text-muted); margin-bottom: var(--space-2); }
+.code figcaption code { font-size: 1em; padding: 0; background: none; border: 0; }
+.code pre {
+  margin: 0; padding: var(--space-4); overflow-x: auto;
+  border-radius: var(--radius-button); background: var(--surface-2); border: 1px solid var(--border);
+  font-size: var(--text-13); line-height: 1.6; color: var(--text);
+  tab-size: 4;
+}
+
+.tech-links { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-6); }
+.tech-links li { display: flex; align-items: center; min-height: 44px; }
+
+/* ------------------------------------------------ closing CTA */
+
+.hiw-cta {
+  margin-top: var(--space-16); padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--border);
+  text-align: center;
+}
+.hiw-cta h2 { font-size: var(--text-24); }
+.hiw-cta p { margin-top: var(--space-2); color: var(--text-muted); }
+.hiw-cta__btns { margin-top: var(--space-6); display: grid; gap: var(--space-2); justify-items: center; }
+.hiw-cta__btns .btn { text-decoration: none; width: 100%; max-width: 320px; }
+.hiw-cta__link {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  color: var(--text); font-weight: 500; text-decoration: none;
+}
+.hiw-cta__link svg { width: 16px; height: 16px; stroke-width: 1.5; transition: transform 150ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .hiw-cta__link:hover svg { transform: translateX(2px); } }
