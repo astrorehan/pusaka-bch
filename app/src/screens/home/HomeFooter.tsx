@@ -1,0 +1,77 @@
+// Footer for the home and How it works pages: links, donation address, licence, and the
+// before/after note the README promises (what existed before BCH BLAZE 2026).
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Check, Copy } from 'lucide-react';
+import { Logo } from '../../components/Logo';
+import { shortAddress } from '../../lib/format';
+import { BLAZE_START_URL, DOCS_URL, DONATION_ADDRESS, LICENSE_URL, OLD_DEMO_URL, OLD_REPO_URL, REPO_URL } from './links';
+import './home-footer.css';
+
+function CopyAddress({ address }: { address: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(address);
+      setState('copied');
+    } catch {
+      setState('failed');
+    }
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setState('idle'), 2000);
+  }
+
+  return (
+    <div className="copy-addr">
+      <span className="copy-addr__text mono" title={address}>{shortAddress(address, 4, 4)}</span>
+      <button type="button" className="copy-addr__btn" onClick={copy} aria-label={`Copy donation address ${address}`}>
+        <span className="copy-addr__icon" data-on={state !== 'copied' || undefined}><Copy aria-hidden /></span>
+        <span className="copy-addr__icon" data-on={state === 'copied' || undefined}><Check aria-hidden /></span>
+      </button>
+      <span className="copy-addr__status" aria-live="polite">
+        {state === 'copied' ? 'Copied' : state === 'failed' ? "Couldn't copy. Select the address to copy it." : ''}
+      </span>
+    </div>
+  );
+}
+
+export function HomeFooter() {
+  return (
+    <footer className="hfoot">
+      <div className="hfoot__inner">
+        <div className="hfoot__brand">
+          <Link to="/" className="hfoot__logo" aria-label="Pusaka home">
+            <Logo size={22} />
+            <span>Pusaka</span>
+          </Link>
+          <p className="hfoot__tag">Inheritance plans for Bitcoin Cash.</p>
+          <p className="hfoot__tag">
+            Open source, <a href={LICENSE_URL} target="_blank" rel="noreferrer">MIT</a>.
+          </p>
+        </div>
+
+        <nav className="hfoot__links" aria-label="Footer">
+          <Link to="/how-it-works">How it works</Link>
+          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+          <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+
+        <div className="hfoot__donate">
+          <p className="hfoot__label">Donations</p>
+          <CopyAddress address={DONATION_ADDRESS} />
+        </div>
+      </div>
+
+      <p className="hfoot__history">
+        Built during BCH BLAZE 2026 (14 to 22 November). Before it, Pusaka ran on Monad:{' '}
+        <a href={OLD_REPO_URL} target="_blank" rel="noreferrer">old code</a> and{' '}
+        <a href={OLD_DEMO_URL} target="_blank" rel="noreferrer">old demo</a>. Reused from it: the idea, the faraid share
+        calculator and the flower logo. Everything after the{' '}
+        <a href={BLAZE_START_URL} target="_blank" rel="noreferrer">blaze-start</a> tag is new.
+      </p>
+    </footer>
+  );
+}
