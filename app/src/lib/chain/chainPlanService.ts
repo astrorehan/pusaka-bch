@@ -164,7 +164,7 @@ export const chainPlanService: PlanService = {
     return {
       lines: [
         { label: 'Into your inheritance plan, for your heirs', amount, kind: 'plan' },
-        { label: 'Kept in the plan for the network fee when heirs are paid', amount: plan.feeBudget, kind: 'fee' },
+        { label: 'Stays in the plan (a network minimum)', amount: plan.feeBudget, kind: 'fee' },
       ],
       networkFee: 3_000n,
     };

@@ -1,5 +1,5 @@
 // Share math, matching the contract exactly: each heir gets floor(pot * share / shareTotal).
-// Leftover satoshis from rounding go to the network fee.
+// Leftover satoshis from rounding stay in the plan, next to its minimum balance.
 
 export const MAX_HEIRS = 10;
 

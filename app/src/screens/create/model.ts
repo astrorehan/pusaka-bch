@@ -5,8 +5,12 @@ import { MAX_HEIRS, equalShares, heirAmounts } from '../../lib/shares';
 import { faraid, EMPTY_FAMILY, type Family, type FaraidResult } from './faraid';
 import { checkAddress } from './cashaddr';
 
-/** Kept in the plan to pay the network fee when heirs are paid (a 10-heir payout is about 12 KB). */
-export const FEE_BUDGET = 15_000n;
+/**
+ * A small amount that stays in the plan for good. The SolidCash contract may not be left holding less than the
+ * network's minimum (576 satoshis) after a payout, so the plan keeps this back from the heirs' pot.
+ * (Whoever sends to heirs pays the network fee from their own wallet.)
+ */
+export const FEE_BUDGET = 1_000n;
 /** Rough network fee for creating the plan, used only to warn early about the wallet balance. */
 export const CREATE_FEE_ESTIMATE = 5_000n;
 /** Later actions (I'm still here, take my BCH back, send to heirs), measured on Chipnet. */

@@ -77,7 +77,7 @@ export function StepReview({ draft, resolved, amounts, leftover, usd, wallet, wa
         <ShareBar heirs={resolved.heirs} total={resolved.total} amounts={amounts} usd={usd} showAddress />
         {leftover > 0n && (
           <p className="cr-small muted num">
-            {leftover.toLocaleString('en-US')} satoshi{leftover === 1n ? '' : 's'} left over from rounding go{leftover === 1n ? 'es' : ''} to the network fee.
+            {leftover.toLocaleString('en-US')} satoshi{leftover === 1n ? '' : 's'} left over from rounding stay{leftover === 1n ? 's' : ''} in the plan.
           </p>
         )}
       </section>

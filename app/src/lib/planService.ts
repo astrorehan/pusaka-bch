@@ -113,7 +113,7 @@ export const mockPlanService: PlanService = {
     return {
       lines: [
         { label: 'Into your inheritance plan', amount, kind: 'plan' },
-        { label: 'Kept for the network fee when heirs are paid', amount: plan.feeBudget, kind: 'fee' },
+        { label: 'Stays in the plan (a network minimum)', amount: plan.feeBudget, kind: 'fee' },
       ],
       networkFee: 3_000n,
     };

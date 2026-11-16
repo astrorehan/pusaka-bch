@@ -194,7 +194,7 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
             <div><dt>Waiting time</dt><dd>{formatDuration(plan.period)}</dd></div>
             <div><dt>Split</dt><dd>{SPLIT[plan.splitMode]}</dd></div>
             <div><dt>In the plan now</dt><dd className="num">{formatBch(state.balance)} BCH</dd></div>
-            {plan.feeBudget > 0n && <div><dt>Kept for the network fee</dt><dd className="num">{formatBch(plan.feeBudget)} BCH</dd></div>}
+            {plan.feeBudget > 0n && <div><dt>Stays in the plan (network minimum)</dt><dd className="num">{formatBch(plan.feeBudget)} BCH</dd></div>}
             <div><dt>Owner</dt><dd><Address address={plan.ownerAddress} label="Copy the owner's address" /></dd></div>
             {plan.contractAddress && <div><dt>Plan address</dt><dd><Address address={plan.contractAddress} label="Copy the plan address" /></dd></div>}
             {plan.createdTxid && (

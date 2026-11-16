@@ -62,8 +62,8 @@ export function StepAmount({ draft, update, resolved, vis, amounts, usd, wallet,
           </div>
         )}
         <p className="cr-small muted cr-amount__fee num">
-          Plus {FEE_BUDGET.toLocaleString('en-US')} satoshis ({formatBch(FEE_BUDGET)} BCH{usd ? `, ${formatUsd(FEE_BUDGET, usd)}` : ''}) kept
-          in the plan to pay the network fee when your heirs are paid.
+          Plus {FEE_BUDGET.toLocaleString('en-US')} satoshis ({formatBch(FEE_BUDGET)} BCH{usd ? `, ${formatUsd(FEE_BUDGET, usd)}` : ''}) stay
+          in the plan for good. The network needs every plan to keep a small minimum balance.
         </p>
       </section>
 

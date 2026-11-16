@@ -233,7 +233,7 @@ export function HowItWorksScreen() {
               <dt>Send to heirs</dt>
               <dd>
                 <code>distribute()</code>. Needs no signature, only <code>tx.time &gt;= deadline</code>. Each heir gets{' '}
-                <code>pot × share ÷ total</code>, rounded down; leftover satoshis go to the network fee.
+                <code>pot × share ÷ total</code>, rounded down; leftover satoshis stay in the plan with its small minimum balance.
               </dd>
             </div>
             <div>

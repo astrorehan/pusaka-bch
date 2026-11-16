@@ -101,7 +101,7 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 - Amounts are `bigint` satoshis in code and are formatted only at display time.
 - BCH comes first, with dollars second and muted: **0.25 BCH** ≈ $112.40. The dollar value always says "≈".
 - Show up to 8 decimals and drop trailing zeros (`0.25`, not `0.25000000`).
-- The heirs' shares on screen add up exactly to what they will receive on-chain. Rounding is down per heir, and leftover satoshis go to the network fee; the review screen shows this.
+- The heirs' shares on screen add up exactly to what they will receive on-chain. Rounding is down per heir, and leftover satoshis stay in the plan next to its small minimum balance (1,000 satoshis, because a SolidCash contract may not be left below the network minimum); the review screen shows this.
 - **Money never animates.** Balances never count up, bounce or shake. A new value simply replaces the old one.
 - Addresses are shortened in the middle (`bitcoincash:qr4x…8f2k`), always with a copy button and the full address on tap or hover. The `bitcoincash:` prefix is kept.
 - Every transaction gets a "View on explorer" link once it has been broadcast.

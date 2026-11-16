@@ -278,7 +278,7 @@ function Review({ action, plan, state, preview, usd }: { action: PlanAction; pla
           })}
           {leftover > 0n && (
             <div className="ax-row ax-row--muted">
-              <span className="ax-row__label">Left over from rounding, added to the network fee</span>
+              <span className="ax-row__label">Left over from rounding, stays in the plan</span>
               <span className="num">{leftover.toLocaleString('en-US')} {leftover === 1n ? 'satoshi' : 'satoshis'}</span>
             </div>
           )}
