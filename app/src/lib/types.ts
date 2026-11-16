@@ -27,6 +27,8 @@ export interface PlanData {
   period: bigint;
   /** satoshis kept back to pay the payout's network fee */
   feeBudget: bigint;
+  /** the plan's id on-chain (the token category its genesis created), filled in once deployed */
+  categoryId?: string;
   /** the contract's address, filled in once deployed */
   contractAddress?: string;
   /** txid of the deployment */

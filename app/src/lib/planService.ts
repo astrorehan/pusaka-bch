@@ -19,7 +19,7 @@ export interface PlanService {
   disconnectWallet(): Promise<void>;
   wallet(): WalletInfo | null;
 
-  /** What creating this plan with `amount` will move. */
+  /** What creating this plan will move. `amount` is what the heirs share; the plan also holds `feeBudget` on top. */
   previewCreate(plan: PlanData, amount: bigint): Promise<TxPreview>;
   /** Deploys and funds the plan. Returns the plan with contractAddress and createdTxid filled in. */
   createPlan(plan: PlanData, amount: bigint): Promise<{ ok: true; plan: PlanData; txid: string } | Extract<TxResult, { ok: false }>>;
@@ -94,10 +94,11 @@ export const mockPlanService: PlanService = {
   async createPlan(plan, amount) {
     const r = await signAndSend();
     if (!r.ok) return r;
-    const created: PlanData = { ...plan, contractAddress: `bitcoincash:p${r.txid.slice(0, 41)}`, createdTxid: r.txid };
+    const created: PlanData = { ...plan, categoryId: r.txid, contractAddress: `bitcoincash:p${r.txid.slice(0, 41)}`, createdTxid: r.txid };
     store.set(key(created), {
       plan: created,
-      state: { status: 'active', balance: amount, deadline: now() - NETWORK_LAG + plan.period, networkTime: now() - NETWORK_LAG, lastTxid: r.txid },
+      // `amount` is what the heirs share; the fee budget sits in the plan on top of it.
+      state: { status: 'active', balance: amount + plan.feeBudget, deadline: now() - NETWORK_LAG + plan.period, networkTime: now() - NETWORK_LAG, lastTxid: r.txid },
     });
     return { ok: true, plan: created, txid: r.txid };
   },
@@ -153,5 +154,50 @@ export const mockPlanService: PlanService = {
   },
 };
 
-/** The service the app uses. Swapped to the real one once the chain layer lands. */
-export const planService: PlanService = mockPlanService;
+// ---------------------------------------------------------------- selection
+
+/**
+ * Mock mode: any `?mock` in the URL (e.g. `?mock=1`, `?mock=cancel`) or `VITE_MOCK=1`. It sticks for the browser
+ * tab, so it survives in-app navigation that drops the query string.
+ */
+export function isMockMode(): boolean {
+  if (import.meta.env.VITE_MOCK === '1') return true;
+  try {
+    if (new URLSearchParams(window.location.search).has('mock')) sessionStorage.setItem('pusaka-mock', '1');
+    return sessionStorage.getItem('pusaka-mock') === '1';
+  } catch {
+    return new URLSearchParams(window.location.search).has('mock');
+  }
+}
+
+/** The real service lives in a separate chunk (the SolidCash SDK is large), loaded on first use. */
+let chain: Promise<typeof import('./chain/chainPlanService')> | null = null;
+export function loadChain() {
+  chain ??= import('./chain/chainPlanService');
+  return chain;
+}
+
+let chainWallet: WalletInfo | null = null;
+/** Set by the wallet provider when a WizardConnect session is ready, so `wallet()` can answer synchronously. */
+export function setChainWallet(info: WalletInfo | null) {
+  chainWallet = info;
+}
+
+const realPlanService: PlanService = {
+  usdPerBch: async () => (await loadChain()).chainPlanService.usdPerBch(),
+  connectWallet: async () => (await loadChain()).chainPlanService.connectWallet(),
+  disconnectWallet: async () => (await loadChain()).chainPlanService.disconnectWallet(),
+  wallet: () => chainWallet,
+  previewCreate: async (p, a) => (await loadChain()).chainPlanService.previewCreate(p, a),
+  createPlan: async (p, a) => (await loadChain()).chainPlanService.createPlan(p, a),
+  readPlan: async (p) => (await loadChain()).chainPlanService.readPlan(p),
+  previewCheckIn: async (p) => (await loadChain()).chainPlanService.previewCheckIn(p),
+  checkIn: async (p) => (await loadChain()).chainPlanService.checkIn(p),
+  previewTakeBack: async (p) => (await loadChain()).chainPlanService.previewTakeBack(p),
+  takeBack: async (p) => (await loadChain()).chainPlanService.takeBack(p),
+  previewSendToHeirs: async (p) => (await loadChain()).chainPlanService.previewSendToHeirs(p),
+  sendToHeirs: async (p) => (await loadChain()).chainPlanService.sendToHeirs(p),
+};
+
+/** The service the app uses: the real network, or the mock for UI work. */
+export const planService: PlanService = isMockMode() ? mockPlanService : realPlanService;
