@@ -19,6 +19,7 @@ export function percentShares(percents: number[]): { shares: bigint[]; total: bi
   return { shares: percents.map((p) => BigInt(Math.round(p * 100))), total: 10000n };
 }
 
+/** Share as a percentage with 2 decimals, rounded to nearest (20/120 -> 16.67), the same as the create flow shows. */
 export function sharePercent(share: bigint, total: bigint): number {
-  return total === 0n ? 0 : Number((share * 10000n) / total) / 100;
+  return total === 0n ? 0 : Number((share * 10000n + total / 2n) / total) / 100;
 }

@@ -57,7 +57,10 @@ export function PlanView({ plan, state, readAt, usd, demo, demoUsed, refresh }: 
   }, [running, secondsLeft, refresh]);
 
   // Remember what each heir gets while there is money in the plan, so "Paid" rows keep their amounts.
-  const livePot = state.balance > 0n ? state.balance - plan.feeBudget : null;
+  // After a payout or take back the plan only holds its fee budget and rounding dust; that is not a pot, so a
+  // plan opened after it was paid shows shares and "Paid" without amounts.
+  const finished = state.status === 'sent' || state.status === 'taken-back';
+  const livePot = !finished && state.balance > plan.feeBudget ? state.balance - plan.feeBudget : null;
   const [knownPot, setKnownPot] = useState<bigint | null>(livePot);
   if (livePot != null && livePot !== knownPot) setKnownPot(livePot);
   const pot = livePot ?? knownPot;
