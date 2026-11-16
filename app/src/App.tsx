@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { WalletProvider } from './lib/wallet';
 import { HomeScreen } from './screens/home/HomeScreen';
@@ -11,21 +11,27 @@ import { NotFoundScreen } from './screens/NotFoundScreen';
 //   screens/home/    -> /, /how-it-works
 //   screens/create/  -> /new
 //   screens/plan/    -> /plan (plan link in the URL fragment), /try (judge path)
+//
+// A data router, so screens can use useBlocker (the plan-link gate on the create flow's success screen) and the
+// shell can restore scroll (a new page starts at the top; Back returns to where you were).
+const router = createBrowserRouter([
+  {
+    element: <AppShell />,
+    children: [
+      { index: true, element: <HomeScreen /> },
+      { path: 'how-it-works', element: <HowItWorksScreen /> },
+      { path: 'new', element: <CreateScreen /> },
+      { path: 'plan', element: <PlanScreen /> },
+      { path: 'try', element: <PlanScreen demo /> },
+      { path: '*', element: <NotFoundScreen /> },
+    ],
+  },
+]);
+
 export default function App() {
   return (
     <WalletProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<HomeScreen />} />
-            <Route path="how-it-works" element={<HowItWorksScreen />} />
-            <Route path="new" element={<CreateScreen />} />
-            <Route path="plan" element={<PlanScreen />} />
-            <Route path="try" element={<PlanScreen demo />} />
-            <Route path="*" element={<NotFoundScreen />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </WalletProvider>
   );
 }

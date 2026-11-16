@@ -2,7 +2,7 @@
 // Header: logo and name on the left; desktop links; theme, phone menu and the wallet button on the right.
 // The wallet button is the rightmost control on every width (organiser's rule).
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
 import { ExternalLink, Menu, Moon, Sun, Unplug, Wallet, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { Button } from './Button';
@@ -258,6 +258,8 @@ export function AppShell() {
       <main id="main" className="main" tabIndex={-1}>
         <Outlet />
       </main>
+      {/* A new page starts at the top; Back and Forward return to where the reader was. */}
+      <ScrollRestoration />
     </div>
   );
 }
