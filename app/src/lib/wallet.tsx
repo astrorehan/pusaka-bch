@@ -51,6 +51,9 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const pending = useRef<((ok: boolean) => void) | null>(null);
+  /** True once a session was handed to the chain layer. Until then nothing loads the chain chunk, so the
+   *  first screen stays light (the SolidCash SDK is large). */
+  const handedOver = useRef(false);
 
   const settle = useCallback((ok: boolean) => {
     pending.current?.(ok);
@@ -65,7 +68,10 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
       if (wiz.state === 'disconnected' || wiz.state === 'idle') {
         setWallet(null);
         setChainWallet(null);
-        void loadChain().then((c) => c.setWizardManager(null, NETWORK));
+        if (handedOver.current) {
+          handedOver.current = false;
+          void loadChain().then((c) => c.setWizardManager(null, NETWORK));
+        }
       }
       return;
     }
@@ -74,6 +80,7 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
       if (!manager.hasPath(0) || cancelled) return;
       const chain = await loadChain();
       chain.setWizardManager(manager, NETWORK);
+      handedOver.current = true;
       const info = chain.chainPlanService.wallet();
       if (cancelled || !info) return;
       setChainWallet(info);
@@ -101,7 +108,10 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
     await wiz.disconnect();
     setWallet(null);
     setChainWallet(null);
-    (await loadChain()).setWizardManager(null, NETWORK);
+    if (handedOver.current) {
+      handedOver.current = false;
+      (await loadChain()).setWizardManager(null, NETWORK);
+    }
   }, [wiz]);
 
   const status: WalletStatus = wallet ? 'connected' : wiz.state === 'connecting' || dialogOpen ? 'connecting' : 'disconnected';
