@@ -86,6 +86,21 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
       setChainWallet(info);
       setWallet(info);
       settle(true);
+      // chainPlanService.wallet() reports a balance of 0 (unknown). Screens check the balance before signing
+      // ("Your wallet has 0 BCH" would block Send to heirs), so read the real one: the plain coins on every
+      // address the wallet can sign for, which is what the chain layer gathers before a call.
+      try {
+        const [{ WizardWallet }, { plainBalance }] = await Promise.all([import('./chain/wizard'), import('./chain/network')]);
+        const addresses = new WizardWallet(manager, NETWORK).derivedAddresses().map((d) => d.address);
+        const parts = await Promise.all(addresses.map((a) => plainBalance(NETWORK, a)));
+        const balance = parts.reduce((t, b) => t + b, 0n);
+        if (cancelled) return;
+        const withBalance = { ...info, balance };
+        setChainWallet(withBalance);
+        setWallet(withBalance);
+      } catch {
+        /* keep the session; the chain layer still refuses a call the wallet can't pay for, in plain words */
+      }
     };
     void ready();
     manager.on('walletready', ready);
