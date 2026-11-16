@@ -29,6 +29,9 @@ The goal is the one the BLAZE judges set: **instant, slick, and it just works**.
 | network fee | miner fee, tx fee |
 
 - Buttons are short verbs in sentence case: "Add heir", "Create plan", "I'm still here". Never "Submit" or "OK".
+- When a sentence names a button, it uses curly quotes: Press “I’m still here” before then. Why: the create flow and the plan page used different quote styles side by side.
+- Dates are day first: "17 May 2028", and with a time "17 May 2028, 08:31". Plan deadlines always say "about". Why: two screens showed the same deadline as "May 17, 2028" and "17 May 2028".
+- Amounts of a few satoshis say "satoshis", never "sats".
 - Don't use em dashes in UI copy. Use a full stop or a comma.
 - Errors say what went wrong and how to fix it: "This amount is too small. Each heir must get at least 546 satoshis (about $0.003)." Never show a raw error code alone. If there is a code, it goes in a collapsible "Details".
 - Faraid is named once, as a preset: "Islamic inheritance (faraid)". The product is for every family. Faraid is never the headline.
@@ -180,6 +183,10 @@ The frame around every page, in `app/src/components/` (`AppShell`, `Banner`, `Sh
 **Buttons:** `Button` for actions, `ButtonLink` for links that look like buttons (`to` for app routes, `href` with `external` for other sites). Same variants, sizes, icon slot and press. Never hand-write `btn` classes.
 
 **Copy:** `CopyButton` next to every address or link worth copying. The icon turns into a green check for 1.5 s and "Copied" is announced.
+
+**Full-area states:** `StateMessage` (icon in a soft circle, serif title, one muted sentence, then the buttons) for the 404 page and every plan-page message, so a dead end looks the same wherever it happens.
+
+**Router:** a data router (`createBrowserRouter`). A new page starts at the top and Back returns to where the reader was (`ScrollRestoration` in the shell); gates such as the plan-link screen use `useBlocker`. Why: links from the bottom of a long page opened the next page half-way down, and the gate needed a history trick.
 
 ## States
 
