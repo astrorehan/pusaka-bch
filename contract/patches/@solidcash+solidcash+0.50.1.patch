@@ -1,0 +1,71 @@
+diff --git a/node_modules/@solidcash/solidcash/dist/message-bus/preflight.js b/node_modules/@solidcash/solidcash/dist/message-bus/preflight.js
+index 74bed57..02322cc 100644
+--- a/node_modules/@solidcash/solidcash/dist/message-bus/preflight.js
++++ b/node_modules/@solidcash/solidcash/dist/message-bus/preflight.js
+@@ -13,6 +13,11 @@ import { deriveBalancedAssemblyFromInputs, preflightBalancedBlockAssembly, } fro
+ import { canApplyRepairedNftCommitment } from '../stateful/computed-output-repair.js';
+ import { matchesProbeOpcodeSequence } from '../stateful/probe-instruction-sequence.js';
+ import { isContractUnlocker } from '../interfaces.js';
++import { applyExternalSignatures, isExternallySignedUnlocker } from '../external-signing.js';
++/** True while a wallet's P2PKH input still carries the all-zero placeholder signature it is built with. */
++const holdsExternalSignaturePlaceholder = (input) => input.unlockingBytecode.length >= 66
++    && input.unlockingBytecode[0] === 65
++    && input.unlockingBytecode.subarray(1, 65).every((byte) => byte === 0);
+ import { getMessageBusEnvelopeTransport } from '../stateful/covenant-helpers.js';
+ import { assertGraphTrailingCapacity } from './graph.js';
+ import { ATOMIC_MESSAGE_ENVELOPE_MIN_BYTES, decodeAtomicMessageEnvelope } from './atomic.js';
+@@ -1216,6 +1221,10 @@ const evaluateEveryInput = (builder, transaction) => {
+     transaction.inputs.forEach((_input, inputIndex) => {
+         if (narrowPreflight && inputIndex !== debugOnlyInput)
+             return;
++        // A wallet's input still holds its placeholder until the wallet signs (../external-signing.ts). Its script
++        // cannot pass yet, and no covenant reads another input's unlocking bytecode, so judge it after signing.
++        if (isExternallySignedUnlocker(builder.inputs[inputIndex]?.unlocker) && holdsExternalSignaturePlaceholder(_input))
++            return;
+         const startedAt = debugTiming ? Date.now() : 0;
+         const evaluated = vm.evaluate({ inputIndex, sourceOutputs, transaction });
+         const objection = vm.stateSuccess(evaluated);
+@@ -3113,8 +3122,11 @@ export async function sendPreflightedMessageBusTransaction(builder, options) {
+     // Structural gate first: this runs before build() takes a single signature.
+     assertNoDerivationProbeOutpoints(builder);
+     const assembly = requireMessageBusBlockAssembly(builder);
+-    const raw = builder.build();
+-    const transaction = decodeTransactionUnsafe(hexToBin(raw));
++    const built = decodeTransactionUnsafe(hexToBin(builder.build()));
++    // A wallet that holds an input's key signs it now, over the transaction the preflight judged with its
++    // placeholder; every input is then judged again on the signed bytes before broadcast (../external-signing.ts).
++    const transaction = await applyExternalSignatures(builder.inputs.map((input) => input.unlocker), built, generateLibauthSourceOutputs(builder.inputs));
++    const raw = binToHex(encodeTransaction(transaction));
+     assertCanonicalMessageEnvelopePush(builder, transaction, assembly);
+     evaluateEveryInput(builder, transaction);
+     // The byte gate reads the DECODED broadcast bytes, not a re-derived shape, so it judges exactly what
+diff --git a/node_modules/@solidcash/solidcash/dist/stateful/stb-submit-final-transaction.js b/node_modules/@solidcash/solidcash/dist/stateful/stb-submit-final-transaction.js
+index cdfcd8d..5e038ef 100644
+--- a/node_modules/@solidcash/solidcash/dist/stateful/stb-submit-final-transaction.js
++++ b/node_modules/@solidcash/solidcash/dist/stateful/stb-submit-final-transaction.js
+@@ -3,7 +3,9 @@
+  */
+ import { hash256 } from '@bitauth/libauth/build/lib/crypto/combinations.js';
+ import { binToHex, hexToBin } from '@bitauth/libauth/build/lib/format/hex.js';
+-import { addressToLockScript } from '../utils.js';
++import { encodeTransaction } from '@bitauth/libauth/build/lib/message/transaction-encoding.js';
++import { addressToLockScript, generateLibauthSourceOutputs } from '../utils.js';
++import { applyExternalSignatures } from '../external-signing.js';
+ import { attachWait } from '../wait.js';
+ import { isScidIdentityCommitment } from './logical-identity.js';
+ import { isViewReturnTailOutput } from './value-chunk-band-helpers.js';
+@@ -12,6 +14,14 @@ import { isViewReturnTailOutput } from './value-chunk-band-helpers.js';
+  * attach wait/receipt events, and return TransactionDetails.
+  */
+ export async function submitFinalTransaction(host, finalBuilder, provider, rawTx, rawTxBin, decodedTx, decodeTransactionUnsafe, sendTiming) {
++    // A wallet that holds an input's key signs it now, over the transaction the preflight judged with its
++    // placeholder (../external-signing.ts). The placeholder has the signature's size, so the fee still holds.
++    const signedTx = await applyExternalSignatures(finalBuilder.inputs.map((input) => input.unlocker), decodedTx, generateLibauthSourceOutputs(finalBuilder.inputs));
++    if (signedTx !== decodedTx) {
++        decodedTx = signedTx;
++        rawTxBin = encodeTransaction(signedTx);
++        rawTx = binToHex(rawTxBin);
++    }
+     // -- Phase 5: submit --
+     const debugRepairConvergence = globalThis.process?.env
+         ?.SOLIDC_DEBUG_REPAIR_CONVERGENCE === '1';

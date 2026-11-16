@@ -45,9 +45,64 @@ Versions: `@solidcash/solidhat` 0.50.0, `@solidcash/solidc` 0.50.0, `@solidcash/
 - Written in Solidity style: a `struct Heir`, a `Heir[]` state array, a `deadline` state variable, a `modifier` for the owner check, `event`s, a custom `error`, and the satoshi container (`this.balance`, `this.transfer`). Compiles with `evmCompat` on. 11 tests pass in solidhat: check-in moves the deadline, strangers are refused, nobody can pay out early, a check-in on day 29 keeps the heirs waiting, all 6 faraid heirs are paid exactly in one transaction, 1-satoshi underpayment and a swapped address are refused, 10 heirs work, 11 are refused, withdraw empties the vault.
 - Owner check without a signature in the contract input: `require(tx.origin == new LockingBytecodeP2PKH(ownerPkh))`. `tx.origin` is the first P2PKH input without tokens, so the owner's wallet only signs its own ordinary coin. Compiles with a warning on every read.
 - Time in seconds: `checkIn` sets `deadline = tx.locktime + period` (with `require(tx.locktime >= 500000000)` so the locktime is a timestamp), and `distribute` requires `tx.time >= this.deadline`. Nothing is counted in blocks, so the May 2027 one-minute-block upgrade does not change the waiting period.
-- **A `for` loop of `this.transfer` cannot be combined with a locktime.** With `.setLocktime(t)` the call fails (`VM failed ... OP_VERIFY` when the SDK derives the outputs, `messageBus: BCH-2026 preflight failed at input 0` with explicit `.transfer()` calls). Hand-unrolled guarded slots (`if (i < len) this.transfer(...)`, ten of them) work, so the contract caps heirs at 10. To reduce to a minimal case and report.
+- **A payout loop cannot be combined with a time check.** Reduced to `contracts/ReproLoop.scash` and `test/repro/loop-transfers.test.ts` (two payees, mock network, real limits):
+
+  | Function body | Outputs | Result |
+  |---|---|---|
+  | `for` loop of `this.transfer`, no time check | derived by the SDK | OK |
+  | same, `.setLocktime(t)` on the call | derived | OK |
+  | same | explicit `.transfer()` calls | `messageBus: BCH-2026 preflight failed at input 0: Program failed an OP_VERIFY operation` |
+  | `require(tx.time >= deadline)` + loop | derived | `VM failed at ip 14 opcode 82 (OP_VERIFY)` |
+  | `require(tx.time >= deadline)` + loop | explicit | preflight failure as above |
+  | `require(tx.time >= deadline)` after the loop | derived | `VM failed at ip 14` |
+  | `require(tx.locktime >= deadline)` + loop | derived | `VM failed at ip 14` |
+  | `require(tx.time >= deadline)` + two unrolled `this.transfer` | derived | `VM failed at ip 14` |
+  | `require(tx.time >= deadline)` + two unrolled `this.transfer` | explicit | OK |
+
+  So two separate problems: (1) when the SDK derives the outputs, any function that reads `tx.time` or `tx.locktime` and transfers fails early (ip 14), perhaps because the derivation run does not use the call's locktime (guess); (2) explicit `.transfer()` outputs fail the preflight whenever the transfers come from a loop. A time-locked payout therefore needs explicit outputs, which need unrolled transfers. Pusaka uses ten guarded slots (`if (i < len) this.transfer(...)`) and caps heirs at 10. To report upstream with this table.
 - `initialState: { heirs: [...] }` is silently ignored for a dynamic struct array (state comes back `[]`); passing the array through a `constructor(Heir[] ...)` works. A warning or error would save time.
 - An early `distribute` fails with the CLTV locktime message, not the contract's custom error, because the transaction's locktime check fails first.
 - `npx solidhat test` on Windows prints the compile lines and exits 0 without running any test. `npx vitest run -c vitest.solidhat.config.ts` runs them.
 - The mock's default consensus limits are relaxed (1 MB inputs, 1 MB NFT commitments, no dust check). The README says so, but the TypeScript template keeps the relaxed mock, so a new project's green tests say little about chain validity. We set the mock to the real 2026 limits (10,000-byte inputs and stack items, 128-byte commitments, dust enforced) in `solidcash.config.ts`; all tests still pass. Suggest making the strict limits the template default.
 - Measured under those limits: `distribute` to 10 heirs is a 12,077-byte transaction with 16 inputs (master NFT, data NFTs, array chunks, satoshi container, caller's coin), about 12,000 satoshis in fees at 1 sat/byte. The caller's own coin pays the fee.
+
+**First run on Chipnet (`contract/scripts/chipnet-flow.ts`, 15 Nov, about 06:51-06:54 UTC)**
+
+The whole lifecycle ran on the real Chipnet network through SolidHat's Electrum provider, with no change to the contract:
+
+| Step | Transaction | Size |
+|---|---|---|
+| Vault A deployed (20,000 sats, 6 heirs) | `993866968a678b289f1b2a9a5cd0f779f8114c8ea333a4cf7b4d519b7704c38d` | |
+| Owner check-in, deadline moved to locktime + 30 days | `73dabfc17d3804fb6a6351a60885a07764c0cf0075fbd2d86c0195c3e34f2a12` | 9,209 bytes |
+| Owner withdraw, container left at 0 | `f3224bea4dc84c83ac3cd37e678b8088df4c85ab364e2895d853e7308df4a439` | 9,085 bytes |
+| Vault B deployed with its deadline an hour behind the network clock (60,000 sats) | `3cb2d009d793c3e4bc75c14228461f61a60ea7fb3fd8099c0de01f604ad4956d` | |
+| Payout to all 6 faraid heirs, each exactly `pot × share ÷ 120` | `d76ffee1296a7d11cc94719e696ed57cdd8781a1389f7fda71eaa66ad48e25ad` | 11,896 bytes, 16 inputs, 17 outputs, fee 12,086 sats (1.02 sat/byte) |
+
+- Chipnet's median time past was 4,449 seconds (about 74 minutes) behind the clock. A timestamp locktime must be below it, so a check-in sets the deadline about an hour earlier than "now + period". The app should say so, or add the lag to the period.
+- The SolidHat scripts have no `time.latest()` on a live network; the script reads the last 11 block headers over Electrum (`blockchain.block.header`) and takes the median. A helper for this in the SDK would help anyone using `tx.time`.
+- Fees: each stateful call is 9-12 KB, about 9,000-12,000 sats at 1 sat/byte, paid from the caller's own coins (the SDK also swept several of the caller's small change coins into the payout transaction).
+
+**Wallet signing for stateful calls (`contract/scripts/external-signing-spike.ts`, 16 Nov, about 03:16-03:28 UTC)**
+
+The web app cannot hold keys, so every transaction must be signed by the user's wallet over `bch_signTransaction` (the request WizardConnect also carries). The SDK has `Signer.external({ wallet, address, publicKey })` for this. The spike runs the whole lifecycle on Chipnet with only the SDK (`ContractFactory`, `StatefulContract`) and a stand-in wallet that signs exactly what the protocol hands it.
+
+- **Deploy works as shipped.** Two wallet requests: a 185-byte coin split, then the 952-byte genesis.
+- **Every stateful call failed before the fix.** The message bus path (`.call.checkIn().send()`) judges every input in `preflight.js` while the wallet's input still holds its all-zero placeholder, so it stopped with `preflight failed at input 2` (`OP_VERIFY` without the public key, `NULLFAIL` with it). With the preflight fixed, the node refused the broadcast (`Signature must be zero for failed CHECK(MULTI)SIG`), because `stb-submit-final-transaction.js` broadcasts the placeholder bytes. `TransactionBuilder.send` and the framed call path call `applyExternalSignatures`; the stateful message-bus path never does.
+- **Fix** (`contract/patches/@solidcash+solidcash+0.50.1.patch`, applied with patch-package): skip a wallet input in `evaluateEveryInput` while it still holds the placeholder, and call `applyExternalSignatures` in `submitFinalTransaction` (and in `sendPreflightedMessageBusTransaction`) before the bytes go out. The placeholder has the signature's size, so the fee is unchanged. To send upstream as a PR.
+- **After the fix**, all on Chipnet through the wallet:
+
+  | Step | Transaction | Wallet request |
+  |---|---|---|
+  | I'm still here (deadline moved by exactly the period) | `cf6ffd83dc7fed321ed158ad40416dec90b2c176c6429233dab40b95e0381c80` | 3 inputs, wallet signs 1 |
+  | Take back | `62dfa7e0e090357643fcf6e832bfdcbeb2669dd0360150cf46adaec711793d1a` | 3 inputs, wallet signs 1 |
+  | Send to 6 heirs, paid by a stranger's wallet | `187ac29671c0c75ff40fdf9ab0ceb421f3e08e53e9167173402b62290d13a90c` | 16 inputs, wallet signs 11 |
+
+- **Attach from a link** needs the static constructor arguments and the category: `new StatefulContract(new Contract(artifact, [ownerPkh, period, total, feeBudget], { provider }), categoryId)`. `ContractFactory.attach(category)` alone fails ("Expected 4 arguments"). The category is not the genesis txid but the txid of the coin the genesis spends first (`deployed.categoryId`); passing the genesis txid gives "Expected 1 data NFT(s) ... found 0".
+- **`distribute` wants 11 separate coins from the caller.** A wallet with one coin is first asked to sign a split into 11 (`Signer has 0 available plain UTXO(s) but 11 funder(s) needed` when it has none). So a visitor pressing "Send to heirs" signs twice. Worth asking whether the funder count can be lower.
+- `STB debug() best-effort error: Cannot debug a transaction with custom unlocker` is printed on every wallet-signed call. Harmless, but it reads like a failure.
+- `ElectrumNetworkProvider` has no `getBalance`; sum `getUtxos(address)`.
+- **WizardConnect** (`@wizardconnect/dapp` 0.2.x) carries the same `WcSignTransactionRequest` plus `inputPaths: [inputIndex, "receive" | "change", addressIndex]`, and the relay chunks large messages. It is an HD session (xpubs), while `Signer.external` and the contract's owner check name one address. An HD wallet moves change to new addresses, so the app must keep the owner's coins at the plan's owner address or consolidate them there before a call.
+
+**Tooling**
+
+- `solidhat compile` only picks up `.scash` files directly inside `contracts/`; a file in `contracts/repro/` was silently not compiled, and the test then failed with "no SolidCash artifact named ...". Hardhat compiles subfolders, so ported projects will expect it. (Not checked whether a config option exists.)
