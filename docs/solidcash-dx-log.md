@@ -103,6 +103,21 @@ The web app cannot hold keys, so every transaction must be signed by the user's 
 - `ElectrumNetworkProvider` has no `getBalance`; sum `getUtxos(address)`.
 - **WizardConnect** (`@wizardconnect/dapp` 0.2.x) carries the same `WcSignTransactionRequest` plus `inputPaths: [inputIndex, "receive" | "change", addressIndex]`, and the relay chunks large messages. It is an HD session (xpubs), while `Signer.external` and the contract's owner check name one address. An HD wallet moves change to new addresses, so the app must keep the owner's coins at the plan's owner address or consolidate them there before a call.
 
+**The app's own chain layer on Chipnet (`app/scripts/chain-e2e.ts`, 16 Nov, about 03:42-03:48 UTC)**
+
+The web app's `src/lib/chain` code, driven from Node with a stand-in WizardConnect manager that signs by `inputPaths`:
+
+| Step | Transaction | Wallet request |
+|---|---|---|
+| Gather coins from receive/1 at the owner address (receive/0) | (sent by `ensureCoinsAtOwner`) | 2 inputs at `receive/1` |
+| Create plan (3 heirs, 30,000 sats for heirs + 2,000 fee budget) | `7b9ef747c27c4f625e86742355eceb3ad8b278a85bcc0140913934622f4b1104` | 1 input at `receive/0` |
+| I'm still here | `41a8dca9e1d8ebc51a54555cfaeb153e20a989a27ddd7d9d8213ab2658e54b3f` | 3 inputs, wallet signs 1 |
+| Send to heirs (7,377 / 9,836 / 12,786) | `703506e9e43f47ba80c481fd6e6452f3e67e5454f06f334cb9304f2eb7eddb5f` | 15 inputs, wallet signs 11 |
+
+- Reading state needs a connected contract: `new StatefulContract(contract, category).state.deadline()` on an unconnected instance fails with "Expected 1 data NFT(s) ... found 0"; `.connect(provider)` works.
+- A timestamp locktime is final only below the median time past, and the contract needs `locktime >= deadline`, so a payout works only once the network clock is strictly past the deadline. Our first try at clock == deadline failed in preflight after the wallet had already signed a coin split.
+- **Design gap in our contract:** the payout's network fee is paid by the presser's own coins, so the plan's `feeBudget` is never spent; it stays locked in the plan with the rounding dust (2,001 sats here). Either pay the fee from the fee budget or drop it.
+
 **Tooling**
 
 - `solidhat compile` only picks up `.scash` files directly inside `contracts/`; a file in `contracts/repro/` was silently not compiled, and the test then failed with "no SolidCash artifact named ...". Hardhat compiles subfolders, so ported projects will expect it. (Not checked whether a config option exists.)
