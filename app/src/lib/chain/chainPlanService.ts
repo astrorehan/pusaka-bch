@@ -220,7 +220,7 @@ export const chainPlanService: PlanService = {
   async checkIn(plan) {
     try {
       const w = requireWallet();
-      if (w.ownerAddress() !== plan.ownerAddress) throw new Error('Only the wallet that made this plan can say "I\'m still here".');
+      if (w.ownerAddress() !== plan.ownerAddress) throw new UserFixableError('Only the wallet that made this plan can say "I\'m still here". Connect that wallet and try again.');
       await ensureCoinsAtOwner(w, CALL_COINS_NEEDED);
       const sc = attach(plan, externalSigner(w, "Pusaka: I'm still here"));
       const lock = Number((await medianTimePast(plan.network)) - 1n);
