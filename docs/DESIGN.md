@@ -4,6 +4,8 @@ These rules apply to every screen of the Pusaka web app. Read them before you bu
 
 The goal is the one the BLAZE judges set: **instant, slick, and it just works**. A judge should understand Pusaka within seconds and reach a real mainnet transaction in about a minute. One flow that works every time beats many features with rough edges.
 
+**Visual direction:** minimal and modern, in the Apple manner: clean surfaces, generous space, one main button per screen, solid near-black primary buttons (cream in dark mode), and warmth from warm neutrals rather than many colours. The bar is a polished, finished product: every state designed, motion that follows the rules below.
+
 ## Principles
 
 1. **Clear in seconds.** The first screen answers "what happens to my BCH when I die?" and shows a family and its shares visually. There is no tutorial.
@@ -82,9 +84,10 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 
 ## Type
 
-- **Body and UI:** one sans-serif, self-hosted (Inter or similar), at 16 px base. Inputs are never below 16 px, so iOS does not zoom on focus.
-- **Headings:** an optional serif for the heirloom feel (e.g. Fraunces), used only for headings 24 px and up.
-- **Mono:** only for BCH addresses and transaction IDs.
+- **Body and UI:** Geist (self-hosted through `@fontsource-variable/geist`), at 16 px base. Inputs are never below 16 px, so iOS does not zoom on focus.
+- **Headings:** Fraunces, a serif for the heirloom feel, used only for headings 24 px and up. Smaller headings use Geist at weight 600.
+- **Mono:** Geist Mono.
+- Mono is used only for BCH addresses and transaction IDs.
 - **Numbers:** all amounts, percentages and countdowns use `font-variant-numeric: tabular-nums`, so digits don't jump.
 - Scale: 13 / 15 / 16 / 20 / 24 / 32 / 40 px. Line height is 1.5 for body and 1.2 for headings.
 
@@ -169,7 +172,10 @@ Every screen and component has all of its states designed, not only the happy pa
 
 ## Motion
 
-- Animate only `transform` and `opacity`. UI motion stays under 300 ms. Easing tokens: `--ease-out: cubic-bezier(0.2, 0.8, 0.2, 1)` and `--ease-in-out: cubic-bezier(0.6, 0, 0.4, 1)`.
+- Animate only `transform` and `opacity`. UI motion stays under 300 ms. Easing tokens: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for anything entering or responding, `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` for things moving on screen, and `--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1)` for sheets. Hover and colour changes use `ease`; never `ease-in`. Durations: press 100 to 160 ms, menus 150 ms, enter 200 ms, leave 150 ms, sheets 300 ms.
+- A label change on a button (Sign, Sending…, Sent) is a 200 ms crossfade, not a jump.
+- Menus and popovers scale from 0.96 to 1 from their trigger. Dialogs scale from the centre, starting at 0.95 or more.
+- Keyboard actions (Enter, Escape) have no animation.
 - The more often something is seen, the less it moves. Buttons and inputs barely move; a success screen may celebrate once, briefly.
 - Elements enter with a fade and an 8 px rise, never from `scale(0)`. Sheets slide up from the bottom on phones.
 - Buttons press to `scale(0.97)`. Hover effects apply only on `(hover: hover)` devices.

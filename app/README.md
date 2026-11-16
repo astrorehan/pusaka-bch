@@ -1,0 +1,35 @@
+# Pusaka web app
+
+Vite + React + TypeScript. Design rules: [`../docs/DESIGN.md`](../docs/DESIGN.md). Read them before touching UI.
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # type-check + production build
+```
+
+## Layout
+
+| Path | What |
+|---|---|
+| `src/styles/tokens.css` | Colour, type, spacing, radius and motion tokens, light and dark. Components use tokens, never raw hex. |
+| `src/lib/types.ts` | `PlanData` (what the plan link carries), `PlanState` (live view), `TxPreview`, `TxResult`. Money is `bigint` satoshis. |
+| `src/lib/planService.ts` | The only door to the network. Screens call `planService`. Today it is a mock; the real SolidCash + wallet layer replaces it without screen changes. |
+| `src/lib/planLink.ts` | Encodes a plan into `/plan#<data>` and back. No server ever sees it. |
+| `src/lib/format.ts`, `src/lib/shares.ts` | BCH/USD formatting, address shortening, share math identical to the contract (floor per heir). |
+| `src/lib/wallet.tsx` | `useWallet()`: connect state for the top-right wallet button. |
+| `src/components/` | Shared pieces: `Logo` (with the bloom), `Button`, `AppShell` (header). |
+| `src/screens/home/` | `/` and `/how-it-works` |
+| `src/screens/create/` | `/new`, the create-a-plan flow |
+| `src/screens/plan/` | `/plan#…` (a plan from its link) and `/try` (the judge path) |
+
+## Mock knobs
+
+Add to any URL while working on states: `?mock=cancel` (wallet cancels), `?mock=fail` (network refuses), `?mock=slow` (4 s waits).
+
+## Facts the UI must respect (from the Chipnet run, 15 Nov)
+
+- Every plan action is a 9 to 12 KB transaction; the network fee is about 9,000 to 12,000 satoshis, paid from the wallet of whoever presses the button (also for "Send to heirs").
+- At most 10 heirs.
+- The network clock runs about an hour behind real time, so "waiting time ends" dates are approximate by about an hour.
+- Heirs need a BCH address. Each share must be at least 546 satoshis.

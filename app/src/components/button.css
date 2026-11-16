@@ -1,0 +1,25 @@
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: 44px; padding: 0 var(--space-4);
+  border-radius: var(--radius-button); border: 1px solid transparent;
+  font-weight: 500; font-size: var(--text-15); white-space: nowrap;
+  transition: transform var(--dur-press) var(--ease-out), background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn--lg { min-height: 52px; padding: 0 var(--space-6); font-size: var(--text-16); }
+.btn--block { width: 100%; }
+.btn__icon { display: inline-flex; }
+.btn__icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+
+.btn--primary { background: var(--primary); color: var(--on-primary); }
+.btn--secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn--ghost { background: transparent; color: var(--text); }
+.btn--danger { background: var(--surface); color: var(--danger); border-color: var(--border); }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover:not(:disabled) { background: var(--primary-hover); }
+  .btn--secondary:hover:not(:disabled), .btn--ghost:hover:not(:disabled) { background: var(--surface-hover); }
+  .btn--danger:hover:not(:disabled) { background: var(--danger-soft); }
+}

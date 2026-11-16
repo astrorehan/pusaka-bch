@@ -1,0 +1,81 @@
+/* Design tokens. Source of truth: docs/DESIGN.md. Components use these, never raw hex. */
+
+:root {
+  color-scheme: light;
+  --bg: #FAF7F2;
+  --surface: #FFFFFF;
+  --surface-2: #F2EDE4;
+  --surface-hover: #F6F2EB;
+  --border: #E3DCD0;
+  --border-strong: #CFC6B7;
+  --text: #131B33;
+  --text-muted: #5E574D;
+  --primary: #131B33;
+  --primary-hover: #222B47;
+  --on-primary: #FAF7F2;
+  --gold: #93633A;
+  --accent: #0AC18E;
+  --on-accent: #131B33;
+  --accent-text: #067A5A;
+  --accent-soft: #E3F6EF;
+  --danger: #B42318;
+  --danger-soft: #FBEAE8;
+  --warning: #C2410C;
+  --warning-soft: #FCEEE6;
+  --focus: #067A5A;
+  --scrim: rgba(19, 27, 51, 0.4);
+  --shadow: 0 1px 2px rgba(19, 27, 51, 0.06), 0 8px 24px rgba(19, 27, 51, 0.06);
+
+  --heir-1: #2563EB; --heir-2: #7C3AED; --heir-3: #0E7490; --heir-4: #BE185D; --heir-5: #4D7C0F;
+
+  --font-body: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Fraunces Variable', Georgia, serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --text-13: 13px; --text-15: 15px; --text-16: 16px; --text-20: 20px;
+  --text-24: 24px; --text-32: 32px; --text-40: 40px;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px; --space-16: 64px;
+
+  --radius-input: 8px; --radius-button: 12px; --radius-card: 16px;
+  --radius-sheet: 24px; --radius-full: 999px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 120ms; --dur-enter: 200ms; --dur-leave: 150ms; --dur-sheet: 300ms;
+
+  --column: 560px;
+  --gutter: 16px;
+}
+
+@media (min-width: 768px) { :root { --gutter: 24px; } }
+
+/* Dark values, applied by system preference unless the toggle forces light, or forced by the toggle. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0E1222; --surface: #161B2C; --surface-2: #1E2438; --surface-hover: #1B2133;
+    --border: #2C3349; --border-strong: #3A4260;
+    --text: #FFF8EC; --text-muted: #9AA0B4;
+    --primary: #FFF8EC; --primary-hover: #EDE5D7; --on-primary: #0E1222;
+    --gold: #E3CA8E; --accent-text: #2FD9A6; --accent-soft: #0F2E2A;
+    --danger: #F97066; --danger-soft: #3A1A1C; --warning: #FB923C; --warning-soft: #3A2414;
+    --focus: #2FD9A6; --scrim: rgba(0, 0, 0, 0.6);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.3);
+    --heir-1: #60A5FA; --heir-2: #A78BFA; --heir-3: #22D3EE; --heir-4: #F472B6; --heir-5: #A3E635;
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0E1222; --surface: #161B2C; --surface-2: #1E2438; --surface-hover: #1B2133;
+  --border: #2C3349; --border-strong: #3A4260;
+  --text: #FFF8EC; --text-muted: #9AA0B4;
+  --primary: #FFF8EC; --primary-hover: #EDE5D7; --on-primary: #0E1222;
+  --gold: #E3CA8E; --accent-text: #2FD9A6; --accent-soft: #0F2E2A;
+  --danger: #F97066; --danger-soft: #3A1A1C; --warning: #FB923C; --warning-soft: #3A2414;
+  --focus: #2FD9A6; --scrim: rgba(0, 0, 0, 0.6);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --heir-1: #60A5FA; --heir-2: #A78BFA; --heir-3: #22D3EE; --heir-4: #F472B6; --heir-5: #A3E635;
+}

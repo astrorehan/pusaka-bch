@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Decide today who gets your BCH. If you stop checking in, your heirs receive it automatically." />
+    <title>Pusaka</title>
+    <style>
+      /* Splash: plain HTML and CSS so it shows before JavaScript loads. Shown only after 300 ms. */
+      #splash { position: fixed; inset: 0; display: grid; place-items: center; background: #FAF7F2; opacity: 0; animation: splash-in 150ms 300ms forwards; z-index: 100; }
+      @media (prefers-color-scheme: dark) { #splash { background: #0E1222; } }
+      #splash.done { animation: splash-out 150ms forwards; }
+      @keyframes splash-in { to { opacity: 1; } }
+      @keyframes splash-out { from { opacity: 1; } to { opacity: 0; } }
+    </style>
+  </head>
+  <body>
+    <div id="splash" aria-hidden="true"></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
