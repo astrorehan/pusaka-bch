@@ -1,5 +1,6 @@
 // Hero illustration: one family, four heirs, their shares. Built from the logo flower.
-import { ShareFlower, heirColor, petalAngle, type FlowerHeir } from './ShareFlower';
+import { ShareFlower } from './ShareFlower';
+import { heirColor, petalAngle, type FlowerHeir } from './flowerMath';
 import './hero-flower.css';
 
 const FAMILY: FlowerHeir[] = [
