@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Choose who gets your Bitcoin Cash. If you stop checking in, your family can receive their shares through your inheritance plan." />
+    <meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E1222" media="(prefers-color-scheme: dark)" />
+    <title>Pusaka: Your BCH. Their future.</title>
+    <script>
+      // Before first paint: apply the saved theme (no flash of the wrong one), and run the splash clock.
+      // The splash shows only if loading takes longer than 300 ms (DESIGN.md "The bloom").
+      (function () {
+        try {
+          var t = localStorage.getItem('pusaka-theme');
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+        var SHOW_AFTER = 300, BLOOM = 700, FADE = 150, shownAt = 0, timer = 0;
+        function el() { return document.getElementById('splash'); }
+        timer = setTimeout(function () {
+          var s = el();
+          if (s) { s.classList.add('show'); shownAt = performance.now(); }
+        }, SHOW_AFTER);
+        // Called by the app once it has rendered.
+        window.__pusakaSplash = {
+          hide: function () {
+            var s = el();
+            if (!s) return;
+            if (!shownAt) { clearTimeout(timer); s.remove(); return; } // never shown: nothing to animate
+            var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
+            setTimeout(function () {
+              s.classList.add('done');
+              setTimeout(function () { s.remove(); }, FADE + 150);
+            }, wait);
+          },
+        };
+      })();
+    </script>
+    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;--s-track:#e3dcd0;--s-ease:cubic-bezier(.23, 1, .32, 1);z-index:100;background:var(--s-bg);opacity:0;visibility:hidden;pointer-events:none;place-content:center;justify-items:center;gap:32px;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}#splash.show{visibility:visible;pointer-events:auto;animation:.15s forwards splash-in}#splash.done{animation:.15s .1s both splash-out}@keyframes splash-in{0%{opacity:0}to{opacity:1}}@keyframes splash-out{0%{opacity:1}to{opacity:0}}#splash svg{width:72px;height:72px;display:block;overflow:visible}@media (width>=768px){#splash svg{width:96px;height:96px}}#splash path{fill:var(--s-ink)}#splash circle{fill:var(--s-gold)}#splash path,#splash circle{transform-box:view-box;transform-origin:16px 16px;opacity:0}#splash.show circle{animation:s-seed .2s var(--s-ease) forwards}#splash.show path{animation:s-petal .24s var(--s-ease) forwards}#splash.show path:first-of-type{--dx:1;--dy:-1;animation-delay:.2s}#splash.show path:nth-of-type(2){--dx:1;--dy:1;animation-delay:.28s}#splash.show path:nth-of-type(3){--dx:-1;--dy:1;animation-delay:.36s}#splash.show path:nth-of-type(4){--dx:-1;--dy:-1;animation-delay:.44s}@keyframes s-seed{0%{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}@keyframes s-petal{0%{opacity:0;transform:translate(calc(var(--dx) * -2px), calc(var(--dy) * -2px)) scale(.8)}to{opacity:1;transform:none}}#splash .line{background:var(--s-track);border-radius:2px;width:120px;height:2px;overflow:hidden}#splash .line i{background:var(--s-gold);transform-origin:0;height:100%;display:block;transform:scaleX(0)}#splash.show .line i{transition:transform 4s cubic-bezier(.1,.6,.3,1);transform:scaleX(.85)}#splash.done .line i{transition:transform .15s var(--s-ease);transform:scaleX(1)}@media (prefers-reduced-motion:reduce){#splash.show path,#splash.show circle{animation:.15s forwards s-fade}@keyframes s-fade{0%{opacity:0}to{opacity:1}}}</style>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-uVkIDsLH.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/rolldown-runtime-XKyaHtl9.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/shares-BXGItO3z.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/preload-helper-0Xy_vY0d.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/planService-UCX6_AjJ.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/react-dom-B8Yh5ZCa.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/format-B6RMYLR_.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/AppShell-jCPU1kv0.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/HomeFooter-CriB5Xvy.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/sawahFrame-BoDVQecf.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/undo-2-NENi3ibm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/planLink-B18FLqXe.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/StateMessage-CDtfkmkM.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/Sheet-CIB823Ge.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/format-QjaKUGcu.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/AppShell-Bm7kh7TO.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/HomeFooter-DHI3K_qA.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/StateMessage-XOYfdz3d.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/Sheet-BAC3QdIj.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-CbH8eHj9.css">
+  </head>
+  <body>
+    <div id="splash" aria-hidden="true">
+      <svg viewBox="6.6 6.6 18.8 18.8">
+        <path d="M24.415 7.585A5.2 3.4 -45 0 0 17.061 14.939A5.2 3.4 -45 0 0 24.415 7.585Z" />
+        <path d="M24.415 24.415A5.2 3.4 45 0 1 17.061 17.061A5.2 3.4 45 0 1 24.415 24.415Z" />
+        <path d="M7.585 24.415A5.2 3.4 -45 0 0 14.939 17.061A5.2 3.4 -45 0 0 7.585 24.415Z" />
+        <path d="M7.585 7.585A5.2 3.4 45 0 1 14.939 14.939A5.2 3.4 45 0 1 7.585 7.585Z" />
+        <circle cx="16" cy="16" r="1.2" />
+      </svg>
+      <div class="line"><i></i></div>
+    </div>
+    <div id="root"></div>
+  </body>
+</html>

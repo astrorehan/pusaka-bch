@@ -1,0 +1,1 @@
+var e=new TextEncoder,t=t=>e.encode(t),n=new TextDecoder,r=e=>n.decode(e),i=e=>e.normalize(`NFKC`),a=e=>[...new Intl.Segmenter(`en`,{granularity:`grapheme`}).segment(e)].map(e=>e.segment),o=e=>a(e).length;export{t as a,a as i,o as n,i as r,r as t};
