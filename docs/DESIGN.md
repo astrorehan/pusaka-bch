@@ -2,6 +2,13 @@
 
 These rules apply to every screen of the Pusaka web app. Read them before you build or change UI, and update this file in the same change when a rule changes.
 
+**Product direction, 17 Nov 2026:** [PRODUCT.md](PRODUCT.md) defines the revised
+wallet, activity and family-review behavior. It takes precedence over the older
+three-action flow described below and in `docs/ux/`. The current app still runs that
+older flow. Screens must not claim that the revised behavior is already available.
+The next implementation priority is proving usable protected funds, incoming
+payments and claim review before further visual polish.
+
 The goal is the one the BLAZE judges set: **instant, slick, and it just works**. A judge should understand Pusaka within seconds and reach a real mainnet transaction in about a minute. One flow that works every time beats many features with rough edges.
 
 **Visual direction:** minimal and modern, in the Apple manner: clean surfaces, generous space, one main button per screen, solid near-black primary buttons (cream in dark mode), and warmth from warm neutrals rather than many colours. The bar is a polished, finished product: every state designed, motion that follows the rules below.
@@ -89,12 +96,12 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 ## Type
 
 - **Body and UI:** Geist (self-hosted through `@fontsource-variable/geist`), at 16 px base. Inputs are never below 16 px, so iOS does not zoom on focus.
-- **Headings:** Fraunces, a serif for the heirloom feel, used only for headings 24 px and up. Smaller headings use Geist at weight 600.
+- **Headings:** the home page uses Geist for its new studio direction. Other screens retain Fraunces for headings 24 px and up until their own design pass. Smaller headings use Geist at weight 600.
 - **Mono:** Geist Mono.
 - Mono is used only for BCH addresses, transaction IDs, and code excerpts on the technical How it works page. Why: code set in a proportional font reads wrong, and that page is the only one allowed to show code.
 - **Numbers:** all amounts, percentages and countdowns use `font-variant-numeric: tabular-nums`, so digits don't jump.
 - Scale: 13 / 15 / 16 / 20 / 24 / 32 / 40 px. Line height is 1.5 for body and 1.2 for headings.
-- **Display: 56 px (`--text-56`), only for the home hero headline from 1280 px.** Why: the judges asked for "enormous text" on the first screen; below 1280 px the hero keeps 40 px so the headline stays at two or three lines.
+- **Home display:** 48 to 76 px, responsive, with a single centered line on desktop and two lines on phones. Why: the headline and the flower need a shared vertical composition rather than a text/image split.
 
 ## Money and addresses
 
@@ -112,7 +119,7 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 - The flow content column is at most 560 px wide and centred. Side gutters are 16 px on phones and 24 px from 768 px.
 - Spacing comes from a 4-px scale: 4, 8, 12, 16, 24, 32, 48, 64. Radius: 8 (inputs), 12 (buttons), 16 (cards), 24 (sheets), full (badges).
 - Touch targets are at least 44 × 44 px.
-- The wallet button is always at the top right, the rightmost control on every width, because the organiser asks for it there. Under 360 px it reads "Connect" (its accessible name stays "Connect wallet").
+- The wallet button is always at the top right, the rightmost control on every width, because the organiser asks for it there. Under 480 px it reads "Connect" (its accessible name stays "Connect wallet"); with the full label the phone header did not fit and pushed the page sideways.
 - Each screen has one primary button, placed where the thumb reaches: on phones it sits at the bottom of the content, full width.
 
 ## Home page
@@ -120,27 +127,31 @@ The palette grows out of the logo: indigo ink, warm paper, cream, and a gold see
 The home page is the app's front door and its landing page. There is no separate marketing site, so a visitor is one tap away from trying it.
 
 1. **Header:** the logo and "Pusaka" on the left, at most three text links ("How it works", "Docs", "GitHub"), and the wallet button on the right. On phones the links and the theme switch move into a menu, but the wallet button stays visible (see [Shell](#shell)).
-2. **Hero:**
-   - One headline promise in plain words, at most 8 words, for example "Leave your BCH to the people you love." Why 8: a headline that short reads in one glance, which is all a judge gives the first screen.
-   - One supporting sentence under it, for example "Choose your heirs and their shares. If you stop checking in, they receive it automatically, with no company in between."
-   - Two buttons: **Try it now** (primary; it leads to the judge path) and **Watch the demo** (secondary, with a play icon).
-   - One large illustration built from the logo: the flower as a family tree, with each petal standing for one heir. On phones it sits above the headline and takes at most 40% of the screen height.
-3. **Built with:** a quiet row of logos (Bitcoin Cash, SolidCash, WizardConnect, Paytaca and other tested wallets), labelled in small caps and shown in monochrome so they don't compete with the hero.
-4. **Choose how to split:** three cards, one per preset:
-   - Equal: "Everyone gets the same."
-   - Custom: "You pick each share."
-   - Islamic inheritance (faraid): "Shares follow faraid."
-
-   Each card has a soft background tint taken from the heir palette, a small illustration of a family with its shares, an example split ("3 heirs · 33.3% each"), and one **Start with this** button that opens the create flow with that preset already chosen.
-5. **How it works:** three steps, each with an icon and one line: "Choose heirs", "Check in now and then", "Missed it? They receive their shares". Under the steps, a link to the full explanation in the docs.
-6. **Footer:** the repository, the docs, the donation address (shortened, with a copy button) and "Open source, MIT".
+2. **Centered hero:**
+   - "Your BCH. Their future." above a supporting sentence that explains who receives the coins and when. Receiving still needs a transaction; do not imply that a timer broadcasts a payment by itself.
+   - **Try it now** (primary) and **Create a plan** (secondary), both pill-shaped on the home page. A compact "Built with" logo row sits directly underneath, followed by the plan-link opener.
+   - Keep the name explanation as a quiet eyebrow: a small uppercase "Pusaka", a thin gold divider, and "Indonesian for heirloom". Both headline lines and the supporting copy use `--text` for contrast over the landscape. The headline uses weight 550; the supporting sentence is 17 px on desktop and 16 px on phones. Reserve `--hero-gold` (`#E3CA8E` in both themes) for the small divider and arrow circle. Hero pills are 48 px tall, 44 px on phones; the primary uses `--hero-action` (`#090D16`) with `--hero-on-action` (`#FAF7F2`) in both themes.
+   - On desktop, extend the hero sky to the top of the page behind the transparent banner and navigation. The header floats over the scene without a background fill, divider, or top fade. Keep the header above the scene so its links and menus remain usable. The water can soften into the family plan below.
+   - The bloom stands in the paddy water beside the copy: a blue water lily grown from the logo, with four separate diagonal petals (white at the throat, blue-violet toward the tips) around a golden seed and its stamens, on a green stem among floating pads. From the front its silhouette stays faithful to the favicon. It is built in code (`app/src/screens/home/sawahFlower.ts`), so no model is downloaded. Its glow is light in the scene, not a UI effect: by day the low sun shines through the petals; after dark the seed lights the bloom, the water and the nearest seedlings. Character mascots are outside this direction.
+   - The background and stone use `--hero-studio` (`#F3F0E9` / `#171B28`) and `--hero-stone` (`#DDD3C2` / `#343747`). Scene lights and physically shaded materials may use their own calibrated colors; UI surfaces still use tokens.
+3. **Family plan:** three example cards, Equal shares, Your own split and Islamic inheritance (faraid), dealt from below face down and flipped over. The back is kawung, the old Javanese batik of four ovals around a point (the logo's own petals and seed), in gold on indigo. Each face shows its blooms on a tint of the heir palette, the heirs as chips with their exact percentages, and **Start**, which opens the create flow with that split. Say that these are examples and nothing moves.
+4. **Built with:** inside the hero, directly below the two actions, show a quiet row of Bitcoin Cash, SolidCash and WizardConnect marks with their names and links to their project sites or documentation. Use self-hosted, source-backed artwork from `app/public/brands/`, rendered in monochrome for both themes. Keep the links at least 44 px tall and let the row wrap on small screens. This credits the chain, contract tooling and wallet protocol; the BLAZE entry stays in its dedicated banner.
+5. **The paddy scene** ("While you're here, it waits. When you're not, it pays."): on desktop a frame opens from the right edge as the visitor scrolls, showing a flooded paddy from above with the bloom on its pads, Pusaka's reminder and a working plan card ("I'm still here" restarts the preview; nothing is sent) lying on the water as frosted glass. The section then holds the screen while the camera moves across the water to "What if someone tries to cheat?": four tricks to pick from and the two layers that refuse each (the app, then the network). Mist rises off the water and it turns to night with the next title already in place. Phones, tablets and reduced motion get the same content as plain sections over crops of the photo.
+6. **The night payout** ("One payment pays everyone."): the paddy at night with fireflies; the plan's seed, one payment and every heir drawn as light, with coins running along the paths. "I'm still here" switches it to a loop back to the plan. Picking an heir shows their exact amount in BCH and satoshis.
+7. **How it works:** on a light sheet with big rounded top corners that rises over the night, three steps, "Choose heirs", "Check in now and then", "Missed it? They receive their shares", under a wide frame of the terraces at golden hour where a glass card shows each step as it looks in the app. The steps advance on their own while in view (paused on hover, never under reduced motion). Under them, a link to the full explanation.
+8. **For heirs** and the **closing call:** "Someone made you an heir?" with **Open a plan link**, then "Your family shouldn't have to guess." with the two hero actions, while a bloom on its pad drifts in from the right edge.
+9. **Footer:** standing on the rice terraces (the night picture in the dark theme), with the sky cut out so the hills rise from the page: the repository, the docs, the donation address (shortened, with a copy button), "Open source, MIT" and the before/after note.
 
 Rules:
 
-- The first screen, before any scrolling, holds only the header, the hero and the two buttons, on both phones and desktop.
-- Illustrations are original and drawn from the Pusaka logo: the four petals and the seed. They use flat or soft shapes in the brand palette, and no stock photos.
-- Large images are lazy-loaded below the fold. The hero image is preloaded and at most 200 KB, so the first screen is ready in under 2 seconds on a phone connection.
-- Scrolling never triggers animations beyond the standard enter fade (see [Motion](#motion)).
+- The first view emphasizes the header, centered copy, two actions, and studio flower. The Family plan may peek in from the studio's lower edge; detailed explanations follow below.
+- Illustrations are original and drawn from the Pusaka logo: four separate diagonal petals and the seed. The 3D bloom sways with the same breeze as the rice, turns a little toward the cursor and opens as it comes near; the header logo keeps its existing bloom rules.
+- The 3D bloom can be turned: dragging across it turns it on its stem and a vertical drag nods it. Let go, it glides on and comes to rest facing the light at a whole turn, without swinging back. A tap greets: the petals open in a swell of light and it turns once. On touch screens only a horizontal drag turns it, so a vertical swipe still scrolls the page.
+- A small, high-priority still image is always available before the 3D scene is ready. Dedicated desktop/phone and light/dark WebP renders come from the same web scene. Preserve the complete flower when framing them; keep each below 200 KB.
+- Load the Three.js chunk and the landscape images only near the viewport on desktop devices with a fine pointer. Touch devices, reduced motion, and data-saving mode begin with a still image and may explicitly request "View in 3D". Failure to load or loss of WebGL keeps the still image and working page.
+- The renderer draws on demand, stops when outside the viewport or the document is hidden, and disposes resources on navigation. Do not add a permanent idle animation loop.
+- Below the hero, scrolling may drive the paddy scene: only `transform`, `clip-path` and `opacity` change, eased toward the scroll position, and it is off on phones, tablets and under reduced motion. Headings there slide up word by word (700 ms) and blocks rise into place; these one-time reveals are the landing's exception to the 300 ms UI limit. Elsewhere, scrolling never triggers animations beyond the standard enter fade (see [Motion](#motion)).
+- Photos are scenes, so their light (sun through the petals, fireflies, the lit seed at night) is allowed; UI on them is frosted glass lit from the upper left like the sun, never a glow. Generated art and its prompts live in `brand/landing/`.
 
 ## The flows
 
@@ -171,6 +182,7 @@ The frame around every page, in `app/src/components/` (`AppShell`, `Banner`, `Sh
 - Groups: "BCH BLAZE 2026 entry", "Slides", "Before BLAZE: Code, Demo", "Now: Code, Demo", "Donations" with the shortened address and a copy button.
 - Under 1024 px it folds into one 40 px line ("BCH BLAZE 2026 entry · Code and demos" and a chevron) that opens a panel over the page with every link as a 44 px row. The full-width line is the one exception to the 44 px touch target, to keep the first screen for the product.
 - Values live in `banner-config.ts`. An empty value hides its entry.
+- On the home page, use a compact transparent 12 px event line, aligned with the header and without a bottom border or group divider strokes. Use `--text` for the event labels, navigation and hero copy so they stay readable over the landscape. Keep every configured link and the address available. The Chipnet label is also transparent; its wording stays visible only on Chipnet. Set `VITE_NETWORK=mainnet` for a mainnet deployment, where the label is not rendered.
 
 **Header:** on phones (under 768 px) the menu button sits just left of the wallet button and opens a panel with How it works, Docs, GitHub and a "Dark theme" switch. From 768 px the links show inline, the current page in `--text`, and the theme toggle is an icon button.
 

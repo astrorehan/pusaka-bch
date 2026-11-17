@@ -10,9 +10,20 @@
 .skip-link:focus-visible { transform: none; opacity: 1; }
 
 .testnet-badge {
-  text-align: center; font-size: var(--text-13); line-height: 1.4; padding: var(--space-1) var(--gutter);
-  background: var(--warning-soft); color: var(--warning); font-weight: 500;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--warning-soft) 78%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--warning) 20%, var(--border));
+  color: var(--warning); font-size: 11px; line-height: 1.2; font-weight: 500;
+  white-space: nowrap; flex: none;
 }
+.testnet-badge::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%; flex: none;
+  background: currentColor;
+}
+.testnet-badge__sub { display: none; }
+@media (min-width: 1100px) { .testnet-badge__sub { display: inline; } }
+@media (max-width: 389px) { .testnet-badge { display: none; } }
 
 /* ---------------------------------------------------------------- header */
 
@@ -20,6 +31,9 @@
   position: relative; z-index: 20;
   display: flex; align-items: center; gap: var(--space-4);
   padding: var(--space-3) var(--gutter); max-width: 1200px; width: 100%; margin: 0 auto;
+}
+.header__start {
+  display: inline-flex; align-items: center; gap: 10px; min-width: 0; flex: none;
 }
 .brand {
   display: inline-flex; align-items: center; gap: var(--space-2); flex: none;
@@ -37,6 +51,17 @@
 .header__links a[aria-current='page'] { color: var(--text); }
 @media (hover: hover) and (pointer: fine) { .header__links a:hover { color: var(--text); } }
 
+/* Dock letters (DockNav.tsx): --m is each letter's pull, 0 at rest and 1 under the pointer. A pulled letter
+   grows, thickens and takes the full ink; the word reflows around it on a shared baseline. */
+.dock__word { display: inline-flex; align-items: baseline; white-space: pre; line-height: 1; }
+.dock__ch {
+  --m: 0;
+  display: inline-block;
+  font-size: calc(1em + var(--m) * 0.5em);
+  font-weight: calc(420 + var(--m) * 230);
+  color: color-mix(in srgb, var(--text) calc(var(--m) * 100%), currentColor);
+}
+
 .header__actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-1); }
 .header__actions .header__theme { display: none; }
 @media (min-width: 360px) { .header__actions { gap: var(--space-2); } }
@@ -44,6 +69,14 @@
   .header__links { display: flex; }
   .header__actions .header__theme { display: inline-grid; }
   .phone-menu { display: none; }
+}
+/* With room to spare the links sit in the middle of the header; the two side columns stay equal, so a word
+   growing under the pointer widens the middle evenly and the row never shifts sideways. */
+@media (min-width: 900px) {
+  .header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .header .brand, .header__start { justify-self: start; }
+  .header__links { margin-left: 0; gap: var(--space-2); }
+  .header__actions { justify-self: end; margin-left: 0; }
 }
 
 .icon-btn {

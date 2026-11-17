@@ -3,22 +3,31 @@
   margin-top: var(--space-16);
   padding: var(--space-12) var(--gutter) var(--space-8);
 }
-.hfoot__inner, .hfoot__history { max-width: 1200px; margin: 0 auto; }
+.hfoot__inner, .hfoot__history { max-width: 1120px; margin: 0 auto; }
 .hfoot__inner { display: grid; gap: var(--space-8); }
 
 .hfoot__logo {
   display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
   color: var(--text); text-decoration: none; font-family: var(--font-heading); font-size: var(--text-20);
+  font-weight: 600; letter-spacing: -0.02em;
 }
-.hfoot__tag { color: var(--text-muted); font-size: var(--text-15); }
+.hfoot__tag { color: var(--text-muted); font-size: var(--text-15); margin-top: var(--space-1); }
 .hfoot__tag a { color: inherit; }
 
-.hfoot__links { display: flex; flex-wrap: wrap; gap: 0 var(--space-6); }
-.hfoot__links a {
+.hfoot__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+.hfoot__col { display: flex; flex-direction: column; align-items: flex-start; }
+.hfoot__col a {
   display: inline-flex; align-items: center; min-height: 44px;
   color: var(--text); text-decoration: none; font-size: var(--text-15);
+  transition: color 150ms ease;
 }
-@media (hover: hover) and (pointer: fine) { .hfoot__links a:hover { text-decoration: underline; text-underline-offset: 3px; } }
+@media (hover: hover) and (pointer: fine) {
+  .hfoot__col a:hover { color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; }
+}
 
 .hfoot__label {
   font-size: var(--text-13); color: var(--text-muted);
@@ -49,7 +58,9 @@
 .hfoot__history a { color: var(--text-muted); text-underline-offset: 2px; }
 @media (hover: hover) and (pointer: fine) { .hfoot__history a:hover { color: var(--text); } }
 
+@media (max-width: 560px) {
+  .hfoot__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+}
 @media (min-width: 960px) {
-  .hfoot__inner { grid-template-columns: 1.4fr 1fr 1fr; align-items: start; }
-  .hfoot__links { flex-direction: column; align-items: flex-start; }
+  .hfoot__inner { grid-template-columns: 1.15fr 1.65fr 0.9fr; align-items: start; }
 }

@@ -9,7 +9,10 @@ import { Button } from './Button';
 import { Banner } from './Banner';
 import { CopyButton } from './CopyButton';
 import { Popover } from './Popover';
+import { Scrollbar } from './Scrollbar';
 import { useMedia } from './useMedia';
+import { DockNav } from './DockNav';
+import { usePillFx } from './pillFx';
 import { DOCS_URL, REPO_URL } from './banner-config';
 import { useWallet } from '../lib/wallet';
 import { planService } from '../lib/planService';
@@ -19,8 +22,9 @@ import './shell.css';
 
 export const NETWORK: 'mainnet' | 'chipnet' = (import.meta.env.VITE_NETWORK as 'mainnet' | 'chipnet') ?? 'chipnet';
 
-/** Under 360 px the wallet button shortens so the header fits a 320 px phone. */
-const NARROW = '(max-width: 359.98px)';
+/** On phones (under 480 px) the wallet button shortens to "Connect" so the header fits beside the logo, the
+    test-network badge and the menu. With the full label it needed about 470 px and pushed the page sideways. */
+const NARROW = '(max-width: 479.98px)';
 
 // ---------------------------------------------------------------- theme
 
@@ -67,8 +71,10 @@ function WalletPanel({ onDisconnect }: { onDisconnect: () => void }) {
   );
 }
 
-function WalletButton() {
+/** `pill`: the home page shows the wallet button as a dark pill with the inverse hover. */
+function WalletButton({ pill }: { pill: boolean }) {
   const { status, wallet, connect, disconnect } = useWallet();
+  const fx = pill ? ' pill-fx' : '';
   const narrow = useMedia(NARROW);
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(false);
@@ -102,7 +108,7 @@ function WalletButton() {
       <Button
         ref={trigger}
         variant="secondary"
-        className="wallet-btn wallet-btn--on"
+        className={`wallet-btn wallet-btn--on${fx}`}
         icon={<Wallet />}
         aria-expanded={panelOpen}
         aria-controls={panelId}
@@ -114,13 +120,13 @@ function WalletButton() {
     );
   } else {
     const connecting = status === 'connecting';
-    // Under 360 px the label stays "Connect" while connecting, so the button never changes width under the
+    // Under 480 px the label stays "Connect" while connecting, so the button never changes width under the
     // finger; the blooming logo in place of the wallet icon says it is waiting (DESIGN "Waiting state").
     const text = narrow ? 'Connect' : connecting ? 'Connecting…' : 'Connect wallet';
     button = (
       <Button
         variant="secondary"
-        className="wallet-btn"
+        className={`wallet-btn${fx}`}
         onClick={onConnect}
         loading={connecting}
         icon={connecting ? <Logo size={20} bloom="loop" /> : <Wallet />}
@@ -210,8 +216,47 @@ function PhoneMenu({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () =
 // ---------------------------------------------------------------- shell
 
 export function AppShell() {
+  const location = useLocation();
   const { dark, toggle } = useThemeState();
+  const shellRef = useRef<HTMLDivElement>(null);
   const top = useRef<HTMLDivElement>(null);
+  const headerSlot = useRef<HTMLDivElement>(null);
+  const home = location.pathname === '/';
+  usePillFx();
+
+  // On the home page, dock the header seamlessly into a floating frosted pill the exact pixel it reaches top: 12px.
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+    if (!home) {
+      shell.removeAttribute('data-scrolled');
+      return;
+    }
+
+    const sync = () => {
+      const slot = headerSlot.current;
+      const docked = slot ? slot.getBoundingClientRect().top <= 12 : window.scrollY > 44;
+      if (docked) shell.setAttribute('data-scrolled', 'true');
+      else shell.removeAttribute('data-scrolled');
+    };
+
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync, { passive: true });
+
+    const slot = headerSlot.current;
+    const io =
+      slot && 'IntersectionObserver' in window
+        ? new IntersectionObserver(sync, { rootMargin: '-12px 0px 0px 0px', threshold: [0, 0.98, 1] })
+        : null;
+    if (slot && io) io.observe(slot);
+
+    return () => {
+      window.removeEventListener('scroll', sync);
+      window.removeEventListener('resize', sync);
+      io?.disconnect();
+    };
+  }, [home]);
 
   // Publish the height of everything above <main>, so a screen can fill the first view exactly.
   useLayoutEffect(() => {
@@ -225,41 +270,47 @@ export function AppShell() {
   }, []);
 
   return (
-    <div className="shell">
+    <div ref={shellRef} className={`shell${home ? ' shell--home' : ''}`}>
       <a className="skip-link" href="#main">Skip to content</a>
       <div ref={top} className="shell__top">
         <Banner />
-        {NETWORK === 'chipnet' && <div className="testnet-badge" role="note">Test network: no real money</div>}
-        <header className="header">
-          <Link to="/" className="brand" aria-label="Pusaka home">
-            <Logo size={26} />
-            <span className="brand__name">Pusaka</span>
-          </Link>
-          <nav className="header__links" aria-label="Main">
-            <NavLink to="/how-it-works">How it works</NavLink>
-            <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
-            <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub</a>
-          </nav>
-          <div className="header__actions">
-            <button
-              type="button"
-              className="icon-btn header__theme"
-              onClick={toggle}
-              aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
-            >
-              <span className="icon-swap" data-on={!dark || undefined} aria-hidden><Moon /></span>
-              <span className="icon-swap" data-on={dark || undefined} aria-hidden><Sun /></span>
-            </button>
-            <PhoneMenu dark={dark} onToggleTheme={toggle} />
-            <WalletButton />
-          </div>
-        </header>
+        <div ref={headerSlot} className="header-slot">
+          <header className="header">
+            <div className="header__start">
+              <Link to="/" className="brand" aria-label="Pusaka home">
+                <Logo size={26} />
+                <span className="brand__name">Pusaka</span>
+              </Link>
+              {NETWORK === 'chipnet' && (
+                <div className="testnet-badge" role="note" title="Test network: no real money">
+                  <span>Test network</span>
+                  <span className="testnet-badge__sub">: no real money</span>
+                </div>
+              )}
+            </div>
+            <DockNav />
+            <div className="header__actions">
+              <button
+                type="button"
+                className="icon-btn header__theme"
+                onClick={toggle}
+                aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+              >
+                <span className="icon-swap" data-on={!dark || undefined} aria-hidden><Moon /></span>
+                <span className="icon-swap" data-on={dark || undefined} aria-hidden><Sun /></span>
+              </button>
+              <PhoneMenu dark={dark} onToggleTheme={toggle} />
+              <WalletButton pill={home} />
+            </div>
+          </header>
+        </div>
       </div>
       <main id="main" className="main" tabIndex={-1}>
         <Outlet />
       </main>
       {/* A new page starts at the top; Back and Forward return to where the reader was. */}
       <ScrollRestoration />
+      <Scrollbar />
     </div>
   );
 }

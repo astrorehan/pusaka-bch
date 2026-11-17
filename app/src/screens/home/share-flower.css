@@ -14,7 +14,24 @@
   animation-delay: calc(var(--sf-delay, 0ms) + 200ms + var(--i) * 80ms);
 }
 
+.sf__arm {
+  transition: opacity 200ms ease;
+}
+.sf--has-active .sf__arm {
+  opacity: 0.3;
+}
+.sf--has-active .sf__arm.is-hot {
+  opacity: 1;
+}
+.sf__arm .sf__petal {
+  transition: transform 260ms var(--ease-expo);
+}
+.sf--has-active .sf__arm.is-hot .sf__petal {
+  transform: scale(1.08);
+}
+
 @media (prefers-reduced-motion: reduce) {
   @keyframes sf-fade { from { opacity: 0; } to { opacity: 1; } }
   .sf--bloom .sf__seed, .sf--bloom .sf__petal { animation: sf-fade 150ms ease both; animation-delay: 0ms; }
+  .sf__arm, .sf__arm .sf__petal { transition: none; transform: none; }
 }

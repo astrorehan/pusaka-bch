@@ -1,0 +1,10 @@
+Use case: stylized-concept.
+Asset type: a single original landscape key visual for the Pusaka Bitcoin Cash inheritance website, suitable as a premium website hero artwork.
+Primary request: a refined three-dimensional family heirloom tree in a quiet, open landscape, expressing care across generations.
+Subject: one mature, sculptural tree with a clearly visible natural trunk and four softly rounded, organic canopy groups that subtly recall a four-petal flower. It must read as a convincing tree, with visible branching and rich foliage volume, not a flower stuck on a pole.
+Style: premium editorial 3D rendering for a modern financial product; soft natural materials, restrained detail, realistic light, beautiful gentle depth, polished high-end art direction.
+Composition: wide landscape 16:9. Front view with slight perspective. Center the tree in the lower portion of the scene, standing on softly rolling grassy terrain. Leave the upper third as genuinely open pale sky for a centered headline and buttons to be added later as real website UI. The tree canopy must not intrude into that upper third. Keep the horizon low and leave a quiet strip of foreground at the bottom for a wide product panel added later. Keep the complete tree in the frame. The tree is the unmistakable focal point, substantial and carefully sculpted.
+Palette: pale atmospheric blue sky, muted jade and sage foliage, neutral natural wood, quiet green terrain.
+Lighting: soft warm daylight from upper left, shadows falling consistently toward lower right, subtle atmospheric haze on the distant hills.
+Materials: softly detailed individual leaves grouped into four organic masses, tactile wood and fine restrained grass. Lush and dimensional without noisy microdetail.
+Constraints: landscape artwork only. No text, letters, UI, panel, buttons, labels, logo, watermark, currency symbols, people, faces, floating coins, mascot, buildings, ornaments or extra trees. No dense forest, cluttered flowers, toy-like plastic, flat vector shapes, neon green, harsh glossy surfaces or vignette. Do not reproduce the left-copy/right-character composition of another landing page.

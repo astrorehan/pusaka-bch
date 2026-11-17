@@ -1,0 +1,6 @@
+Use case: photorealistic-natural.
+Asset type: one standalone panoramic sky texture for a 3D Indonesian rice-paddy website hero, approximately 3:1, 3072 x 1024.
+Primary request: a quiet, spacious tropical sky at first light, deliberately understated so a foreground blue water lily and the page headline remain the focus.
+Composition: sky only from the softly hazy horizon at the bottom to clear open sky above; at least 85 percent open atmosphere. Only a few very thin, distant, diffuse cirrus veils. Keep the left two thirds especially spacious. No large clouds, no dramatic cloud banks, no dense details.
+Lighting and palette: soft humid morning light, muted pale blue-grey above, gently transitioning into a luminous warm ivory and a hint of soft peach at the very bottom. Very low cloud-to-sky contrast and restrained saturation; natural photographic atmosphere, broad smooth transitions and delicate fine detail. Even gentle light across the panorama; no distinct bright hotspot.
+Constraints: texture asset only, no landscape, mountains, vegetation, water, buildings, objects, characters, text, UI, logos, borders or watermark. No sun disc, moon, stars, rays, lens flare, contrails, towering cumulus, storm clouds, strong orange or saturated blue. Not a website screenshot or an illustration.

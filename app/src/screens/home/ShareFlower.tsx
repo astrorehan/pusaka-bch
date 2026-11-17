@@ -17,16 +17,27 @@ interface ShareFlowerProps {
   /** extra delay before the bloom starts, in ms */
   delay?: number;
   className?: string;
+  activeIndex?: number | null;
+  onHoverHeir?: (index: number | null) => void;
 }
 
-export function ShareFlower({ heirs, size = 96, bloom = false, delay = 0, className = '' }: ShareFlowerProps) {
+export function ShareFlower({
+  heirs,
+  size = 96,
+  bloom = false,
+  delay = 0,
+  className = '',
+  activeIndex = null,
+  onHoverHeir,
+}: ShareFlowerProps) {
   const n = heirs.length;
   const max = Math.max(...heirs.map((h) => h.share));
+  const hasActive = activeIndex !== null && activeIndex >= 0 && activeIndex < n;
   // Fewer petals get fuller, so three still read as a flower; more than four get narrower so they don't overlap.
   const widthFactor = n < 4 ? 1.12 : n === 4 ? 1 : Math.min(1, 4.4 / n);
   return (
     <svg
-      className={`sf${bloom ? ' sf--bloom' : ''} ${className}`}
+      className={`sf${bloom ? ' sf--bloom' : ''}${hasActive ? ' sf--has-active' : ''} ${className}`}
       viewBox="0 0 32 32"
       width={size}
       height={size}
@@ -37,8 +48,17 @@ export function ShareFlower({ heirs, size = 96, bloom = false, delay = 0, classN
         const k = petalScale(h.share, max);
         const ry = LEN * k;
         const rx = WIDTH * k * widthFactor;
+        const isHot = activeIndex === i;
         return (
-          <g key={i} transform={`rotate(${petalAngle(i, n)} ${C} ${C})`}>
+          <g
+            key={i}
+            transform={`rotate(${petalAngle(i, n)} ${C} ${C})`}
+            className={`sf__arm${isHot ? ' is-hot' : ''}`}
+            onMouseEnter={onHoverHeir ? () => onHoverHeir(i) : undefined}
+            onMouseLeave={onHoverHeir ? () => onHoverHeir(null) : undefined}
+            onClick={onHoverHeir ? () => onHoverHeir(isHot ? null : i) : undefined}
+            style={onHoverHeir ? { cursor: 'pointer' } : undefined}
+          >
             <ellipse
               className="sf__petal"
               cx={C}

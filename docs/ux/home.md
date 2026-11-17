@@ -26,14 +26,20 @@ a promise, one sentence, an illustration that shows a family and its shares, and
    - Illustration: `ShareFlower`, the logo flower drawn as a family. One petal per heir in the heir colours,
      each petal's area proportional to its share, with name and percentage chips at the petal tips. A small
      pill under it ("Waiting time: 6 months") carries the second half of the idea: the timer.
-2. **Built on**: Bitcoin Cash, SolidCash, WizardConnect, Paytaca, Cashonize as muted text wordmarks.
-3. **Choose how to split**: three cards (Equal, Custom, Islamic inheritance (faraid)), each with a tint from the heir
-   palette, a small `ShareFlower` of its example family, a share bar, an example line and **Start with this**,
-   which opens `/new?split=equal|custom|faraid`.
-4. **How it works**: three steps from DESIGN with Lucide icons, then "Read the full explanation" (`/how-it-works`).
-5. **For heirs**: "Someone made you an heir?" band with **Open a plan link**.
-6. **Footer**: repo, docs, donation address (shortened, copy button), "Open source, MIT", and one small
-   before/after paragraph (what existed before BLAZE and what was reused).
+2. **Built with**: inside the hero, under the two actions (`app/public/brands/`).
+3. **Family plan** (`FamilyCards.tsx`): three example cards dealt face down with a kawung back and flipped over;
+   each opens `/new?split=equal|custom|faraid`.
+4. **The paddy scene** (`PaddyScroll.tsx`, `paddyParts.tsx`, `cheatScenarios.ts`): on desktop a pinned frame over
+   `paddy-scene.webp`, with Pusaka's reminder, a working plan card and "What if someone tries to cheat?", then mist
+   into night. Phones, tablets and reduced motion get `StackedScene`, the same content as plain sections.
+5. **The night payout** (`NightPayout.tsx`): seed, one payment and four heirs as light, fireflies, an heir inspector
+   with exact BCH and satoshis.
+6. **Light sheet** (`StepsFrame.tsx`, `ClosingSections.tsx`): the three steps over a terraces frame, the heir band
+   with **Open a plan link**, the closing call, then the footer on the terraces (`HomeFooter scene`).
+
+The order, the copy rules and the motion limits are in `docs/DESIGN.md` (Home page). Section copy shared between
+components (the night title, the pinned media query) is in `landingCopy.ts`. The first version of these sections
+is kept in `work/landing-v1/` for comparison.
 
 ## Open a plan link (dialog)
 
@@ -92,7 +98,7 @@ The dollar value of the fee comes from `planService.usdPerBch()`; if the price i
 
 - A tutorial or carousel in the hero (judges: "losing people every click").
 - Counting-up stats ("X BCH protected"): money never animates, and we have no real numbers yet.
-- Scroll-triggered animations beyond the enter fade.
+- Scroll-triggered animations beyond the enter fade, outside the paddy scene and the one-time landing reveals.
 - A separate "Open a plan link" page: a dialog keeps the heir one step from the plan.
 - Shields, padlocks, sparkles as trust symbols (DESIGN Icons).
 
@@ -115,8 +121,7 @@ The dollar value of the fee comes from `planService.usdPerBch()`; if the price i
    their usage notes, so "Built on" can show real logos.
 7. **`Button.tsx`**: an `as="link"` / `to` option, so links styled as buttons don't need to repeat the
    `btn btn--primary` class names (the home page does that today with `<Link className="btn …">`).
-8. **Header overflows at 320 px** (`AppShell.tsx`, `shell.css`): logo + theme toggle + "Connect wallet" measure
-   355 px, so every page scrolls sideways on a 320 px phone. Suggested: below 360 px show the wallet button as
-   "Connect" (or icon only with an `aria-label`), and drop the gap between the toggle and the button to 4 px.
+8. **Header overflow on phones**: done. Under 480 px the wallet button reads "Connect" (`AppShell.tsx`), and on the
+   home page the header gaps tighten under 440 px (`home-hero.css`). Checked at 320, 390 and 430 px.
 9. **`DESIGN.md` Type / `tokens.css`**: a display size (56 px) for the desktop hero headline. The judges asked for
    "enormous text"; 40 px is the scale's top, so the hero uses 40 px today.

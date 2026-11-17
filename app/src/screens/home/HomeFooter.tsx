@@ -5,7 +5,18 @@ import { Link } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { shortAddress } from '../../lib/format';
-import { BLAZE_START_URL, DOCS_URL, DONATION_ADDRESS, LICENSE_URL, OLD_DEMO_URL, OLD_REPO_URL, REPO_URL } from './links';
+import {
+  BLAZE_START_URL,
+  CONTRACT_URL,
+  DOCS_URL,
+  DONATION_ADDRESS,
+  LICENSE_URL,
+  OLD_DEMO_URL,
+  OLD_REPO_URL,
+  REPO_URL,
+  SOLIDCASH_URL,
+  TESTS_URL,
+} from './links';
 import './home-footer.css';
 
 function CopyAddress({ address }: { address: string }) {
@@ -38,40 +49,127 @@ function CopyAddress({ address }: { address: string }) {
   );
 }
 
-export function HomeFooter() {
+function Brand() {
+  return (
+    <div className="hfoot__brand">
+      <Link to="/" className="hfoot__logo" aria-label="Pusaka home">
+        <Logo size={24} />
+        <span>Pusaka</span>
+      </Link>
+      <p className="hfoot__tag">Inheritance plans for Bitcoin Cash.</p>
+      <p className="hfoot__tag">
+        Open source, <a href={LICENSE_URL} target="_blank" rel="noreferrer">MIT</a>.
+      </p>
+    </div>
+  );
+}
+
+function Columns() {
+  return (
+    <nav className="hfoot__cols" aria-label="Footer">
+      <div className="hfoot__col">
+        <p className="hfoot__label">Product</p>
+        <Link to="/try">Try it now</Link>
+        <Link to="/new">Create a plan</Link>
+        <Link to="/how-it-works">How it works</Link>
+      </div>
+      <div className="hfoot__col">
+        <p className="hfoot__label">Resources</p>
+        <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+        <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={CONTRACT_URL} target="_blank" rel="noreferrer">Source code</a>
+        <a href={TESTS_URL} target="_blank" rel="noreferrer">Test suite</a>
+      </div>
+      <div className="hfoot__col">
+        <p className="hfoot__label">Built on</p>
+        <a href="https://bitcoincash.org" target="_blank" rel="noreferrer">Bitcoin Cash</a>
+        <a href={SOLIDCASH_URL} target="_blank" rel="noreferrer">SolidCash</a>
+        <a href="https://docs.riftenlabs.com/wizardconnect/" target="_blank" rel="noreferrer">WizardConnect</a>
+      </div>
+    </nav>
+  );
+}
+
+function Donate() {
+  return (
+    <div className="hfoot__donate">
+      <p className="hfoot__label">Donations</p>
+      <CopyAddress address={DONATION_ADDRESS} />
+    </div>
+  );
+}
+
+function History() {
+  return (
+    <p className="hfoot__history">
+      Built during BCH BLAZE 2026 (14 to 22 November). Before it, Pusaka ran on Monad:{' '}
+      <a href={OLD_REPO_URL} target="_blank" rel="noreferrer">old code</a> and{' '}
+      <a href={OLD_DEMO_URL} target="_blank" rel="noreferrer">old demo</a>. Reused from it: the idea, the faraid share
+      calculator and the flower logo. Everything after the{' '}
+      <a href={BLAZE_START_URL} target="_blank" rel="noreferrer">blaze-start</a> tag is new.
+    </p>
+  );
+}
+
+/**
+ * `scene` (the home page): the footer sits on the rice terraces, with the sky cut out so the hills rise straight
+ * from the page. On desktop the links stand on the grass in white over a soft shade; on phones they sit on the page
+ * above the terraces. The night picture follows the dark theme.
+ */
+export function HomeFooter({ scene = false }: { scene?: boolean }) {
+  if (scene) {
+    return (
+      <footer className="hfoot hfoot--scene">
+        <div className="hfoot__page">
+          <Brand />
+          <Columns />
+          <Donate />
+        </div>
+        <div className="hfoot__meadow">
+          <img
+            className="hfoot__img hfoot__img--day"
+            src="/landing/footer-terraces-1600.webp"
+            srcSet="/landing/footer-terraces-1600.webp 1600w, /landing/footer-terraces.webp 2400w"
+            sizes="100vw"
+            alt="Green rice terraces below a volcano, with a timber hut and coconut palms."
+            width={2400}
+            height={800}
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            className="hfoot__img hfoot__img--night"
+            src="/landing/footer-terraces-night-1600.webp"
+            srcSet="/landing/footer-terraces-night-1600.webp 1600w, /landing/footer-terraces-night.webp 2400w"
+            sizes="100vw"
+            alt="The same terraces by moonlight, the hut's window lit and fireflies over the fields."
+            width={2400}
+            height={800}
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="hfoot__shade" aria-hidden />
+          <div className="hfoot__grass">
+            <Brand />
+            <Columns />
+            <Donate />
+          </div>
+          <div className="hfoot__bottom">
+            <History />
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="hfoot">
       <div className="hfoot__inner">
-        <div className="hfoot__brand">
-          <Link to="/" className="hfoot__logo" aria-label="Pusaka home">
-            <Logo size={22} />
-            <span>Pusaka</span>
-          </Link>
-          <p className="hfoot__tag">Inheritance plans for Bitcoin Cash.</p>
-          <p className="hfoot__tag">
-            Open source, <a href={LICENSE_URL} target="_blank" rel="noreferrer">MIT</a>.
-          </p>
-        </div>
-
-        <nav className="hfoot__links" aria-label="Footer">
-          <Link to="/how-it-works">How it works</Link>
-          <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
-          <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub</a>
-        </nav>
-
-        <div className="hfoot__donate">
-          <p className="hfoot__label">Donations</p>
-          <CopyAddress address={DONATION_ADDRESS} />
-        </div>
+        <Brand />
+        <Columns />
+        <Donate />
       </div>
-
-      <p className="hfoot__history">
-        Built during BCH BLAZE 2026 (14 to 22 November). Before it, Pusaka ran on Monad:{' '}
-        <a href={OLD_REPO_URL} target="_blank" rel="noreferrer">old code</a> and{' '}
-        <a href={OLD_DEMO_URL} target="_blank" rel="noreferrer">old demo</a>. Reused from it: the idea, the faraid share
-        calculator and the flower logo. Everything after the{' '}
-        <a href={BLAZE_START_URL} target="_blank" rel="noreferrer">blaze-start</a> tag is new.
-      </p>
+      <History />
     </footer>
   );
 }

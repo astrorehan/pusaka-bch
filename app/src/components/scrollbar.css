@@ -1,0 +1,42 @@
+/* Overlay viewport scrollbar: no track or background, just a floating 60% black pill. */
+.scrollbar {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: 16px;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.scrollbar__thumb {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 6px;
+  min-height: 32px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.6);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  will-change: transform, height;
+  transition: background-color 120ms ease, width 120ms ease, opacity 150ms ease;
+}
+
+.scrollbar[data-visible='false'] .scrollbar__thumb {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scrollbar__thumb:hover {
+    width: 8px;
+    background: rgb(0 0 0 / 0.78);
+  }
+}
+
+.scrollbar__thumb[data-dragging='true'] {
+  width: 8px;
+  background: rgb(0 0 0 / 0.85);
+  cursor: grabbing;
+}
