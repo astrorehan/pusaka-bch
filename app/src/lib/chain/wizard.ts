@@ -5,9 +5,10 @@
 // `bch_signTransaction` request with the wallet's inputs left empty; we find each empty input's address among
 // the wallet's derived addresses and send the request with those `inputPaths`.
 import type { DappConnectionManager } from '@wizardconnect/dapp';
+import { sourceOutputToRelay, transactionToHex } from '@wizardconnect/core/hdwalletv1-serialize';
 import type { ExternalTransactionSigner } from '@solidcash/solidcash';
 import type { NetworkName } from '../types';
-import { addressOfPubkey, binToHex, lockOfAddress } from './network';
+import { addressOfPubkey, binToHex, lockOfAddress } from './network.ts';
 
 /** How far into each HD path we look for the user's coins. Fresh wallets use the first few addresses. */
 const SCAN_DEPTH = 20;
@@ -82,7 +83,20 @@ export class WizardWallet {
         let response;
         try {
           response = await this.manager.signTransaction({
-            transaction: { ...request, broadcast: false, userPrompt: userPrompt ?? request.userPrompt } as never,
+            transaction: {
+              ...request,
+              // The relay uses JSON: encode native transaction bytes and BigInts before handing it the request.
+              transaction: transactionToHex(request.transaction.inputs, request.transaction.outputs, request.transaction.version, request.transaction.locktime),
+              sourceOutputs: request.sourceOutputs.map((source) => ({
+                ...sourceOutputToRelay(source),
+                ...(source.contract && { contract: {
+                  ...source.contract,
+                  redeemScript: binToHex(source.contract.redeemScript),
+                } }),
+              })),
+              broadcast: false,
+              userPrompt: userPrompt ?? request.userPrompt,
+            },
             inputPaths,
           });
         } catch (e) {

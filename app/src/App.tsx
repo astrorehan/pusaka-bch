@@ -20,12 +20,27 @@ function FirstLoad() {
 
 export const router = createBrowserRouter([
   {
+    lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletLayout }),
+    HydrateFallback: FirstLoad,
+    children: [
+      { path: 'wallet', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletScreen }) },
+      { path: 'wallet/plan', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletScreen }) },
+      { path: 'wallet/activity', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletScreen }) },
+      { path: 'wallet/demo', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletScreen }) },
+      { path: 'wallet/new', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).SetupScreen }) },
+      { path: 'new', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).SetupScreen }) },
+      { path: 'wallet/swap', lazy: async () => ({ Component: (await import('./screens/wallet/SwapScreen')).SwapScreen }) },
+      { path: 'wallet/edit', lazy: async () => { const { SetupScreen } = await import('./screens/wallet/WalletApp'); return { Component: () => <SetupScreen edit /> }; } },
+      { path: 'v2/plan', lazy: async () => ({ Component: (await import('./screens/wallet/WalletApp')).WalletScreen }) },
+    ],
+  },
+  {
     element: <AppShell />,
     HydrateFallback: FirstLoad,
     children: [
       { index: true, element: <HomeScreen /> },
       { path: 'how-it-works', lazy: async () => ({ Component: (await import('./screens/home/HowItWorksScreen')).HowItWorksScreen }) },
-      { path: 'new', lazy: async () => ({ Component: (await import('./screens/create/CreateScreen')).CreateScreen }) },
+      { path: 'legacy/new', lazy: async () => ({ Component: (await import('./screens/create/CreateScreen')).CreateScreen }) },
       { path: 'plan', lazy: async () => ({ Component: (await import('./screens/plan/PlanScreen')).PlanScreen }) },
       {
         path: 'try',
@@ -37,7 +52,7 @@ export const router = createBrowserRouter([
       { path: '*', element: <NotFoundScreen /> },
     ],
   },
-]);
+], { basename: import.meta.env.BASE_URL });
 
 export default function App() {
   return (

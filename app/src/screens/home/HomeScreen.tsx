@@ -47,10 +47,10 @@ export function HomeScreen() {
             Choose who gets your Bitcoin Cash. If you stop checking in, your family can receive their shares.
           </p>
           <div className="home-hero__ctas">
-            <ButtonLink to="/try" size="lg" className="pill-fx">
+            <ButtonLink to="/wallet/demo" size="lg" className="pill-fx">
               Try it now <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to="/new" variant="secondary" size="lg" className="pill-fx">Create a plan</ButtonLink>
+            <ButtonLink to="/wallet" variant="secondary" size="lg" className="pill-fx">Open wallet</ButtonLink>
           </div>
           <section className="home-built home-built--hero" aria-label="Built with">
             <p className="home-label">Built with</p>

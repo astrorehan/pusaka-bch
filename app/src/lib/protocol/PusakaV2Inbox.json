@@ -1,0 +1,160 @@
+{
+  "contractName": "PusakaV2Inbox",
+  "constructorInputs": [
+    {
+      "name": "planCategory",
+      "type": "bytes32"
+    },
+    {
+      "name": "planLockingBytecode",
+      "type": "bytes"
+    },
+    {
+      "name": "perInputFeeCap",
+      "type": "int256"
+    }
+  ],
+  "abi": [
+    {
+      "name": "sweep",
+      "selector": "35faa416",
+      "inputs": [],
+      "sourceEffectOrder": "unsupported-flow"
+    }
+  ],
+  "bytecode": "765102ff008d930121800120 OP_1 OP_DEFINE OP_TXINPUTCOUNT OP_2 OP_GREATERTHANOREQUAL OP_VERIFY OP_0 OP_UTXOBYTECODE OP_2 OP_PICK OP_EQUALVERIFY OP_0 OP_UTXOTOKENCATEGORY OP_OVER OP_2 OP_CAT OP_EQUALVERIFY OP_TXOUTPUTCOUNT OP_1 OP_NUMEQUAL OP_IF OP_1 OP_ELSE OP_TXOUTPUTCOUNT OP_2 OP_NUMEQUAL OP_ENDIF OP_VERIFY OP_0 OP_OUTPUTBYTECODE OP_2 OP_PICK OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCATEGORY OP_SWAP OP_2 OP_CAT OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCOMMITMENT OP_0 OP_UTXOTOKENCOMMITMENT OP_EQUALVERIFY OP_INPUTINDEX OP_UTXOBYTECODE OP_0 OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_0 OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_1 OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_BEGIN OP_DUP OP_TXINPUTCOUNT OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_LESSTHAN OP_IF OP_DUP OP_UTXOTOKENCATEGORY OP_0 OP_EQUALVERIFY OP_DUP OP_UTXOBYTECODE OP_DUP OP_6 OP_PICK OP_EQUAL OP_NOT OP_VERIFY OP_DUP OP_5 OP_PICK OP_EQUAL OP_IF OP_3 OP_PICK OP_2 OP_PICK OP_UTXOVALUE OP_ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_4 OP_ROLL OP_DROP OP_2SWAP OP_3 OP_ROLL OP_2 OP_PICK OP_1ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_3 OP_ROLL OP_DROP OP_SWAP OP_TOALTSTACK OP_SWAP OP_FROMALTSTACK OP_ENDIF OP_OVER OP_1ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_ROT OP_DROP OP_NIP OP_0 OP_ELSE OP_1 OP_ENDIF OP_UNTIL OP_OVER OP_1 OP_GREATERTHANOREQUAL OP_VERIFY OP_OVER 14 OP_LESSTHANOREQUAL OP_VERIFY OP_TXOUTPUTCOUNT OP_1 OP_NUMEQUAL OP_IF e40c OP_2 OP_PICK OP_7 OP_PICK OP_MUL OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE OP_0 OP_UTXOVALUE OP_5 OP_PICK OP_ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_2 OP_PICK OP_SUB OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_GREATERTHANOREQUAL OP_VERIFY OP_0 OP_OUTPUTVALUE OP_0 OP_UTXOVALUE OP_GREATERTHANOREQUAL OP_VERIFY OP_DROP OP_ELSE OP_0 OP_OUTPUTVALUE OP_0 OP_UTXOVALUE OP_4 OP_PICK OP_ADD OP_1 OP_INVOKE OP_SPLIT OP_NIP 00 OP_EQUALVERIFY OP_GREATERTHANOREQUAL OP_VERIFY OP_1 OP_OUTPUTTOKENCATEGORY OP_0 OP_EQUALVERIFY OP_ENDIF OP_2DROP OP_2DROP OP_2DROP OP_1",
+  "source": "pragma solidcash ^0.50.0;\n\n// Long-lived permissionless receive/inbox covenant for Pusaka v2 (Stage 3).\n// Constructor depends ONLY on immutable plan identity (planCategory, planLockingBytecode,\n// perInputFeeCap), so the issued receive address never changes across policy edits,\n// partial spends, review cycles, owner exits, or post-payout late receipts.\n//\n// Sweeps 1 or more plain-BCH inbox UTXOs directly into PusakaV2Plan (input 0 -> output 0)\n// without owner signatures and without changing plan status, round, deadline, or policy.\ncontract PusakaV2Inbox(\n    bytes32 planCategory,\n    bytes planLockingBytecode,\n    int perInputFeeCap\n) {\n    function sweep() {\n        require(tx.inputs.length >= 2, \"sweep requires plan and inbox input\");\n        require(tx.inputs[0].lockingBytecode == planLockingBytecode, \"input 0 must be plan\");\n        require(tx.inputs[0].tokenCategory == planCategory + 0x02, \"input 0 must hold plan minting NFT\");\n\n        require(tx.outputs.length == 1 || tx.outputs.length == 2, \"invalid sweep output count\");\n        require(tx.outputs[0].lockingBytecode == planLockingBytecode, \"output 0 must return to plan\");\n        require(tx.outputs[0].tokenCategory == planCategory + 0x02, \"output 0 must preserve plan minting NFT\");\n        require(tx.outputs[0].nftCommitment == tx.inputs[0].nftCommitment, \"sweep cannot alter plan state\");\n\n        bytes myLock = tx.inputs[this.activeInputIndex].lockingBytecode;\n        int inboxIn = 0;\n        int inboxCount = 0;\n\n        for (int i = 1; i < int(tx.inputs.length); i++) {\n            require(tx.inputs[i].tokenCategory == 0x, \"sweep funding/inbox inputs must be plain BCH\");\n            bytes lock = tx.inputs[i].lockingBytecode;\n            require(lock != planLockingBytecode, \"extra plan locking input forbidden\");\n            if (lock == myLock) {\n                inboxIn = inboxIn + tx.inputs[i].value;\n                inboxCount = inboxCount + 1;\n            }\n        }\n\n        require(inboxCount >= 1, \"missing inbox input\");\n        require(inboxCount <= 20, \"sweep at most 20 inbox inputs per transaction\");\n\n        if (tx.outputs.length == 1) {\n            int feeAllowance = 3300 + inboxCount * perInputFeeCap;\n            require(tx.outputs[0].value >= tx.inputs[0].value + inboxIn - feeAllowance, \"self-sweep fee exceeds cap\");\n            require(tx.outputs[0].value >= tx.inputs[0].value, \"self-sweep cannot shrink plan\");\n        } else {\n            require(tx.outputs[0].value >= tx.inputs[0].value + inboxIn, \"sponsored sweep must preserve 100% of inbox\");\n            require(tx.outputs[1].tokenCategory == 0x, \"sponsor change must be plain BCH\");\n        }\n    }\n}\n",
+  "debug": {
+    "bytecode": "0c765102ff008d9301218001205189c352a26900c752798800ce78527e88c4519c635167c4529c686900cd52798800d17c527e8800d200cf88c0c700518a7f7701008800518a7f7701008851518a7f770100886576c3518a7f770100889f6376ce008876c7765679879169765579876353795279c693518a7f77010088547a7572537a52798b518a7f77010088537a757c6b7c6c68788b518a7f770100887b757700675168667851a269780114a169c4519c6302e40c5279577995518a7f7701008893518a7f7701008800cc00c6557993518a7f77010088527994518a7f77010088a26900cc00c6a269756700cc00c6547993518a7f77010088a26951d10088686d6d6d51",
+    "sourceMap": "1::51:1;;;16:16:16:32;:36::37;:16:::1;:8::78;17:26:17:27:0;:16::44:1;:48::67:0;;:8::93:1;18:26:18:27:0;:16::42:1;:46::58:0;:61::65;:46:::1;:8::105;20:16:20:33:0;:37::38;:16:::1;:::64:0;;::::1;:42::59:0;:63::64;:42:::1;:16;:8::96;21:27:21:28:0;:16::45:1;:49::68:0;;:8::102:1;22:27:22:28:0;:16::43:1;:47::59:0;:62::66;:47:::1;:8::111;23:27:23:28:0;:16::43:1;:57::58:0;:47::73:1;:8::108;25:33:25:54:0;:23::71:1;26:22:26:23:0;:8::24:1;;;;;;27:25:27:26:0;:8::27:1;;;;;;29:21:29:22:0;:13::23:1;;;;;;:8:37:9:0;:24:29:25;:32::48;:28::49:1;;;;;;:24;:8:37:9:0;30:30:30:31;:20::46:1;:50::52:0;:12::102:1;31:35:31:36:0;:25::53:1;32:20:32:24:0;:28::47;;:20:::1;;:12::87;33:16:33:20:0;:24::30;;:16:::1;:32:36:13:0;34:26:34:33;;:46::47;;:36::54:1;:26;:16::55;;;;;;;;;;;;35:29:35:39:0;;:::43:1;;;;;;;:16::44;;;;;;;33:32:36:13;29:51:29:52:0;:::54:1;;;;;;;;;::37:9;:8;;;;;39:16:39:26:0;:30::31;:16:::1;:8::56;40:16:40:26:0;:30::32;:16:::1;:8::83;42:12:42:29:0;:33::34;:12:::1;:36:46:9:0;43:31:43:35;:38::48;;:51::65;;:38:::1;;;;;;;:31;;;;;;;44::44:32:0;:20::39:1;:53::54:0;:43::61:1;:64::71:0;;:43:::1;;;;;;;:74::86:0;;:43:::1;;;;;;;:20;:12::118;45:31:45:32:0;:20::39:1;:53::54:0;:43::61:1;:20;:12::96;42:36:46:9;46:15:49::0;47:31:47:32;:20::39:1;:53::54:0;:43::61:1;:64::71:0;;:43:::1;;;;;;;:20;:12::120;48:31:48:32:0;:20::47:1;:51::53:0;:12::91:1;46:15:49:9;15:4:50:5;;;",
+    "logs": [],
+    "requires": [
+      {
+        "ip": 9,
+        "line": 16,
+        "message": "sweep requires plan and inbox input"
+      },
+      {
+        "ip": 14,
+        "line": 17,
+        "message": "input 0 must be plan"
+      },
+      {
+        "ip": 20,
+        "line": 18,
+        "message": "input 0 must hold plan minting NFT"
+      },
+      {
+        "ip": 31,
+        "line": 20,
+        "message": "invalid sweep output count"
+      },
+      {
+        "ip": 36,
+        "line": 21,
+        "message": "output 0 must return to plan"
+      },
+      {
+        "ip": 42,
+        "line": 22,
+        "message": "output 0 must preserve plan minting NFT"
+      },
+      {
+        "ip": 47,
+        "line": 23,
+        "message": "sweep cannot alter plan state"
+      },
+      {
+        "ip": 85,
+        "line": 30,
+        "message": "sweep funding/inbox inputs must be plain BCH"
+      },
+      {
+        "ip": 93,
+        "line": 32,
+        "message": "extra plan locking input forbidden"
+      },
+      {
+        "ip": 153,
+        "line": 39,
+        "message": "missing inbox input"
+      },
+      {
+        "ip": 157,
+        "line": 40,
+        "message": "sweep at most 20 inbox inputs per transaction"
+      },
+      {
+        "ip": 204,
+        "line": 44,
+        "message": "self-sweep fee exceeds cap"
+      },
+      {
+        "ip": 210,
+        "line": 45,
+        "message": "self-sweep cannot shrink plan"
+      },
+      {
+        "ip": 227,
+        "line": 47,
+        "message": "sponsored sweep must preserve 100% of inbox"
+      },
+      {
+        "ip": 231,
+        "line": 48,
+        "message": "sponsor change must be plain BCH"
+      }
+    ]
+  },
+  "fingerprint": "7e859d10712f074578bbf34b1deb8ab93c10e71009d94a4d97b760f8f5a4055e",
+  "compiler": {
+    "name": "solidc",
+    "version": "0.50.0",
+    "options": {
+      "evmCompat": true,
+      "enforceFunctionParameterTypes": true,
+      "enforceLocktimeGuard": true,
+      "enforceFinalRequire": true,
+      "allowUnsafeOperations": false,
+      "commitmentLimit": 128,
+      "messageBus": false
+    }
+  },
+  "updatedAt": "2026-11-17T14:27:19.037Z",
+  "invocationAnalysis": {
+    "version": 1,
+    "protocolVersions": [
+      1
+    ],
+    "functions": [
+      {
+        "id": 0,
+        "name": "sweep",
+        "arity": 0,
+        "entryPoint": true,
+        "selector": "35faa416",
+        "calls": [],
+        "closure": [
+          0
+        ],
+        "component": 0,
+        "recursive": false,
+        "reads": [],
+        "writes": [],
+        "effects": [],
+        "unknown": false,
+        "bounded": true,
+        "maximumDirectInvocations": 0
+      }
+    ],
+    "components": [
+      {
+        "id": 0,
+        "functions": [
+          0
+        ],
+        "recursive": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "version": "pusaka-v2",
+  "protocolRevision": "assets-1",
+  "network": "chipnet",
+  "planCategoryHex": "b7de4cbf3f7dbadab1aef573bb4c60f271d32c822e062128cf19c4c7be4a3c2d",
+  "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+  "planAddress": "bchtest:rvt3rtt7uf2mdcg64kfftgwngxsnc73fhqcj29nvfjmlrq2jsw5yjc4m9d57a",
+  "planLockHex": "aa201711ad7ee255b6e11aad9295a1d341a13c7a29b83125166c4cb7f1815283a84987",
+  "anchorAddress": "bchtest:rw7xea70smt7dudf9s4ck5xeg2j43luk0mjehu6g9t5x9r4nx53hxqqsg7wk5",
+  "anchorLockHex": "aa20bc6cf7cf86d7e6f1a92c2b8b50d942a558ff967ee59bf3482ae8628eb335237387",
+  "inboxAddress": "bchtest:pvhmr7yqfwjk2kc5gul8tyc8ng2rmu7xvakau0h256dtstfc4c7824sel4mpp",
+  "inboxLockHex": "aa202fb1f8804ba5655b14473e7593079a143df3c6676dde3eeaa69ab82d38ae3c7587",
+  "perInputFeeCap": "600",
+  "policyBytesHex": "805101000100400070170000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea0300000003219178a12ac1914acc1f9e4f2a111d574687ebb3010000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f01000000a0290a25754e41d6ee94068bbe49dfbc99a94f0001000000",
+  "policyHashHex": "e2a7bd26f01d4fa1f1c1cd4ff96dd4a617e22fa59b3318cffbdd94027cbe0b15",
+  "createdAtLocktime": 1794934820,
+  "inactivityPeriodSeconds": 86400,
+  "reviewSequence": 4194305,
+  "reviewUnits": 1,
+  "effectiveReviewSeconds": 512,
+  "feeBudget": "6000",
+  "contacts": [
+    "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+    "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+    "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+  ],
+  "totalShares": "3",
+  "heirs": [
+    {
+      "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+      "share": "1"
+    },
+    {
+      "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+      "share": "1"
+    },
+    {
+      "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+      "share": "1"
+    }
+  ]
+}

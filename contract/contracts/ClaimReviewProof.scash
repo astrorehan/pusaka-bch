@@ -1,0 +1,174 @@
+pragma solidcash ^0.50.0;
+
+// Minimal claim-open, owner-cancel, deposit-safe, and delayed-finalize covenant
+// proving an unforgeable BIP68-anchored review delay for Pusaka v2 (Stage 2).
+//
+// State is stored in the single `minting` NFT (`planCategory || 0x02`) commitment:
+//   byte 0     : policy version (`0x02`)
+//   byte 1     : status (`0x00` = ACTIVE, `0x01` = REVIEW)
+//   bytes 2..5 : 4-byte little-endian claim round (`0` initially, incremented on openClaim)
+//
+// When entering REVIEW, `openClaim()` mints exactly one immutable (`none`-cap)
+// NFT of `planCategory` to `anchorLockingBytecode` with commitment = `bytes4(newRound)`.
+// Its actual chain confirmation age enforces the full review delay in `ClaimReviewAnchor`.
+contract ClaimReviewProof(
+    bytes32 planCategory,
+    bytes20 ownerPkh,
+    bytes20 heirPkh,
+    int reviewSequence,
+    bytes anchorLockingBytecode,
+    int minAnchorSats,
+    int feeBudget
+) {
+    // Incoming BCH deposit (allowed in BOTH ACTIVE and REVIEW without touching
+    // the active ClaimReviewAnchor UTXO or altering status/round/age).
+    function deposit() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.inputs.length == 2, "deposit requires plan and funding input");
+        require(tx.inputs[1].tokenCategory == 0x, "funding input must be plain BCH");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 6, "invalid plan state length");
+        bytes header = commitment.split(2)[0];
+        require(header == 0x0200 || header == 0x0201, "invalid plan state");
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid deposit output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == commitment, "deposit cannot alter state or round");
+        require(tx.outputs[0].value > tx.inputs[0].value, "deposit must increase plan balance");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].tokenCategory == 0x, "deposit change must be plain BCH");
+        }
+    }
+
+    // Transition ACTIVE -> REVIEW and mint a fresh authenticated ClaimReviewAnchor UTXO.
+    // Stage 3 integrates the 2-of-3 contact quorum or inactivity deadline check here.
+    function openClaim() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(reviewSequence >= 4194305 && reviewSequence <= 4259839, "invalid reviewSequence");
+        require(anchorLockingBytecode.length == 35, "anchor must be P2SH32");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 6, "invalid plan state length");
+        bytes header, bytes roundBytes = commitment.split(2);
+        require(header == 0x0200, "plan must be ACTIVE");
+
+        int round = int(roundBytes);
+        int newRound = round + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        bytes nextRoundBytes = toPaddedBytes(newRound, 4);
+
+        require(tx.inputs.length == 1 || tx.inputs.length == 2, "invalid openClaim input count");
+        if (tx.inputs.length == 2) {
+            require(tx.inputs[1].tokenCategory == 0x, "sponsor input must be plain BCH");
+            require(tx.outputs[0].value >= tx.inputs[0].value, "sponsored open cannot shrink plan");
+        } else {
+            require(tx.outputs[0].value >= tx.inputs[0].value - minAnchorSats - feeBudget, "excessive self-funded open cost");
+            // There is no external sponsor input to return change to. Extra
+            // outputs would let a caller withdraw the plan's reserved fees.
+            require(tx.outputs.length == 2, "self-funded open cannot pay caller change");
+        }
+
+        require(tx.outputs.length == 2 || tx.outputs.length == 3, "invalid openClaim output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == 0x0201 + nextRoundBytes, "output 0 must enter REVIEW with newRound");
+
+        // Output 1 creates the dedicated ClaimReviewAnchor UTXO whose chain age starts the delay.
+        require(tx.outputs[1].lockingBytecode == anchorLockingBytecode, "output 1 must lock to anchor");
+        require(tx.outputs[1].tokenCategory == planCategory, "output 1 must hold immutable plan NFT");
+        require(tx.outputs[1].nftCommitment == nextRoundBytes, "anchor must commit to newRound");
+        require(tx.outputs[1].value >= minAnchorSats, "anchor below minAnchorSats");
+
+        if (tx.outputs.length == 3) {
+            require(tx.outputs[2].tokenCategory == 0x, "openClaim change must be plain BCH");
+        }
+    }
+
+    // Immediate owner cancellation while in REVIEW: requires owner P2PKH co-spend,
+    // consumes and burns the active ClaimReviewAnchor UTXO, and returns Plan to ACTIVE.
+    function cancelClaim() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 6, "invalid plan state length");
+        bytes header, bytes roundBytes = commitment.split(2);
+        require(header == 0x0201, "plan must be in REVIEW");
+
+        require(tx.inputs.length == 3, "cancel requires plan, anchor, and owner coin");
+        require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+        require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+        require(tx.inputs[1].nftCommitment == roundBytes, "anchor round mismatch");
+        require(tx.inputs[2].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "input 2 must be owner");
+        require(tx.inputs[2].tokenCategory == 0x, "owner input must be plain BCH");
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid cancel output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == 0x0200 + roundBytes, "output 0 must return to ACTIVE");
+        require(tx.outputs[0].value >= tx.inputs[0].value, "cancel cannot shrink plan balance");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].tokenCategory == 0x, "cancel change must burn anchor NFT");
+        }
+    }
+
+    // Owner withdrawal when ACTIVE: ownership remains with the owner until finalized payout.
+    function ownerWithdraw() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 6, "invalid plan state length");
+        bytes header = commitment.split(2)[0];
+        require(header == 0x0200, "cancel pending review before withdraw");
+
+        require(tx.inputs.length == 2, "withdraw requires plan and owner coin");
+        require(tx.inputs[1].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "input 1 must be owner");
+        require(tx.inputs[1].tokenCategory == 0x, "owner input must be plain BCH");
+
+        require(tx.outputs.length == 1, "withdraw must have single owner output");
+        require(tx.outputs[0].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "output 0 must pay owner");
+        require(tx.outputs[0].tokenCategory == 0x, "withdraw must burn plan minting NFT");
+    }
+
+    // Delayed payout after the ClaimReviewAnchor UTXO satisfies BIP68 time-based CSV.
+    // Consumes Plan (input 0) + matching ClaimReviewAnchor (input 1), burns both NFTs,
+    // and pays heirPkh at output 0.
+    function finalizeClaim() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.version >= 2, "tx version must be >= 2");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 6, "invalid plan state length");
+        bytes header, bytes roundBytes = commitment.split(2);
+        require(header == 0x0201, "plan must be in REVIEW");
+
+        require(tx.inputs.length == 2 || tx.inputs.length == 3, "invalid finalize input count");
+        require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+        require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+        require(tx.inputs[1].nftCommitment == roundBytes, "anchor round mismatch");
+
+        int vaultTotal = tx.inputs[0].value + tx.inputs[1].value;
+        require(tx.outputs[0].lockingBytecode == new LockingBytecodeP2PKH(heirPkh), "output 0 must pay heir");
+        require(tx.outputs[0].tokenCategory == 0x, "output 0 must burn plan NFTs");
+
+        if (tx.inputs.length == 2) {
+            require(tx.outputs.length == 1, "self-funded finalize takes 1 output");
+            require(tx.outputs[0].value >= vaultTotal - feeBudget, "excessive finalize fee");
+        } else {
+            require(tx.inputs[2].tokenCategory == 0x, "fee input must be plain BCH");
+            require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid sponsored finalize output count");
+            require(tx.outputs[0].value >= vaultTotal, "heir must receive full vault");
+            if (tx.outputs.length == 2) {
+                require(tx.outputs[1].tokenCategory == 0x, "finalize change must be plain BCH");
+            }
+        }
+    }
+}

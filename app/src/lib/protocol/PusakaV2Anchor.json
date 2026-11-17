@@ -1,0 +1,200 @@
+{
+  "contractName": "PusakaV2Anchor",
+  "constructorInputs": [
+    {
+      "name": "planCategory",
+      "type": "bytes32"
+    },
+    {
+      "name": "ownerPkh",
+      "type": "bytes20"
+    }
+  ],
+  "abi": [
+    {
+      "name": "finalize",
+      "selector": "4bb278f3",
+      "inputs": [],
+      "sourceEffectOrder": "unsupported-flow"
+    },
+    {
+      "name": "cancel",
+      "selector": "ea8a1af0",
+      "inputs": [],
+      "sourceEffectOrder": "linear"
+    }
+  ],
+  "bytecode": "c0519d00ce78527e8851ce8851cf768277589d547f7781765102ff008d9301218001207f770100887603010040a2637603ffff40a167006869c252a26976b26d7551 4bb278f3 OP_DEFINE c0519d00ce78527e8851ce7888c353a26952c70376a914537a7e0288ac7e8800cd00c78800d17c527e87 ea8a1af0 OP_DEFINE OP_DEPTH OP_1SUB OP_ROLL OP_SIZE OP_4 OP_NUMEQUALVERIFY OP_INVOKE",
+  "source": "pragma solidcash ^0.50.0;\n\n// Dedicated immutable-NFT review-delay anchor covenant for Pusaka v2 (Stage 3).\n// Constructor arguments depend ONLY on immutable plan identity (planCategory, ownerPkh),\n// so anchorAddress NEVER changes across owner policy edits and has zero hash cycle\n// with PusakaV2Plan.\n//\n// Each claim round entering REVIEW mints one `none`-capability NFT of `planCategory`\n// to this contract with 8-byte commitment: `bytes4(round) || bytes4(reviewSequence)`.\n// Finalization must co-spend PusakaV2Plan (`planCategory || 0x02`) at input 0 under\n// tx.version >= 2 with time-based BIP68 CSV (`this.age >= reviewSequence`).\n// Owner cancellation co-spends PusakaV2Plan (input 0) + this Anchor (input 1) +\n// owner P2PKH (input 2) immediately without waiting for the review delay.\ncontract PusakaV2Anchor(\n    bytes32 planCategory,\n    bytes20 ownerPkh\n) {\n    function finalize() {\n        require(this.activeInputIndex == 1, \"anchor must be input 1\");\n        require(tx.inputs[0].tokenCategory == planCategory + 0x02, \"input 0 must be plan minting NFT\");\n        require(tx.inputs[1].tokenCategory == planCategory, \"anchor must hold plan none NFT\");\n\n        bytes commitment = tx.inputs[1].nftCommitment;\n        require(commitment.length == 8, \"invalid anchor commitment length\");\n        bytes seqBytes = commitment.split(4)[1];\n        int reviewSequence = int(seqBytes);\n        require(reviewSequence >= 4194305 && reviewSequence <= 4259839, \"reviewSequence must be valid time-based BIP68\");\n        require(tx.version >= 2, \"tx version must be >= 2 for BIP68 CSV\");\n        require(this.age >= reviewSequence, \"review delay has not elapsed\");\n    }\n\n    function cancel() {\n        require(this.activeInputIndex == 1, \"anchor must be input 1\");\n        require(tx.inputs[0].tokenCategory == planCategory + 0x02, \"input 0 must be plan minting NFT\");\n        require(tx.inputs[1].tokenCategory == planCategory, \"anchor must hold plan none NFT\");\n        require(tx.inputs.length >= 3, \"owner co-spend input required\");\n        require(tx.inputs[2].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), \"input 2 must be owner\");\n        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, \"cancel must return to plan\");\n        require(tx.outputs[0].tokenCategory == planCategory + 0x02, \"cancel must preserve plan minting NFT\");\n    }\n}\n",
+  "debug": {
+    "bytecode": "42c0519d00ce78527e8851ce8851cf768277589d547f7781765102ff008d9301218001207f770100887603010040a2637603ffff40a167006869c252a26976b26d7551044bb278f3892ac0519d00ce78527e8851ce7888c353a26952c70376a914537a7e0288ac7e8800cd00c78800d17c527e8704ea8a1af089748c7a82549d8a",
+    "sourceMap": "18:4:30:5;;;32::40;;;14:0:41:1;;;;;;",
+    "logs": [],
+    "requires": [],
+    "functionDebug": {
+      "4bb278f3": {
+        "requires": [
+          {
+            "ip": 2,
+            "line": 19,
+            "message": "anchor must be input 1"
+          },
+          {
+            "ip": 8,
+            "line": 20,
+            "message": "input 0 must be plan minting NFT"
+          },
+          {
+            "ip": 11,
+            "line": 21,
+            "message": "anchor must hold plan none NFT"
+          },
+          {
+            "ip": 18,
+            "line": 24,
+            "message": "invalid anchor commitment length"
+          },
+          {
+            "ip": 45,
+            "line": 27,
+            "message": "reviewSequence must be valid time-based BIP68"
+          },
+          {
+            "ip": 49,
+            "line": 28,
+            "message": "tx version must be >= 2 for BIP68 CSV"
+          },
+          {
+            "ip": 51,
+            "line": 29,
+            "message": "review delay has not elapsed"
+          }
+        ],
+        "sourceMap": "19:16:19:37;:41::42;:8::70:1;20:26:20:27:0;:16::42:1;:46::58:0;:61::65;:46:::1;:8::103;21:26:21:27:0;:16::42:1;:8::94;23:37:23:38:0;:27::53:1;24:16:24:26:0;:::33:1;;:37::38:0;:8::76:1;25:42:25:43:0;:25::44:1;:::47;26:29:26:42;;;;;;;;;;;;;27:16:27:30:0;:34::41;:16:::1;:::70:0;:45::59;:63::70;:45:::1;:16;;;:8::121;28:16:28:26:0;:30::31;:16:::1;:8::74;29:28:29:42:0;:8::76:1;18:4:30:5;;",
+        "logs": []
+      },
+      "ea8a1af0": {
+        "requires": [
+          {
+            "ip": 2,
+            "line": 33,
+            "message": "anchor must be input 1"
+          },
+          {
+            "ip": 8,
+            "line": 34,
+            "message": "input 0 must be plan minting NFT"
+          },
+          {
+            "ip": 12,
+            "line": 35,
+            "message": "anchor must hold plan none NFT"
+          },
+          {
+            "ip": 16,
+            "line": 36,
+            "message": "owner co-spend input required"
+          },
+          {
+            "ip": 25,
+            "line": 37,
+            "message": "input 2 must be owner"
+          },
+          {
+            "ip": 30,
+            "line": 38,
+            "message": "cancel must return to plan"
+          },
+          {
+            "ip": 37,
+            "line": 39,
+            "message": "cancel must preserve plan minting NFT"
+          }
+        ],
+        "sourceMap": "33:16:33:37;:41::42;:8::70:1;34:26:34:27:0;:16::42:1;:46::58:0;:61::65;:46:::1;:8::103;35:26:35:27:0;:16::42:1;:46::58:0;:8::94:1;36:16:36:32:0;:36::37;:16:::1;:8::72;37:26:37:27:0;:16::44:1;:48::82:0;:73::81;;:48::82:1;;;:8::109;38:27:38:28:0;:16::45:1;:59::60:0;:49::77:1;:8::109;39:27:39:28:0;:16::43:1;:47::59:0;:62::66;:47:::1;:8::109",
+        "logs": []
+      }
+    }
+  },
+  "functionBodies": {
+    "4bb278f3": "c0519d00ce78527e8851ce8851cf768277589d547f7781765102ff008d9301218001207f770100887603010040a2637603ffff40a167006869c252a26976b26d7551",
+    "ea8a1af0": "c0519d00ce78527e8851ce7888c353a26952c70376a914537a7e0288ac7e8800cd00c78800d17c527e87"
+  },
+  "fingerprint": "11b7ac24da6fae8ac2734ffff56cca7f486ed17a44c81e34de40c6ed4f85fd73",
+  "compiler": {
+    "name": "solidc",
+    "version": "0.50.0",
+    "options": {
+      "evmCompat": true,
+      "enforceFunctionParameterTypes": true,
+      "enforceLocktimeGuard": true,
+      "enforceFinalRequire": true,
+      "allowUnsafeOperations": false,
+      "commitmentLimit": 128,
+      "messageBus": false
+    }
+  },
+  "updatedAt": "2026-11-17T13:28:52.753Z",
+  "invocationAnalysis": {
+    "version": 1,
+    "protocolVersions": [
+      1
+    ],
+    "functions": [
+      {
+        "id": 0,
+        "name": "finalize",
+        "arity": 0,
+        "entryPoint": true,
+        "selector": "4bb278f3",
+        "calls": [],
+        "closure": [
+          0
+        ],
+        "component": 0,
+        "recursive": false,
+        "reads": [],
+        "writes": [],
+        "effects": [],
+        "unknown": false,
+        "bounded": true,
+        "maximumDirectInvocations": 0
+      },
+      {
+        "id": 1,
+        "name": "cancel",
+        "arity": 0,
+        "entryPoint": true,
+        "selector": "ea8a1af0",
+        "calls": [],
+        "closure": [
+          1
+        ],
+        "component": 1,
+        "recursive": false,
+        "reads": [],
+        "writes": [],
+        "effects": [],
+        "unknown": false,
+        "bounded": true,
+        "maximumDirectInvocations": 0
+      }
+    ],
+    "components": [
+      {
+        "id": 0,
+        "functions": [
+          0
+        ],
+        "recursive": false
+      },
+      {
+        "id": 1,
+        "functions": [
+          1
+        ],
+        "recursive": false
+      }
+    ]
+  }
+}

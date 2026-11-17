@@ -5,7 +5,7 @@
 // Leave a value as '' to hide its entry. A group with nothing left in it is hidden too.
 
 export const REPO_URL = 'https://github.com/astrorehan/pusaka-bch';
-export const DOCS_URL = `${REPO_URL}/tree/main/docs`;
+export const DOCS_URL = `${REPO_URL}/tree/web-app/docs`;
 
 export const BANNER = {
   event: 'BCH BLAZE 2026',
@@ -22,8 +22,8 @@ export const BANNER = {
 
   /** What was built during BLAZE. `demoUrl` '/' means this app. */
   now: {
-    codeUrl: REPO_URL,
-    demoUrl: '/',
+    codeUrl: `${REPO_URL}/tree/web-app`,
+    demoUrl: import.meta.env.VITE_NETWORK === 'mainnet' ? '/wallet' : '/wallet/demo',
   },
 
   /**

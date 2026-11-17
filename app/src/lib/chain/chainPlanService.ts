@@ -34,6 +34,8 @@ export function setWizardManager(manager: DappConnectionManager | null, network:
   wallet = manager ? new WizardWallet(manager, network) : null;
 }
 
+export function getWizardWallet(): WizardWallet { return requireWallet(); }
+
 /** A problem the user can fix themselves; its message is shown as is. */
 export class UserFixableError extends Error {}
 

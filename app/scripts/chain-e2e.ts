@@ -5,7 +5,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { deriveHdPath, deriveHdPrivateNodeFromSeed, deriveSeedFromBip39Mnemonic, secp256k1 } from '@bitauth/libauth';
 import { SignatureTemplate } from '@solidcash/solidcash';
-import { encodeTransaction, binToHex } from '@bitauth/libauth';
+import { encodeTransaction, binToHex, decodeTransactionBch, hexToBin } from '@bitauth/libauth';
+import { toBigInt, toUint8Array } from '@wizardconnect/core';
 import { chainPlanService, setWizardManager } from '../src/lib/chain/chainPlanService';
 import { addressOfPubkey } from '../src/lib/chain/network';
 import type { PlanData } from '../src/lib/types';
@@ -30,7 +31,25 @@ const fakeManager = {
   on() {},
   off() {},
   async signTransaction({ transaction: request, inputPaths }: any) {
-    const { transaction, sourceOutputs } = request;
+    // Decode the same relay-safe payload a phone wallet receives, rather than accepting native SDK objects.
+    const transaction = decodeTransactionBch(hexToBin(request.transaction));
+    if (typeof transaction === 'string') throw new Error(transaction);
+    const sourceOutputs = request.sourceOutputs.map((source: any) => ({
+      ...source,
+      outpointTransactionHash: toUint8Array(source.outpointTransactionHash),
+      unlockingBytecode: toUint8Array(source.unlockingBytecode),
+      lockingBytecode: toUint8Array(source.lockingBytecode),
+      valueSatoshis: toBigInt(source.valueSatoshis),
+      ...(source.token && { token: {
+        ...source.token,
+        category: toUint8Array(source.token.category),
+        amount: toBigInt(source.token.amount),
+        ...(source.token.nft && { nft: {
+          ...source.token.nft,
+          commitment: toUint8Array(source.token.nft.commitment),
+        } }),
+      } }),
+    }));
     const inputs = [...transaction.inputs];
     for (const [i, path, index] of inputPaths as [number, string, number][]) {
       const unlocker = new SignatureTemplate(keyAt(path === 'change' ? 1 : 0, index)).unlockP2PKH();

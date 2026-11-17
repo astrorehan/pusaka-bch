@@ -1,0 +1,10 @@
+{
+  "network": "chipnet",
+  "name": "Pusaka test FT",
+  "symbol": "PSK",
+  "decimals": 0,
+  "category": "520edcfb14e3a83e24b955efb0dfaef0a74c677b3113e4a5ec6eff9cc3c9c41d",
+  "poolAddress": "bchtest:r0juw4w6m7ql3hr0dl04eefljuxe6gtc6x0e37skdxa05dkwlkd9qu3j8k73a",
+  "withdrawPkh": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+  "testOnly": true
+}

@@ -1,0 +1,41 @@
+pragma solidcash ^0.50.0;
+
+// Dedicated immutable-NFT review-delay anchor covenant for Pusaka v2 (Stage 3).
+// Constructor arguments depend ONLY on immutable plan identity (planCategory, ownerPkh),
+// so anchorAddress NEVER changes across owner policy edits and has zero hash cycle
+// with PusakaV2Plan.
+//
+// Each claim round entering REVIEW mints one `none`-capability NFT of `planCategory`
+// to this contract with 8-byte commitment: `bytes4(round) || bytes4(reviewSequence)`.
+// Finalization must co-spend PusakaV2Plan (`planCategory || 0x02`) at input 0 under
+// tx.version >= 2 with time-based BIP68 CSV (`this.age >= reviewSequence`).
+// Owner cancellation co-spends PusakaV2Plan (input 0) + this Anchor (input 1) +
+// owner P2PKH (input 2) immediately without waiting for the review delay.
+contract PusakaV2Anchor(
+    bytes32 planCategory,
+    bytes20 ownerPkh
+) {
+    function finalize() {
+        require(this.activeInputIndex == 1, "anchor must be input 1");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.inputs[1].tokenCategory == planCategory, "anchor must hold plan none NFT");
+
+        bytes commitment = tx.inputs[1].nftCommitment;
+        require(commitment.length == 8, "invalid anchor commitment length");
+        bytes seqBytes = commitment.split(4)[1];
+        int reviewSequence = int(seqBytes);
+        require(reviewSequence >= 4194305 && reviewSequence <= 4259839, "reviewSequence must be valid time-based BIP68");
+        require(tx.version >= 2, "tx version must be >= 2 for BIP68 CSV");
+        require(this.age >= reviewSequence, "review delay has not elapsed");
+    }
+
+    function cancel() {
+        require(this.activeInputIndex == 1, "anchor must be input 1");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.inputs[1].tokenCategory == planCategory, "anchor must hold plan none NFT");
+        require(tx.inputs.length >= 3, "owner co-spend input required");
+        require(tx.inputs[2].lockingBytecode == new LockingBytecodeP2PKH(ownerPkh), "input 2 must be owner");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "cancel must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "cancel must preserve plan minting NFT");
+    }
+}

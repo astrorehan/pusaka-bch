@@ -24,7 +24,7 @@ export interface BridgeProps {
 export default function WizardBridge({ network, onReady, onState, onSettle }: BridgeProps) {
   const wiz = useWizardConnect({
     dappName: 'Pusaka',
-    dappIcon: `${window.location.origin}/favicon.svg`,
+    dappIcon: `${window.location.origin}${import.meta.env.BASE_URL}favicon.svg`,
   });
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);

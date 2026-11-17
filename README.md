@@ -10,9 +10,21 @@
 > Status: being built during [BCH BLAZE 2026](https://dorahacks.io/hackathon/bchblaze2026) (14 to 22 Nov 2026).
 > Entered for the Mainnet Track and the Best SolidCash Application bounty.
 
+> **Wallet release, 18 Nov:** [open the live Chipnet app](https://astrorehan.github.io/pusaka-bch/wallet/demo).
+> The v2 app now includes a usable protected BCH balance, Send/Receive, contacts,
+> claim review, policy editing and protected fungible token proceeds from a real
+> Cauldron V0 test pair. [Release evidence](docs/proofs/app-and-assets.md) and
+> [owner/family guide](docs/demo-guide.md). Selected qualification: 18 v2/asset
+> tests, 26 earlier contract tests, 3 signing transport tests and 2 browser tests pass.
+> Actual Paytaca phone approval, v2 mainnet execution and a mainnet trading pair
+> remain open gates. The existing funded v1 mainnet plan is separate and untouched.
+>
+> The receipts below retain the earlier v1 milestone. They do not prove v2 mainnet use.
+
 ## Live now
 
-What works today, each with its proof. Nothing has run on mainnet yet.
+What works today, each with its proof. A plan was created on mainnet through Paytaca on 17 Nov; the remaining
+mainnet lifecycle actions still need to be verified.
 
 | What | Proof |
 |---|---|
@@ -23,7 +35,7 @@ What works today, each with its proof. Nothing has run on mainnet yet.
 | The contract: create, I'm still here, take back, send to heirs | [`contract/contracts/Pusaka.scash`](contract/contracts/Pusaka.scash), 11 tests in [`contract/test/Pusaka.test.ts`](contract/test/Pusaka.test.ts) |
 | The whole lifecycle on Chipnet (test network) | 5 transactions on 15 Nov and 3 on 16 Nov, listed in [JUDGE.md](JUDGE.md#transactions-you-can-open) |
 | An outside wallet can sign every stateful call over `bch_signTransaction` (with our SDK fix) | Chipnet transactions of 16 Nov, signed by a stand-in wallet in Node ([script](contract/scripts/external-signing-spike.ts)); the [patch](contract/patches/@solidcash+solidcash+0.50.1.patch) and [the log](docs/solidcash-dx-log.md). **TODO (owner): add txids signed in Paytaca and Cashonize** |
-| On mainnet | **TODO (owner): plan created, sent to heirs, I'm still here, taken back (txids)** |
+| On mainnet | Plan created in the app through Paytaca: [`4e5b2fd4…1c3d`](https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d), 17 Nov. **TODO (owner): sent to heirs, I'm still here, taken back (txids)** |
 | SolidCash developer feedback | [`docs/solidcash-feedback.md`](docs/solidcash-feedback.md), from the dated [log](docs/solidcash-dx-log.md) |
 | Donation and prize address (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |
 | Repository | https://github.com/astrorehan/pusaka-bch |

@@ -1,0 +1,708 @@
+pragma solidcash ^0.50.0;
+
+// Complete Pusaka v2 inheritance wallet plan covenant (Stage 3).
+//
+// Constructor depends ONLY on immutable identity & anchor binding:
+//   - planCategory        : unique CashTokens category ID (VM wire byte order)
+//   - ownerPkh            : owner P2PKH key hash
+//   - anchorLockingBytecode : 35-byte P2SH32 locking bytecode of PusakaV2Anchor(planCategory, ownerPkh)
+//
+// Mutable plan state is stored in the single `minting` NFT (`planCategory || 0x02`) commitment (51 bytes):
+//   [0]      : version (`0x02`)
+//   [1]      : status (`0x00` ACTIVE, `0x01` REVIEW, `0x02` PAID_OUT, `0x03` CLOSED)
+//   [2..5]   : round (4-byte LE int, incremented on owner actions, policy edits, and claim openings)
+//   [6]      : approvalsMask (1-byte bitmask `0x00..0x07` of trusted contact approvals in current round)
+//   [7..14]  : deadline (8-byte LE int, unix seconds)
+//   [15..18] : inactivityPeriod (4-byte LE int, seconds)
+//   [19..50] : policyHash (`hash256(policyBytes)`, 32 bytes)
+//
+// Canonical `policyBytes` layout (101..317 bytes, for 1..10 heirs):
+//   [0..3]   : inactivityPeriod (4-byte LE int > 0)
+//   [4..7]   : reviewSequence (4-byte LE int, valid time-based BIP68: 4194305..4259839)
+//   [8..11]  : feeBudget (4-byte LE int, 500..100000)
+//   [12..31] : contact0 (bytes20)
+//   [32..51] : contact1 (bytes20)
+//   [52..71] : contact2 (bytes20)
+//   [72..75] : totalShares (4-byte LE int > 0)
+//   [76]     : heirCount (1-byte int, 1..10)
+//   [77..]   : heirCount * 24 bytes: [bytes20 heirPkh, bytes4 heirShare]
+contract PusakaV2Plan(
+    bytes32 planCategory,
+    bytes20 ownerPkh,
+    bytes anchorLockingBytecode
+) {
+    // 1. Permissionless deposit / inbox sweep in ANY status (ACTIVE, REVIEW, PAID_OUT, CLOSED).
+    // Never modifies status, round, approvalsMask, deadline, period, or policyHash, and never touches Anchor.
+    function deposit() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.inputs.length >= 2, "deposit requires plan and funding/inbox input");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes ver, bytes rest = commitment.split(1);
+        require(ver == 0x02, "unsupported plan version");
+        bytes statusByte = rest.split(1)[0];
+        require(
+            statusByte == 0x00 || statusByte == 0x01 || statusByte == 0x02 || statusByte == 0x03,
+            "invalid plan status"
+        );
+
+        for (int i = 1; i < int(tx.inputs.length); i++) {
+            require(tx.inputs[i].tokenCategory == 0x, "deposit inputs must be plain BCH");
+        }
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid deposit output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == commitment, "deposit cannot alter plan state");
+
+        if (tx.outputs.length == 1) {
+            require(tx.outputs[0].value >= tx.inputs[0].value, "deposit cannot shrink plan balance");
+        } else {
+            require(tx.outputs[0].value > tx.inputs[0].value, "sponsored deposit must increase plan balance");
+            require(tx.outputs[1].tokenCategory == 0x, "deposit change must be plain BCH");
+        }
+    }
+
+    // 2. Owner-directed partial or full payment with protected change & atomic activity renewal.
+    // Owner-authorized tx fees (up to 10,000 sats) may be paid from protected BCH so a small
+    // persistent auth coin can be returned intact. If plan is in REVIEW, atomically cancels
+    // the pending claim and burns PusakaV2Anchor.
+    function send(bytes recipientLock, int amount) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.time >= 500000000, "use timestamp locktime with non-final sequence");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0201, "plan must be ACTIVE or REVIEW");
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes deadlineBytes, bytes tail = afterMask.split(8);
+        bytes periodBytes = tail.split(4)[0];
+
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        int extraIn = 0;
+        if (header == 0x0200) {
+            require(tx.inputs.length >= 2, "send requires plan and owner input");
+            require(tx.inputs[1].lockingBytecode == ownerLock, "input 1 must be owner");
+            for (int i = 1; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        } else {
+            require(tx.inputs.length >= 3, "send during review requires plan, anchor, and owner");
+            require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+            require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+            require(tx.inputs[1].nftCommitment.split(4)[0] == roundBytes, "anchor round mismatch");
+            require(tx.inputs[2].lockingBytecode == ownerLock, "input 2 must be owner");
+            extraIn = tx.inputs[1].value;
+            for (int i = 2; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        }
+
+        require(amount >= 546, "amount below dust");
+        require(
+            recipientLock.length == 25 || recipientLock.length == 23 || recipientLock.length == 35,
+            "unsupported recipient script"
+        );
+        int spendable = tx.inputs[0].value - 1000;
+        require(spendable >= amount, "insufficient protected balance");
+        int nextPlanSats = tx.inputs[0].value - amount;
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        int curDeadline = int(deadlineBytes);
+        int nextDeadline = tx.locktime + int(periodBytes);
+        require(nextDeadline <= 4294967295, "deadline exceeds timestamp locktime range");
+        int newDeadline = curDeadline;
+        if (nextDeadline > curDeadline) {
+            newDeadline = nextDeadline;
+        }
+        bytes nextCommitment = 0x0200 + toPaddedBytes(newRound, 4) + 0x00 + toPaddedBytes(newDeadline, 8) + tail;
+
+        require(tx.outputs.length == 2 || tx.outputs.length == 3, "invalid send output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == nextCommitment, "invalid send successor commitment");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        require(tx.outputs[0].value >= nextPlanSats - 10000, "excessive owner fee");
+
+        require(tx.outputs[1].lockingBytecode == recipientLock, "wrong recipient");
+        require(tx.outputs[1].value == amount, "wrong payment amount");
+        require(tx.outputs[1].tokenCategory == 0x, "recipient output cannot carry tokens");
+
+        if (tx.outputs.length == 3) {
+            require(tx.outputs[2].tokenCategory == 0x, "change output cannot carry tokens");
+            require(tx.outputs[2].value <= extraIn, "change cannot draw from protected balance");
+            if (tx.outputs[0].value < nextPlanSats) {
+                require(tx.outputs[2].lockingBytecode == ownerLock, "change output must pay owner");
+            }
+        }
+    }
+
+    // 3. Owner standalone check-in (fallback proof of life) or explicit Stop Claim.
+    // Also reactivates a CLOSED plan back to ACTIVE. Atomically cancels REVIEW if pending.
+    function checkIn() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.time >= 500000000, "use timestamp locktime with non-final sequence");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0201 || header == 0x0203, "invalid status for checkIn");
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes deadlineBytes, bytes tail = afterMask.split(8);
+        bytes periodBytes = tail.split(4)[0];
+
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        int extraIn = 0;
+        if (header == 0x0201) {
+            require(tx.inputs.length >= 3, "checkIn during review requires plan, anchor, and owner");
+            require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+            require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+            require(tx.inputs[1].nftCommitment.split(4)[0] == roundBytes, "anchor round mismatch");
+            require(tx.inputs[2].lockingBytecode == ownerLock, "input 2 must be owner");
+            extraIn = tx.inputs[1].value;
+            for (int i = 2; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        } else {
+            require(tx.inputs.length >= 2, "checkIn requires plan and owner");
+            require(tx.inputs[1].lockingBytecode == ownerLock, "input 1 must be owner");
+            for (int i = 1; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        }
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        int curDeadline = int(deadlineBytes);
+        int nextDeadline = tx.locktime + int(periodBytes);
+        require(nextDeadline <= 4294967295, "deadline exceeds timestamp locktime range");
+        int newDeadline = curDeadline;
+        if (nextDeadline > curDeadline) {
+            newDeadline = nextDeadline;
+        }
+        bytes nextCommitment = 0x0200 + toPaddedBytes(newRound, 4) + 0x00 + toPaddedBytes(newDeadline, 8) + tail;
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid checkIn output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == nextCommitment, "invalid checkIn commitment");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        require(tx.outputs[0].value >= tx.inputs[0].value - 10000, "excessive owner fee");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].tokenCategory == 0x, "change output cannot carry tokens");
+            require(tx.outputs[1].value <= extraIn, "change cannot draw from protected balance");
+            if (tx.outputs[0].value < tx.inputs[0].value) {
+                require(tx.outputs[1].lockingBytecode == ownerLock, "change output must pay owner");
+            }
+        }
+    }
+
+    // 3b. Explicit Stop Claim while in REVIEW: consumes Anchor, resets approvalsMask, advances round and deadline.
+    function cancelClaim() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.time >= 500000000, "use timestamp locktime with non-final sequence");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0201, "plan must be in REVIEW");
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes deadlineBytes, bytes tail = afterMask.split(8);
+        bytes periodBytes = tail.split(4)[0];
+
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        require(tx.inputs.length >= 3, "cancelClaim requires plan, anchor, and owner");
+        require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+        require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+        require(tx.inputs[1].nftCommitment.split(4)[0] == roundBytes, "anchor round mismatch");
+        require(tx.inputs[2].lockingBytecode == ownerLock, "input 2 must be owner");
+        int extraIn = tx.inputs[1].value;
+        for (int i = 2; i < int(tx.inputs.length); i++) {
+            require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+            extraIn = extraIn + tx.inputs[i].value;
+        }
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        int curDeadline = int(deadlineBytes);
+        int nextDeadline = tx.locktime + int(periodBytes);
+        require(nextDeadline <= 4294967295, "deadline exceeds timestamp locktime range");
+        int newDeadline = curDeadline;
+        if (nextDeadline > curDeadline) {
+            newDeadline = nextDeadline;
+        }
+        bytes nextCommitment = 0x0200 + toPaddedBytes(newRound, 4) + 0x00 + toPaddedBytes(newDeadline, 8) + tail;
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid cancelClaim output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == nextCommitment, "invalid cancelClaim commitment");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        require(tx.outputs[0].value >= tx.inputs[0].value - 10000, "excessive owner fee");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].tokenCategory == 0x, "change output cannot carry tokens");
+            require(tx.outputs[1].value <= extraIn, "change cannot draw from protected balance");
+            if (tx.outputs[0].value < tx.inputs[0].value) {
+                require(tx.outputs[1].lockingBytecode == ownerLock, "change output must pay owner");
+            }
+        }
+    }
+
+    // 4. Owner policy update: edits heirs/shares, 3 distinct contacts, periods, and feeBudget.
+    // Advances round and clears approvalsMask; preserves planAddress & inboxAddress.
+    // Atomically cancels pending REVIEW if active.
+    function updatePolicy(bytes newPolicyBytes) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.time >= 500000000, "use timestamp locktime with non-final sequence");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0201, "cannot edit policy after exit or payout");
+        bytes roundBytes = afterHeader.split(4)[0];
+
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        int extraIn = 0;
+        if (header == 0x0201) {
+            require(tx.inputs.length >= 3, "updatePolicy during review requires plan, anchor, and owner");
+            require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+            require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+            require(tx.inputs[1].nftCommitment.split(4)[0] == roundBytes, "anchor round mismatch");
+            require(tx.inputs[2].lockingBytecode == ownerLock, "input 2 must be owner");
+            extraIn = tx.inputs[1].value;
+            for (int i = 2; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        } else {
+            require(tx.inputs.length >= 2, "updatePolicy requires plan and owner");
+            require(tx.inputs[1].lockingBytecode == ownerLock, "input 1 must be owner");
+            for (int i = 1; i < int(tx.inputs.length); i++) {
+                require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+                extraIn = extraIn + tx.inputs[i].value;
+            }
+        }
+
+        require(int(newPolicyBytes.length) >= 101 && int(newPolicyBytes.length) <= 317, "invalid policy length");
+        bytes newPeriodBytes, bytes pRest1 = newPolicyBytes.split(4);
+        int newPeriod = int(newPeriodBytes);
+        require(newPeriod > 0 && newPeriod < 2147483647, "inactivity period must be positive uint31");
+
+        bytes newSeqBytes, bytes pRest2 = pRest1.split(4);
+        int newReviewSeq = int(newSeqBytes);
+        require(newReviewSeq >= 4194305 && newReviewSeq <= 4259839, "invalid reviewSequence");
+
+        bytes newFeeBytes, bytes pRest3 = pRest2.split(4);
+        int newFeeBudget = int(newFeeBytes);
+        require(newFeeBudget >= 500 && newFeeBudget <= 100000, "invalid feeBudget");
+
+        bytes c0, bytes cRest1 = pRest3.split(20);
+        bytes c1, bytes cRest2 = cRest1.split(20);
+        bytes c2, bytes pRest4 = cRest2.split(20);
+        require(c0 != c1 && c0 != c2 && c1 != c2, "contacts must be distinct");
+        require(c0 != ownerPkh && c1 != ownerPkh && c2 != ownerPkh, "contact cannot be owner");
+
+        bytes totalSharesBytes, bytes pRest5 = pRest4.split(4);
+        int newTotalShares = int(totalSharesBytes);
+        require(newTotalShares > 0, "totalShares must be positive");
+
+        bytes heirCountBytes, bytes heirsSlice = pRest5.split(1);
+        int heirCount = int(heirCountBytes);
+        require(heirCount >= 1 && heirCount <= 10, "1 to 10 heirs");
+        require(int(heirsSlice.length) == heirCount * 24, "heirs slice length mismatch");
+
+        int shareSum = 0;
+        for (int i = 0; i < heirCount; i++) {
+            bytes entry = heirsSlice.slice(i * 24, i * 24 + 24);
+            int share = int(entry.split(20)[1]);
+            require(share > 0, "heir share must be positive");
+            shareSum = shareSum + share;
+        }
+        require(shareSum == newTotalShares, "share sum mismatch");
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        int newDeadline = tx.locktime + newPeriod;
+        require(newDeadline <= 4294967295, "deadline exceeds timestamp locktime range");
+        bytes32 newPolicyHash = hash256(newPolicyBytes);
+        bytes nextCommitment = 0x0200 + toPaddedBytes(newRound, 4) + 0x00 + toPaddedBytes(newDeadline, 8) + newPeriodBytes + newPolicyHash;
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid updatePolicy output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == nextCommitment, "invalid updatePolicy commitment");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        require(tx.outputs[0].value >= tx.inputs[0].value - 10000, "excessive owner fee");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].tokenCategory == 0x, "change output cannot carry tokens");
+            require(tx.outputs[1].value <= extraIn, "change cannot draw from protected balance");
+            if (tx.outputs[0].value < tx.inputs[0].value) {
+                require(tx.outputs[1].lockingBytecode == ownerLock, "change output must pay owner");
+            }
+        }
+    }
+
+    // 5. Owner exit: withdraws all spendable balance (> 1000 carrier) to ownerPkh and marks
+    // plan CLOSED (0x03), keeping the 1000-sat plan identity carrier alive and renewing
+    // deadline to max(previous deadline, tx.locktime + period). Later receipts at
+    // inboxAddress remain owner-recoverable AND inheritable via contact quorum or inactivity.
+    function ownerExit() {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.time >= 500000000, "use timestamp locktime with non-final sequence");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0203, "cancel pending review before exit");
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes deadlineBytes, bytes tail = afterMask.split(8);
+        bytes periodBytes = tail.split(4)[0];
+
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        require(tx.inputs.length >= 2, "exit requires plan and owner");
+        require(tx.inputs[1].lockingBytecode == ownerLock, "input 1 must be owner");
+        for (int i = 1; i < int(tx.inputs.length); i++) {
+            require(tx.inputs[i].tokenCategory == 0x, "extra inputs must be plain BCH");
+        }
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        int curDeadline = int(deadlineBytes);
+        int nextDeadline = tx.locktime + int(periodBytes);
+        require(nextDeadline <= 4294967295, "deadline exceeds timestamp locktime range");
+        int newDeadline = curDeadline;
+        if (nextDeadline > curDeadline) {
+            newDeadline = nextDeadline;
+        }
+        bytes closedCommitment = 0x0203 + toPaddedBytes(newRound, 4) + 0x00 + toPaddedBytes(newDeadline, 8) + tail;
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid exit output count");
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must keep plan carrier");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == closedCommitment, "output 0 must enter CLOSED");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+
+        if (tx.outputs.length == 2) {
+            require(tx.outputs[1].lockingBytecode == ownerLock, "output 1 must pay owner");
+            require(tx.outputs[1].tokenCategory == 0x, "owner output cannot carry tokens");
+        }
+    }
+
+    // 6. Trusted contact approval (2-of-3 quorum) from ACTIVE or funded CLOSED.
+    // 1st distinct approval records bit in approvalsMask while preserving ACTIVE or CLOSED.
+    // 2nd distinct approval transitions ACTIVE/CLOSED -> REVIEW, increments round, resets mask,
+    // and mints a fresh PusakaV2Anchor UTXO whose chain age starts the full review delay.
+    function contactApprove(int contactIndex, bytes policyBytes) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(contactIndex >= 0 && contactIndex <= 2, "invalid contactIndex");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0203, "plan must be ACTIVE or CLOSED");
+        if (header == 0x0203) {
+            require(tx.inputs[0].value > 1000, "closed plan has no spendable funds");
+        }
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes maskByte, bytes afterMask = afterRound.split(1);
+        bytes policyHashBytes = afterMask.split(12)[1];
+        require(hash256(policyBytes) == policyHashBytes, "policyBytes hash mismatch");
+
+        require(int(policyBytes.length) >= 101 && int(policyBytes.length) <= 317, "invalid policy length");
+        bytes seqBytes = policyBytes.slice(4, 8);
+        int reviewSeq = int(seqBytes);
+        require(reviewSeq >= 4194305 && reviewSeq <= 4259839, "invalid reviewSequence");
+
+        bytes20 c0 = unsafe_bytes20(policyBytes.slice(12, 32));
+        bytes20 c1 = unsafe_bytes20(policyBytes.slice(32, 52));
+        bytes20 c2 = unsafe_bytes20(policyBytes.slice(52, 72));
+        require(c0 != c1 && c0 != c2 && c1 != c2, "contacts must be distinct");
+
+        bytes20 contactPkh = c0;
+        int bit = 1;
+        if (contactIndex == 1) {
+            contactPkh = c1;
+            bit = 2;
+        }
+        if (contactIndex == 2) {
+            contactPkh = c2;
+            bit = 4;
+        }
+
+        require(tx.inputs.length == 2, "contactApprove requires plan and contact input");
+        require(tx.inputs[1].lockingBytecode == new LockingBytecodeP2PKH(contactPkh), "input 1 must be registered contact");
+        require(tx.inputs[1].tokenCategory == 0x, "contact input must be plain BCH");
+
+        int mask = int(maskByte);
+        require(mask == 0 || mask == 1 || mask == 2 || mask == 4, "invalid approvals mask");
+        require((mask / bit) % 2 == 0, "contact already approved this round");
+
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].value >= tx.inputs[0].value, "contact cannot shrink plan balance");
+
+        if (mask == 0) {
+            bytes nextCommitment = header + roundBytes + toPaddedBytes(bit, 1) + afterMask;
+            require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid first-approval output count");
+            require(tx.outputs[0].nftCommitment == nextCommitment, "invalid first-approval commitment");
+            if (tx.outputs.length == 2) {
+                require(tx.outputs[1].tokenCategory == 0x, "contact change must be plain BCH");
+            }
+        } else {
+            require(anchorLockingBytecode.length == 35, "anchor must be P2SH32");
+            int newRound = int(roundBytes) + 1;
+            require(newRound > 0 && newRound < 2147483647, "round overflow");
+            bytes nextRoundBytes = toPaddedBytes(newRound, 4);
+            bytes reviewCommitment = 0x0201 + nextRoundBytes + 0x00 + afterMask;
+
+            require(tx.outputs.length == 2 || tx.outputs.length == 3, "invalid quorum output count");
+            require(tx.outputs[0].nftCommitment == reviewCommitment, "output 0 must enter REVIEW");
+            require(tx.outputs[1].lockingBytecode == anchorLockingBytecode, "output 1 must lock to anchor");
+            require(tx.outputs[1].tokenCategory == planCategory, "output 1 must hold immutable plan NFT");
+            require(tx.outputs[1].nftCommitment == nextRoundBytes + seqBytes, "anchor commitment mismatch");
+            require(tx.outputs[1].value >= 1000, "anchor below minimum sats");
+            if (tx.outputs.length == 3) {
+                require(tx.outputs[2].tokenCategory == 0x, "quorum change must be plain BCH");
+            }
+        }
+    }
+
+    // 7. Permissionless inactivity trigger after tx.time >= deadline from ACTIVE or funded CLOSED.
+    // Supports sponsored opening (input 1 plain BCH) or self-funded opening (exactly 2 outputs,
+    // forbidding any caller-change fee siphon).
+    function openClaimByInactivity(bytes policyBytes) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(anchorLockingBytecode.length == 35, "anchor must be P2SH32");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0200 || header == 0x0203, "plan must be ACTIVE or CLOSED");
+        if (header == 0x0203) {
+            require(tx.inputs[0].value > 1000, "closed plan has no spendable funds");
+        }
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes deadlineBytes = afterMask.split(8)[0];
+        bytes policyHashBytes = afterMask.split(12)[1];
+
+        int deadline = int(deadlineBytes);
+        require(tx.time >= deadline, "inactivity period has not elapsed");
+        require(hash256(policyBytes) == policyHashBytes, "policyBytes hash mismatch");
+
+        require(int(policyBytes.length) >= 101 && int(policyBytes.length) <= 317, "invalid policy length");
+        bytes seqBytes = policyBytes.slice(4, 8);
+        int reviewSeq = int(seqBytes);
+        require(reviewSeq >= 4194305 && reviewSeq <= 4259839, "invalid reviewSequence");
+        bytes feeBudgetBytes = policyBytes.slice(8, 12);
+        int feeBudget = int(feeBudgetBytes);
+
+        int newRound = int(roundBytes) + 1;
+        require(newRound > 0 && newRound < 2147483647, "round overflow");
+        bytes nextRoundBytes = toPaddedBytes(newRound, 4);
+
+        require(tx.inputs.length == 1 || tx.inputs.length == 2, "invalid openClaim input count");
+        if (tx.inputs.length == 2) {
+            require(tx.inputs[1].tokenCategory == 0x, "sponsor input must be plain BCH");
+            require(tx.outputs.length == 2 || tx.outputs.length == 3, "invalid sponsored open output count");
+            require(tx.outputs[0].value >= tx.inputs[0].value, "sponsored open cannot shrink plan");
+            if (tx.outputs.length == 3) {
+                require(tx.outputs[2].tokenCategory == 0x, "openClaim change must be plain BCH");
+            }
+        } else {
+            require(tx.outputs.length == 2, "self-funded open cannot pay caller change");
+            require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+            require(
+                tx.outputs[0].value + tx.outputs[1].value >= tx.inputs[0].value - feeBudget,
+                "excessive self-funded open cost"
+            );
+        }
+
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == 0x0201 + nextRoundBytes + 0x00 + afterMask, "output 0 must enter REVIEW");
+
+        require(tx.outputs[1].lockingBytecode == anchorLockingBytecode, "output 1 must lock to anchor");
+        require(tx.outputs[1].tokenCategory == planCategory, "output 1 must hold immutable plan NFT");
+        require(tx.outputs[1].nftCommitment == nextRoundBytes + seqBytes, "anchor commitment mismatch");
+        require(tx.outputs[1].value >= 1000, "anchor below minAnchorSats");
+    }
+
+    // 8. Permissionless payout after full consensus-enforced BIP68 review delay.
+    // Consumes Plan (input 0) + matching Anchor (input 1), burns Anchor, pays 1..10 heirs,
+    // and keeps Plan in PAID_OUT (0x02) with >= 1000-sat carrier + rounding remainder so
+    // any late receipts at inboxAddress remain claimable by the same heirs.
+    function finalizeClaim(bytes policyBytes) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+        require(tx.version >= 2, "tx version must be >= 2");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0201, "plan must be in REVIEW");
+
+        bytes roundBytes, bytes afterRound = afterHeader.split(4);
+        bytes afterMask = afterRound.split(1)[1];
+        bytes policyHashBytes = afterMask.split(12)[1];
+        require(hash256(policyBytes) == policyHashBytes, "policyBytes hash mismatch");
+
+        require(int(policyBytes.length) >= 101 && int(policyBytes.length) <= 317, "invalid policy length");
+        bytes seqBytes = policyBytes.slice(4, 8);
+        bytes feeBudgetBytes = policyBytes.slice(8, 12);
+        bytes totalSharesBytes = policyBytes.slice(72, 76);
+        bytes heirCountBytes = policyBytes.slice(76, 77);
+        int feeBudget = int(feeBudgetBytes);
+        int totalShares = int(totalSharesBytes);
+        int heirCount = int(heirCountBytes);
+        require(totalShares > 0, "totalShares must be positive");
+        require(heirCount >= 1 && heirCount <= 10, "1 to 10 heirs");
+        require(int(policyBytes.length) == 77 + heirCount * 24, "policy length mismatch");
+        bytes heirsSlice = policyBytes.slice(77, 77 + heirCount * 24);
+
+        require(tx.inputs.length == 2 || tx.inputs.length == 3, "invalid finalize input count");
+        require(tx.inputs[1].lockingBytecode == anchorLockingBytecode, "input 1 must be anchor");
+        require(tx.inputs[1].tokenCategory == planCategory, "input 1 must hold plan none NFT");
+        require(tx.inputs[1].nftCommitment == roundBytes + seqBytes, "anchor round or sequence mismatch");
+
+        int vaultTotal = tx.inputs[0].value + tx.inputs[1].value;
+        int pot = vaultTotal - 1000;
+        if (tx.inputs.length == 2) {
+            require(tx.outputs.length == 1 + heirCount, "self-funded finalize output count");
+            pot = pot - feeBudget;
+        } else {
+            require(tx.inputs[2].tokenCategory == 0x, "sponsor input must be plain BCH");
+            require(
+                tx.outputs.length == 1 + heirCount || tx.outputs.length == 2 + heirCount,
+                "sponsored finalize output count"
+            );
+            if (tx.outputs.length == 2 + heirCount) {
+                require(tx.outputs[1 + heirCount].tokenCategory == 0x, "finalize change must be plain BCH");
+            }
+        }
+        require(pot > 0, "insufficient pot for payout");
+
+        int paidTotal = 0;
+        for (int i = 0; i < heirCount; i++) {
+            bytes entry = heirsSlice.slice(i * 24, i * 24 + 24);
+            bytes pkhBytes, bytes shareBytes = entry.split(20);
+            int expected = (pot * int(shareBytes)) / totalShares;
+            require(expected >= 546, "heir share below dust");
+            require(
+                tx.outputs[1 + i].lockingBytecode == new LockingBytecodeP2PKH(unsafe_bytes20(pkhBytes)),
+                "wrong heir address"
+            );
+            require(tx.outputs[1 + i].value == expected, "wrong heir amount");
+            require(tx.outputs[1 + i].tokenCategory == 0x, "heir output cannot carry tokens");
+            paidTotal = paidTotal + expected;
+        }
+
+        bytes paidOutCommitment = 0x0202 + roundBytes + 0x00 + afterMask;
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == paidOutCommitment, "output 0 must enter PAID_OUT");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        if (tx.inputs.length == 2) {
+            require(tx.outputs[0].value >= vaultTotal - paidTotal - feeBudget, "excessive finalize fee");
+        } else {
+            require(tx.outputs[0].value >= vaultTotal - paidTotal, "plan must keep carrier and remainder");
+        }
+    }
+
+    // 9. Permissionless late-receipt distribution when plan is already PAID_OUT (0x02).
+    // Pays newly swept receipts from inboxAddress to the same configured heirs without stranding funds.
+    function distributeLate(bytes policyBytes) {
+        require(this.activeInputIndex == 0, "plan must be input 0");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must be plan minting NFT");
+
+        bytes commitment = tx.inputs[0].nftCommitment;
+        require(commitment.length == 51, "invalid plan state length");
+        bytes header, bytes afterHeader = commitment.split(2);
+        require(header == 0x0202, "plan must be PAID_OUT");
+        bytes policyHashBytes = afterHeader.split(17)[1];
+        require(hash256(policyBytes) == policyHashBytes, "policyBytes hash mismatch");
+
+        require(int(policyBytes.length) >= 101 && int(policyBytes.length) <= 317, "invalid policy length");
+        bytes feeBudgetBytes = policyBytes.slice(8, 12);
+        bytes totalSharesBytes = policyBytes.slice(72, 76);
+        bytes heirCountBytes = policyBytes.slice(76, 77);
+        int feeBudget = int(feeBudgetBytes);
+        int totalShares = int(totalSharesBytes);
+        int heirCount = int(heirCountBytes);
+        require(totalShares > 0, "totalShares must be positive");
+        require(heirCount >= 1 && heirCount <= 10, "1 to 10 heirs");
+        require(int(policyBytes.length) == 77 + heirCount * 24, "policy length mismatch");
+        bytes heirsSlice = policyBytes.slice(77, 77 + heirCount * 24);
+
+        int vaultTotal = tx.inputs[0].value;
+        int pot = vaultTotal - 1000;
+        require(tx.inputs.length == 1 || tx.inputs.length == 2, "invalid distributeLate input count");
+        if (tx.inputs.length == 1) {
+            require(tx.outputs.length == 1 + heirCount, "self-funded distributeLate output count");
+            pot = pot - feeBudget;
+        } else {
+            require(tx.inputs[1].tokenCategory == 0x, "sponsor input must be plain BCH");
+            require(
+                tx.outputs.length == 1 + heirCount || tx.outputs.length == 2 + heirCount,
+                "sponsored distributeLate output count"
+            );
+            if (tx.outputs.length == 2 + heirCount) {
+                require(tx.outputs[1 + heirCount].tokenCategory == 0x, "distributeLate change must be plain BCH");
+            }
+        }
+        require(pot > 0, "insufficient late pot");
+
+        int paidTotal = 0;
+        for (int i = 0; i < heirCount; i++) {
+            bytes entry = heirsSlice.slice(i * 24, i * 24 + 24);
+            bytes pkhBytes, bytes shareBytes = entry.split(20);
+            int expected = (pot * int(shareBytes)) / totalShares;
+            require(expected >= 546, "heir share below dust");
+            require(
+                tx.outputs[1 + i].lockingBytecode == new LockingBytecodeP2PKH(unsafe_bytes20(pkhBytes)),
+                "wrong heir address"
+            );
+            require(tx.outputs[1 + i].value == expected, "wrong heir amount");
+            require(tx.outputs[1 + i].tokenCategory == 0x, "heir output cannot carry tokens");
+            paidTotal = paidTotal + expected;
+        }
+
+        require(tx.outputs[0].lockingBytecode == tx.inputs[0].lockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == commitment, "distributeLate must preserve PAID_OUT state");
+        require(tx.outputs[0].value >= 1000, "plan carrier below minimum");
+        if (tx.inputs.length == 1) {
+            require(tx.outputs[0].value >= vaultTotal - paidTotal - feeBudget, "excessive distributeLate fee");
+        } else {
+            require(tx.outputs[0].value >= vaultTotal - paidTotal, "plan must keep carrier and remainder");
+        }
+    }
+}

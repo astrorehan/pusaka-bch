@@ -8,6 +8,38 @@ npm run dev      # http://localhost:5173
 npm run build    # type-check + production build
 ```
 
+## Current wallet
+
+- `/wallet`: usable protected BCH and fungible receipts.
+- `/new` or `/wallet/new`: new asset-enabled setup.
+- `/wallet/plan`, `/wallet/swap`, `/wallet/activity`: family rules, test-pair swap and local submissions.
+- `/v2/plan#...`: restore a v2 public plan link. `/wallet/demo`: live public Chipnet proof wallet.
+- `/plan#...`: existing v1 plan support. `/legacy/new` retains the old setup code.
+
+`src/lib/protocol/` is shared by the browser and contract runners. Install app dependencies
+before running Node contract scripts. No fixture keys or filesystem helpers enter the client.
+Compile contracts before `npm run sync:artifacts`; `npm run check:artifacts` detects stale bundles.
+
+`npm run test:ui` runs isolated headless browser checks with Microsoft Edge. Set
+`PUSAKA_TEST_URL=https://astrorehan.github.io/pusaka-bch/` to test the published base path.
+`npm run build:pages` builds that hosted path. [Release evidence](../docs/proofs/app-and-assets.md).
+
+## Mainnet wallet testing
+
+```bash
+npm run build:mainnet
+npm run preview:mainnet  # http://localhost:4180/new
+```
+
+This production build uses mainnet and disables mock mode. Connect Paytaca on your phone by scanning the
+WizardConnect QR code. Connecting shares the wallet session; each transaction still needs approval in the wallet.
+
+The mainnet build lives in `dist-mainnet`, separate from the normal `dist` build, so rebuilding the app for UI
+work does not remove the mainnet preview. Keep the preview command running while testing.
+
+Run `npm run test:wallet` for offline wallet transport checks (Node 24). These exercise the SDK signer through
+WizardConnect's JSON serialization, including CashTokens, change addresses, and rejection of altered outputs.
+
 ## Layout
 
 | Path | What |

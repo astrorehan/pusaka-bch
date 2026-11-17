@@ -1,0 +1,323 @@
+{
+  "contractName": "PusakaTokenVault",
+  "constructorInputs": [
+    {
+      "name": "planCategory",
+      "type": "bytes32"
+    },
+    {
+      "name": "planLock",
+      "type": "bytes"
+    },
+    {
+      "name": "ownerPkh",
+      "type": "bytes20"
+    }
+  ],
+  "abi": [
+    {
+      "name": "ownerSpend",
+      "selector": "37b982a8",
+      "inputs": [],
+      "sourceEffectOrder": "unsupported-flow"
+    },
+    {
+      "name": "distribute",
+      "selector": "c12fc38b",
+      "inputs": [
+        {
+          "name": "policy",
+          "type": "bytes"
+        }
+      ],
+      "sourceEffectOrder": "unsupported-flow"
+    }
+  ],
+  "bytecode": "00c752798800ce78527e8800cd7b8800d17c527e8800d2527f75020200880376a9147c7e0288ac7e51c7788763516752c778876869c0ce827701209dc0cf008777 37b982a8 OP_DEFINE c0519d00c77b8800ce78527e8800cf76827701339c6376527f7502020287670068695379aa7801137f7788537982770165a26353798277023d01a16700686951ce76827701209c6376537987916700686951cf0088547901487f77547f755579014c7f77517f757c81518a7c81518a7800a0637600a067006863765aa167006869567982777602ff008e0200018d94014d5279011895518a93518a9dc4518a785393518a9d51d0518a00518a00518a00518a657655799f635a79014d5279011895518a93518a7f777601147f757801147f77547f757681518a7600a06957797895518a5a7996518a55795a798c518a9c635879587994518a776855798b518acd0376a91455797e0288ac7e887600a06355798b518ad15c798855798b518ad3789d6755798b518ad100886855798b518ad2008855798b518acc022003a26957797893518a587a75577a577a577a577a577a577a577a5679527993518a577a75567a567a567a567a567a567a55798b518a567a757171557a6d6d7500675168667c557a9d53798b518a76cd51c78876cc51c6a26970a06376d156798876d35479547994518a9d76d200886776d100886852518a6576c3518a9f6376ce0088768b518a77006751686655795293518ad100886d6d6d6d6d7551 c12fc38b OP_DEFINE 765102ff008d9301218001207f77010088 OP_1 OP_DEFINE OP_DEPTH OP_1SUB OP_ROLL OP_SIZE OP_4 OP_NUMEQUALVERIFY OP_INVOKE",
+  "source": "pragma solidcash ^0.50.0;\r\n\r\n// Fungible CashTokens at this address follow the authenticated plan's live policy.\r\n// No NFT splitting, no fixed off-chain heir list, and no caller-chosen recipients.\r\ncontract PusakaTokenVault(bytes32 planCategory, bytes planLock, bytes20 ownerPkh) {\r\n    function ownerSpend() {\r\n        require(tx.inputs[0].lockingBytecode == planLock, \"bound plan required\");\r\n        require(tx.inputs[0].tokenCategory == planCategory + 0x02, \"plan identity\");\r\n        require(tx.outputs[0].lockingBytecode == planLock, \"plan successor\");\r\n        require(tx.outputs[0].tokenCategory == planCategory + 0x02, \"preserve identity\");\r\n        require(tx.outputs[0].nftCommitment.split(2)[0] == 0x0200, \"owner returns ACTIVE\");\r\n        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);\r\n        require(tx.inputs[1].lockingBytecode == ownerLock || tx.inputs[2].lockingBytecode == ownerLock, \"owner signature required\");\r\n        require(tx.inputs[this.activeInputIndex].tokenCategory.length == 32, \"fungible tokens only\");\r\n        require(tx.inputs[this.activeInputIndex].nftCommitment == 0x, \"no NFT\");\r\n    }\r\n\r\n    function distribute(bytes policy) {\r\n        require(this.activeInputIndex == 1, \"one token receipt per payout\");\r\n        require(tx.inputs[0].lockingBytecode == planLock, \"bound plan required\");\r\n        require(tx.inputs[0].tokenCategory == planCategory + 0x02, \"plan identity\");\r\n        bytes state = tx.inputs[0].nftCommitment;\r\n        require(state.length == 51 && state.split(2)[0] == 0x0202, \"BCH claim must finish first\");\r\n        require(hash256(policy) == state.split(19)[1], \"live heir policy\");\r\n        require(policy.length >= 101 && policy.length <= 317, \"policy length\");\r\n        bytes category = tx.inputs[1].tokenCategory;\r\n        require(category.length == 32 && category != planCategory, \"foreign fungible category\");\r\n        require(tx.inputs[1].nftCommitment == 0x, \"no NFT\");\r\n        bytes totalBytes = policy.split(72)[1].split(4)[0];\r\n        bytes countBytes = policy.split(76)[1].split(1)[0];\r\n        int total = int(totalBytes);\r\n        int count = int(countBytes);\r\n        require(total > 0 && count > 0 && count <= 10, \"heir bounds\");\r\n        require(int(policy.length) == 77 + count * 24, \"canonical policy\");\r\n        require(int(tx.outputs.length) == count + 3, \"exact payout outputs\");\r\n        int amount = tx.inputs[1].tokenAmount;\r\n        int paid = 0;\r\n        int sum = 0;\r\n        for (int i = 0; i < count; i++) {\r\n            bytes entry = policy.split(77 + i * 24)[1];\r\n            bytes20 heir = unsafe_bytes20(entry.split(20)[0]);\r\n            bytes shareBytes = entry.split(20)[1].split(4)[0];\r\n            int share = int(shareBytes);\r\n            require(share > 0, \"positive share\");\r\n            int part = (amount * share) / total;\r\n            // Assign indivisible rounding units to the final configured heir.\r\n            if (i == count - 1) { part = amount - paid; }\r\n            require(tx.outputs[i + 1].lockingBytecode == new LockingBytecodeP2PKH(heir), \"fixed heir\");\r\n            if (part > 0) {\r\n                require(tx.outputs[i + 1].tokenCategory == category, \"correct token\");\r\n                require(tx.outputs[i + 1].tokenAmount == part, \"correct token share\");\r\n            } else {\r\n                require(tx.outputs[i + 1].tokenCategory == 0x, \"zero-share carrier only\");\r\n            }\r\n            require(tx.outputs[i + 1].nftCommitment == 0x, \"fungible payout\");\r\n            require(tx.outputs[i + 1].value >= 800, \"token carrier\");\r\n            paid = paid + part;\r\n            sum = sum + share;\r\n        }\r\n        require(sum == total, \"share total\");\r\n        int remainderIndex = count + 1;\r\n        require(tx.outputs[remainderIndex].lockingBytecode == tx.inputs[1].lockingBytecode, \"protected remainder\");\r\n        require(tx.outputs[remainderIndex].value >= tx.inputs[1].value, \"preserve token receipt BCH\");\r\n        if (paid < amount) {\r\n            require(tx.outputs[remainderIndex].tokenCategory == category, \"remainder category\");\r\n            require(tx.outputs[remainderIndex].tokenAmount == amount - paid, \"exact remainder\");\r\n            require(tx.outputs[remainderIndex].nftCommitment == 0x, \"fungible remainder\");\r\n        } else {\r\n            require(tx.outputs[remainderIndex].tokenCategory == 0x, \"no remainder token\");\r\n        }\r\n        for (int j = 2; j < int(tx.inputs.length); j++) {\r\n            require(tx.inputs[j].tokenCategory == 0x, \"sponsor BCH only\");\r\n        }\r\n        require(tx.outputs[count + 2].tokenCategory == 0x, \"sponsor change BCH only\");\r\n    }\r\n}\r\n",
+  "debug": {
+    "bytecode": "4100c752798800ce78527e8800cd7b8800d17c527e8800d2527f75020200880376a9147c7e0288ac7e51c7788763516752c778876869c0ce827701209dc0cf0087770437b982a8894dd701c0519d00c77b8800ce78527e8800cf76827701339c6376527f7502020287670068695379aa7801137f7788537982770165a26353798277023d01a16700686951ce76827701209c6376537987916700686951cf0088547901487f77547f755579014c7f77517f757c81518a7c81518a7800a0637600a067006863765aa167006869567982777602ff008e0200018d94014d5279011895518a93518a9dc4518a785393518a9d51d0518a00518a00518a00518a657655799f635a79014d5279011895518a93518a7f777601147f757801147f77547f757681518a7600a06957797895518a5a7996518a55795a798c518a9c635879587994518a776855798b518acd0376a91455797e0288ac7e887600a06355798b518ad15c798855798b518ad3789d6755798b518ad100886855798b518ad2008855798b518acc022003a26957797893518a587a75577a577a577a577a577a577a577a5679527993518a577a75567a567a567a567a567a567a55798b518a567a757171557a6d6d7500675168667c557a9d53798b518a76cd51c78876cc51c6a26970a06376d156798876d35479547994518a9d76d200886776d100886852518a6576c3518a9f6376ce0088768b518a77006751686655795293518ad100886d6d6d6d6d755104c12fc38b8911765102ff008d9301218001207f770100885189748c7a82549d8a",
+    "sourceMap": "6:4:16:5;;;18::75;;;5:0:76:1;;;;;;;;;",
+    "logs": [],
+    "requires": [],
+    "functionDebug": {
+      "37b982a8": {
+        "requires": [
+          {
+            "ip": 4,
+            "line": 7,
+            "message": "bound plan required"
+          },
+          {
+            "ip": 10,
+            "line": 8,
+            "message": "plan identity"
+          },
+          {
+            "ip": 14,
+            "line": 9,
+            "message": "plan successor"
+          },
+          {
+            "ip": 20,
+            "line": 10,
+            "message": "preserve identity"
+          },
+          {
+            "ip": 27,
+            "line": 11,
+            "message": "owner returns ACTIVE"
+          },
+          {
+            "ip": 45,
+            "line": 13,
+            "message": "owner signature required"
+          },
+          {
+            "ip": 51,
+            "line": 14,
+            "message": "fungible tokens only"
+          },
+          {
+            "ip": 56,
+            "line": 15,
+            "message": "no NFT"
+          }
+        ],
+        "logs": [],
+        "sourceMap": "7:26:7:27;:16::44:1;:48::56:0;;:8::81:1;8:26:8:27:0;:16::42:1;:46::58:0;:61::65;:46:::1;:8::84;9:27:9:28:0;:16::45:1;:49::57:0;:8::77:1;10:27:10:28:0;:16::43:1;:47::59:0;:62::66;:47:::1;:8::89;11:27:11:28:0;:16::43:1;:50::51:0;:16::52:1;:::55;:59::65:0;:8::91:1;12:26:12:60:0;:51::59;:26::60:1;;;13::13:27:0;:16::44:1;:48::57:0;:16:::1;:::102:0;;::::1;:71::72:0;:61::89:1;:93::102:0;:61:::1;:16;:8::132;14:26:14:47:0;:16::62:1;:::69;;:73::75:0;:8::101:1;15:26:15:47:0;:16::62:1;:66::68:0;:8::80:1;6:4:16:5"
+      },
+      "c12fc38b": {
+        "requires": [
+          {
+            "ip": 2,
+            "line": 19,
+            "message": "one token receipt per payout"
+          },
+          {
+            "ip": 6,
+            "line": 20,
+            "message": "bound plan required"
+          },
+          {
+            "ip": 12,
+            "line": 21,
+            "message": "plan identity"
+          },
+          {
+            "ip": 30,
+            "line": 23,
+            "message": "BCH claim must finish first"
+          },
+          {
+            "ip": 38,
+            "line": 24,
+            "message": "live heir policy"
+          },
+          {
+            "ip": 55,
+            "line": 25,
+            "message": "policy length"
+          },
+          {
+            "ip": 72,
+            "line": 27,
+            "message": "foreign fungible category"
+          },
+          {
+            "ip": 76,
+            "line": 28,
+            "message": "no NFT"
+          },
+          {
+            "ip": 118,
+            "line": 33,
+            "message": "heir bounds"
+          },
+          {
+            "ip": 139,
+            "line": 34,
+            "message": "canonical policy"
+          },
+          {
+            "ip": 148,
+            "line": 35,
+            "message": "exact payout outputs"
+          },
+          {
+            "ip": 200,
+            "line": 44,
+            "message": "positive share"
+          },
+          {
+            "ip": 242,
+            "line": 48,
+            "message": "fixed heir"
+          },
+          {
+            "ip": 255,
+            "line": 50,
+            "message": "correct token"
+          },
+          {
+            "ip": 263,
+            "line": 51,
+            "message": "correct token share"
+          },
+          {
+            "ip": 272,
+            "line": 53,
+            "message": "zero-share carrier only"
+          },
+          {
+            "ip": 281,
+            "line": 55,
+            "message": "fungible payout"
+          },
+          {
+            "ip": 290,
+            "line": 56,
+            "message": "token carrier"
+          },
+          {
+            "ip": 359,
+            "line": 60,
+            "message": "share total"
+          },
+          {
+            "ip": 369,
+            "line": 62,
+            "message": "protected remainder"
+          },
+          {
+            "ip": 375,
+            "line": 63,
+            "message": "preserve token receipt BCH"
+          },
+          {
+            "ip": 383,
+            "line": 65,
+            "message": "remainder category"
+          },
+          {
+            "ip": 393,
+            "line": 66,
+            "message": "exact remainder"
+          },
+          {
+            "ip": 397,
+            "line": 67,
+            "message": "fungible remainder"
+          },
+          {
+            "ip": 402,
+            "line": 69,
+            "message": "no remainder token"
+          },
+          {
+            "ip": 417,
+            "line": 72,
+            "message": "sponsor BCH only"
+          },
+          {
+            "ip": 436,
+            "line": 74,
+            "message": "sponsor change BCH only"
+          }
+        ],
+        "logs": [],
+        "sourceMap": "19:16:19:37;:41::42;:8::76:1;20:26:20:27:0;:16::44:1;:48::56:0;:8::81:1;21:26:21:27:0;:16::42:1;:46::58:0;:61::65;:46:::1;:8::84;22:32:22:33:0;:22::48:1;23:16:23:21:0;:::28:1;;:32::34:0;:16:::1;:::65:0;:38::43;:50::51;:38::52:1;:::55;:59::65:0;:38:::1;:16;;;:8::98;24:24:24:30:0;;:16::31:1;:35::40:0;:47::49;:35::50:1;:::53;:8::75;25:16:25:22:0;;:::29:1;;:33::36:0;:16:::1;:::60:0;:40::46;;:::53:1;;:57::60:0;:40:::1;:16;;;:8::79;26:35:26:36:0;:25::51:1;27:16:27:24:0;:::31:1;;:35::37:0;:16:::1;:::65:0;:41::49;:53::65;;:41:::1;;:16;;;:8::96;28:26:28:27:0;:16::42:1;:46::48:0;:8::60:1;29:27:29:33:0;;:40::42;:27::43:1;:::46;:53::54:0;:27::55:1;:::58;30::30:33:0;;:40::42;:27::43:1;:::46;:53::54:0;:27::55:1;:::58;31:24:31:34:0;:20::35:1;;;32:24:32:34:0;:20::35:1;;;33:16:33:21:0;:24::25;:16:::1;:::38:0;:29::34;:37::38;:29:::1;:16;;;:::53:0;:42::47;:51::53;:42:::1;:16;;;:8::70;34:20:34:26:0;;:::33:1;;:16::34;;;;;;:38::40:0;:43::48;;:51::53;:43:::1;;;:38;;;:8::75;35:20:35:37:0;:16::38:1;;:42::47:0;:50::51;:42:::1;;;:8::77;36:31:36:32:0;:21::45:1;:8::46;;37:19:37:20:0;:8::21:1;;38:18:38:19:0;:8::20:1;;39:21:39:22:0;:13::23:1;;:8:59:9:0;:24:39:25;:28::33;;:24:::1;:8:59:9:0;40:26:40:32;;:39::41;:44::45;;:48::50;:44:::1;;;:39;;;:26::51;:::54;41:42:41:47:0;:54::56;:42::57:1;:::60;42:31:42:36:0;:43::45;:31::46:1;:::49;:56::57:0;:31::58:1;:::61;43:28:43:38:0;:24::39:1;;;44:20:44:25:0;:28::29;:20:::1;:12::49;45:24:45:30:0;;:33::38;:24:::1;;;:42::47:0;;:23:::1;;;47:16:47:17:0;;:21::26;;:::30:1;;;:16;:32::57:0;:41::47;;:50::54;;:41:::1;;;:34::55;:32::57;48:31:48:32:0;;:::36:1;;;:20::53;:57::87:0;:82::86;;:57::87:1;;;:12::103;49:16:49:20:0;:23::24;:16:::1;:26:52:13:0;50:35:50:36;;:::40:1;;;:24::55;:59::67:0;;:16::86:1;51:35:51:36:0;;:::40:1;;;:24::53;:57::61:0;:16::86:1;52:19:54:13:0;53:35:53:36;;:::40:1;;;:24::55;:59::61:0;:16::90:1;52:19:54:13;55:31:55:32:0;;:::36:1;;;:20::51;:55::57:0;:12::78:1;56:31:56:32:0;;:::36:1;;;:20::43;:47::50:0;:20:::1;:12::69;57:19:57:23:0;;:26::30;:19:::1;;;:12::31;;;;;;;;;;;;;;;;;58:18:58:21:0;;:24::29;;:18:::1;;;:12::30;;;;;;;;;;;;;;;39:35:39:36:0;;:::38:1;;;;;;;;;;:40:59:9;;;:8;;;;;60:16:60:19:0;:23::28;;:8::45:1;61:29:61:34:0;;:::38:1;;;62:27:62:41:0;:16::58:1;:72::73:0;:62::90:1;:8::115;63:27:63:41:0;:16::48:1;:62::63:0;:52::70:1;:16;:8::102;64:12:64:25:0;::::1;:27:68:9:0;65:31:65:45;:20::60:1;:64::72:0;;:12::96:1;66:31:66:45:0;:20::58:1;:62::68:0;;:71::75;;:62:::1;;;:12::96;67:31:67:45:0;:20::60:1;:64::66:0;:12::90:1;68:15:70:9:0;69:31:69:45;:20::60:1;:64::66:0;:12::90:1;68:15:70:9;71:21:71:22:0;:13::23:1;;:8:73:9:0;:24:71:25;:32::48;:28::49:1;;:24;:8:73:9:0;72:30:72:31;:20::46:1;:50::52:0;:12::74:1;71:51:71:52:0;:::54:1;;;;:8:73:9;;;;;74:27:74:32:0;;:35::36;:27:::1;;;:16::51;:55::57:0;:8::86:1;18:4:75:5;;;;;;"
+      }
+    },
+    "invokeDebug": {
+      "1": {
+        "bytecode": "765102ff008d9301218001207f77010088",
+        "name": "outlined source span 1",
+        "requires": [],
+        "logs": [],
+        "sourceMap": "31:20:31:35:1;;;;;;;;;;;"
+      }
+    }
+  },
+  "functionBodies": {
+    "37b982a8": "00c752798800ce78527e8800cd7b8800d17c527e8800d2527f75020200880376a9147c7e0288ac7e51c7788763516752c778876869c0ce827701209dc0cf008777",
+    "c12fc38b": "c0519d00c77b8800ce78527e8800cf76827701339c6376527f7502020287670068695379aa7801137f7788537982770165a26353798277023d01a16700686951ce76827701209c6376537987916700686951cf0088547901487f77547f755579014c7f77517f757c81518a7c81518a7800a0637600a067006863765aa167006869567982777602ff008e0200018d94014d5279011895518a93518a9dc4518a785393518a9d51d0518a00518a00518a00518a657655799f635a79014d5279011895518a93518a7f777601147f757801147f77547f757681518a7600a06957797895518a5a7996518a55795a798c518a9c635879587994518a776855798b518acd0376a91455797e0288ac7e887600a06355798b518ad15c798855798b518ad3789d6755798b518ad100886855798b518ad2008855798b518acc022003a26957797893518a587a75577a577a577a577a577a577a577a5679527993518a577a75567a567a567a567a567a567a55798b518a567a757171557a6d6d7500675168667c557a9d53798b518a76cd51c78876cc51c6a26970a06376d156798876d35479547994518a9d76d200886776d100886852518a6576c3518a9f6376ce0088768b518a77006751686655795293518ad100886d6d6d6d6d7551"
+  },
+  "fingerprint": "89cb6bccdb190dbc8605911f77533a955c018458a84870ed8fa96832ba59de6a",
+  "compiler": {
+    "name": "solidc",
+    "version": "0.50.0",
+    "options": {
+      "evmCompat": true,
+      "enforceFunctionParameterTypes": true,
+      "enforceLocktimeGuard": true,
+      "enforceFinalRequire": true,
+      "allowUnsafeOperations": false,
+      "commitmentLimit": 128,
+      "messageBus": false
+    }
+  },
+  "updatedAt": "2026-11-17T17:05:53.981Z",
+  "invocationAnalysis": {
+    "version": 1,
+    "protocolVersions": [
+      1
+    ],
+    "functions": [
+      {
+        "id": 0,
+        "name": "ownerSpend",
+        "arity": 0,
+        "entryPoint": true,
+        "selector": "37b982a8",
+        "calls": [],
+        "closure": [
+          0
+        ],
+        "component": 0,
+        "recursive": false,
+        "reads": [],
+        "writes": [],
+        "effects": [],
+        "unknown": false,
+        "bounded": true,
+        "maximumDirectInvocations": 0
+      },
+      {
+        "id": 1,
+        "name": "distribute",
+        "arity": 1,
+        "entryPoint": true,
+        "selector": "c12fc38b",
+        "calls": [],
+        "closure": [
+          1
+        ],
+        "component": 1,
+        "recursive": false,
+        "reads": [],
+        "writes": [],
+        "effects": [],
+        "unknown": false,
+        "bounded": true,
+        "maximumDirectInvocations": 0
+      }
+    ],
+    "components": [
+      {
+        "id": 0,
+        "functions": [
+          0
+        ],
+        "recursive": false
+      },
+      {
+        "id": 1,
+        "functions": [
+          1
+        ],
+        "recursive": false
+      }
+    ]
+  }
+}

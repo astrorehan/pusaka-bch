@@ -1,0 +1,76 @@
+pragma solidcash ^0.50.0;
+
+// Fungible CashTokens at this address follow the authenticated plan's live policy.
+// No NFT splitting, no fixed off-chain heir list, and no caller-chosen recipients.
+contract PusakaTokenVault(bytes32 planCategory, bytes planLock, bytes20 ownerPkh) {
+    function ownerSpend() {
+        require(tx.inputs[0].lockingBytecode == planLock, "bound plan required");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "plan identity");
+        require(tx.outputs[0].lockingBytecode == planLock, "plan successor");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "preserve identity");
+        require(tx.outputs[0].nftCommitment.split(2)[0] == 0x0200, "owner returns ACTIVE");
+        bytes ownerLock = new LockingBytecodeP2PKH(ownerPkh);
+        require(tx.inputs[1].lockingBytecode == ownerLock || tx.inputs[2].lockingBytecode == ownerLock, "owner signature required");
+        require(tx.inputs[this.activeInputIndex].tokenCategory.length == 32, "fungible tokens only");
+        require(tx.inputs[this.activeInputIndex].nftCommitment == 0x, "no NFT");
+    }
+
+    function distribute(bytes policy) {
+        require(this.activeInputIndex == 1, "one token receipt per payout");
+        require(tx.inputs[0].lockingBytecode == planLock, "bound plan required");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "plan identity");
+        bytes state = tx.inputs[0].nftCommitment;
+        require(state.length == 51 && state.split(2)[0] == 0x0202, "BCH claim must finish first");
+        require(hash256(policy) == state.split(19)[1], "live heir policy");
+        require(policy.length >= 101 && policy.length <= 317, "policy length");
+        bytes category = tx.inputs[1].tokenCategory;
+        require(category.length == 32 && category != planCategory, "foreign fungible category");
+        require(tx.inputs[1].nftCommitment == 0x, "no NFT");
+        bytes totalBytes = policy.split(72)[1].split(4)[0];
+        bytes countBytes = policy.split(76)[1].split(1)[0];
+        int total = int(totalBytes);
+        int count = int(countBytes);
+        require(total > 0 && count > 0 && count <= 10, "heir bounds");
+        require(int(policy.length) == 77 + count * 24, "canonical policy");
+        require(int(tx.outputs.length) == count + 3, "exact payout outputs");
+        int amount = tx.inputs[1].tokenAmount;
+        int paid = 0;
+        int sum = 0;
+        for (int i = 0; i < count; i++) {
+            bytes entry = policy.split(77 + i * 24)[1];
+            bytes20 heir = unsafe_bytes20(entry.split(20)[0]);
+            bytes shareBytes = entry.split(20)[1].split(4)[0];
+            int share = int(shareBytes);
+            require(share > 0, "positive share");
+            int part = (amount * share) / total;
+            // Assign indivisible rounding units to the final configured heir.
+            if (i == count - 1) { part = amount - paid; }
+            require(tx.outputs[i + 1].lockingBytecode == new LockingBytecodeP2PKH(heir), "fixed heir");
+            if (part > 0) {
+                require(tx.outputs[i + 1].tokenCategory == category, "correct token");
+                require(tx.outputs[i + 1].tokenAmount == part, "correct token share");
+            } else {
+                require(tx.outputs[i + 1].tokenCategory == 0x, "zero-share carrier only");
+            }
+            require(tx.outputs[i + 1].nftCommitment == 0x, "fungible payout");
+            require(tx.outputs[i + 1].value >= 800, "token carrier");
+            paid = paid + part;
+            sum = sum + share;
+        }
+        require(sum == total, "share total");
+        int remainderIndex = count + 1;
+        require(tx.outputs[remainderIndex].lockingBytecode == tx.inputs[1].lockingBytecode, "protected remainder");
+        require(tx.outputs[remainderIndex].value >= tx.inputs[1].value, "preserve token receipt BCH");
+        if (paid < amount) {
+            require(tx.outputs[remainderIndex].tokenCategory == category, "remainder category");
+            require(tx.outputs[remainderIndex].tokenAmount == amount - paid, "exact remainder");
+            require(tx.outputs[remainderIndex].nftCommitment == 0x, "fungible remainder");
+        } else {
+            require(tx.outputs[remainderIndex].tokenCategory == 0x, "no remainder token");
+        }
+        for (int j = 2; j < int(tx.inputs.length); j++) {
+            require(tx.inputs[j].tokenCategory == 0x, "sponsor BCH only");
+        }
+        require(tx.outputs[count + 2].tokenCategory == 0x, "sponsor change BCH only");
+    }
+}

@@ -1,0 +1,51 @@
+pragma solidcash ^0.50.0;
+
+// Long-lived permissionless receive/inbox covenant for Pusaka v2 (Stage 3).
+// Constructor depends ONLY on immutable plan identity (planCategory, planLockingBytecode,
+// perInputFeeCap), so the issued receive address never changes across policy edits,
+// partial spends, review cycles, owner exits, or post-payout late receipts.
+//
+// Sweeps 1 or more plain-BCH inbox UTXOs directly into PusakaV2Plan (input 0 -> output 0)
+// without owner signatures and without changing plan status, round, deadline, or policy.
+contract PusakaV2Inbox(
+    bytes32 planCategory,
+    bytes planLockingBytecode,
+    int perInputFeeCap
+) {
+    function sweep() {
+        require(tx.inputs.length >= 2, "sweep requires plan and inbox input");
+        require(tx.inputs[0].lockingBytecode == planLockingBytecode, "input 0 must be plan");
+        require(tx.inputs[0].tokenCategory == planCategory + 0x02, "input 0 must hold plan minting NFT");
+
+        require(tx.outputs.length == 1 || tx.outputs.length == 2, "invalid sweep output count");
+        require(tx.outputs[0].lockingBytecode == planLockingBytecode, "output 0 must return to plan");
+        require(tx.outputs[0].tokenCategory == planCategory + 0x02, "output 0 must preserve plan minting NFT");
+        require(tx.outputs[0].nftCommitment == tx.inputs[0].nftCommitment, "sweep cannot alter plan state");
+
+        bytes myLock = tx.inputs[this.activeInputIndex].lockingBytecode;
+        int inboxIn = 0;
+        int inboxCount = 0;
+
+        for (int i = 1; i < int(tx.inputs.length); i++) {
+            require(tx.inputs[i].tokenCategory == 0x, "sweep funding/inbox inputs must be plain BCH");
+            bytes lock = tx.inputs[i].lockingBytecode;
+            require(lock != planLockingBytecode, "extra plan locking input forbidden");
+            if (lock == myLock) {
+                inboxIn = inboxIn + tx.inputs[i].value;
+                inboxCount = inboxCount + 1;
+            }
+        }
+
+        require(inboxCount >= 1, "missing inbox input");
+        require(inboxCount <= 20, "sweep at most 20 inbox inputs per transaction");
+
+        if (tx.outputs.length == 1) {
+            int feeAllowance = 3300 + inboxCount * perInputFeeCap;
+            require(tx.outputs[0].value >= tx.inputs[0].value + inboxIn - feeAllowance, "self-sweep fee exceeds cap");
+            require(tx.outputs[0].value >= tx.inputs[0].value, "self-sweep cannot shrink plan");
+        } else {
+            require(tx.outputs[0].value >= tx.inputs[0].value + inboxIn, "sponsored sweep must preserve 100% of inbox");
+            require(tx.outputs[1].tokenCategory == 0x, "sponsor change must be plain BCH");
+        }
+    }
+}

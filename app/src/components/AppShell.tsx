@@ -72,7 +72,7 @@ function WalletPanel({ onDisconnect }: { onDisconnect: () => void }) {
 }
 
 /** `pill`: the home page shows the wallet button as a dark pill with the inverse hover. */
-function WalletButton({ pill }: { pill: boolean }) {
+export function WalletButton({ pill }: { pill: boolean }) {
   const { status, wallet, connect, disconnect } = useWallet();
   const fx = pill ? ' pill-fx' : '';
   const narrow = useMedia(NARROW);

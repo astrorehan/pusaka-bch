@@ -1,12 +1,19 @@
 # Pusaka: guide for judges
 
+**18 November wallet release:** [open the live Chipnet proof wallet](https://astrorehan.github.io/pusaka-bch/wallet/demo).
+The working app has owner and family flows, contact review and a Cauldron V0 swap
+whose token return remains inheritable. [Current evidence](docs/proofs/app-and-assets.md)
+includes accepted swap, mature BCH claim and exact fungible token payout IDs.
+[Demo guide](docs/demo-guide.md). Real phone signing and v2 mainnet qualification
+are still pending. The following older receipts describe the v1 milestone.
+
 A 3-minute read: what Pusaka does, what to press, and where to check each claim. Everything else is in the
 [README](README.md).
 
 | | |
 |---|---|
-| **Web app** | **TODO (owner): hosted app URL** |
-| **Judge path** (one button, a real transaction) | **TODO (owner): `<app URL>/try`** |
+| **Web app** | [Chipnet app](https://astrorehan.github.io/pusaka-bch/wallet/demo) |
+| **Judge path** (one button, a real transaction) | [Live public proof plan](https://astrorehan.github.io/pusaka-bch/wallet/demo) (read-only; different owner) |
 | **Demo video** | **TODO (owner): video link, or delete this row** (BLAZE does not require a video) |
 | **Presentation** (Widget Factory) | **TODO (owner): deck link** |
 | **Code now** | https://github.com/astrorehan/pusaka-bch |
@@ -15,9 +22,9 @@ A 3-minute read: what Pusaka does, what to press, and where to check each claim.
 | **Entered for** | BCH BLAZE 2026 Mainnet Track and the Best SolidCash Application bounty |
 | **Prize and donation address** (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |
 
-> **Status on 16 Nov 2026:** the contract and the whole plan lifecycle have run on **Chipnet**, the BCH test
-> network ([transactions below](#transactions-you-can-open)). Nothing has run on mainnet yet; the mainnet rows are
-> empty slots. **TODO (owner): rewrite this line once the mainnet transactions exist.**
+> **Status on 17 Nov 2026:** the whole plan lifecycle has run on **Chipnet**, the BCH test network. A plan has
+> also been created on **mainnet** in the web app, signed in Paytaca ([transactions below](#transactions-you-can-open)).
+> Mainnet check-in, take back, and payout still need to be verified.
 
 ## Pusaka in one minute
 
@@ -101,13 +108,15 @@ not a phone wallet.
 In both payouts, outputs #3 to #8 are the six heirs: 7,250, 9,666, 9,666, 12,566, 12,566 and 6,283 sats. That is
 58,000 × 15, 20, 20, 26, 26 and 13 ÷ 120, rounded down (60,000 in the plan minus a 2,000-sat fee budget).
 
-**Mainnet.** **TODO (owner): fill these rows with real txids and explorer links.**
+**Mainnet.** On 17 Nov 2026, a plan was created in the web app and signed in Paytaca on a phone. Its on-chain state
+holds 11,000 sats: 10,000 for one test heir (100%) and a 1,000-sat reserve, with a one-day waiting time. The creation
+transaction is 755 bytes and paid a 1,755-sat network fee. The remaining rows still need real transactions.
 
 | Network | What happened | Transaction |
 |---|---|---|
 | Mainnet | Example plan for `/try` created | TODO (owner) |
 | Mainnet | Example plan sent to its heirs from `/try` | TODO (owner) |
-| Mainnet | A plan created in the app, signed in Paytaca or Cashonize | TODO (owner) |
+| Mainnet | A plan created in the app, signed in Paytaca | [`4e5b2fd4…1c3d`](https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d) |
 | Mainnet | I'm still here, signed in the wallet | TODO (owner) |
 | Mainnet | Take my BCH back, signed in the wallet | TODO (owner) |
 

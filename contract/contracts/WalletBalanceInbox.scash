@@ -1,0 +1,41 @@
+pragma solidcash ^0.50.0;
+
+// Permissionless receive/inbox covenant for WalletBalanceProof.
+// Binds all received BCH to a specific authenticated satoshiContainer P2SH32 lock
+// without requiring owner authorization or advancing the liveness deadline.
+contract WalletBalanceInbox(bytes35 satoshiContainerLock, int perInputFeeCap) {
+    function sweepToContainer() {
+        require(tx.outputs.length >= 1, "missing container output");
+        require(tx.outputs[0].lockingBytecode == satoshiContainerLock, "output 0 must be satoshi container");
+        require(tx.outputs[0].tokenCategory == 0x, "container output cannot carry tokens");
+        require(tx.outputs[0].value >= 576, "container output below dust");
+
+        bytes myLock = tx.inputs[this.activeInputIndex].lockingBytecode;
+        int protectedIn = 0;
+        int inboxInputs = 0;
+        int containerInputs = 0;
+
+        for (int i = 0; i < int(tx.inputs.length); i++) {
+            bytes lock = tx.inputs[i].lockingBytecode;
+            if (lock == satoshiContainerLock) {
+                require(tx.inputs[i].tokenCategory == 0x, "container input cannot carry tokens");
+                protectedIn = protectedIn + tx.inputs[i].value;
+                containerInputs = containerInputs + 1;
+            } else if (lock == myLock) {
+                require(tx.inputs[i].tokenCategory == 0x, "inbox input cannot carry tokens");
+                protectedIn = protectedIn + tx.inputs[i].value;
+                inboxInputs = inboxInputs + 1;
+            }
+        }
+
+        require(containerInputs <= 1, "at most one container input per sweep");
+        require(inboxInputs >= 1, "missing inbox input");
+
+        if (tx.outputs.length == 1) {
+            int feeAllowance = 400 + inboxInputs * perInputFeeCap;
+            require(tx.outputs[0].value >= protectedIn - feeAllowance, "self-sweep fee exceeds cap");
+        } else {
+            require(tx.outputs[0].value >= protectedIn, "sponsored sweep must preserve protected balance");
+        }
+    }
+}
