@@ -1,5 +1,5 @@
 // Scroll-reveal and typography motion helpers for the landing page.
-// Uses IntersectionObserver + CSS compositor transforms (word-up and rise-in).
+// Uses IntersectionObserver for one-time reveals.
 import { useEffect, useRef, useState } from 'react';
 
 export function useInView<T extends Element>(threshold = 0.02) {
@@ -30,7 +30,7 @@ export function useInView<T extends Element>(threshold = 0.02) {
 }
 
 /**
- * The words of a heading, each sliding up out of its own mask once `seen` (lines split on \n).
+ * The words of a heading, each resolving like ink once `seen` (lines split on \n).
  * Purely visual: the heading that holds it carries the text as its aria-label.
  */
 export function SplitWords({ text, seen, delayBase = 0, stepMs = 60 }: { text: string; seen: boolean; delayBase?: number; stepMs?: number }) {
@@ -43,7 +43,7 @@ export function SplitWords({ text, seen, delayBase = 0, stepMs = 60 }: { text: s
         <span key={li} className="word-line" aria-hidden="true">
           {words.map((word, wi) => (
             <span key={wi} className="word-clip">
-              <span className={`word-up${seen ? ' is-seen' : ''}`} style={{ animationDelay: `${delayBase + (firsts[li] + wi) * stepMs}ms` }}>
+              <span className={`word-up${seen ? ' is-seen' : ''}`} style={{ animationDelay: `${Math.min(300, delayBase + (firsts[li] + wi) * stepMs)}ms` }}>
                 {word}
               </span>
               {wi < words.length - 1 ? ' ' : ''}

@@ -12,11 +12,11 @@ has, by [`compose_landing_art.py`](compose_landing_art.py). Runtime files are We
 | `paddy-card.webp` | Composed: open water cropped from the paddy scene | Behind the glass cards on phones (`.water-box`) |
 | `mist-a.webp`, `mist-b.webp` | Composed: procedural cloud banks with alpha | The mist that rises into the night |
 | `steps-frame.webp` | Composed: the hero's sky, volcano, terraces and one palm, at golden hour | The three steps frame (`StepsFrame.tsx`) |
-| `footer-terraces.webp` (2400 px) and `-1600` | Composed: the hero's volcano, terraces, hut and palms, sky cut out | The footer (`HomeFooter scene`) |
-| `footer-terraces-night.webp` and `-1600` | Composed: the same picture by moonlight, the window lit, fireflies | The footer in the dark theme |
+| `footer-terraces.webp` (2400 px) and `-1600` | Composed: the hero's volcano, terraces, hut, palms and a small bloom on its pad, sky cut out | The footer (`HomeFooter scene`) |
+| `footer-terraces-night.webp` and `-1600` | Composed: the same picture by moonlight, the window and bloom seed lit, fireflies | The footer in the dark theme |
 
 The composed pictures reuse the hero's photographic plates in `brand/hero/landscape-v2/`, so the hut, palms and volcano
-at the bottom of the page are the same ones the visitor saw at the top.
+at the bottom of the page are the same ones the visitor saw at the top. The footer bloom comes from the closing call master, with a soft contact shadow and reflection.
 
 ## The bloom
 

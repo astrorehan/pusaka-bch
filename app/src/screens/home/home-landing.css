@@ -78,23 +78,12 @@
 /* ---------------------------------------------------------------- motion & reveal primitives */
 
 .word-line { display: block; }
-.word-clip {
-  display: inline-block;
-  overflow: hidden;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
-  vertical-align: bottom;
-}
-.word-up {
-  display: inline-block;
-  transform: translateY(108%);
-}
-.word-up.is-seen {
-  animation: landing-word-up 700ms var(--ease-expo) both;
-}
-@keyframes landing-word-up {
-  from { transform: translateY(108%); }
-  to { transform: translateY(0); }
+.word-clip { display: inline-block; vertical-align: bottom; }
+.word-up { display: inline-block; opacity: 0; filter: blur(4px); }
+.word-up.is-seen { animation: landing-ink 400ms ease-out both; }
+@keyframes landing-ink {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 .rise-in {
@@ -201,6 +190,7 @@
     animation: none;
     opacity: 1;
     transform: none;
+    filter: none;
   }
   .shell--home .header,
   .shell--home .header::before {

@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[2]
 PLATES = ROOT / 'brand' / 'hero' / 'landscape-v2'
@@ -108,12 +108,25 @@ def footer_day() -> tuple[Image.Image, dict]:
     nx = (FW - near.width) // 2
     canvas.alpha_composite(near, (nx, FH - near.height + 30))
 
+    # A small bloom and its pad sit on the water in front of the hut.
+    bloom = Image.open(ROOT / 'brand' / 'landing' / 'cta-bloom.png').convert('RGBA')
+    bloom = scaled(bloom, (FH * 0.15) / bloom.height)
+    bx, by = round(FW * 0.39), round(FH * 0.57)
+    shadow = Image.new('RGBA', (bloom.width, 30))
+    ImageDraw.Draw(shadow).ellipse((15, 6, bloom.width - 15, 24), fill=(8, 20, 16, 95))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(9))
+    canvas.alpha_composite(shadow, (bx, by + bloom.height - 18))
+    reflection = bloom.transpose(Image.FLIP_TOP_BOTTOM).resize((bloom.width, 45), Image.LANCZOS)
+    reflection.putalpha(reflection.getchannel('A').point(lambda a: round(a * 0.14)))
+    canvas.alpha_composite(reflection.filter(ImageFilter.GaussianBlur(3)), (bx, by + bloom.height - 4))
+    canvas.alpha_composite(bloom, (bx, by))
+
     # A little sharpening after the upscale.
     rgb = canvas.convert('RGB').filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))
     out = rgb.convert('RGBA')
     out.putalpha(canvas.getchannel('A'))
     window = (hx + round(962 * hs), hy + round(506 * hs), hx + round(1131 * hs), hy + round(704 * hs))
-    return out, {'window': window}
+    return out, {'window': window, 'seed': (bx + bloom.width * 0.49, by + bloom.height * 0.37)}
 
 
 def footer_night(day: Image.Image, info: dict) -> Image.Image:
@@ -137,6 +150,11 @@ def footer_night(day: Image.Image, info: dict) -> Image.Image:
     night = night * (1 - inside[..., None]) + (warm * (0.55 + 0.45 * lum[..., None])) * inside[..., None]
     d2 = ((xx - cx) ** 2 + (yy - cy) ** 2) / (90.0 ** 2)
     night += np.exp(-d2)[..., None] * warm * 0.22
+
+    # The seed casts a small warm light onto the petals at night.
+    sx, sy = info['seed']
+    seed_d2 = ((xx - sx) ** 2 + (yy - sy) ** 2) / (24.0 ** 2)
+    night += np.exp(-seed_d2)[..., None] * warm * 0.38
 
     # Fireflies over the paddies, kept off the hut.
     rng = np.random.default_rng(7)

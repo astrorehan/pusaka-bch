@@ -113,8 +113,7 @@ function History() {
 
 /**
  * `scene` (the home page): the footer sits on the rice terraces, with the sky cut out so the hills rise straight
- * from the page. On desktop the links stand on the grass in white over a soft shade; on phones they sit on the page
- * above the terraces. The night picture follows the dark theme.
+ * from the page. Links sit on the page above the terraces at every width. The night picture follows the dark theme.
  */
 export function HomeFooter({ scene = false }: { scene?: boolean }) {
   if (scene) {
@@ -131,7 +130,7 @@ export function HomeFooter({ scene = false }: { scene?: boolean }) {
             src="/landing/footer-terraces-1600.webp"
             srcSet="/landing/footer-terraces-1600.webp 1600w, /landing/footer-terraces.webp 2400w"
             sizes="100vw"
-            alt="Green rice terraces below a volcano, with a timber hut and coconut palms."
+            alt="Green rice terraces below a volcano, with a timber hut, coconut palms and a bloom on a lily pad."
             width={2400}
             height={800}
             loading="lazy"
@@ -142,18 +141,12 @@ export function HomeFooter({ scene = false }: { scene?: boolean }) {
             src="/landing/footer-terraces-night-1600.webp"
             srcSet="/landing/footer-terraces-night-1600.webp 1600w, /landing/footer-terraces-night.webp 2400w"
             sizes="100vw"
-            alt="The same terraces by moonlight, the hut's window lit and fireflies over the fields."
+            alt="The same terraces by moonlight, the hut's window lit, fireflies and a bloom on a lily pad."
             width={2400}
             height={800}
             loading="lazy"
             decoding="async"
           />
-          <div className="hfoot__shade" aria-hidden />
-          <div className="hfoot__grass">
-            <Brand />
-            <Columns />
-            <Donate />
-          </div>
           <div className="hfoot__bottom">
             <History />
           </div>
