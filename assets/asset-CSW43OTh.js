@@ -1,0 +1,1 @@
+var e=`/pusaka-bch/`;export{e as t};
