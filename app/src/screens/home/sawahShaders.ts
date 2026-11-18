@@ -45,6 +45,7 @@ uniform vec3 uSkyMid;
 uniform vec3 uSkyLow;
 uniform sampler2D tSky;
 uniform sampler2D tMountains;
+uniform float uLandscapeBlur;
 uniform float uNight;
 uniform vec2 uMountainAngles;
 uniform vec3 uHaze;
@@ -71,7 +72,7 @@ vec3 landscape(vec3 d) {
   // The photo covers 110 degrees of azimuth and 35 degrees of elevation. Both the
   // visible dome and its environment/reflection use the same directional mapping.
   vec2 skyUv = vec2(clamp(0.5 + az / 110.0, 0.0, 1.0), clamp(el / 35.0, 0.0, 1.0));
-  vec3 photograph = texture2D(tSky, skyUv).rgb;
+  vec3 photograph = texture2D(tSky, skyUv, uLandscapeBlur).rgb;
   float t = clamp(el / 25.0, 0.0, 1.0);
   vec3 night = mix(uSkyLow, uSkyMid, smoothstep(0.0, 0.5, t));
   night = mix(night, uSkyTop, smoothstep(0.35, 1.0, t));
@@ -100,7 +101,7 @@ vec3 landscape(vec3 d) {
   // The mountain plate has real alpha above the skyline; the sky remains its own asset.
   vec2 mountainUv = vec2(0.5 + (az - uMountainAngles.x) / 72.0, el / uMountainAngles.y);
   if (mountainUv.x >= 0.0 && mountainUv.x <= 1.0 && mountainUv.y >= 0.0 && mountainUv.y <= 1.0) {
-    vec4 terrain = texture2D(tMountains, mountainUv);
+    vec4 terrain = texture2D(tMountains, mountainUv, uLandscapeBlur);
     float edge = smoothstep(0.0, 0.045, mountainUv.x) * (1.0 - smoothstep(0.955, 1.0, mountainUv.x));
     vec3 rock = mix(terrain.rgb, terrain.rgb * vec3(0.06, 0.09, 0.18), uNight);
     rock = mix(rock, uHaze, 0.12 + 0.5 * (1.0 - smoothstep(0.0, 3.0, el)));

@@ -18,6 +18,8 @@ Pointer and scroll parallax translate the camera and its target together, with n
 
 The hut's landing is defined by `bankHeight()` in `app/src/screens/home/flowerScene.ts`. Its billboard is lowered by the source image's clear foot margin so the feet meet the ground. The lower strip of `terraces.webp` supplies the bank's texture without changing the master image. The sky, mountains, trees, terraces and house all participate in the same water reflection.
 
+The bloom and foreground rice stay sharp. Texture filtering gently softens the palms, hut and terraces with distance, reaching its strongest blur on the sky and mountains. The same filtering appears in the reflections and the stills.
+
 ## Refresh the stills
 
 The four v3 posters come from the resting pose of the live scene, in wide/tall and light/dark compositions. Run the development server, then the renderer from the repository root:

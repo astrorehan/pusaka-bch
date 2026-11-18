@@ -34,6 +34,20 @@ const TAU = Math.PI * 2;
 /** A drag across the bloom's own radius turns it by this many radians, so it feels the same on any screen. */
 const TURN_PER_RADIUS = 1.5;
 
+// Use coarser texture mip levels as the landscape recedes, without blurring the foreground render.
+const blurBias = (strength: number) => strength * 0.3;
+
+function softenLandscapeMap(material: THREE.MeshBasicMaterial, strength: number) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uLandscapeBlur = { value: blurBias(strength) };
+    const mapFragment = THREE.ShaderChunk.map_fragment.replace(
+      'texture2D( map, vMapUv )', 'texture2D( map, vMapUv, uLandscapeBlur )',
+    );
+    shader.fragmentShader = `uniform float uLandscapeBlur;\n${shader.fragmentShader}`
+      .replace('#include <map_fragment>', mapFragment);
+  };
+}
+
 // ---------------------------------------------------------------- palettes
 
 const COLOR_KEYS = [
@@ -320,6 +334,7 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     uniforms: {
       uSkyTop: { value: live.color.skyTop }, uSkyMid: { value: live.color.skyMid }, uSkyLow: { value: live.color.skyLow },
       tSky: { value: null }, tMountains: { value: null }, uNight: { value: 0 },
+      uLandscapeBlur: { value: blurBias(7) },
       uMountainAngles: { value: new THREE.Vector2() },
       uHaze, uGlow, uGlowPower, uSunColor: { value: live.color.sun }, uSunDir, uSunAngles: { value: new THREE.Vector2() },
       uSunSize: { value: 1.25 },
@@ -367,29 +382,31 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
 
   // ---- a curved, textured waterline supporting the hut and the terraced fields behind it
   const bankMaterial = new THREE.MeshBasicMaterial({ toneMapped: false, side: THREE.DoubleSide });
+  softenLandscapeMap(bankMaterial, 2.5);
   const bank = new THREE.Mesh(buildBank(), bankMaterial);
   scene.add(bank);
 
   // ---- individual photographic cutouts, placed in the same space as the water and bloom
-  function billboard(width: number, height: number, x: number, y: number, z: number) {
+  function billboard(width: number, height: number, x: number, y: number, z: number, blur: number) {
     const own = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.04, depthWrite: false, toneMapped: false });
+    softenLandscapeMap(own, blur);
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), own);
     mesh.position.set(x, y + height / 2, z);
     scene.add(mesh);
     return own;
   }
-  const terraceMaterial = billboard(240, 46, 0, -1.8, -145);
+  const terraceMaterial = billboard(240, 46, 0, -1.8, -145, 6);
   const groveNear = [
     // The texture has a little clear padding below its roots. Submerge that padding
     // and the feet, rather than putting the trees on a floating patch of undergrowth.
-    billboard(28, 18.67, 34, -0.55, -64),
+    billboard(28, 18.67, 34, -0.55, -64, 1.5),
   ];
   const groveFar = [
-    billboard(24, 16, -1.5, 0.28, -110),
-    billboard(36, 24, 49, 0.2, -130),
+    billboard(24, 16, -1.5, 0.28, -110, 4),
+    billboard(36, 24, 49, 0.2, -130, 5),
   ];
   // The small clear margin under the house's feet is buried in its level landing.
-  const houseMaterial = billboard(12, 8, -2, bankHeight(-2) - 0.24, -93);
+  const houseMaterial = billboard(12, 8, -2, bankHeight(-2) - 0.24, -93, 3);
   const windowMaterial = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, toneMapped: false, fog: false });
   const windowPane = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.75), windowMaterial);
   windowPane.position.set(0.1, bankHeight(-2) + 2.8, -92.9);
