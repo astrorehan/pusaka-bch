@@ -1,212 +1,325 @@
-import { useState } from "react";
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import {
   ArrowDown,
-  ArrowUpRight,
-  ShieldCheck,
   ArrowLeftRight,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import type { Utxo } from "@solidcash/solidcash";
-import { Card, Heading, Review, Dialog, useCurrentPlan } from "./WalletApp";
-import { useWallet } from "../../lib/wallet";
-import * as api from "../../lib/chain/v2";
+  ArrowRight,
+  ArrowUpRight,
+  Coins,
+  FlaskConical,
+  ShieldCheck,
+  Wallet,
+} from 'lucide-react';
+import type { Utxo } from '@solidcash/solidcash';
+import { Button, ButtonLink } from '../../components/Button';
+import * as api from '../../lib/chain/v2';
+import { formatBch } from '../../lib/format';
+import { useWallet } from '../../lib/wallet';
+import { planAddressHash, useCurrentPlan } from './currentPlan';
+import { walletPath } from './paths';
+import {
+  Address,
+  Badge,
+  BchMark,
+  Card,
+  CardHeading,
+  DemoNotice,
+  Details,
+  EmptyState,
+  ErrorNotice,
+  PageHeading,
+  TransactionNotice,
+  TransactionReview,
+  WalletSheet,
+} from './WalletUi';
+
+type Metadata = api.PusakaV2PlanMetadata;
 
 export function SwapScreen() {
-  const { metadata, data, error, refresh } = useCurrentPlan(),
-    wallet = useWallet();
-  const [amount, setAmount] = useState("0.00005"),
-    [slippage, setSlippage] = useState("0.5");
-  const [quote, setQuote] = useState<api.Quote | null>(null),
-    [prepared, setPrepared] = useState<api.Prepared | null>(null),
-    [busy, setBusy] = useState(false),
-    [issue, setIssue] = useState(""),
-    [success, setSuccess] = useState("");
+  const { data, metadata, demo, loading, refresh, error } = useCurrentPlan();
+  const supported = api.NETWORK === 'chipnet' && Boolean(api.testPair.category);
+
   return (
     <div className="pw-page">
-      <Heading
+      <PageHeading
         title="Swap"
-        text="Trade from your wallet. Keep the proceeds in your plan."
-      />
+        description="Swap BCH for a supported token that stays under your inheritance rules."
+      >
+        <ButtonLink
+          to={walletPath('/wallet', demo)}
+          variant="secondary"
+          icon={<Wallet />}
+        >
+          Back to wallet
+        </ButtonLink>
+      </PageHeading>
+      {demo && <DemoNotice />}
+      {error && <ErrorNotice>{error}</ErrorNotice>}
       <div className="pw-columns">
-        <div className="pw-main-column">
+        <div className="pw-column">
           <Card>
-            <div className="pw-card-heading">
-              <h2>BCH → PSK</h2>
-              <span className="pw-badge">Chipnet test pair</span>
-            </div>
-            <p className="pw-muted">
-              A single-pool Cauldron V0 swap. PSK is a test token with no
-              monetary value. Mainnet pairs have not been qualified.
-            </p>
-            {!metadata ? (
-              <p>
-                <Link to="/wallet">Open or create a Pusaka wallet first.</Link>
-              </p>
-            ) : metadata.protocolRevision !== "assets-1" ? (
-              <div className="pw-error">
-                This older wallet supports BCH. Asset support requires a new
-                wallet; old funded contracts are kept intact.
-              </div>
+            <CardHeading
+              title="Swap BCH for PSK"
+              description={
+                supported
+                  ? 'PSK is a test token with no monetary value.'
+                  : 'Exchange BCH directly from Pusaka.'
+              }
+            >
+              {supported && (
+                <Badge tone="warning">
+                  <FlaskConical size={13} aria-hidden /> Test pair
+                </Badge>
+              )}
+            </CardHeading>
+            {!supported ? (
+              <EmptyState
+                icon={<ArrowLeftRight size={21} />}
+                title="No mainnet swap pairs yet"
+                description="The PSK test pair is available in the Chipnet app."
+              />
+            ) : !metadata ? (
+              <EmptyState
+                icon={<Wallet size={21} />}
+                title={
+                  loading ? 'Loading your wallet' : 'Open a wallet to swap'
+                }
+                description="A Pusaka wallet holds the BCH you spend and the tokens you receive."
+              >
+                {!loading && <ButtonLink to="/wallet">Go to wallet</ButtonLink>}
+              </EmptyState>
+            ) : metadata.protocolRevision !== 'assets-1' ? (
+              <EmptyState
+                icon={<Coins size={21} />}
+                title="This wallet supports BCH"
+                description="Protected tokens require a new Pusaka wallet. Your existing wallet can still hold and send BCH."
+              />
             ) : (
-              <>
-                <label className="pw-swap-field">
-                  You pay · BCH
-                  <input
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => {
-                      setAmount(e.target.value);
-                      setQuote(null);
-                    }}
-                  />
-                  <small>
-                    Available:{" "}
-                    {data
-                      ? api.bch(data.state.spendableBalanceSats)
-                      : "Checking…"}
-                  </small>
-                </label>
-                <div className="pw-swap-arrow">
-                  <ArrowDown size={18} />
-                </div>
-                <div className="pw-swap-field">
-                  <span>You receive · PSK base units</span>
-                  <strong>{quote ? quote.receive.toString() : "—"}</strong>
-                  <small>Sent directly to your protected token vault.</small>
-                </div>
-                <label className="pw-swap-slippage">
-                  Slippage tolerance
-                  <select
-                    value={slippage}
-                    onChange={(e) => {
-                      setSlippage(e.target.value);
-                      setQuote(null);
-                    }}
-                  >
-                    <option value="0">0%</option>
-                    <option value="0.5">0.5%</option>
-                    <option value="1">1%</option>
-                  </select>
-                </label>
-                {quote && (
-                  <dl className="pw-review">
-                    <div>
-                      <dt>Minimum return</dt>
-                      <dd>{quote.minimum.toString()} PSK</dd>
-                    </div>
-                    <div>
-                      <dt>Liquidity provider fee (included)</dt>
-                      <dd>{api.bch(quote.poolFee)}</dd>
-                    </div>
-                    <div>
-                      <dt>Quote</dt>
-                      <dd>
-                        Valid for 60 seconds; pool state must remain available.
-                      </dd>
-                    </div>
-                  </dl>
-                )}
-                {(issue || error) && (
-                  <div role="alert" className="pw-error">
-                    {issue || error}
-                  </div>
-                )}
-                {success && (
-                  <p className="pw-success" role="status">
-                    Transaction accepted: {success}
-                  </p>
-                )}
-                <button
-                  className="pw-btn pw-primary pw-wide"
-                  disabled={
-                    busy ||
-                    !data ||
-                    (Boolean(quote) && data.state.status !== "ACTIVE")
-                  }
-                  onClick={async () => {
-                    setBusy(true);
-                    setIssue("");
-                    try {
-                      if (quote && metadata)
-                        setPrepared(await api.prepareSwap(metadata, quote));
-                      else
-                        setQuote(
-                          await api.getSwapQuote(
-                            api.parseBch(amount),
-                            Math.round(Number(slippage) * 100),
-                          ),
-                        );
-                    } catch (e) {
-                      setIssue(e instanceof Error ? e.message : String(e));
-                      setQuote(null);
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                >
-                  {busy ? "Preparing…" : quote ? "Review swap" : "Get quote"}
-                  <ArrowUpRight size={16} />
-                </button>
-                {!wallet.wallet && (
-                  <p className="pw-fine">
-                    Connect the owner wallet before requesting approval.
-                  </p>
-                )}
-                {data?.state.status === "REVIEW" && (
-                  <p className="pw-fine">
-                    Stop the pending claim from Inheritance before swapping.
-                  </p>
-                )}
-              </>
+              <SwapForm
+                key={metadata.planCategoryHex}
+                metadata={metadata}
+                data={data}
+                loading={loading}
+                refresh={refresh}
+              />
             )}
           </Card>
-          {metadata && (
-            <TokenAssets metadata={metadata} data={data} refresh={refresh} />
+          {metadata?.protocolRevision === 'assets-1' && (
+            <TokenAssets
+              key={metadata.planCategoryHex}
+              metadata={metadata}
+              data={data}
+              refresh={refresh}
+            />
           )}
         </div>
-        <aside className="pw-detail-column">
+        <aside className="pw-column">
           <Card>
-            <ShieldCheck size={25} />
-            <h2 style={{ marginTop: 12 }}>Protection follows the return</h2>
+            <CardHeading title="Protected after the swap">
+              <span className="pw-symbol pw-symbol--accent">
+                <ShieldCheck size={19} aria-hidden />
+              </span>
+            </CardHeading>
             <p className="pw-muted">
-              The swap pays tokens straight into a vault bound to your plan
-              identity. Policy changes keep that address. After the BCH claim
-              finishes, anyone can sponsor the token payout to your current
-              heirs.
+              Tokens go to a receive address tied to this plan. If a claim
+              completes, they follow the same shares as your BCH.
             </p>
-            <p className="pw-fine">
-              Token carrier values and fees are reviewed separately. Indivisible
-              token units go to the final configured heir. This integration buys
-              one fungible token with BCH; arbitrary trading positions and NFTs
-              are outside its scope.
-            </p>
-            <p className="pw-fine">
-              Powered by{" "}
-              <a
-                href="https://docs.riftenlabs.com/cauldron/swap/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Cauldron V0
-              </a>
-              .
-            </p>
+            <div className="pw-footnote">
+              <Coins aria-hidden size={16} />
+              <p>
+                Token amounts are whole base units. Any remainder goes to the
+                last listed heir.
+              </p>
+            </div>
+            <a
+              className="pw-card-link"
+              href="https://docs.riftenlabs.com/cauldron/swap/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              About Cauldron swaps <ArrowUpRight size={15} aria-hidden />
+            </a>
           </Card>
         </aside>
       </div>
+    </div>
+  );
+}
+
+function SwapForm({
+  metadata,
+  data,
+  loading,
+  refresh,
+}: {
+  metadata: Metadata;
+  data: api.LoadedPlan | null;
+  loading: boolean;
+  refresh: () => Promise<void>;
+}) {
+  const { wallet } = useWallet();
+  const [amount, setAmount] = useState('0.00005');
+  const [slippage, setSlippage] = useState('0.5');
+  const [quote, setQuote] = useState<api.Quote | null>(null);
+  const [prepared, setPrepared] = useState<api.Prepared | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [issue, setIssue] = useState('');
+  const [txid, setTxid] = useState('');
+  const state = data?.state;
+  const owner =
+    wallet && planAddressHash(wallet.address) === metadata.ownerPkhHex;
+  let reviewBlocked = '';
+  if (state?.status === 'REVIEW')
+    reviewBlocked = 'Stop the pending claim in Inheritance before swapping.';
+  else if (state && state.status !== 'ACTIVE')
+    reviewBlocked = 'The plan must be active to approve a swap.';
+  else if (!owner)
+    reviewBlocked =
+      'Connect the wallet that owns this plan to approve the swap.';
+  else if (state && quote && quote.supply > state.spendableBalanceSats)
+    reviewBlocked = 'The BCH amount exceeds your spendable balance.';
+
+  useEffect(() => {
+    if (!quote) return;
+    const timer = window.setTimeout(
+      () => {
+        setQuote(null);
+        setIssue('This quote expired. Get a new quote to continue.');
+      },
+      Math.max(0, quote.expiresAt - Date.now()),
+    );
+    return () => window.clearTimeout(timer);
+  }, [quote]);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!state || busy || (quote && reviewBlocked)) return;
+    setBusy(true);
+    setIssue('');
+    try {
+      if (quote) setPrepared(await api.prepareSwap(metadata, quote));
+      else {
+        const sats = api.parseBch(amount.trim());
+        if (sats <= 0n)
+          throw new Error('Enter a BCH amount greater than zero.');
+        setQuote(
+          await api.getSwapQuote(sats, Math.round(Number(slippage) * 100)),
+        );
+      }
+    } catch (error) {
+      setIssue(error instanceof Error ? error.message : String(error));
+      setQuote(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function clearQuote() {
+    setQuote(null);
+    setIssue('');
+  }
+
+  return (
+    <>
+      <form className="pw-form pw-swap-form" onSubmit={submit}>
+        <div className="pw-swap-pair">
+          <div className="pw-swap-field">
+            <label htmlFor="pw-swap-amount">You pay</label>
+            <div className="pw-swap-value">
+              <input
+                id="pw-swap-amount"
+                inputMode="decimal"
+                required
+                value={amount}
+                disabled={busy}
+                onChange={(event) => {
+                  setAmount(event.target.value);
+                  clearQuote();
+                }}
+              />
+              <span className="pw-currency">
+                <BchMark size={23} /> BCH
+              </span>
+            </div>
+            <small>
+              {state
+                ? `Available: ${formatBch(state.spendableBalanceSats)} BCH`
+                : loading
+                  ? 'Checking balance…'
+                  : 'Balance unavailable'}
+            </small>
+          </div>
+          <div className="pw-swap-arrow" aria-hidden>
+            <ArrowDown size={17} />
+          </div>
+          <div className="pw-swap-field">
+            <span>You receive</span>
+            <div className="pw-swap-value">
+              <output htmlFor="pw-swap-amount" className="num">
+                {quote ? quote.receive.toLocaleString('en-US') : '—'}
+              </output>
+              <span className="pw-currency">
+                <span className="pw-token-mark">
+                  <Coins size={14} aria-hidden />
+                </span>{' '}
+                PSK
+              </span>
+            </div>
+            <small>Base units sent to your protected token address</small>
+          </div>
+        </div>
+        <label className="pw-swap-slippage">
+          Slippage tolerance
+          <select
+            value={slippage}
+            disabled={busy}
+            onChange={(event) => {
+              setSlippage(event.target.value);
+              clearQuote();
+            }}
+          >
+            <option value="0">0%</option>
+            <option value="0.5">0.5%</option>
+            <option value="1">1%</option>
+          </select>
+        </label>
+        {quote && (
+          <Details
+            rows={[
+              [
+                'Minimum return',
+                `${quote.minimum.toLocaleString('en-US')} PSK`,
+              ],
+              ['Liquidity fee included', `${formatBch(quote.poolFee)} BCH`],
+              ['Quote validity', '60 seconds while liquidity is available'],
+            ]}
+          />
+        )}
+        {issue && <ErrorNotice>{issue}</ErrorNotice>}
+        {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
+        {reviewBlocked && <p className="pw-fine">{reviewBlocked}</p>}
+        <Button
+          type="submit"
+          block
+          loading={busy}
+          disabled={!state || Boolean(quote && reviewBlocked)}
+          icon={<ArrowRight />}
+        >
+          {busy ? 'Preparing…' : quote ? 'Review swap' : 'Get quote'}
+        </Button>
+      </form>
       {prepared && (
-        <Review
+        <TransactionReview
           prepared={prepared}
           close={() => setPrepared(null)}
-          done={(txid) => {
+          done={(id) => {
             setPrepared(null);
             setQuote(null);
-            setSuccess(txid);
+            setTxid(id);
             void refresh();
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -215,167 +328,189 @@ export function TokenAssets({
   data,
   refresh,
 }: {
-  metadata: api.PusakaV2PlanMetadata;
+  metadata: Metadata;
   data: api.LoadedPlan | null;
   refresh: () => Promise<void>;
 }) {
-  const wallet = useWallet(),
-    [prepared, setPrepared] = useState<api.Prepared | null>(null),
-    [error, setError] = useState(""),
-    [receipt, setReceipt] = useState<Utxo | null>(null),
-    [recipient, setRecipient] = useState(""),
-    [units, setUnits] = useState(""),
-    [busy, setBusy] = useState(false);
-  if (metadata.protocolRevision !== "assets-1") return null;
-  const address = data ? api.tokenVault(data.handle).tokenAddress : "";
+  const { wallet } = useWallet();
+  const formId = useId();
+  const [prepared, setPrepared] = useState<api.Prepared | null>(null);
+  const [receipt, setReceipt] = useState<Utxo | null>(null);
+  const [recipient, setRecipient] = useState('');
+  const [units, setUnits] = useState('');
+  const [error, setError] = useState('');
+  const [txid, setTxid] = useState('');
+  const [busy, setBusy] = useState(false);
+  if (metadata.protocolRevision !== 'assets-1') return null;
+  const address = data ? api.tokenVault(data.handle).tokenAddress : null;
+  const owner =
+    wallet && planAddressHash(wallet.address) === metadata.ownerPkhHex;
+
+  async function prepare(next: () => Promise<api.Prepared>) {
+    setBusy(true);
+    setError('');
+    try {
+      setPrepared(await next());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Card>
-      <div className="pw-card-heading">
-        <h2>Protected tokens</h2>
-        <ArrowLeftRight size={17} />
-      </div>
-      <p className="pw-muted">
-        Each receipt stays under your current plan rules. Amounts below are
-        indivisible base units.
-      </p>
+      <CardHeading
+        title="Protected tokens"
+        description="Receipts follow your plan. Token amounts are shown in whole base units."
+      >
+        <span className="pw-symbol">
+          <Coins size={18} aria-hidden />
+        </span>
+      </CardHeading>
       {address && (
-        <div className="pw-address">
-          {address}
-          <button
-            className="pw-text"
-            onClick={() => void navigator.clipboard.writeText(address)}
-          >
-            Copy token receive address
-          </button>
-        </div>
+        <Address value={address} label="Copy token receive address" />
       )}
       {data?.tokenReceipts.length ? (
-        <div>
-          {data.tokenReceipts.map((u) => (
-            <div className="pw-token-row" key={`${u.txid}:${u.vout}`}>
-              <div>
-                <strong>
-                  {u.token!.amount.toString()}{" "}
-                  {u.token!.category === api.testPair.category
-                    ? "PSK"
-                    : "units"}
+        <ul className="pw-rows">
+          {data.tokenReceipts.map((utxo) => (
+            <li
+              className="pw-row pw-token-row"
+              key={`${utxo.txid}:${utxo.vout}`}
+            >
+              <span className="pw-symbol pw-symbol--accent">
+                <Coins size={17} aria-hidden />
+              </span>
+              <div className="pw-row-main">
+                <strong className="num">
+                  {utxo.token!.amount.toLocaleString('en-US')}{' '}
+                  {utxo.token!.category === api.testPair.category
+                    ? 'PSK'
+                    : 'units'}
                 </strong>
-                <small>
-                  {u.token!.category.slice(0, 14)}…{u.token!.category.slice(-8)}
-                </small>
-                <small>Carrier: {api.bch(u.satoshis)}</small>
+                <span className="mono" title={utxo.token!.category}>
+                  {utxo.token!.category.slice(0, 12)}…
+                  {utxo.token!.category.slice(-8)}
+                </span>
+                <span>Carrier: {formatBch(utxo.satoshis)} BCH</span>
               </div>
-              <div className="pw-actions">
-                {wallet.wallet && data.state.status === "ACTIVE" && (
-                  <button className="pw-btn" onClick={() => setReceipt(u)}>
-                    Send
-                  </button>
-                )}
-                {data.state.status === "PAID_OUT" && (
-                  <button
-                    className="pw-btn"
-                    disabled={busy}
-                    onClick={async () => {
-                      setError("");
-                      setBusy(true);
-                      try {
-                        setPrepared(await api.prepareTokenPayout(metadata, u));
-                      } catch (e) {
-                        setError(e instanceof Error ? e.message : String(e));
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
-                  >
-                    Pay heirs
-                  </button>
-                )}
-              </div>
-            </div>
+              {owner && data.state.status === 'ACTIVE' && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    setError('');
+                    setReceipt(utxo);
+                  }}
+                >
+                  Send
+                </Button>
+              )}
+              {data.state.status === 'PAID_OUT' && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={() =>
+                    void prepare(() => api.prepareTokenPayout(metadata, utxo))
+                  }
+                >
+                  Pay heirs
+                </Button>
+              )}
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
-        <div className="pw-no-activity">
-          <ShieldCheck size={23} />
-          <strong>No fungible token receipts yet</strong>
-          <p>
-            Tokens from supported swaps arrive here automatically. Send BCH to
-            your BCH receive address, not this token address.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Coins size={21} />}
+          title={data ? 'No token receipts yet' : 'Token balance unavailable'}
+          description={
+            data
+              ? 'Tokens from supported swaps will appear here.'
+              : 'The network must return the plan before its token receipts can be shown.'
+          }
+        />
       )}
-      {error && (
-        <p role="alert" className="pw-error">
-          {error}
-        </p>
-      )}
-      {receipt && (
-        <Dialog title="Send tokens" close={() => setReceipt(null)}>
+      {error && !receipt && <ErrorNotice>{error}</ErrorNotice>}
+      {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
+      {receipt && !prepared && (
+        <WalletSheet
+          open
+          title="Send tokens"
+          description="The next step shows your token payment, protected change, and network fee."
+          dismissible={!busy}
+          onClose={() => setReceipt(null)}
+          footer={
+            <Button
+              type="submit"
+              form={formId}
+              loading={busy}
+              icon={<ArrowRight />}
+            >
+              Review token payment
+            </Button>
+          }
+        >
           <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError("");
-              try {
-                setPrepared(
-                  await api.prepareTokenSend(
-                    metadata,
-                    receipt,
-                    recipient,
-                    BigInt(units),
-                  ),
+            id={formId}
+            className="pw-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void prepare(async () => {
+                const amount = BigInt(units.trim());
+                if (amount <= 0n)
+                  throw new Error(
+                    'Enter a positive whole number of token units.',
+                  );
+                return api.prepareTokenSend(
+                  metadata,
+                  receipt,
+                  recipient.trim(),
+                  amount,
                 );
-                setReceipt(null);
-              } catch (e) {
-                setError(e instanceof Error ? e.message : String(e));
-              } finally {
-                setBusy(false);
-              }
+              });
             }}
           >
-            <div className="pw-dialog-body">
-              <label>
-                Recipient address
-                <input
-                  required
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value.trim())}
-                />
-              </label>
-              <label>
-                Base units (whole numbers)
-                <input
-                  required
-                  inputMode="numeric"
-                  pattern="[0-9]+"
-                  value={units}
-                  onChange={(e) => setUnits(e.target.value)}
-                />
-              </label>
-              {error && (
-                <p className="pw-error" role="alert">
-                  {error}
-                </p>
-              )}
-              <p className="pw-fine">
-                Your ordinary use renews activity in this same transaction.
-                Protected token change returns to this vault.
-              </p>
-            </div>
-            <footer>
-              <button className="pw-btn pw-primary" disabled={busy}>
-                Review token payment
-              </button>
-            </footer>
+            <label>
+              Recipient address
+              <input
+                required
+                value={recipient}
+                disabled={busy}
+                spellCheck={false}
+                onChange={(event) => setRecipient(event.target.value)}
+              />
+            </label>
+            <label>
+              Base units (whole numbers)
+              <input
+                required
+                inputMode="numeric"
+                pattern="[0-9]+"
+                value={units}
+                disabled={busy}
+                onChange={(event) => setUnits(event.target.value)}
+              />
+            </label>
+            {error && <ErrorNotice>{error}</ErrorNotice>}
+            <p className="pw-fine">
+              Sending tokens renews the waiting time in the same transaction.
+            </p>
           </form>
-        </Dialog>
+        </WalletSheet>
       )}
       {prepared && (
-        <Review
+        <TransactionReview
           prepared={prepared}
           close={() => setPrepared(null)}
-          done={() => {
+          done={(id) => {
             setPrepared(null);
+            setReceipt(null);
+            setRecipient('');
+            setUnits('');
+            setTxid(id);
             void refresh();
           }}
         />

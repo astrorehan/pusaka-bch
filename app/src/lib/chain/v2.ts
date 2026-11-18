@@ -18,6 +18,7 @@ import {
   finalizeBuilderTxHex,
   encodePusakaV2PlanLink,
   decodePusakaV2PlanLink,
+  PUSAKA_V2_VERSION,
   type PusakaV2PlanMetadata,
   type PusakaV2PolicyInput,
   type PusakaV2PlanHandle,
@@ -84,9 +85,18 @@ export function planLink(plan: PusakaV2PlanMetadata) {
   );
 }
 export function importPlan(text: string): PusakaV2PlanMetadata {
-  const parsed = text.trim().startsWith("{")
-    ? JSON.parse(text)
-    : decodePusakaV2PlanLink(text.trim());
+  const value = text.trim();
+  let parsed: PusakaV2PlanMetadata;
+  try {
+    parsed = value.startsWith("{")
+      ? JSON.parse(value)
+      : decodePusakaV2PlanLink(value);
+    if (parsed?.version !== PUSAKA_V2_VERSION) throw new Error();
+  } catch {
+    throw new Error("Could not read this plan. Paste the complete plan link or choose the saved plan file.");
+  }
+  if (parsed.network !== "mainnet" && parsed.network !== "chipnet")
+    throw new Error("This plan file is missing a supported Bitcoin Cash network.");
   if (parsed.network !== NETWORK)
     throw new Error(
       `This plan uses ${parsed.network}. Open the matching network build.`,
@@ -169,6 +179,7 @@ export interface Prepared {
   before?: { txid: string; vout: number };
   handle?: PusakaV2PlanHandle;
   validUntil?: number;
+  walletApproval?: boolean;
 }
 export function bch(sats: bigint) {
   return `${(Number(sats) / 1e8).toFixed(8)} BCH`;
@@ -463,6 +474,7 @@ export async function prepareAction(
     planCategory: metadata.planCategoryHex,
     before: state.planUtxo,
     handle,
+    walletApproval: !["sweep", "open", "finalize", "late"].includes(action),
   };
 }
 export async function submit(prepared: Prepared): Promise<string> {
