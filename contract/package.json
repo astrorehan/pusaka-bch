@@ -18,7 +18,7 @@
     "@solidcash/solidcash": "^0.50.1",
     "@solidcash/solidhat": "^0.50.0",
     "patch-package": "^8.0.1",
-    "typescript": "^5.9.2",
+    "typescript": "~7.0.2",
     "vitest": "^5.0.4"
   },
   "dependencies": {
