@@ -283,8 +283,8 @@ export function AppShell() {
               </Link>
               {NETWORK === 'chipnet' && (
                 <div className="testnet-badge" role="note" title="Test network: no real money">
-                  <span>Test network</span>
-                  <span className="testnet-badge__sub">: no real money</span>
+                  Testnet
+                  <span className="sr-only">, no real money</span>
                 </div>
               )}
             </div>

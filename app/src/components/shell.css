@@ -9,20 +9,17 @@
 }
 .skip-link:focus-visible { transform: none; opacity: 1; }
 
+/* A quiet note beside the wordmark: a hairline, a gold dot and one word. The title carries the full meaning. */
 .testnet-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 9px; border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--warning-soft) 78%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--warning) 20%, var(--border));
-  color: var(--warning); font-size: 11px; line-height: 1.2; font-weight: 500;
-  white-space: nowrap; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding-left: 12px; border-left: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px; line-height: 1; font-weight: 500; letter-spacing: 0.01em;
+  white-space: nowrap; flex: none; cursor: default;
 }
 .testnet-badge::before {
-  content: ''; width: 5px; height: 5px; border-radius: 50%; flex: none;
-  background: currentColor;
+  content: ""; width: 5px; height: 5px; border-radius: 50%; flex: none;
+  background: var(--gold, var(--warning));
 }
-.testnet-badge__sub { display: none; }
-@media (min-width: 1100px) { .testnet-badge__sub { display: inline; } }
 @media (max-width: 389px) { .testnet-badge { display: none; } }
 
 /* ---------------------------------------------------------------- header */
