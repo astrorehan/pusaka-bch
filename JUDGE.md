@@ -223,7 +223,13 @@ with the current branch on GitHub.
 - **Every action costs the person who presses it about 9,000 to 12,000 satoshis** in network fees. Each stateful
   call is a 9 to 12 KB transaction. That includes Send to heirs, so whoever sends needs a little BCH.
 - **Keep the plan link.** It is the only way to find the plan again. Until the owner saves, shares or copies it,
-  the app asks "Leave without saving?" before they leave the success screen.
+  the app asks "Leave without saving?" before they leave the success screen. The v2 wallet opens "Save your
+  plan" right after a plan is funded or its rules change.
+- **Known limitation: the plan details live off-chain.** Every action, including a claim and the payout, needs the
+  full plan (heirs, contacts, waiting times), and Pusaka keeps no copy. A full plan is too large for the 223-byte
+  OP_RETURN limit. If every copy of the link and the file is lost, the BCH stays safe in the contract, but the app
+  cannot act on it. That is why the link is meant to be shared with the heirs and contacts: it holds only public
+  addresses and rules, never a key. Recovery from the chain alone is future work.
 - **Faraid is worked out in the browser.** The contract enforces the resulting numbers; it does not check the
   rules of faraid itself.
 - **It is not a legal will.** It moves only the BCH in the plan.
