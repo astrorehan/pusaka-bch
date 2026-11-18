@@ -6,6 +6,7 @@ import { Button, ButtonLink } from '../../components/Button';
 import { NETWORK } from '../../components/AppShell';
 import { SplitWords, useInView } from './motion';
 import { BASE } from '../../lib/asset';
+import { HEIRS } from './payoutHeirs';
 
 const CTA_TITLE = 'Your family shouldn’t have to guess.';
 
@@ -24,8 +25,8 @@ export function HeirBand({ onOpenLink }: { onOpenLink: () => void }) {
         <div className="hb-art water-box" aria-hidden>
           <div className="hb-link glass-lite"><Link2 /> <span className="mono">…/plan#Kx9fQ2…</span></div>
           <div className="hb-share glass-lite">
-            <span className="hb-share__who"><span className="hb-share__dot" />Your share, Aisha</span>
-            <strong className="num">0.048 BCH</strong>
+            <span className="hb-share__who"><span className="hb-share__dot" />Your share, {HEIRS[0].name}</span>
+            <strong className="num">{HEIRS[0].bch} BCH</strong>
             <span className="hb-share__when">Can be sent once the waiting time passes</span>
           </div>
         </div>

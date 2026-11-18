@@ -14,7 +14,7 @@ import { Logo } from '../../components/Logo';
 import { useMedia } from '../../components/useMedia';
 import { SplitWords, useInView } from './motion';
 import { Fireflies } from './NightPayout';
-import { HEIRS } from './payoutHeirs';
+import { HEIRS, POT } from './payoutHeirs';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
 import './subak.css';
 
@@ -54,9 +54,9 @@ function channels(cx: number, top: number, canalW: number, gap: number, terraces
 /** Wide: the spring at the top left, the canal along the top to the divider, the terraces stepping down below. */
 function wideGeo(): Geo {
   const canalW = 22;
-  const terraces = [262, 340, 418, 496].map((y, i) => ({ x0: 548 - i * 4, x1: [1132, 1154, 1170, 1184][i], y, h: 64 }));
+  const terraces = HEIRS.map((_, i) => ({ x0: 548 - i * 4, x1: [1132, 1154, 1170, 1184, 1196][i], y: 262 + i * 78, h: 64 }));
   return {
-    w: 1200, h: 540, wide: true,
+    w: 1200, h: terraces[terraces.length - 1].y + 44, wide: true,
     pool: { x: 170, y: 104, rx: 118, ry: 46 },
     gate: { x: 302, y: 106, across: 'x' },
     canal: 'M 290 106 C 400 106, 484 116, 484 188',
@@ -73,9 +73,9 @@ function wideGeo(): Geo {
 /** Tall (phones): the same, narrower: the canal runs down the left and the terraces step down on the right. */
 function tallGeo(): Geo {
   const canalW = 16;
-  const terraces = [292, 366, 440, 514].map((y, i) => ({ x0: 124, x1: [340, 346, 350, 354][i], y, h: 58 }));
+  const terraces = HEIRS.map((_, i) => ({ x0: 124, x1: [340, 346, 350, 354, 356][i], y: 292 + i * 74, h: 58 }));
   return {
-    w: 360, h: 560, wide: false,
+    w: 360, h: terraces[terraces.length - 1].y + 46, wide: false,
     pool: { x: 84, y: 70, rx: 66, ry: 30 },
     gate: { x: 84, y: 114, across: 'y' },
     canal: 'M 84 100 L 84 216',
@@ -94,7 +94,7 @@ const TALL = tallGeo();
 const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 const at = (g: Geo, p: Pt): CSSProperties => ({ left: pct(p.x, g.w), top: pct(p.y, g.h) });
 /** each terrace bends a little differently, like contour lines */
-const BEND = [8, -5, 10, -3];
+const BEND = [8, -5, 10, -3, 6];
 
 /** A terrace seen from the front: a long field whose ends taper into the hillside, its top edge (the bund)
  *  catching the moon. */
@@ -283,7 +283,7 @@ export function SubakPayout() {
             <div className="sb__seed" style={at(g, g.pool)}><Logo size={g.wide ? 44 : 30} /></div>
             <div className="sb__label sb__label--plan" data-align={g.planLabel.align} style={at(g, g.planLabel)}>
               <span className="np__kicker">For your heirs</span>
-              <strong className="num">0.12 BCH</strong>
+              <strong className="num">{POT}</strong>
               <span className="np__state">
                 {payout ? <Clock3 aria-hidden /> : <Check aria-hidden />}
                 {payout ? 'Waiting time passed' : 'Waiting time restarted'}
@@ -333,11 +333,14 @@ export function SubakPayout() {
               ) : (
                 <span>
                   <b>The waiting time starts again.</b>{' '}
-                  <span className="np__muted">All <span className="num">0.12 BCH</span> stays in the plan, and the heirs wait for the new date.</span>
+                  <span className="np__muted">All <span className="num">{POT}</span> stays in the plan, and the heirs wait for the new date.</span>
                 </span>
               )}
             </p>
-            <p className="np__fee">The network fee, about 9,000 to 12,000 satoshis, is paid by whoever presses the button.</p>
+            <p className="np__fee">
+              The network fee, about 9,000 to 12,000 satoshis, is paid by whoever presses the button. An heir with no
+              BCH can ask anyone who has the plan link to press it: each share still goes only to its heir.
+            </p>
           </div>
         </div>
 

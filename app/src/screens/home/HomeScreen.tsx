@@ -52,7 +52,7 @@ export function HomeScreen() {
             <ButtonLink to="/wallet/demo" size="lg" className="pill-fx">
               Try it now <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to="/wallet" variant="secondary" size="lg" className="pill-fx">Open wallet</ButtonLink>
+            <ButtonLink to="/new" variant="secondary" size="lg" className="pill-fx">Create a plan</ButtonLink>
           </div>
           <section className="home-built home-built--hero" aria-label="Built with">
             <p className="home-label">Built with</p>
@@ -67,16 +67,15 @@ export function HomeScreen() {
               ))}
             </ul>
           </section>
-          <div className="home-hero__more">
-            <button type="button" className="home-textlink" onClick={() => setLinkOpen(true)}>
-              Have a plan link? <span className="home-textlink__em">Open it</span>
-            </button>
-            {DEMO_VIDEO_URL && (
+          {/* Two ways in, nothing else: heirs with a plan link have their own section below, and an owner coming
+              back finds "Open your wallet" behind the wallet button. */}
+          {DEMO_VIDEO_URL && (
+            <div className="home-hero__more">
               <a className="home-textlink" href={DEMO_VIDEO_URL} target="_blank" rel="noreferrer">
                 <Play aria-hidden /> <span className="home-textlink__em">Watch the demo</span>
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="home-hero__scene"><FlowerStage /></div>
       </section>

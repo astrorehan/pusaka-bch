@@ -22,6 +22,7 @@ import { SplitWords, useInView } from './motion';
 import { Fireflies } from './NightPayout';
 import { PlanBubble, ScenePlanCard } from './paddyParts';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
+import { HEIR_NAMES, POT } from './payoutHeirs';
 import { BASE } from '../../lib/asset';
 import './time-scroll.css';
 
@@ -136,10 +137,10 @@ function TimeCard({ onCheckIn, note, onBack }: { onCheckIn: () => void; note: st
           <span className="pc__unit">days left</span>
         </p>
         <p className="pc__line ts-line--wait">
-          Then Aisha, Omar and Layla can receive <b className="num">0.12 BCH</b>.
+          Then {HEIR_NAMES} can receive <b className="num">{POT}</b>.
         </p>
         <p className="pc__line ts-line--passed">
-          Aisha, Omar and Layla can receive <b className="num">0.12 BCH</b> now.
+          {HEIR_NAMES} can receive <b className="num">{POT}</b> now.
         </p>
         <p className="pc__meta">
           <span>6-month waiting time</span>
@@ -347,7 +348,7 @@ function PinnedScene() {
     checkIn.current();
     setNote('Waiting time restarted. A preview, so nothing was sent.');
   }, []);
-  const onBack = useCallback(() => setNote('In a real plan, this sends the 0.12 BCH back to your wallet.'), []);
+  const onBack = useCallback(() => setNote(`In a real plan, this sends the ${POT} back to your wallet.`), []);
 
   return (
     <section ref={root} className="ts ts--pinned" data-phase="wait" style={{ ['--pin' as string]: `${PIN}px` }}>

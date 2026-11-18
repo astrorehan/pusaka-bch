@@ -5,7 +5,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
 import { ExternalLink, Menu, Moon, Sun, Unplug, Wallet, X } from 'lucide-react';
 import { Logo } from './Logo';
-import { Button } from './Button';
+import { Button, ButtonLink } from './Button';
 import { Banner } from './Banner';
 import { CopyButton } from './CopyButton';
 import { Popover } from './Popover';
@@ -66,6 +66,7 @@ function WalletPanel({ onDisconnect }: { onDisconnect: () => void }) {
         <strong>{formatBch(wallet.balance)} BCH</strong>
         {dollars && <span className="muted"> {dollars}</span>}
       </p>
+      <ButtonLink to="/wallet" block icon={<Wallet />}>Open your wallet</ButtonLink>
       <Button variant="secondary" block icon={<Unplug />} onClick={onDisconnect}>Disconnect</Button>
     </div>
   );
