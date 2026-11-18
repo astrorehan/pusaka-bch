@@ -333,7 +333,7 @@ export function PlanShare({
     <Card>
       <CardHeading
         title="Share & recovery"
-        description="Keep a copy of your public plan details where your family can find it."
+        description="Your heirs and contacts need these plan details to claim. Pusaka keeps no copy, so share the link and save the file."
       />
       <div className="pw-share-link">
         <span className="pw-symbol" aria-hidden>

@@ -811,7 +811,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
             if (plan) {
               selectPlan(plan);
               navigate(api.encodePusakaV2PlanLink(plan, '/v2/plan'), {
-                state: { txid },
+                state: { txid, savePlan: true },
               });
             } else setPreparationTx(txid);
           }}

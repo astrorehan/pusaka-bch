@@ -389,8 +389,13 @@ function SavePlan({
       open
       onClose={close}
       title="Save your plan"
-      description="Keep an updated copy somewhere your family can find it. The plan contains public rules and addresses."
+      description="Send this link to your heirs and trusted contacts, and keep the file somewhere safe."
     >
+      <p className="pw-fine">
+        Nobody can claim or pay out without these plan details, and Pusaka
+        keeps no copy. They hold public rules and addresses only, never a key.
+        Share them again after every change to the rules.
+      </p>
       <div className="pw-sheet-stack">
         <div className="pw-share-link">
           <strong>Family plan link</strong>
@@ -445,7 +450,9 @@ function WalletPage() {
     refresh,
     selectPlan,
   } = useCurrentPlan();
-  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [dialog, setDialog] = useState<Dialog | null>(() =>
+    location.state?.savePlan ? 'export' : null,
+  );
   const [review, setReview] = useState<{
     prepared: api.Prepared;
     back: Dialog | null;
