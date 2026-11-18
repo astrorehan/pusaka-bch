@@ -10,6 +10,7 @@ import { formatDay } from '../plan/time';
 import { useMedia } from '../../components/useMedia';
 import { SplitWords, useInView } from './motion';
 import { BASE } from '../../lib/asset';
+import { HEIRS } from './payoutHeirs';
 
 const STEPS = [
   { title: 'Choose heirs', line: 'Add up to 10 people, their BCH addresses and the share each one gets.' },
@@ -17,21 +18,16 @@ const STEPS = [
   { title: 'Missed it? They receive their shares', line: 'Once the waiting time has passed, every heir is paid their share in one payment.' },
 ];
 
-const HEIRS = [
-  { name: 'Aisha', addr: 'bitcoincash:qp3w…7c9d', pct: 50, bch: '0.06' },
-  { name: 'Omar', addr: 'bitcoincash:qz8k…2m4e', pct: 30, bch: '0.036' },
-  { name: 'Layla', addr: 'bitcoincash:qr4x…8f2k', pct: 20, bch: '0.024' },
-];
 const PERIOD = 180 * 86400;
 const TITLE = 'Set once, check in, stay sure.';
 
 function HeirsUi() {
   return (
     <div className="sf-ui">
-      <p className="sf-ui__head"><span>Your heirs</span><span className="sf-ui__muted">3 of up to 10</span></p>
+      <p className="sf-ui__head"><span>Your heirs</span><span className="sf-ui__muted">{HEIRS.length} of up to 10</span></p>
       <ul className="sf-ui__rows">
-        {HEIRS.map((h, i) => (
-          <li key={h.name} style={{ '--c': `var(--heir-${i + 1})` } as CSSProperties}>
+        {HEIRS.map((h) => (
+          <li key={h.name} style={{ '--c': h.color } as CSSProperties}>
             <span className="sf-ui__avatar" aria-hidden>{h.name[0]}</span>
             <span className="sf-ui__who"><b>{h.name}</b><span className="mono">{h.addr}</span></span>
             <span className="sf-ui__pct num">{h.pct}%</span>
@@ -39,7 +35,7 @@ function HeirsUi() {
         ))}
       </ul>
       <div className="sf-ui__bar" aria-hidden>
-        {HEIRS.map((h, i) => <span key={h.name} style={{ flexGrow: h.pct, background: `var(--heir-${i + 1})` }} />)}
+        {HEIRS.map((h) => <span key={h.name} style={{ flexGrow: h.pct, background: h.color }} />)}
       </div>
       <p className="sf-ui__foot"><Clock3 aria-hidden /> Waiting time: 6 months</p>
     </div>
@@ -52,7 +48,7 @@ function StillHereUi() {
     <div className="sf-ui sf-ui--ring">
       <p className="sf-ui__head"><span>Family plan</span><span className="sf-ui__ok"><Check aria-hidden /> Restarted</span></p>
       <div className="sf-ui__ring">
-        <CountdownRing status="active" secondsLeft={PERIOD} periodSeconds={PERIOD} heirColours={['var(--heir-1)', 'var(--heir-2)', 'var(--heir-3)']} />
+        <CountdownRing status="active" secondsLeft={PERIOD} periodSeconds={PERIOD} heirColours={HEIRS.map((h) => h.color)} />
       </div>
       <p className="sf-ui__note">Heirs can receive from about {until}.</p>
       <span className="sf-ui__btn" aria-hidden><Hand /> I’m still here</span>
@@ -63,10 +59,10 @@ function StillHereUi() {
 function SentUi() {
   return (
     <div className="sf-ui">
-      <p className="sf-ui__sent"><span className="sf-ui__tick" aria-hidden><Check /></span>Sent to 3 heirs in one payment</p>
+      <p className="sf-ui__sent"><span className="sf-ui__tick" aria-hidden><Check /></span>Sent to {HEIRS.length} heirs in one payment</p>
       <ul className="sf-ui__rows sf-ui__rows--paid">
-        {HEIRS.map((h, i) => (
-          <li key={h.name} style={{ '--c': `var(--heir-${i + 1})` } as CSSProperties}>
+        {HEIRS.map((h) => (
+          <li key={h.name} style={{ '--c': h.color } as CSSProperties}>
             <span className="sf-ui__avatar" aria-hidden>{h.name[0]}</span>
             <span className="sf-ui__who"><b>{h.name}</b><span>{h.pct}% share</span></span>
             <span className="sf-ui__amt num">{h.bch} BCH</span>

@@ -1,6 +1,7 @@
 // The four ways someone might try to cheat a plan, and the two layers that stop each one.
 // Backed by the contract's test suite (contract/test): every case here is a test that expects a refusal.
 import { AlertCircle, Clock3, Coins, UserX, type LucideIcon } from 'lucide-react';
+import { POT } from './payoutHeirs';
 
 export interface CheatScenario {
   id: string;
@@ -29,7 +30,7 @@ export const CHEAT_SCENARIOS: CheatScenario[] = [
     appBadge: 'Waiting time active',
     appReason: '“Send to heirs” stays locked while the owner still has time left to press “I’m still here”.',
     networkHeadline: 'Refused by the network',
-    networkSummary: 'Early payout · 0.12 BCH',
+    networkSummary: `Early payout · ${POT}`,
     networkReason: 'Bitcoin Cash checks the network clock against the plan’s deadline. An early payout cannot confirm.',
     proofs: ['Waiting time has not passed', 'No payment was made', 'Plan balance unchanged'],
   },
@@ -38,7 +39,7 @@ export const CHEAT_SCENARIOS: CheatScenario[] = [
     label: 'Pay 1 satoshi less',
     icon: Coins,
     attemptTitle: 'Take 1 satoshi from one heir',
-    attemptLine: 'A changed request sends Layla 1,256,599 satoshis instead of her exact 1,256,600.',
+    attemptLine: 'A changed request sends Layla 239,999,999 satoshis instead of her exact 240,000,000.',
     appBadge: 'Amounts don’t match',
     appReason: 'The review screen works out every heir’s exact share before any wallet is asked to sign.',
     networkHeadline: 'Refused by the network',

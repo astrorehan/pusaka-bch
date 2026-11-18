@@ -6,6 +6,7 @@ import { AlertCircle, Ban, Check, Clock3, Hand, Undo2 } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 import { formatDay } from '../plan/time';
 import { CHEAT_SCENARIOS } from './cheatScenarios';
+import { HEIR_NAMES, POT } from './payoutHeirs';
 
 const DAY_MS = 86_400_000;
 const LEFT_DAYS = 142;
@@ -36,7 +37,7 @@ export function ScenePlanCard({ glass = 'glass-water' }: { glass?: string }) {
   const note = restarted
     ? 'Waiting time restarted. A preview, so nothing was sent.'
     : backHint
-      ? 'In a real plan, this sends the 0.12 BCH back to your wallet.'
+      ? `In a real plan, this sends the ${POT} back to your wallet.`
       : '';
 
   return (
@@ -53,7 +54,7 @@ export function ScenePlanCard({ glass = 'glass-water' }: { glass?: string }) {
         <span className="pc__unit">days left</span>
       </p>
       <p className="pc__line">
-        Then Aisha, Omar and Layla can receive <b className="num">0.12 BCH</b>.
+        Then {HEIR_NAMES} can receive <b className="num">{POT}</b>.
       </p>
       <p className="pc__meta">
         <span>6-month waiting time</span>

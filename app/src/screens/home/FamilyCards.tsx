@@ -7,6 +7,7 @@ import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { FAMILIES, KAWUNG, TITLE, type Family } from './familyPlans';
+import { POT } from './payoutHeirs';
 import { sharePercent } from '../../lib/shares';
 import { Logo } from '../../components/Logo';
 import { SplitWords, useInView } from './motion';
@@ -45,7 +46,7 @@ export function FamilyFace({ f, className, style }: { f: Family; className: stri
           </span>
           <span className="fc-who__text">
             <b>{f.names.length} heirs</b>
-            <span>Example, 0.12 BCH</span>
+            <span>Example, {POT}</span>
           </span>
         </div>
         <Link to={`/new?split=${f.mode}`} className="fc-cta" aria-label={`Start a plan with ${f.title.toLowerCase()}`}>

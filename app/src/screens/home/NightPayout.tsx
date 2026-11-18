@@ -12,7 +12,7 @@ import { Logo } from '../../components/Logo';
 import { useMedia } from '../../components/useMedia';
 import { SplitWords, useInView } from './motion';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
-import { HEIRS } from './payoutHeirs';
+import { HEIRS, POT } from './payoutHeirs';
 
 interface Pt { x: number; y: number }
 interface Label extends Pt { align: 'center' | 'start' }
@@ -192,7 +192,7 @@ export function NightPayout() {
           </div>
           <div className="np__plan-label" data-align={L.planLabel.align} style={at(L, L.planLabel)}>
             <span className="np__kicker">For your heirs</span>
-            <strong className="num">0.12 BCH</strong>
+            <strong className="num">{POT}</strong>
             <span className="np__state">
               {payout ? <Clock3 aria-hidden /> : <Check aria-hidden />}
               {payout ? 'Waiting time passed' : 'Waiting time restarted'}
@@ -238,7 +238,7 @@ export function NightPayout() {
             ) : (
               <span>
                 <b>The waiting time starts again.</b>{' '}
-                <span className="np__muted">All <span className="num">0.12 BCH</span> stays in the plan, and the heirs wait for the new date.</span>
+                <span className="np__muted">All <span className="num">{POT}</span> stays in the plan, and the heirs wait for the new date.</span>
               </span>
             )}
           </p>

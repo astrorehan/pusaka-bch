@@ -1,5 +1,6 @@
 // The three example family plans shown on the home page, and the kawung pattern their letters are wrapped in.
 import type { SplitMode } from '../../lib/types';
+import { HEIRS } from './payoutHeirs';
 
 export interface Family {
   mode: SplitMode;
@@ -10,16 +11,21 @@ export interface Family {
   shares: bigint[];
 }
 
+// The page's one family: Aisha, Omar and Layla. Faraid counts the whole family, so its letter adds the owner's
+// parents (Yusuf, Mariam) and a second son (Idris), the same six heirs as the /try example plan, out of 120: wife 15,
+// each parent 20, each son 26, daughter 13. Aisha, Omar and Layla come first so they keep their colours.
+const NAMES = HEIRS.map((h) => h.name);
+
 export const FAMILIES: Family[] = [
-  { mode: 'equal', title: 'Equal shares', role: 'The same share for everyone.', tint: 'var(--heir-1)', names: ['Aisha', 'Omar', 'Layla'], shares: [1n, 1n, 1n] },
-  { mode: 'custom', title: 'Your own split', role: 'A little more here, a little less there.', tint: 'var(--heir-2)', names: ['Aisha', 'Omar', 'Layla'], shares: [50n, 30n, 20n] },
+  { mode: 'equal', title: 'Equal shares', role: 'The same share for everyone.', tint: 'var(--heir-1)', names: NAMES, shares: NAMES.map(() => 1n) },
+  { mode: 'custom', title: 'Your own split', role: 'A little more here, a little less there.', tint: 'var(--heir-2)', names: NAMES, shares: HEIRS.map((h) => BigInt(h.pct)) },
   {
     mode: 'faraid',
     title: 'Islamic inheritance (faraid)',
-    role: 'Shares worked out from your family.',
+    role: 'Worked out from the whole family, parents included.',
     tint: 'var(--gold)',
-    names: ['Wife', 'Father', 'Mother', 'Son 1', 'Son 2', 'Daughter'],
-    shares: [15n, 20n, 20n, 26n, 26n, 13n],
+    names: [...NAMES, 'Yusuf', 'Mariam', 'Idris'],
+    shares: [15n, 26n, 13n, 20n, 20n, 26n],
   },
 ];
 
