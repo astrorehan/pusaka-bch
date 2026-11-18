@@ -16,13 +16,17 @@
           var t = localStorage.getItem('pusaka-theme');
           if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
-        var BLOOM = 700, FADE = 150, shownAt = 0;
+        // The bloom takes 700 ms. Then the line glides to full, and the splash lifts while the page settles in.
+        var BLOOM = 700, FINISH = 360, LIFT = 700, REVEAL = 1600, shownAt = 0;
+        var root = document.documentElement;
         function el() { return document.getElementById('splash'); }
         window.__pusakaSplash = {
           // Called right after the splash markup, so it covers the very first paint.
           show: function () {
             var s = el();
-            if (s) { s.classList.add('show'); shownAt = performance.now(); }
+            if (!s) return;
+            s.classList.add('show'); shownAt = performance.now();
+            root.classList.add('splashing'); // holds the page's entrance until the splash lifts
           },
           // Called by the app once it has rendered.
           hide: function () {
@@ -31,15 +35,28 @@
             if (!shownAt) { s.remove(); return; }
             var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
             setTimeout(function () {
-              s.classList.add('done');
-              setTimeout(function () { s.remove(); }, FADE + 150);
+              // Finish the line from wherever it has reached, so it never jumps.
+              var fill = s.querySelector('.line i');
+              if (fill && fill.animate) {
+                var now = getComputedStyle(fill).transform;
+                fill.style.animation = 'none';
+                fill.animate([{ transform: now }, { transform: 'scaleX(1)' }],
+                  { duration: FINISH, easing: 'cubic-bezier(0.33, 0, 0.2, 1)', fill: 'forwards' });
+              }
+              setTimeout(function () {
+                s.classList.add('done');
+                root.classList.remove('splashing');
+                root.classList.add('splash-reveal');
+                setTimeout(function () { s.remove(); }, LIFT);
+                setTimeout(function () { root.classList.remove('splash-reveal'); }, REVEAL);
+              }, FINISH - 80);
             }, wait);
           },
         };
       })();
     </script>
-    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;--s-track:#e3dcd0;--s-ease:cubic-bezier(.23, 1, .32, 1);z-index:100;background:var(--s-bg);opacity:0;visibility:hidden;pointer-events:none;place-content:center;justify-items:center;gap:32px;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}#splash.show{visibility:visible;pointer-events:auto;opacity:1}#splash.done{animation:.15s .1s both splash-out}@keyframes splash-out{0%{opacity:1}to{opacity:0}}#splash svg{width:72px;height:72px;display:block;overflow:visible}@media (width>=768px){#splash svg{width:96px;height:96px}}#splash path{fill:var(--s-ink)}#splash circle{fill:var(--s-gold)}#splash path,#splash circle{transform-box:view-box;transform-origin:16px 16px;opacity:0}#splash.show circle{animation:s-seed .2s var(--s-ease) forwards}#splash.show path{animation:s-petal .24s var(--s-ease) forwards}#splash.show path:first-of-type{--dx:1;--dy:-1;animation-delay:.2s}#splash.show path:nth-of-type(2){--dx:1;--dy:1;animation-delay:.28s}#splash.show path:nth-of-type(3){--dx:-1;--dy:1;animation-delay:.36s}#splash.show path:nth-of-type(4){--dx:-1;--dy:-1;animation-delay:.44s}@keyframes s-seed{0%{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}@keyframes s-petal{0%{opacity:0;transform:translate(calc(var(--dx) * -2px), calc(var(--dy) * -2px)) scale(.8)}to{opacity:1;transform:none}}#splash .line{background:var(--s-track);border-radius:2px;width:120px;height:2px;overflow:hidden}#splash .line i{background:var(--s-gold);transform-origin:0;height:100%;display:block;transform:scaleX(0)}#splash.show .line i{animation:4s cubic-bezier(.1,.6,.3,1) forwards s-line}@keyframes s-line{0%{transform:scaleX(0)}to{transform:scaleX(.85)}}#splash.done .line i{transition:transform .15s var(--s-ease);animation:none;transform:scaleX(1)}@media (prefers-reduced-motion:reduce){#splash.show path,#splash.show circle{animation:.15s forwards s-fade}@keyframes s-fade{0%{opacity:0}to{opacity:1}}}</style>
-    <script type="module" crossorigin src="/pusaka-bch/assets/index-Ldremjhx.js"></script>
+    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;--s-track:#e3dcd0;--s-ease:cubic-bezier(.23, 1, .32, 1);z-index:100;background:var(--s-bg);opacity:0;visibility:hidden;pointer-events:none;place-content:center;justify-items:center;gap:32px;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}#splash.show{visibility:visible;pointer-events:auto;opacity:1}#splash.done{pointer-events:none;animation:.56s cubic-bezier(.4,0,.2,1) .12s both splash-out}#splash.done svg{animation:s-lift .44s var(--s-ease) both}#splash.done .line{opacity:0;transition:opacity .24s}@keyframes splash-out{0%{opacity:1}to{opacity:0}}@keyframes s-lift{to{opacity:0;transform:scale(1.08)}}#splash svg{width:72px;height:72px;display:block;overflow:visible}@media (width>=768px){#splash svg{width:96px;height:96px}}#splash path{fill:var(--s-ink)}#splash circle{fill:var(--s-gold)}#splash path,#splash circle{transform-box:view-box;transform-origin:16px 16px;opacity:0}#splash.show circle{animation:s-seed .2s var(--s-ease) forwards}#splash.show path{animation:s-petal .24s var(--s-ease) forwards}#splash.show path:first-of-type{--dx:1;--dy:-1;animation-delay:.2s}#splash.show path:nth-of-type(2){--dx:1;--dy:1;animation-delay:.28s}#splash.show path:nth-of-type(3){--dx:-1;--dy:1;animation-delay:.36s}#splash.show path:nth-of-type(4){--dx:-1;--dy:-1;animation-delay:.44s}@keyframes s-seed{0%{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}@keyframes s-petal{0%{opacity:0;transform:translate(calc(var(--dx) * -2px), calc(var(--dy) * -2px)) scale(.8)}to{opacity:1;transform:none}}#splash .line{background:var(--s-track);border-radius:2px;width:120px;height:2px;overflow:hidden}#splash .line i{border-radius:inherit;background:var(--s-gold);transform-origin:0;will-change:transform;height:100%;display:block;transform:scaleX(0)}#splash.show .line i{animation:2.6s cubic-bezier(.16,1,.3,1) forwards s-line}@keyframes s-line{0%{transform:scaleX(0)}to{transform:scaleX(.9)}}@media (prefers-reduced-motion:reduce){#splash.show path,#splash.show circle{animation:.15s forwards s-fade}@keyframes s-fade{0%{opacity:0}to{opacity:1}}#splash.done svg{animation:.24s both s-fade-out}@keyframes s-fade-out{to{opacity:0}}}</style>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-IaWc7Wex.js"></script>
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/rolldown-runtime-XKyaHtl9.js">
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/shares-BXGItO3z.js">
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/preload-helper-0Xy_vY0d.js">
@@ -59,7 +76,7 @@
     <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/HomeFooter-DHI3K_qA.css">
     <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/StateMessage-XOYfdz3d.css">
     <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/Sheet-BAC3QdIj.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-BycCG_8y.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-C5ahq95a.css">
   </head>
   <body>
     <div id="splash" aria-hidden="true">
