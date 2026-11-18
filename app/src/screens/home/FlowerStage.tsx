@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box } from 'lucide-react';
 import { useMedia } from '../../components/useMedia';
 import { FRAMES, WIDE_QUERY } from './sawahFrame';
+import { BASE } from '../../lib/asset';
 
 export function FlowerStage() {
   const desktop = useMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
@@ -66,7 +67,7 @@ export function FlowerStage() {
   return (
     <div className="flower-stage" ref={container} data-scene={state} data-frame={frame}>
       <picture className="flower-stage__poster">
-        <img src={`/hero/pusaka-sawah-v3-${frame}${dark ? '-dark' : ''}.webp`} width={FRAMES[frame].width} height={FRAMES[frame].height} fetchPriority="high" alt="A four-petalled blue water lily with a glowing golden seed rises on a green stem from a flooded rice terrace. Coconut palms, a timber house and twin volcanoes sit beneath a quiet sky." />
+        <img src={`${BASE}hero/pusaka-sawah-v3-${frame}${dark ? '-dark' : ''}.webp`} width={FRAMES[frame].width} height={FRAMES[frame].height} fetchPriority="high" alt="A four-petalled blue water lily with a glowing golden seed rises on a green stem from a flooded rice terrace. Coconut palms, a timber house and twin volcanoes sit beneath a quiet sky." />
       </picture>
       <div className="flower-stage__canvas" ref={host} />
       {(!desktop || reducedMotion || saveData) && state !== 'ready' && state !== 'failed' && (

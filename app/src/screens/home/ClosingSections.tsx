@@ -5,6 +5,7 @@ import { ArrowRight, Link2 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
 import { NETWORK } from '../../components/AppShell';
 import { SplitWords, useInView } from './motion';
+import { BASE } from '../../lib/asset';
 
 const CTA_TITLE = 'Your family shouldn’t have to guess.';
 
@@ -58,7 +59,7 @@ export function ClosingCta() {
       <div className={`cta__art${seen ? ' is-seen' : ''}`} aria-hidden>
         <div className="cta__float">
           <span className="cta__shadow" />
-          <img src="/landing/cta-bloom.webp" alt="" width={1156} height={1022} loading="lazy" decoding="async" />
+          <img src={`${BASE}landing/cta-bloom.webp`} alt="" width={1156} height={1022} loading="lazy" decoding="async" />
         </div>
       </div>
     </section>

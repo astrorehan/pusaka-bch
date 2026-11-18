@@ -17,6 +17,7 @@ import {
   SOLIDCASH_URL,
   TESTS_URL,
 } from './links';
+import { BASE } from '../../lib/asset';
 import './home-footer.css';
 
 function CopyAddress({ address }: { address: string }) {
@@ -127,8 +128,8 @@ export function HomeFooter({ scene = false }: { scene?: boolean }) {
         <div className="hfoot__meadow">
           <img
             className="hfoot__img hfoot__img--day"
-            src="/landing/footer-terraces-1600.webp"
-            srcSet="/landing/footer-terraces-1600.webp 1600w, /landing/footer-terraces.webp 2400w"
+            src={`${BASE}landing/footer-terraces-1600.webp`}
+            srcSet={`${BASE}landing/footer-terraces-1600.webp 1600w, ${BASE}landing/footer-terraces.webp 2400w`}
             sizes="100vw"
             alt="Green rice terraces below a volcano, with a timber hut, coconut palms and a bloom on a lily pad."
             width={2400}
@@ -138,8 +139,8 @@ export function HomeFooter({ scene = false }: { scene?: boolean }) {
           />
           <img
             className="hfoot__img hfoot__img--night"
-            src="/landing/footer-terraces-night-1600.webp"
-            srcSet="/landing/footer-terraces-night-1600.webp 1600w, /landing/footer-terraces-night.webp 2400w"
+            src={`${BASE}landing/footer-terraces-night-1600.webp`}
+            srcSet={`${BASE}landing/footer-terraces-night-1600.webp 1600w, ${BASE}landing/footer-terraces-night.webp 2400w`}
             sizes="100vw"
             alt="The same terraces by moonlight, the hut's window lit, fireflies and a bloom on a lily pad."
             width={2400}

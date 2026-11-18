@@ -19,6 +19,7 @@ import { useMedia } from '../../components/useMedia';
 import { SplitWords, useInView } from './motion';
 import { CheatBlock, PlanBubble, ScenePlanCard } from './paddyParts';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
+import { BASE } from '../../lib/asset';
 
 /** The stage, in the photo's proportions (paddy-scene is 3:1). */
 const STAGE_W = 2160;
@@ -77,8 +78,8 @@ function Stage() {
     <div className="ps-stage">
       <img
         className="ps-stage__photo"
-        src="/landing/paddy-scene-2560.webp"
-        srcSet="/landing/paddy-scene-2560.webp 1x, /landing/paddy-scene.webp 2x"
+        src={`${BASE}landing/paddy-scene-2560.webp`}
+        srcSet={`${BASE}landing/paddy-scene-2560.webp 1x, ${BASE}landing/paddy-scene.webp 2x`}
         alt="A blue water lily floating on its pads in a flooded rice paddy, seen from above in dappled palm shade."
         width={STAGE_W}
         height={STAGE_H}
@@ -239,7 +240,7 @@ function PinnedScene() {
             </div>
           </div>
           {MISTS.map((m, i) => (
-            <img key={i} className={`ps-mist ${m.cls}`} src={`/landing/${m.src}.webp`} alt="" aria-hidden loading="lazy" decoding="async" style={{ filter: `blur(${m.blur}px)` }} />
+            <img key={i} className={`ps-mist ${m.cls}`} src={`${BASE}landing/${m.src}.webp`} alt="" aria-hidden loading="lazy" decoding="async" style={{ filter: `blur(${m.blur}px)` }} />
           ))}
           <div className="ps-fog" aria-hidden />
           <div className="ps-grain grain" aria-hidden />

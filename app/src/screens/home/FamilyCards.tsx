@@ -10,6 +10,7 @@ import { FAMILIES, KAWUNG, TITLE, type Family } from './familyPlans';
 import { sharePercent } from '../../lib/shares';
 import { Logo } from '../../components/Logo';
 import { SplitWords, useInView } from './motion';
+import { BASE } from '../../lib/asset';
 
 const FROM_TILT = [-9, 4, 10];
 
@@ -23,7 +24,7 @@ export function FamilyFace({ f, className, style }: { f: Family; className: stri
           <h3 className="fc-title">{f.title}</h3>
           <p className="fc-role">{f.role}</p>
         </div>
-        <img className="fc-art" src={`/landing/bloom-${f.mode}.webp`} alt="" loading="lazy" decoding="async" />
+        <img className="fc-art" src={`${BASE}landing/bloom-${f.mode}.webp`} alt="" loading="lazy" decoding="async" />
         <ul className="fc-chips" aria-label={`Example heirs for ${f.title}`}>
           {f.names.map((name, i) => (
             <li key={name} className="fc-chip" style={{ '--c': `var(--heir-${(i % 5) + 1})` } as CSSProperties}>

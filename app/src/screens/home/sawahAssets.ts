@@ -1,12 +1,13 @@
 import * as THREE from 'three';
+import { BASE } from '../../lib/asset';
 
 // Each plate stays separate so the landscape can be adjusted without flattening the live scene.
 export const LANDSCAPE_ASSETS = {
-  sky: '/hero/landscape-v2/sky.webp',
-  mountains: '/hero/landscape-v2/mountains.webp',
-  palms: '/hero/landscape-v2/palms.webp',
-  house: '/hero/landscape-v2/house.webp',
-  terraces: '/hero/landscape-v2/terraces.webp',
+  sky: `${BASE}hero/landscape-v2/sky.webp`,
+  mountains: `${BASE}hero/landscape-v2/mountains.webp`,
+  palms: `${BASE}hero/landscape-v2/palms.webp`,
+  house: `${BASE}hero/landscape-v2/house.webp`,
+  terraces: `${BASE}hero/landscape-v2/terraces.webp`,
 } as const;
 
 type AssetName = keyof typeof LANDSCAPE_ASSETS;

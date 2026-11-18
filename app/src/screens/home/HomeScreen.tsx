@@ -16,15 +16,16 @@ import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL, SOLIDCASH_URL } from './links';
 import { useGlide } from './useGlide';
 import { ButtonLink } from '../../components/Button';
+import { BASE } from '../../lib/asset';
 import './home.css';
 import './home-hero.css';
 import './home-landing.css';
 import './landing.css';
 
 const BUILT_WITH = [
-  { name: 'Bitcoin Cash', logo: '/brands/bitcoin-cash.svg', href: 'https://bitcoincash.org' },
-  { name: 'SolidCash', logo: '/brands/solidcash.svg', href: SOLIDCASH_URL },
-  { name: 'WizardConnect', logo: '/brands/wizardconnect.png', href: 'https://docs.riftenlabs.com/wizardconnect/' },
+  { name: 'Bitcoin Cash', logo: `${BASE}brands/bitcoin-cash.svg`, href: 'https://bitcoincash.org' },
+  { name: 'SolidCash', logo: `${BASE}brands/solidcash.svg`, href: SOLIDCASH_URL },
+  { name: 'WizardConnect', logo: `${BASE}brands/wizardconnect.png`, href: 'https://docs.riftenlabs.com/wizardconnect/' },
 ];
 
 export function HomeScreen() {

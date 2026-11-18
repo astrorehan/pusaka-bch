@@ -22,6 +22,7 @@ import { SplitWords, useInView } from './motion';
 import { Fireflies } from './NightPayout';
 import { PlanBubble, ScenePlanCard } from './paddyParts';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
+import { BASE } from '../../lib/asset';
 import './time-scroll.css';
 
 /** The stage, in the photo's proportions (paddy-scene is 3:1). */
@@ -359,8 +360,8 @@ function PinnedScene() {
           <div className="ts-stage">
             <img
               className="ps-stage__photo"
-              src="/landing/paddy-scene-2560.webp"
-              srcSet="/landing/paddy-scene-2560.webp 1x, /landing/paddy-scene.webp 2x"
+              src={`${BASE}landing/paddy-scene-2560.webp`}
+              srcSet={`${BASE}landing/paddy-scene-2560.webp 1x, ${BASE}landing/paddy-scene.webp 2x`}
               alt="A blue water lily floating on its pads in a flooded rice paddy, seen from above in dappled palm shade."
               width={STAGE_W}
               height={STAGE_H}

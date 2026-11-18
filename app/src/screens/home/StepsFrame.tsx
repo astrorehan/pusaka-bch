@@ -9,6 +9,7 @@ import { CountdownRing } from '../plan/CountdownRing';
 import { formatDay } from '../plan/time';
 import { useMedia } from '../../components/useMedia';
 import { SplitWords, useInView } from './motion';
+import { BASE } from '../../lib/asset';
 
 const STEPS = [
   { title: 'Choose heirs', line: 'Add up to 10 people, their BCH addresses and the share each one gets.' },
@@ -114,7 +115,7 @@ export function StepsFrame() {
       </header>
 
       <div className={`sf-frame fade-up${seen ? ' is-seen' : ''}`} style={{ animationDelay: `${words * 60 + 120}ms` }}>
-        <img className="sf-frame__photo" src="/landing/steps-frame.webp" alt="" width={1920} height={1080} loading="lazy" decoding="async" />
+        <img className="sf-frame__photo" src={`${BASE}landing/steps-frame.webp`} alt="" width={1920} height={1080} loading="lazy" decoding="async" />
         <div className="grain sf-frame__grain" aria-hidden />
         <div className="sf-frame__stack" aria-live="polite">
           {SCREENS.map((Screen, i) => (
