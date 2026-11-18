@@ -10,24 +10,25 @@
     <title>Pusaka: Your BCH. Their future.</title>
     <script>
       // Before first paint: apply the saved theme (no flash of the wrong one), and run the splash clock.
-      // The splash shows only if loading takes longer than 300 ms (DESIGN.md "The bloom").
+      // The splash greets every full page load with one bloom (DESIGN.md "The bloom"); in-app navigation skips it.
       (function () {
         try {
           var t = localStorage.getItem('pusaka-theme');
           if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
-        var SHOW_AFTER = 300, BLOOM = 700, FADE = 150, shownAt = 0, timer = 0;
+        var BLOOM = 700, FADE = 150, shownAt = 0;
         function el() { return document.getElementById('splash'); }
-        timer = setTimeout(function () {
-          var s = el();
-          if (s) { s.classList.add('show'); shownAt = performance.now(); }
-        }, SHOW_AFTER);
-        // Called by the app once it has rendered.
         window.__pusakaSplash = {
+          // Called right after the splash markup, so it covers the very first paint.
+          show: function () {
+            var s = el();
+            if (s) { s.classList.add('show'); shownAt = performance.now(); }
+          },
+          // Called by the app once it has rendered.
           hide: function () {
             var s = el();
             if (!s) return;
-            if (!shownAt) { clearTimeout(timer); s.remove(); return; } // never shown: nothing to animate
+            if (!shownAt) { s.remove(); return; }
             var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
             setTimeout(function () {
               s.classList.add('done');
@@ -51,9 +52,9 @@
       }
       :root[data-theme='dark'] #splash { --s-bg: #0E1222; --s-ink: #FFF8EC; --s-gold: #E3CA8E; --s-track: #2C3349; }
 
-      #splash.show { visibility: visible; pointer-events: auto; animation: splash-in 150ms ease forwards; }
+      /* Opaque from the first paint, so the unstyled page never shows through. */
+      #splash.show { visibility: visible; pointer-events: auto; opacity: 1; }
       #splash.done { animation: splash-out 150ms ease 100ms both; }
-      @keyframes splash-in { from { opacity: 0; } to { opacity: 1; } }
       @keyframes splash-out { from { opacity: 1; } to { opacity: 0; } }
 
       /* The logo: 72 px on phones, 96 px from 768 px. */
@@ -81,8 +82,9 @@
          progress, so it never claims done) and fills when the app is ready. */
       #splash .line { width: 120px; height: 2px; border-radius: 2px; background: var(--s-track); overflow: hidden; }
       #splash .line i { display: block; height: 100%; background: var(--s-gold); transform-origin: left; transform: scaleX(0); }
-      #splash.show .line i { transform: scaleX(0.85); transition: transform 4s cubic-bezier(0.1, 0.6, 0.3, 1); }
-      #splash.done .line i { transform: scaleX(1); transition: transform 150ms var(--s-ease); }
+      #splash.show .line i { animation: s-line 4s cubic-bezier(0.1, 0.6, 0.3, 1) forwards; }
+      @keyframes s-line { from { transform: scaleX(0); } to { transform: scaleX(0.85); } }
+      #splash.done .line i { animation: none; transform: scaleX(1); transition: transform 150ms var(--s-ease); }
 
       @media (prefers-reduced-motion: reduce) {
         #splash.show path, #splash.show circle { animation: s-fade 150ms ease forwards; animation-delay: 0ms; }
@@ -101,6 +103,7 @@
       </svg>
       <div class="line"><i></i></div>
     </div>
+    <script>window.__pusakaSplash.show();</script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
