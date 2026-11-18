@@ -2,8 +2,9 @@
 
 18 November 2026. This is the current implementation and qualification record.
 Stages 4 and 5 have executable app and contract implementations. Stage 6 has a
-published Chipnet demo and automated qualification. Real Paytaca phone approval,
-v2 mainnet transactions and a qualified mainnet trading pair remain open gates.
+published Chipnet demo, automated qualification and a Paytaca phone signing check
+on Chipnet. V2 mainnet transactions and a qualified mainnet trading pair remain
+open gates.
 The previous funded v1 mainnet plan was not migrated or spent.
 
 ## Application
@@ -97,6 +98,25 @@ carrier and a 5,190-sat network fee. Raw transaction and all predecessor outputs
 were fetched independently to check token conservation and fee accounting.
 External signing used a local deterministic stand-in, **not a Paytaca phone**.
 
+## Paytaca phone signing on Chipnet
+
+18 November 2026, about 11:20 to 11:31 UTC. The app's own owner flow, connected
+over WizardConnect to Paytaca on an actual phone in Chipnet mode. The heir was the
+tester's Paytaca address; the three contacts were demo addresses.
+
+| Step | Result |
+| --- | --- |
+| Pair | Paytaca connected from the QR in the review sheet |
+| Create plan, 30,000 sats | Signed on the phone. 29,000 sats protected, 1,000 sats plan identity, 335-sat fee. [`051af5d7…d9b9`](https://chipnet.chaingraph.cash/tx/051af5d7d96f3777991795511c71fa2d93689a239e6ff879bf1c8af2af5dd9b9) |
+| Send 2,000 sats, first request | Rejected in Paytaca. The app reported the rejection; the protected balance stayed 29,000 sats |
+| Send 2,000 sats, second request | The phone's output list matched the app's review: 2,000 sats out, 28,000 sats back to Pusaka (27,000 protected + 1,000 identity), 4,109-sat fee from ordinary Paytaca funds. Approved. Owner activity moved forward. [`b31fe96b…bdb1`](https://chipnet.chaingraph.cash/tx/b31fe96bbe819162b35e62b77e05366fbbedd19aa26a4991f8be7ffdbdc2bdb1) |
+| Reopen while disconnected | The plan link loaded from the network with the wallet disconnected |
+| Reconnect | A fresh QR paired the same Paytaca address; Send was enabled again |
+
+Not covered by this run: an incoming payment after the send, a second send, and
+restore from a saved plan file in a fresh browser session. The reopen used the
+same browser.
+
 ## Automated qualification
 
 - Compiler: 12 contracts compile without errors.
@@ -116,8 +136,9 @@ execution. A phone-sized browser viewport does not prove Paytaca mobile signing.
 
 ## Remaining user-dependent qualification
 
-1. Connect Paytaca on the actual phone, approve creation and partial send, receive,
-   reconnect and restore from saved data. Check rejection in the wallet too.
+1. Paytaca on the phone: creation, rejection, partial send and reconnect passed on
+   Chipnet (above). Still open: receive into the plan, send again, and restore
+   from saved plan data in a fresh session.
 2. Use small reviewed v2 mainnet transactions to prove owner use, false-claim
    cancellation and the valid multi-heir lifecycle. Keep the existing v1 plan separate.
 3. Select and review a real mainnet fungible pair, then prove protected proceeds

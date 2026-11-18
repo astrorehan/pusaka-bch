@@ -8,9 +8,9 @@ Chipnet app. Live Chipnet proves swap, protected token return, contact quorum,
 early-finalize rejection, mature BCH payout and the exact multi-heir token payout.
 See [current evidence and open qualification gates](proofs/app-and-assets.md).
 
-Stage 6 remains partially qualified: real Paytaca phone approval, v2 mainnet
-transactions, a mainnet pair and the organiser's public presentation upload need
-user participation. A public Chipnet release and demo script are available.
+Stage 6 remains partially qualified. Paytaca phone signing passed on Chipnet for
+creation, rejection, partial send and reconnect. V2 mainnet transactions, a mainnet
+pair and the organiser's public presentation upload need user participation. A public Chipnet release and demo script are available.
 The existing v1 mainnet plan remains separate and untouched.
 
 ## Intended outcome

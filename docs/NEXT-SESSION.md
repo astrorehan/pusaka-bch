@@ -36,8 +36,9 @@ contact review, mature BCH payout and exact fungible token inheritance.
 
 The following do not follow from those checks:
 
-1. Actual Paytaca phone signing of the new covenants, wallet rejection, reconnect
-   and recovery on that device. Approve only the reviewed transaction in the app.
+1. Paytaca phone signing passed on Chipnet for creation, rejection, partial send
+   and reconnect ([record](proofs/app-and-assets.md#paytaca-phone-signing-on-chipnet)).
+   Still open: receive, a second send, and restore from saved data in a fresh session.
 2. Small reviewed v2 mainnet creation, partial use, false-claim cancellation and
    valid multi-heir payout. Keep the older v1 plan separate.
 3. A real mainnet pair with protected token return and inheritance. The UI
