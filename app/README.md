@@ -54,8 +54,8 @@ WizardConnect's JSON serialization, including CashTokens, change addresses, and 
 | `src/components/` | Shared pieces: `Logo` (with the bloom), `Button`, `AppShell` (header). |
 | `src/screens/home/` | `/` and `/how-it-works` |
 | `src/screens/home/FlowerStage.tsx`, `flowerScene.ts` | Progressive studio hero: still images first, with the actual flower GLB and on-demand Three.js rendering on desktop. Touch devices opt in. |
-| `src/screens/home/FamilyCards.tsx` | The three example plans (Equal, Custom, Faraid) as cards dealt and flipped; each links to the matching create preset. |
-| `src/screens/home/PaddyScroll.tsx`, `NightPayout.tsx`, `StepsFrame.tsx`, `ClosingSections.tsx` | The landing below the hero: the pinned paddy scene, the night payout, the steps, the heir band and the closing call. Art in `public/landing/`, sources in `brand/landing/`. |
+| `src/screens/home/SealedLetters.tsx` | The three example plans (Equal, Custom, Faraid) unfold from sealed letters and link to their matching create presets. |
+| `src/screens/home/TimeScroll.tsx`, `SubakPayout.tsx`, `StepsFrame.tsx`, `CheatSection.tsx`, `ClosingSections.tsx` | The landing below the hero covers the scroll-driven day in the paddy, the subak payout, the three steps, fraud scenarios, the heir band and the closing call. Art is in `public/landing/` and sources are in `brand/landing/`. |
 | `src/screens/create/` | `/new`, the create-a-plan flow |
 | `src/screens/plan/` | `/plan#…` (a plan from its link) and `/try` (the judge path) |
 

@@ -27,14 +27,18 @@ a promise, one sentence, an illustration that shows a family and its shares, and
      each petal's area proportional to its share, with name and percentage chips at the petal tips. A small
      pill under it ("Waiting time: 6 months") carries the second half of the idea: the timer.
 2. **Built with**: inside the hero, under the two actions (`app/public/brands/`).
-3. **Family plan** (`FamilyCards.tsx`): three example cards dealt face down with a kawung back and flipped over;
-   each opens `/new?split=equal|custom|faraid`.
-4. **The paddy scene** (`PaddyScroll.tsx`, `paddyParts.tsx`, `cheatScenarios.ts`): on desktop a pinned frame over
-   `paddy-scene.webp`, with Pusaka's reminder, a working plan card and "What if someone tries to cheat?", then mist
-   into night. Phones, tablets and reduced motion get `StackedScene`, the same content as plain sections.
-5. **The night payout** (`NightPayout.tsx`): seed, one payment and four heirs as light, fireflies, an heir inspector
-   with exact BCH and satoshis.
-6. **Light sheet** (`StepsFrame.tsx`, `ClosingSections.tsx`): the three steps over a terraces frame, the heir band
+3. **Family plan** (`SealedLetters.tsx`, data in `familyPlans.ts`): three example plans as sealed letters, kawung
+   outside and a wax seal; in view the seal breaks and each unfolds into its card (`FamilyFace`); each opens
+   `/new?split=equal|custom|faraid`.
+4. **The paddy scene** (`TimeScroll.tsx`, `paddyParts.tsx`): on desktop the section holds while the day passes over
+   a still `paddy-scene.webp`: the light, the sun's reflection and the glass shadows move, the plan card counts its
+   days down, "I'm still here" rewinds to morning and adds a new day, and left alone it sets into night. Phones,
+   tablets and reduced motion get the copy and the working card as a plain section.
+5. **The night payout** (`SubakPayout.tsx`, heirs in `payoutHeirs.ts`): subak, a spring, a gated canal and a divider
+   feeding four terraces through channels as wide as each share; fireflies; an heir inspector with exact BCH and
+   satoshis.
+6. **Light sheet** (`StepsFrame.tsx`, `CheatSection.tsx`, `ClosingSections.tsx`): the three steps over a terraces
+   frame, "What if someone tries to cheat?" (`cheatScenarios.ts`), the heir band
    with **Open a plan link**, the closing call, then the footer on the terraces (`HomeFooter scene`).
 
 The order, the copy rules and the motion limits are in `docs/DESIGN.md` (Home page). Section copy shared between

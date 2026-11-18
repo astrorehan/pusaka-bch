@@ -1,0 +1,108 @@
+/* The night payout drawn as subak (SubakPayout.tsx): a spring, a gated canal, a divider and four terraces.
+   Water is moonlight; only the water moves. The section frame, tabs and inspector reuse the night payout's styles. */
+
+.np--subak { --water: #a9c4f5; }
+.sb-wrap { position: relative; display: grid; justify-items: center; gap: 28px; width: 100%; }
+/* Wide screens: the inspector sits in the open ground under the spring, beside the terraces. */
+@media (min-width: 1024px) {
+  .np--subak .sb-wrap .np__inspector {
+    position: absolute; left: max(0px, calc(50% - 600px)); bottom: 2%; width: min(37%, 440px);
+    flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 10px;
+  }
+}
+.sb { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; }
+.sb__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* the spring */
+.sb__pool-bed { fill: rgba(255, 248, 236, 0.03); stroke: rgba(255, 248, 236, 0.14); stroke-width: 1.2; }
+.sb__pool { stroke: rgba(227, 202, 142, 0.4); stroke-width: 1; transition: opacity 600ms ease; }
+.sb__ripple { fill: none; stroke: rgba(255, 248, 236, 0.2); stroke-width: 1; }
+.sb[data-flow='on'] .sb__pool { opacity: 0.86; transition-delay: 300ms; }
+.sb__seed {
+  --text: #fff8ec;
+  --gold: #e3ca8e;
+  position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center;
+  filter: drop-shadow(0 0 12px rgba(243, 220, 158, 0.55));
+}
+
+/* canal and channels: a dry bed, the water (filled along the path), and a shimmer running with the flow */
+.sb__bed, .sb__water, .sb__glint { fill: none; }
+.sb__bed { stroke: rgba(255, 248, 236, 0.11); stroke-width: calc(var(--w) * 1px + 5px); stroke-linecap: round; }
+.sb__water {
+  stroke: var(--water); stroke-opacity: 0.9; stroke-width: calc(var(--w) * 1px);
+  stroke-dasharray: 1 1; stroke-dashoffset: 1;
+  transition: stroke-dashoffset 720ms cubic-bezier(0.45, 0, 0.25, 1);
+}
+.sb__run--ch .sb__water { stroke: color-mix(in srgb, var(--c) 28%, var(--water)); }
+.sb__run--ch.is-pick .sb__water { stroke: color-mix(in srgb, var(--c) 16%, #f4f7ff); }
+.sb__glint {
+  stroke: #fff8ec; stroke-opacity: 0; stroke-width: calc(var(--w) * 0.2px); stroke-linecap: round;
+  stroke-dasharray: 0.028 0.072; transition: stroke-opacity 300ms ease;
+}
+
+/* Paying: the gate opens, the canal runs, every channel at once, then every terrace at once. */
+.sb[data-flow='on'] .sb__run--canal .sb__water { stroke-dashoffset: 0; transition-delay: 260ms; }
+.sb[data-flow='on'] .sb__run--ch .sb__water { stroke-dashoffset: 0; transition-delay: 860ms; }
+.sb[data-flow='on'] .sb__glint { stroke-opacity: 0.5; transition: stroke-opacity 500ms ease 1500ms; }
+.sb[data-flow='on'][data-live] .sb__glint { animation: sb-run 3s linear infinite; }
+@keyframes sb-run { to { stroke-dashoffset: -0.1; } }
+/* "I'm still here": the other way round, fields first and the canal last, back into the spring. */
+.sb[data-flow='off'] .sb__run--ch .sb__water { transition-delay: 420ms; }
+.sb[data-flow='off'] .sb__run--canal .sb__water { transition-delay: 900ms; }
+
+/* the terraces */
+.sb__lip { fill: rgba(150, 118, 78, 0.24); }
+.sb__earth { fill: #14182a; stroke: rgba(255, 248, 236, 0.08); stroke-width: 1; transition: stroke 300ms ease; }
+.sb__rice { stroke: none; pointer-events: none; }
+.sb pattern path { fill: none; stroke: rgba(176, 214, 150, 0.34); stroke-width: 1; stroke-linecap: round; }
+.sb__shine { fill: none; stroke: #f2f5ff; stroke-opacity: 0.4; stroke-width: 1.4; stroke-linecap: round; }
+.sb__rim { fill: none; stroke: rgba(227, 202, 142, 0.5); stroke-width: 1.4; stroke-linecap: round; transition: stroke 300ms ease; }
+.sb__field.is-pick .sb__earth { stroke: color-mix(in srgb, var(--c) 70%, transparent); }
+.sb__field.is-pick .sb__rim { stroke: color-mix(in srgb, var(--c) 45%, #fff8ec); stroke-width: 2; }
+.sb__fill {
+  transform: translateX(-101%); transform-box: fill-box;
+  transition: transform 700ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+.sb[data-flow='on'] .sb__fill { transform: none; transition: transform 1000ms cubic-bezier(0.25, 0.6, 0.3, 1) 1380ms; }
+/* the divider stone and the gate */
+.sb__divider { fill: #232a46; stroke: rgba(255, 248, 236, 0.4); stroke-width: 1.2; }
+.sb__gate-frame { fill: none; stroke: rgba(255, 248, 236, 0.55); stroke-width: 2.2; stroke-linecap: round; }
+.sb__gate-board { fill: #e3ca8e; transition: transform 420ms cubic-bezier(0.3, 0.7, 0.4, 1); }
+.sb[data-layout='wide'][data-flow='on'] .sb__gate-board { transform: translateY(-26px); }
+.sb[data-layout='tall'][data-flow='on'] .sb__gate-board { transform: translateX(-26px); }
+
+/* labels */
+.sb__label {
+  position: absolute; margin: 0; transform: translate(-50%, -50%);
+  display: grid; justify-items: center; gap: 3px; text-align: center; white-space: nowrap;
+}
+.sb__label[data-align='start'] { transform: translate(0, -50%); justify-items: start; text-align: left; }
+.sb__label--plan strong { font-size: 28px; font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; }
+.sb__label--gate strong { font-size: 15px; font-weight: 600; }
+.sb__label--gate span { font-size: 12.5px; color: var(--night-muted); }
+.sb__label--divider { font-size: 12.5px; line-height: 1.4; color: var(--night-muted); }
+
+/* the heirs, each one their whole terrace */
+.sb__heirs { list-style: none; margin: 0; padding: 0; }
+.sb__heirs li { position: absolute; }
+.sb__heir {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 100%; padding: 0 26px 0 44px;
+  border: 0; border-radius: 18px; background: transparent; color: var(--night-text);
+  font-size: 15px; text-align: left; text-shadow: 0 1px 10px rgba(5, 8, 20, 0.7);
+  transition: background-color 200ms ease, transform var(--dur-press) var(--ease-out);
+}
+.sb__heir:active { transform: scale(0.985); }
+.sb__heir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .sb__heir:hover { background: rgba(255, 248, 236, 0.04); } }
+.sb__heir .np__heir-amt { font-size: 16px; }
+
+.sb[data-layout='tall'] .sb__label--plan strong { font-size: 24px; }
+.sb[data-layout='tall'] .sb__label--gate strong { font-size: 14px; }
+.sb[data-layout='tall'] .sb__label--gate span, .sb[data-layout='tall'] .sb__label--divider { font-size: 12px; }
+.sb[data-layout='tall'] .sb__heir { gap: 8px; padding: 0 14px 0 22px; font-size: 13.5px; }
+.sb[data-layout='tall'] .sb__heir .np__heir-amt { font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sb__water, .sb__fill, .sb__gate-board, .sb__glint, .sb__pool,
+  .sb[data-flow] .sb__water, .sb[data-flow] .sb__fill, .sb[data-flow] .sb__glint { transition: none; }
+}

@@ -5,9 +5,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Play } from 'lucide-react';
 import { FlowerStage } from './FlowerStage';
-import { FamilyCards } from './FamilyCards';
-import { PaddyScroll } from './PaddyScroll';
-import { NightPayout } from './NightPayout';
+import { SealedLetters } from './SealedLetters';
+import { TimeScroll } from './TimeScroll';
+import { CheatSection } from './CheatSection';
+import { SubakPayout } from './SubakPayout';
 import { StepsFrame } from './StepsFrame';
 import { ClosingCta, HeirBand } from './ClosingSections';
 import { OpenLinkDialog } from './OpenLinkDialog';
@@ -79,12 +80,13 @@ export function HomeScreen() {
         <div className="home-hero__scene"><FlowerStage /></div>
       </section>
 
-      <FamilyCards />
-      <PaddyScroll />
-      <NightPayout />
+      <SealedLetters />
+      <TimeScroll />
+      <SubakPayout />
 
       <div className="lp-sheet">
         <StepsFrame />
+        <CheatSection />
         <HeirBand onOpenLink={() => setLinkOpen(true)} />
         <ClosingCta />
         <HomeFooter scene />
