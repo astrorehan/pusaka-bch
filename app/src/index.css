@@ -69,3 +69,17 @@ input, select, textarea { font-size: 16px; } /* no iOS zoom on focus */
   @keyframes enter { from { opacity: 0; } to { opacity: 1; } }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
+
+/* Splash handover (index.html): the page waits under the splash, then settles in as it lifts. */
+html.splashing .enter { animation-play-state: paused; }
+html.splashing .enter, html.splash-reveal .enter { animation-duration: 900ms; animation-timing-function: var(--ease-expo); }
+html.splash-reveal .enter { animation-delay: 140ms; }
+html.splash-reveal .header { animation: splash-header-in 700ms var(--ease-out) 220ms both; }
+html.splash-reveal .flower-stage__poster,
+html.splash-reveal .flower-stage__canvas { animation: splash-settle 1500ms var(--ease-expo) both; }
+@keyframes splash-header-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-settle { from { transform: scale(1.05); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  html.splash-reveal .flower-stage__poster,
+  html.splash-reveal .flower-stage__canvas { animation: none; }
+}

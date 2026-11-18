@@ -16,13 +16,17 @@
           var t = localStorage.getItem('pusaka-theme');
           if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
-        var BLOOM = 700, FADE = 150, shownAt = 0;
+        // The bloom takes 700 ms. Then the line glides to full, and the splash lifts while the page settles in.
+        var BLOOM = 700, FINISH = 360, LIFT = 700, REVEAL = 1600, shownAt = 0;
+        var root = document.documentElement;
         function el() { return document.getElementById('splash'); }
         window.__pusakaSplash = {
           // Called right after the splash markup, so it covers the very first paint.
           show: function () {
             var s = el();
-            if (s) { s.classList.add('show'); shownAt = performance.now(); }
+            if (!s) return;
+            s.classList.add('show'); shownAt = performance.now();
+            root.classList.add('splashing'); // holds the page's entrance until the splash lifts
           },
           // Called by the app once it has rendered.
           hide: function () {
@@ -31,8 +35,21 @@
             if (!shownAt) { s.remove(); return; }
             var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
             setTimeout(function () {
-              s.classList.add('done');
-              setTimeout(function () { s.remove(); }, FADE + 150);
+              // Finish the line from wherever it has reached, so it never jumps.
+              var fill = s.querySelector('.line i');
+              if (fill && fill.animate) {
+                var now = getComputedStyle(fill).transform;
+                fill.style.animation = 'none';
+                fill.animate([{ transform: now }, { transform: 'scaleX(1)' }],
+                  { duration: FINISH, easing: 'cubic-bezier(0.33, 0, 0.2, 1)', fill: 'forwards' });
+              }
+              setTimeout(function () {
+                s.classList.add('done');
+                root.classList.remove('splashing');
+                root.classList.add('splash-reveal');
+                setTimeout(function () { s.remove(); }, LIFT);
+                setTimeout(function () { root.classList.remove('splash-reveal'); }, REVEAL);
+              }, FINISH - 80);
             }, wait);
           },
         };
@@ -54,8 +71,12 @@
 
       /* Opaque from the first paint, so the unstyled page never shows through. */
       #splash.show { visibility: visible; pointer-events: auto; opacity: 1; }
-      #splash.done { animation: splash-out 150ms ease 100ms both; }
+      /* Lifting: the bloom swells a little and fades, then the paper dissolves into the page. */
+      #splash.done { pointer-events: none; animation: splash-out 560ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
+      #splash.done svg { animation: s-lift 440ms var(--s-ease) both; }
+      #splash.done .line { transition: opacity 240ms ease; opacity: 0; }
       @keyframes splash-out { from { opacity: 1; } to { opacity: 0; } }
+      @keyframes s-lift { to { opacity: 0; transform: scale(1.08); } }
 
       /* The logo: 72 px on phones, 96 px from 768 px. */
       #splash svg { display: block; width: 72px; height: 72px; overflow: visible; }
@@ -78,17 +99,21 @@
         to { opacity: 1; transform: none; }
       }
 
-      /* The progress line: 120 x 2 px, border track, gold fill. It creeps toward 85% (it can't know the real
-         progress, so it never claims done) and fills when the app is ready. */
+      /* The progress line: 120 x 2 px, border track, gold fill. It eases toward 90% (it can't know the real
+         progress, so it never claims done), slowing as it goes, and glides to full when the app is ready. */
       #splash .line { width: 120px; height: 2px; border-radius: 2px; background: var(--s-track); overflow: hidden; }
-      #splash .line i { display: block; height: 100%; background: var(--s-gold); transform-origin: left; transform: scaleX(0); }
-      #splash.show .line i { animation: s-line 4s cubic-bezier(0.1, 0.6, 0.3, 1) forwards; }
-      @keyframes s-line { from { transform: scaleX(0); } to { transform: scaleX(0.85); } }
-      #splash.done .line i { animation: none; transform: scaleX(1); transition: transform 150ms var(--s-ease); }
+      #splash .line i {
+        display: block; height: 100%; border-radius: inherit; background: var(--s-gold);
+        transform-origin: left; transform: scaleX(0); will-change: transform;
+      }
+      #splash.show .line i { animation: s-line 2600ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      @keyframes s-line { from { transform: scaleX(0); } to { transform: scaleX(0.9); } }
 
       @media (prefers-reduced-motion: reduce) {
         #splash.show path, #splash.show circle { animation: s-fade 150ms ease forwards; animation-delay: 0ms; }
         @keyframes s-fade { from { opacity: 0; } to { opacity: 1; } }
+        #splash.done svg { animation: s-fade-out 240ms ease both; }
+        @keyframes s-fade-out { to { opacity: 0; } }
       }
     </style>
   </head>
