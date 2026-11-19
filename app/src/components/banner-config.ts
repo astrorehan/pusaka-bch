@@ -11,8 +11,8 @@ export const BANNER = {
   event: 'BCH BLAZE 2026',
   eventUrl: 'https://bchblaze.cash',
 
-  /** The Widget Factory presentation (Google Slides "anyone with the link can view"). TODO: set before submitting. */
-  slidesUrl: '',
+  /** The presentation in the organiser's template, as a PDF in the repository. A public Google Slides link works too. */
+  slidesUrl: `${REPO_URL}/blob/main/docs/Pusaka-BCH-BLAZE-2026.pdf`,
 
   /** Pusaka as it was before the hackathon (Solidity on Monad). */
   before: {

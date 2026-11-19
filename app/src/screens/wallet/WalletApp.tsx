@@ -1,6 +1,7 @@
 import {
   lazy,
   Suspense,
+  useEffect,
   useId,
   useState,
   type FormEvent,
@@ -474,6 +475,13 @@ export function WalletScreen() {
 
 function WalletPage() {
   const location = useLocation();
+  // No example plans on this network: the live ones are in the other network's app, so go straight there.
+  const forwardDemo = !HAS_DEMO && OTHER_APP && isDemoRoute(location.pathname, location.search)
+    ? `${OTHER_APP}${location.pathname.replace(/^\//, '')}${location.search}`
+    : '';
+  useEffect(() => {
+    if (forwardDemo) window.location.replace(forwardDemo);
+  }, [forwardDemo]);
   const { wallet } = useWallet();
   const {
     metadata,
@@ -718,7 +726,7 @@ function WalletPage() {
             </Button>
           )}
         </PageHeading>
-        {demo && <DemoNotice />}
+        {demo && <DemoNotice paidOut={data?.state?.status === 'PAID_OUT'} />}
         {error && <ErrorNotice>{error}</ErrorNotice>}
         {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
         {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}

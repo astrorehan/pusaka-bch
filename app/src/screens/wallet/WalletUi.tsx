@@ -19,7 +19,7 @@ import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
 import { explorerTxUrl } from '../../lib/format';
 import type { Prepared } from '../../lib/chain/v2';
-import { NETWORK } from '../../lib/networkName';
+import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import './wallet-app.css';
 
 export function Card({
@@ -29,7 +29,9 @@ export function Card({
   return <section className={`pw-card ${className}`} {...props} />;
 }
 
-export function DemoNotice() {
+/** `paidOut`: the demo picked a plan with nothing left to do, so every example here has paid its heirs. */
+export function DemoNotice({ paidOut = false }: { paidOut?: boolean }) {
+  const elsewhere = paidOut && NETWORK === 'mainnet' && OTHER_APP;
   return (
     <div className="pw-info" role="note">
       <FlaskConical size={17} aria-hidden />
@@ -37,6 +39,14 @@ export function DemoNotice() {
         {NETWORK === 'mainnet'
           ? 'Live example plan on Bitcoin Cash. Anyone can open its claim or pay its heirs, with no wallet of your own. The plan pays the network fee from its real BCH.'
           : 'Live example plan on Chipnet, the Bitcoin Cash test network. Anyone can open its claim or pay its heirs, with no wallet of your own.'}
+        {elsewhere && (
+          <>
+            {' '}All the mainnet examples have paid their heirs.{' '}
+            <a href={`${OTHER_APP}wallet/demo`}>
+              Try the steps on Chipnet <ArrowUpRight aria-hidden size={14} />
+            </a>
+          </>
+        )}
       </p>
       <Link to="/wallet">
         Exit demo <ArrowRight aria-hidden size={14} />
