@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { planService } from '../../lib/planService';
 import { decodePlan } from '../../lib/planLink';
 import type { PlanData, PlanState } from '../../lib/types';
-import { NETWORK } from '../../components/AppShell';
+import { NETWORK } from '../../lib/networkName';
 import { DEMO_PLANS } from './demoPlan';
 
 export type PlanLoad =
@@ -62,7 +62,6 @@ export function usePlan(demo: boolean, hash: string) {
       const dev = devState();
       if (import.meta.env.DEV && dev === 'loading') return; // hold the skeleton on screen
       try {
-        const usdP = planService.usdPerBch().catch(() => null);
         let plan: PlanData | null;
         let state: PlanState | null = null;
         let demoUsed = false;
@@ -89,7 +88,6 @@ export function usePlan(demo: boolean, hash: string) {
         const dv = applyDev(plan, state, dev);
         if (dv === 'error') throw new Error('dev: network error');
         state = dv;
-        const usd = await usdP;
         if (my !== seq.current) return;
         // The chain layer answers null for any failed read; offline is not "not found".
         if (!state && typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -105,9 +103,13 @@ export function usePlan(demo: boolean, hash: string) {
           plan: plan!,
           state: state!,
           readAt: Date.now(),
-          usd,
+          usd: prev.kind === 'ready' ? prev.usd : null,
           demoUsed: demoUsed || (prev.kind === 'ready' && prev.demoUsed),
         }));
+        void planService.usdPerBch().then((usd) => {
+          if (my !== seq.current) return;
+          setLoad((prev) => prev.kind === 'ready' && prev.usd !== usd ? { ...prev, usd } : prev);
+        }).catch(() => {});
       } catch {
         if (my !== seq.current) return;
         // A silent refresh that fails keeps what is on screen.
@@ -126,7 +128,9 @@ export function usePlan(demo: boolean, hash: string) {
   // Quiet re-read every minute, so a plan someone else just paid shows as sent.
   useEffect(() => {
     if (load.kind !== 'ready') return;
-    const id = setInterval(() => read(true), REFRESH_MS);
+    const id = setInterval(() => {
+      if (!document.hidden && navigator.onLine) void read(true);
+    }, REFRESH_MS);
     return () => clearInterval(id);
   }, [load.kind, read]);
 

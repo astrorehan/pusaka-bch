@@ -13,8 +13,12 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
-import * as api from '../../lib/chain/v2';
-import { formatBch } from '../../lib/format';
+import { p2pkhCashAddressFromPkh } from '../../lib/cashAddress';
+import type { Prepared, PusakaV2PolicyInput } from '../../lib/chain/v2';
+import { formatBch, parseBch } from '../../lib/format';
+import { NETWORK } from '../../lib/networkName';
+import { MAX_HEIR_NAME_LENGTH } from '../../lib/planPayload';
+import { encodePusakaV2PlanLink, MAX_HEIRS, MAX_INT32, MIN_PLAN_CARRIER_SATS, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import type { SplitMode } from '../../lib/types';
 import { useWallet } from '../../lib/wallet';
 import { EMPTY_FAMILY, faraid, type Family } from '../create/faraid';
@@ -59,7 +63,6 @@ const SPLITS = [
   },
 ] as const;
 
-type Metadata = api.PusakaV2PlanMetadata;
 type Person = { name: string; address: string };
 type Heir = Person & { id: string; share: string };
 
@@ -83,7 +86,7 @@ function daySeconds(value: string, max: number, previous?: number) {
 }
 
 export function SetupScreen({ edit = false }: { edit?: boolean }) {
-  const { metadata } = useCurrentPlan();
+  const { metadata, loading, error } = useCurrentPlan();
   if (edit && !metadata) {
     return (
       <div className="pw-page">
@@ -94,10 +97,10 @@ export function SetupScreen({ edit = false }: { edit?: boolean }) {
         <Card>
           <EmptyState
             icon={<ShieldCheck size={21} />}
-            title="Open your plan first"
-            description="Create or open your wallet before editing its inheritance rules."
+            title={loading ? 'Checking your plan…' : 'Open your plan first'}
+            description={error || 'Create or open your wallet before editing its inheritance rules.'}
           >
-            <ButtonLink to="/wallet">Go to wallet</ButtonLink>
+            {!loading && <ButtonLink to="/wallet">Go to wallet</ButtonLink>}
           </EmptyState>
         </Card>
       </div>
@@ -135,7 +138,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
       ? existing.heirs.map((heir, i) => ({
           id: `heir-${i}`,
           name: heir.label ?? '',
-          address: api.p2pkhCashAddressFromPkh(heir.pkhHex, api.NETWORK),
+          address: p2pkhCashAddressFromPkh(heir.pkhHex, NETWORK),
           share: heir.share,
         }))
       : [initialHeir(0), initialHeir(1)],
@@ -147,7 +150,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
   const [contacts, setContacts] = useState(() =>
     existing
       ? existing.contacts.map((pkh) =>
-          api.p2pkhCashAddressFromPkh(pkh, api.NETWORK),
+          p2pkhCashAddressFromPkh(pkh, NETWORK),
         )
       : ['', '', ''],
   );
@@ -161,7 +164,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [connectError, setConnectError] = useState(false);
-  const [prepared, setPrepared] = useState<api.Prepared | null>(null);
+  const [prepared, setPrepared] = useState<Prepared | null>(null);
   const [preparationTx, setPreparationTx] = useState('');
 
   const familyResult = faraid(family);
@@ -245,12 +248,14 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
 
   function validateHeirs() {
     if (mode === 'faraid' && !familyResult.ok) return familyResult.message;
+    if (heirs.some(({ name }) => name.trim().length > MAX_HEIR_NAME_LENGTH))
+      return `Use heir names with at most ${MAX_HEIR_NAME_LENGTH} characters.`;
     const invalid = heirs.findIndex((heir) => !planAddressHash(heir.address));
     if (invalid !== -1)
-      return `Enter a valid ${api.NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for ${heirs[invalid].name.trim() || `heir ${invalid + 1}`}.`;
+      return `Enter a valid ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for ${heirs[invalid].name.trim() || `heir ${invalid + 1}`}.`;
     if (
       shares.some((share) => share <= 0n) ||
-      totalShares >= BigInt(api.MAX_INT32)
+      totalShares >= BigInt(MAX_INT32)
     )
       return 'Use positive whole numbers for the shares and reduce any unusually large values.';
     return '';
@@ -260,7 +265,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     const hashes = contacts.map(planAddressHash);
     const invalid = hashes.indexOf(null);
     if (invalid !== -1)
-      return `Enter a valid ${api.NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for trusted contact ${invalid + 1}.`;
+      return `Enter a valid ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for trusted contact ${invalid + 1}.`;
     if (
       new Set(hashes).size !== 3 ||
       (walletHash && hashes.includes(walletHash))
@@ -295,7 +300,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     setBusy(true);
     setError('');
     try {
-      const policy: api.PusakaV2PolicyInput = {
+      const policy: PusakaV2PolicyInput = {
         inactivityPeriodSeconds: waitingSeconds,
         reviewPeriodSeconds: reviewSeconds,
         feeBudget: existing ? BigInt(existing.feeBudget) : 5000n,
@@ -310,15 +315,18 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
           label: heir.name.trim(),
         })),
       };
-      if (existing)
-        setPrepared(await api.prepareAction(existing, 'policy', { policy }));
-      else {
-        const deposit = api.parseBch(amount.trim());
-        if (deposit < api.MIN_PLAN_CARRIER_SATS)
+      if (existing) {
+        const { prepareAction } = await import('../../lib/chain/v2');
+        setPrepared(await prepareAction(existing, 'policy', { policy }));
+      } else {
+        const deposit = parseBch(amount);
+        if (deposit === null) throw new Error('Enter the starting transfer in BCH with up to eight decimal places.');
+        if (deposit < MIN_PLAN_CARRIER_SATS)
           throw new Error(
-            `The starting transfer must be at least ${formatBch(api.MIN_PLAN_CARRIER_SATS)} BCH.`,
+            `The starting transfer must be at least ${formatBch(MIN_PLAN_CARRIER_SATS)} BCH.`,
           );
-        setPrepared(await api.prepareCreate(policy, deposit));
+        const { prepareCreate } = await import('../../lib/chain/v2');
+        setPrepared(await prepareCreate(policy, deposit));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -331,7 +339,8 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     setBusy(true);
     setError('');
     try {
-      setPrepared(await api.prepareGather());
+      const { prepareGather } = await import('../../lib/chain/v2');
+      setPrepared(await prepareGather());
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -469,6 +478,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                               Name
                               <input
                                 value={heir.name}
+                                maxLength={MAX_HEIR_NAME_LENGTH}
                                 placeholder={`Heir ${i + 1}`}
                                 onChange={(event) =>
                                   changeHeir(heir, 'name', event.target.value)
@@ -535,7 +545,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                         two thirds and the other one third.
                       </p>
                     )}
-                    {mode !== 'faraid' && heirs.length < api.MAX_HEIRS && (
+                    {mode !== 'faraid' && heirs.length < MAX_HEIRS && (
                       <Button
                         type="button"
                         variant="secondary"
@@ -810,7 +820,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
             setPrepared(null);
             if (plan) {
               selectPlan(plan);
-              navigate(api.encodePusakaV2PlanLink(plan, '/v2/plan'), {
+              navigate(encodePusakaV2PlanLink(plan, '/v2/plan'), {
                 state: { txid, savePlan: true },
               });
             } else setPreparationTx(txid);

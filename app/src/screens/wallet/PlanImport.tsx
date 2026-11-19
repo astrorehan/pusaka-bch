@@ -2,8 +2,8 @@ import { useId, useState, type FormEvent } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
-import * as api from '../../lib/chain/v2';
-import { useCurrentPlan } from './currentPlan';
+import { NETWORK } from '../../lib/networkName';
+import { checkPlanLink, MAX_PLAN_FILE_BYTES } from '../home/readPlanLink';
 import { ErrorNotice, WalletSheet } from './WalletUi';
 
 export function PlanImport({
@@ -13,41 +13,31 @@ export function PlanImport({
   open: boolean;
   close: () => void;
 }) {
-  const { selectPlan } = useCurrentPlan();
   const navigate = useNavigate();
   const formId = useId();
   const [text, setText] = useState('');
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState(false);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
-    setBusy(true);
-    setError('');
-    try {
-      const plan = api.importPlan(text);
-      const data = await api.loadPlan(plan);
-      if (data.state.status === 'UNINITIALIZED')
-        throw new Error(
-          'This plan could not be found on the network. Check that you have the latest link or file.',
-        );
-      selectPlan(plan, data);
-      setText('');
-      close();
-      navigate('/wallet/plan');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(false);
+    if (reading) return;
+    const result = checkPlanLink(text, NETWORK);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    setText('');
+    setError('');
+    close();
+    navigate(result.to);
   }
 
   return (
     <WalletSheet
       open={open}
       onClose={close}
-      dismissible={!busy}
+      dismissible={!reading}
       title="Open a saved plan"
       description="Use the link or plan file shared with you. It contains public addresses and rules."
       footer={
@@ -55,10 +45,10 @@ export function PlanImport({
           type="submit"
           form={formId}
           icon={<ArrowRight />}
-          loading={busy}
+          loading={reading}
           disabled={!text.trim()}
         >
-          {busy ? 'Checking plan…' : 'Open plan'}
+          {reading ? 'Reading file…' : 'Open plan'}
         </Button>
       }
     >
@@ -71,7 +61,7 @@ export function PlanImport({
             value={text}
             spellCheck={false}
             autoCapitalize="off"
-            disabled={busy}
+            disabled={reading}
             onChange={(event) => {
               setText(event.target.value);
               setError('');
@@ -83,11 +73,17 @@ export function PlanImport({
           Or choose saved plan data
           <input
             type="file"
-            accept="application/json,.json"
-            disabled={busy}
+            accept=".json,.html,.htm,.txt,.url,application/json,text/html,text/plain"
+            disabled={reading}
             onChange={async (event) => {
               const file = event.target.files?.[0];
+              event.target.value = '';
               if (!file) return;
+              if (file.size > MAX_PLAN_FILE_BYTES) {
+                setError('This saved plan is too large to open.');
+                return;
+              }
+              setReading(true);
               try {
                 setText(await file.text());
                 setError('');
@@ -95,6 +91,8 @@ export function PlanImport({
                 setError(
                   'Could not read the plan file. Choose it again or paste the plan link.',
                 );
+              } finally {
+                setReading(false);
               }
             }}
           />

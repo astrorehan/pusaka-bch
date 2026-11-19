@@ -12,11 +12,12 @@ export function FlowerStage() {
   const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches));
   const [requested, setRequested] = useState(false);
   const [nearby, setNearby] = useState(false);
+  const [posterSettled, setPosterSettled] = useState(false);
   const [state, setState] = useState<'still' | 'loading' | 'ready' | 'failed'>('still');
   const container = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const saveData = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-  const enhance = nearby && (requested || (desktop && !reducedMotion && !saveData));
+  const enhance = nearby && (requested || (posterSettled && desktop && !reducedMotion && !saveData));
   const frame = wide ? 'wide' : 'tall';
 
   useEffect(() => {
@@ -67,7 +68,15 @@ export function FlowerStage() {
   return (
     <div className="flower-stage" ref={container} data-scene={state} data-frame={frame}>
       <picture className="flower-stage__poster">
-        <img src={`${BASE}hero/pusaka-sawah-v3-${frame}${dark ? '-dark' : ''}.webp`} width={FRAMES[frame].width} height={FRAMES[frame].height} fetchPriority="high" alt="A four-petalled blue water lily with a glowing golden seed rises on a green stem from a flooded rice terrace. Coconut palms, a timber house and twin volcanoes sit beneath a quiet sky." />
+        <img
+          src={`${BASE}hero/pusaka-sawah-v3-${frame}${dark ? '-dark' : ''}.webp`}
+          width={FRAMES[frame].width}
+          height={FRAMES[frame].height}
+          fetchPriority="high"
+          onLoad={() => setPosterSettled(true)}
+          onError={() => setPosterSettled(true)}
+          alt="A four-petalled blue water lily with a glowing golden seed rises on a green stem from a flooded rice terrace. Coconut palms, a timber house and twin volcanoes sit beneath a quiet sky."
+        />
       </picture>
       <div className="flower-stage__canvas" ref={host} />
       {(!desktop || reducedMotion || saveData) && state !== 'ready' && state !== 'failed' && (

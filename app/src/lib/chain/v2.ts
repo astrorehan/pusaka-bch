@@ -16,21 +16,20 @@ import {
   buildDistributeLateTx,
   discoverPusakaV2State,
   finalizeBuilderTxHex,
-  encodePusakaV2PlanLink,
-  decodePusakaV2PlanLink,
-  PUSAKA_V2_VERSION,
   type PusakaV2PlanMetadata,
   type PusakaV2PolicyInput,
   type PusakaV2PlanHandle,
 } from "../protocol/pusaka-v2";
-import { getWizardWallet } from "./chainPlanService";
+import { NETWORK } from "../networkName";
+import { recordActivity, savePlan } from "../walletData";
 import {
   getProvider,
   medianTimePast,
   pkhOfAddress,
   lockOfAddress,
+  paymentAddress,
 } from "./network";
-import type { NetworkName } from "../types";
+import { getWizardWallet } from "./wizard";
 import {
   tokenVault,
   quoteBuy,
@@ -41,132 +40,45 @@ import {
 } from "../protocol/assets";
 import testPair from "../protocol/test-pair.json";
 
-export * from "../protocol/pusaka-v2";
-export const NETWORK: NetworkName =
-  import.meta.env.VITE_NETWORK === "mainnet" ? "mainnet" : "chipnet";
-const PLANS_KEY = `pusaka.v2.plans.${NETWORK}`;
-const HISTORY_KEY = `pusaka.v2.activity.${NETWORK}`;
-export type Activity = {
-  txid: string;
-  title: string;
-  at: number;
-  plan: string;
-  status: "accepted";
-};
-export function savedPlans(): PusakaV2PlanMetadata[] {
-  try {
-    return JSON.parse(localStorage.getItem(PLANS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-export function savePlan(plan: PusakaV2PlanMetadata) {
-  const plans = savedPlans().filter(
-    (p) => p.planCategoryHex !== plan.planCategoryHex,
-  );
-  try {
-    localStorage.setItem(PLANS_KEY, JSON.stringify([plan, ...plans]));
-    return true;
-  } catch {
-    return false;
-  }
-}
-export function history(): Activity[] {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-export function planLink(plan: PusakaV2PlanMetadata) {
-  return encodePusakaV2PlanLink(
-    plan,
-    `${location.origin}${import.meta.env.BASE_URL}v2/plan`,
-  );
-}
-export function importPlan(text: string): PusakaV2PlanMetadata {
-  const value = text.trim();
-  let parsed: PusakaV2PlanMetadata;
-  try {
-    parsed = value.startsWith("{")
-      ? JSON.parse(value)
-      : decodePusakaV2PlanLink(value);
-    if (parsed?.version !== PUSAKA_V2_VERSION) throw new Error();
-  } catch {
-    throw new Error("Could not read this plan. Paste the complete plan link or choose the saved plan file.");
-  }
-  if (parsed.network !== "mainnet" && parsed.network !== "chipnet")
-    throw new Error("This plan file is missing a supported Bitcoin Cash network.");
-  if (parsed.network !== NETWORK)
-    throw new Error(
-      `This plan uses ${parsed.network}. Open the matching network build.`,
-    );
-  return parsed;
-}
-export const attach = (plan: PusakaV2PlanMetadata) =>
-  attachPusakaV2Plan(plan, getProvider(NETWORK));
+export type { PusakaV2PlanMetadata, PusakaV2PolicyInput, Quote };
+
 export async function loadPlan(plan: PusakaV2PlanMetadata) {
-  const handle = await attach(plan);
+  const provider = getProvider(NETWORK);
+  // Use the same state read to verify the policy and display the balance.
+  const handle = await attachPusakaV2Plan(plan, provider, { verifyOnChain: false });
   const [state, now] = await Promise.all([
     discoverPusakaV2State(handle),
     medianTimePast(NETWORK),
   ]);
-  let review:
-    | { confirmed: boolean; age: number; required: number; ready: boolean }
-    | undefined;
-  if (state.anchorUtxo) {
-    const p = getProvider(NETWORK);
-    const hash = binToHex(
-      sha256.hash(handle.contracts.anchorLockingBytecode).reverse(),
-    );
-    const coins = (await p.performRequest(
-      "blockchain.scripthash.listunspent",
-      hash,
-      "include_tokens",
-    )) as Array<{ tx_hash: string; tx_pos: number; height: number }>;
-    const coin = coins.find(
-      (c) =>
-        c.tx_hash === state.anchorUtxo!.txid &&
-        c.tx_pos === state.anchorUtxo!.vout,
-    );
-    let age = 0;
-    if (coin && coin.height > 0) {
-      const headers = await Promise.all(
-        Array.from({ length: 11 }, (_, i) =>
-          p.performRequest("blockchain.block.header", coin.height - 1 - i),
-        ),
-      );
-      const times = headers
-        .map((h) =>
-          new DataView(hexToBin(String(h)).buffer).getUint32(68, true),
-        )
-        .sort((a, b) => a - b);
-      age = Math.max(0, Number(now) - times[5]);
-    }
-    review = {
-      confirmed: Boolean(coin && coin.height > 0),
-      age,
-      required: handle.policy.effectiveReviewSeconds,
-      ready: Boolean(
-        coin && coin.height > 0 && age >= handle.policy.effectiveReviewSeconds,
-      ),
-    };
+  if (!state.planUtxo) {
+    throw new Error("This plan could not be found on the network. Check that you have the latest link or file.");
   }
-  const tokenReceipts =
-    handle.metadata.protocolRevision === "assets-1"
-      ? (
-          await getProvider(NETWORK).getUtxos(tokenVault(handle).address)
-        ).filter(
-          (u) =>
-            u.token &&
-            !u.token.nft &&
-            u.token.category !== metadataCategory(plan),
-        )
-      : [];
-  return { handle, state, now: Number(now), review, tokenReceipts };
-}
-function metadataCategory(plan: PusakaV2PlanMetadata) {
-  return plan.planCategoryHex;
+  if (!state.policyMatchesMetadata) {
+    throw new Error("The plan rules have changed. Ask the owner for the latest link or file.");
+  }
+
+  const vault = handle.metadata.protocolRevision === "assets-1" ? tokenVault(handle) : null;
+  const anchorHeight = state.status === "REVIEW" && state.anchorMatchesRound &&
+    state.anchorSequence === handle.policy.reviewSequence ? state.anchorUtxo?.blockHeight ?? 0 : 0;
+  const [rawReceipts, anchorTime] = await Promise.all([
+    vault ? provider.getUtxos(vault.address) : [],
+    anchorHeight > 0 ? medianTimePast(NETWORK, anchorHeight - 1) : null,
+  ]);
+  const age = anchorTime === null ? 0 : Math.max(0, Number(now - anchorTime));
+  const required = handle.policy.effectiveReviewSeconds;
+  return {
+    handle,
+    state,
+    now: Number(now),
+    review: state.status === "REVIEW" ? {
+      confirmed: anchorTime !== null,
+      age,
+      required,
+      ready: anchorTime !== null && age >= required,
+    } : undefined,
+    tokenReceiveAddress: vault?.tokenAddress,
+    tokenReceipts: rawReceipts.filter((u) => u.token && !u.token.nft && u.token.category !== plan.planCategoryHex),
+  };
 }
 export type LoadedPlan = Awaited<ReturnType<typeof loadPlan>>;
 export interface Prepared {
@@ -181,19 +93,18 @@ export interface Prepared {
   validUntil?: number;
   walletApproval?: boolean;
 }
-export function bch(sats: bigint) {
+function bch(sats: bigint) {
   return `${(Number(sats) / 1e8).toFixed(8)} BCH`;
 }
-export function parseBch(text: string): bigint {
-  if (!/^(0|[1-9]\d*)(\.\d{1,8})?$/.test(text))
-    throw new Error("Enter BCH with up to eight decimal places.");
-  const [whole, fraction = ""] = text.split(".");
-  return BigInt(whole) * 100000000n + BigInt(fraction.padEnd(8, "0"));
-}
-function signing(prompt: string) {
+function walletOnNetwork() {
   const w = getWizardWallet();
+  if (!w) throw new Error("Connect your wallet first.");
   if (w.network !== NETWORK)
     throw new Error("Connect a wallet on this network.");
+  return w;
+}
+function signing(prompt: string) {
+  const w = walletOnNetwork();
   const signer = Signer.external(
     {
       wallet: w.signer(prompt),
@@ -211,9 +122,10 @@ async function ownerCoins(address: string): Promise<Utxo[]> {
     .sort((a, b) => (a.satoshis > b.satoshis ? -1 : 1));
 }
 export async function prepareGather(): Promise<Prepared> {
-  const { w } = signing("Pusaka: prepare the first receive address");
+  const w = walletOnNetwork();
   const p = getProvider(NETWORK);
   const addresses = w.derivedAddresses();
+  const signer = w.signer("Pusaka: prepare your first receive address", addresses);
   const sets = await Promise.all(addresses.map((d) => p.getUtxos(d.address)));
   const builder = new TransactionBuilder({ provider: p });
   let total = 0n,
@@ -226,7 +138,7 @@ export async function prepareGather(): Promise<Prepared> {
           u,
           externallySignedUnlocker({
             lockingBytecode: lockOfAddress(addresses[i].address),
-            signer: w.signer("Pusaka: prepare your first receive address"),
+            signer,
           }),
         );
         total += u.satoshis;
@@ -310,6 +222,7 @@ export async function prepareAction(
     policy?: PusakaV2PolicyInput;
   } = {},
 ): Promise<Prepared> {
+  const recipient = action === "send" && options.address ? paymentAddress(options.address, NETWORK) : null;
   const loaded = await loadPlan(metadata);
   const { handle, state, now } = loaded;
   if (!state.planUtxo)
@@ -394,17 +307,11 @@ export async function prepareAction(
       };
       switch (action) {
         case "send":
-          if (!options.address || options.amount === undefined)
+          if (!recipient || options.amount === undefined)
             throw new Error("Enter a recipient and amount.");
-          if (
-            !options.address.startsWith(
-              NETWORK === "mainnet" ? "bitcoincash:" : "bchtest:",
-            )
-          )
-            throw new Error("Use an address on this network.");
           result = buildSendTx({
             ...common,
-            recipientAddressOrLock: options.address,
+            recipientAddressOrLock: recipient,
             amount: options.amount,
           });
           break;
@@ -438,9 +345,9 @@ export async function prepareAction(
     }
   }
   const rows: Array<[string, string]> = [["Network fee", bch(result.fee)]];
-  if (action === "send")
+  if (recipient)
     rows.unshift(
-      ["To recipient", `${options.address}`],
+      ["To recipient", recipient],
       ["Payment", bch(options.amount!)],
     );
   if ("protectedFeeSats" in result)
@@ -510,31 +417,20 @@ export async function submit(prepared: Prepared): Promise<string> {
   const txid =
     typeof response === "string"
       ? response
-      : (response as { txid: string }).txid;
-  if (prepared.metadata) savePlan(prepared.metadata);
-  try {
-    localStorage.setItem(
-      HISTORY_KEY,
-      JSON.stringify(
-        [
-          {
-            txid,
-            title: prepared.title,
-            at: Date.now(),
-            plan: prepared.planCategory || "",
-            status: "accepted",
-          },
-          ...history(),
-        ].slice(0, 100),
-      ),
-    );
-  } catch {
-    /* The accepted transaction remains valid if browser storage is full. */
+      : (response as { txid?: string } | null)?.txid;
+  if (typeof txid !== "string" || txid.toLowerCase() !== expectedTxid) {
+    throw new Error(`Submission could not be confirmed. Check transaction ${expectedTxid} before trying again.`);
   }
-  return txid;
+  if (prepared.metadata) savePlan(prepared.metadata);
+  recordActivity({
+    txid: expectedTxid,
+    title: prepared.title,
+    at: Date.now(),
+    plan: prepared.planCategory || "",
+    status: "accepted",
+  });
+  return expectedTxid;
 }
-export { testPair, tokenVault };
-export type { Quote };
 export async function getSwapQuote(amount: bigint, slippageBps: number) {
   if (NETWORK !== "chipnet" || !testPair.category)
     throw new Error(
@@ -642,14 +538,11 @@ export async function prepareTokenSend(
   recipient: string,
   units: bigint,
 ): Promise<Prepared> {
+  const destination = paymentAddress(recipient, NETWORK);
   const { handle, state, now } = await loadPlan(metadata),
     { w, unlocker } = signing("Pusaka: send protected tokens");
   if (binToHex(pkhOfAddress(w.ownerAddress())) !== metadata.ownerPkhHex)
     throw new Error("Connect the owner wallet.");
-  if (
-    !recipient.startsWith(NETWORK === "chipnet" ? "bchtest:" : "bitcoincash:")
-  )
-    throw new Error("Choose a recipient on this network.");
   const coin = [...(await ownerCoins(w.ownerAddress()))]
     .reverse()
     .find((u) => u.satoshis >= 600n);
@@ -662,7 +555,7 @@ export async function prepareTokenSend(
     ownerUtxo: coin,
     ownerUnlocker: unlocker,
     ownerAddress: w.ownerAddress(),
-    recipient,
+    recipient: destination,
     units,
     locktime: now - 1,
   });
@@ -674,7 +567,7 @@ export async function prepareTokenSend(
     before: state.planUtxo,
     planCategory: metadata.planCategoryHex,
     rows: [
-      ["Recipient", recipient],
+      ["Recipient", destination],
       ["Send", `${units} base units`],
       ["Protected token change", `${result.remaining} base units`],
       ["Network fee", bch(result.fee)],

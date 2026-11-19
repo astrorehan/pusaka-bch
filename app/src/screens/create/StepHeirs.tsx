@@ -1,5 +1,6 @@
 import { CircleAlert, ClipboardPaste, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../components/Button';
+import { MAX_HEIR_NAME_LENGTH } from '../../lib/planPayload';
 import { MAX_HEIRS } from '../../lib/shares';
 import type { SplitMode } from '../../lib/types';
 import { FARAID_MAX_HEIRS, type Family } from './faraid';
@@ -201,6 +202,7 @@ export function StepHeirs({ draft, update, resolved, vis, usd, network, onContin
             <div className="cr-heir__fields">
               <Field
                 fkey={`${h.id}.name`} label="Name" value={h.name} autoComplete="off" placeholder={h.relation ? `Your ${h.label.toLowerCase().replace(/ \d+$/, '')}'s name` : 'Their name'}
+                maxLength={MAX_HEIR_NAME_LENGTH}
                 onValue={(v) => setHeir(h.id, 'name', v)} onBlur={() => vis.blur(`${h.id}.name`)} error={vis.show(`${h.id}.name`)}
               />
               <Field

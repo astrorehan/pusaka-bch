@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { CircleAlert, FileUp } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Sheet } from '../../components/Sheet';
-import { NETWORK } from '../../components/AppShell';
-import { checkPlanLink } from './readPlanLink';
+import { NETWORK } from '../../lib/networkName';
+import { checkPlanLink, MAX_PLAN_FILE_BYTES, type PlanDestination } from './readPlanLink';
 import './open-link-dialog.css';
 
 interface OpenLinkDialogProps {
@@ -14,7 +14,6 @@ interface OpenLinkDialogProps {
   onClose: () => void;
 }
 
-const MAX_FILE_BYTES = 1_000_000;
 const finePointer = () => window.matchMedia('(pointer: fine)').matches;
 
 export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
@@ -35,15 +34,15 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
     }
   }
 
-  function go(fragment: string) {
+  function go(to: PlanDestination) {
     onClose();
-    navigate(`/plan#${fragment}`);
+    navigate(to);
   }
 
   function submit(e: FormEvent) {
     e.preventDefault();
     const r = checkPlanLink(text, NETWORK);
-    if (r.ok) go(r.fragment);
+    if (r.ok) go(r.to);
     else {
       setError(r.error);
       inputRef.current?.focus();
@@ -58,7 +57,7 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
 
   async function onFile(file: File | undefined) {
     if (!file) return;
-    if (file.size > MAX_FILE_BYTES) {
+    if (file.size > MAX_PLAN_FILE_BYTES) {
       setError('This file is too large to be a saved plan link. Choose the file you saved when the plan was made.');
       return;
     }
@@ -70,7 +69,7 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
       return;
     }
     const r = checkPlanLink(content, NETWORK, 'file');
-    if (r.ok) go(r.fragment);
+    if (r.ok) go(r.to);
     else setError(r.error);
   }
 
@@ -92,7 +91,7 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
           <input
             ref={fileRef}
             type="file"
-            accept=".html,.htm,.txt,.url,text/html,text/plain"
+            accept=".json,.html,.htm,.txt,.url,application/json,text/html,text/plain"
             hidden
             onChange={(e) => {
               void onFile(e.target.files?.[0]);

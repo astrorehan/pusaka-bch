@@ -88,7 +88,7 @@ function mockMode(): string {
   }
 }
 // Remember a knob from the URL the tab opened with, before any in-app navigation drops the query.
-if (import.meta.env.DEV || import.meta.env.VITE_MOCK === '1') mockMode();
+if (import.meta.env.DEV) mockMode();
 
 async function signAndSend(): Promise<TxResult> {
   await sleep(mockMode() === 'slow' ? 4000 : 1200);
@@ -189,13 +189,13 @@ export const mockPlanService: PlanService = {
 // ---------------------------------------------------------------- selection
 
 /**
- * Mock mode, for UI work only: `VITE_MOCK=1`, or in the dev server any `?mock` in the URL (e.g. `?mock=1`,
+ * In development, use `VITE_MOCK=1` or any `?mock` in the URL (e.g. `?mock=1`,
  * `?mock=cancel`), which sticks for the tab. A production build ignores `?mock`, so a shared link can never
  * show simulated results as if they were real.
  */
 export function isMockMode(): boolean {
-  if (import.meta.env.VITE_MOCK === '1') return true;
   if (!import.meta.env.DEV) return false;
+  if (import.meta.env.VITE_MOCK === '1') return true;
   try {
     if (new URLSearchParams(window.location.search).has('mock')) sessionStorage.setItem('pusaka-mock', '1');
     return sessionStorage.getItem('pusaka-mock') === '1';
@@ -217,8 +217,34 @@ export function setChainWallet(info: WalletInfo | null) {
   chainWallet = info;
 }
 
+let lastPrice: { value: number | null; expires: number } | undefined;
+let pendingPrice: Promise<number | null> | undefined;
+
+async function fetchBchPrice(): Promise<number | null> {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd', {
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!response.ok) return null;
+    const price = (await response.json())?.['bitcoin-cash']?.usd;
+    return typeof price === 'number' && Number.isFinite(price) && price > 0 ? price : null;
+  } catch {
+    return null;
+  }
+}
+
+function usdPerBch() {
+  if (lastPrice && Date.now() < lastPrice.expires) return Promise.resolve(lastPrice.value);
+  pendingPrice ??= fetchBchPrice().then((value) => {
+    lastPrice = { value, expires: Date.now() + (value === null ? 30_000 : 300_000) };
+    pendingPrice = undefined;
+    return value;
+  });
+  return pendingPrice;
+}
+
 const realPlanService: PlanService = {
-  usdPerBch: async () => (await loadChain()).chainPlanService.usdPerBch(),
+  usdPerBch,
   connectWallet: async () => (await loadChain()).chainPlanService.connectWallet(),
   disconnectWallet: async () => (await loadChain()).chainPlanService.disconnectWallet(),
   wallet: () => chainWallet,
@@ -234,4 +260,4 @@ const realPlanService: PlanService = {
 };
 
 /** The service the app uses: the real network, or the mock for UI work. */
-export const planService: PlanService = isMockMode() ? mockPlanService : realPlanService;
+export const planService: PlanService = import.meta.env.DEV && isMockMode() ? mockPlanService : realPlanService;

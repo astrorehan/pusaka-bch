@@ -1,10 +1,12 @@
-// The WizardConnect session, loaded lazily by the wallet provider (lib/wallet.tsx) after the first paint.
-// WizardConnect brings nostr and the libauth crypto (about 250 KB gzipped); keeping it out of the first chunk
-// lets the home page draw at once. This component renders only the QR dialog and reports the session up to
-// the provider, so loading it never remounts the page.
+// Connect and restore WizardConnect sessions without loading the transaction builders.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useWizardConnect, WizardConnectQRDialog } from '@wizardconnect/react';
-import { loadChain, setChainWallet, type WalletInfo } from './planService';
+import { AlphanumericQRCode, useWizardConnect } from '@wizardconnect/react';
+import { ButtonLink } from '../components/Button';
+import { CopyButton } from '../components/CopyButton';
+import { Sheet } from '../components/Sheet';
+import { plainBalance } from './chain/network';
+import { getWizardWallet, setWizardWallet, WizardWallet } from './chain/wizard';
+import { setChainWallet, type WalletInfo } from './planService';
 import type { NetworkName } from './types';
 
 export interface BridgeApi {
@@ -15,22 +17,26 @@ export interface BridgeApi {
 
 export interface BridgeProps {
   network: NetworkName;
+  sessionKey: string;
   onReady(api: BridgeApi): void;
   onState(state: { wallet: WalletInfo | null; connecting: boolean }): void;
   /** a connect() finished: true when a wallet is ready, false when the user closed the dialog */
   onSettle(ok: boolean): void;
 }
 
-export default function WizardBridge({ network, onReady, onState, onSettle }: BridgeProps) {
+export default function WizardBridge({ network, sessionKey, onReady, onState, onSettle }: BridgeProps) {
   const wiz = useWizardConnect({
     dappName: 'Pusaka',
     dappIcon: `${window.location.origin}${import.meta.env.BASE_URL}favicon.svg`,
+    sessionKey,
   });
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  /** True once a session was handed to the chain layer. Until then nothing loads the chain chunk, so the
-   *  first screen stays light (the SolidCash SDK is large). */
-  const handedOver = useRef(false);
+  const clearWallet = useCallback(() => {
+    setWizardWallet(null);
+    setChainWallet(null);
+    setWallet(null);
+  }, []);
 
   const settle = useCallback((ok: boolean) => {
     setDialogOpen(false);
@@ -41,36 +47,31 @@ export default function WizardBridge({ network, onReady, onState, onSettle }: Br
   useEffect(() => {
     const manager = wiz.manager;
     if (wiz.state !== 'connected' || !manager) {
-      if (wiz.state === 'disconnected' || wiz.state === 'idle') {
-        setWallet(null);
-        setChainWallet(null);
-        if (handedOver.current) {
-          handedOver.current = false;
-          void loadChain().then((c) => c.setWizardManager(null, network));
-        }
-      }
+      clearWallet();
       return;
     }
-    let cancelled = false;
+    let current: WizardWallet | null = null;
     const ready = async () => {
-      if (!manager.hasPath(0) || cancelled) return;
-      const chain = await loadChain();
-      chain.setWizardManager(manager, network);
-      handedOver.current = true;
-      const info = chain.chainPlanService.wallet();
-      if (cancelled || !info) return;
+      if (!manager.hasPath(0)) return;
+      const session = new WizardWallet(manager, network);
+      let address: string;
+      try {
+        address = session.ownerAddress();
+      } catch {
+        clearWallet();
+        settle(false);
+        return;
+      }
+      const info = { address, balance: 0n, name: session.name };
+      current = session;
+      setWizardWallet(session);
       setChainWallet(info);
       setWallet(info);
       settle(true);
-      // chainPlanService.wallet() reports a balance of 0 (unknown). Screens check the balance before signing
-      // ("Your wallet has 0 BCH" would block Send to heirs), so read the real one: the plain coins on every
-      // address the wallet can sign for, which is what the chain layer gathers before a call.
       try {
-        const [{ WizardWallet }, { plainBalance }] = await Promise.all([import('./chain/wizard'), import('./chain/network')]);
-        const addresses = new WizardWallet(manager, network).derivedAddresses().map((d) => d.address);
-        const parts = await Promise.all(addresses.map((a) => plainBalance(network, a)));
+        const parts = await Promise.all(session.derivedAddresses().map(({ address }) => plainBalance(network, address)));
         const balance = parts.reduce((t, b) => t + b, 0n);
-        if (cancelled) return;
+        if (getWizardWallet() !== session) return;
         const withBalance = { ...info, balance };
         setChainWallet(withBalance);
         setWallet(withBalance);
@@ -81,13 +82,22 @@ export default function WizardBridge({ network, onReady, onState, onSettle }: Br
     void ready();
     manager.on('walletready', ready);
     return () => {
-      cancelled = true;
       manager.off('walletready', ready);
+      if (getWizardWallet() === current) {
+        setWizardWallet(null);
+        setChainWallet(null);
+      }
     };
-  }, [wiz.state, wiz.manager, settle, network]);
+  }, [wiz.state, wiz.manager, settle, network, clearWallet]);
+
+  const connectionFailed = Boolean(wiz.error) || wiz.state === 'disconnected';
+  useEffect(() => {
+    if (dialogOpen && connectionFailed) onSettle(false);
+  }, [dialogOpen, connectionFailed, onSettle]);
 
   // Report the session up to the provider.
-  const connecting = !wallet && (wiz.state === 'connecting' || dialogOpen);
+  const pairing = dialogOpen && !connectionFailed && !wallet;
+  const connecting = !wallet && (wiz.state === 'connecting' || pairing);
   useEffect(() => { onState({ wallet, connecting }); }, [wallet, connecting, onState]);
 
   // Hand the provider an API that always sees the latest session.
@@ -98,47 +108,46 @@ export default function WizardBridge({ network, onReady, onState, onSettle }: Br
       connect() {
         const { wiz: w, wallet: current } = latest.current;
         if (current) { onSettle(true); return; }
-        setDialogOpen(true);
-        if (w.state !== 'connecting') w.connect();
+        try {
+          if (w.state === 'connecting' || w.connect()) {
+            setDialogOpen(true);
+            return;
+          }
+        } catch { /* The relay could not start. */ }
+        onSettle(false);
       },
       async disconnect() {
+        clearWallet();
         await latest.current.wiz.disconnect();
-        setWallet(null);
-        setChainWallet(null);
-        if (handedOver.current) {
-          handedOver.current = false;
-          (await loadChain()).setWizardManager(null, network);
-        }
       },
     });
-  }, [onReady, onSettle, network]);
+  }, [onReady, onSettle, clearWallet]);
 
-  if (!wiz.uri || !wiz.qrUri) return null;
+  const uri = wiz.uri?.startsWith('wiz://') ? wiz.uri : null;
   return (
-    <WizardConnectQRDialog
-      show={dialogOpen && !wallet}
+    <Sheet
+      open={pairing}
       onClose={() => {
+        clearWallet();
         void wiz.disconnect();
         settle(false);
       }}
-      uri={wiz.uri}
-      qrUri={wiz.qrUri}
+      size="sm"
       title="Connect your wallet"
-      subtitle="Scan with a WizardConnect wallet, or open the link on this device."
-      theme={{
-        backdropColor: 'var(--scrim)',
-        dialogBackground: 'var(--surface)',
-        headerBackground: 'var(--surface)',
-        titleColor: 'var(--text)',
-        subtitleColor: 'var(--text-muted)',
-        qrForeground: '#131B33',
-        qrBackground: '#FFFFFF',
-        uriRowBackground: 'var(--surface-2)',
-        uriTextColor: 'var(--text-muted)',
-        borderColor: 'var(--border)',
-        closeButtonColor: 'var(--text-muted)',
-        copyButtonColor: 'var(--text-muted)',
-      }}
-    />
+      description="Scan the code with Paytaca or another WizardConnect wallet."
+      footer={uri && <ButtonLink href={uri} size="lg" block>Open in wallet</ButtonLink>}
+    >
+      {uri && wiz.qrUri ? (
+        <div className="wallet-pair">
+          <div role="img" aria-label="Wallet connection QR code">
+            <AlphanumericQRCode value={wiz.qrUri} size={224} quietZone={12} />
+          </div>
+          <div className="wallet-pair__link">
+            <span>Wallet connection link</span>
+            <CopyButton value={uri} label="Copy wallet connection link" size="sm" />
+          </div>
+        </div>
+      ) : <p role="status">Preparing the connection…</p>}
+    </Sheet>
   );
 }

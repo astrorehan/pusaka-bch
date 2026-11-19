@@ -24,9 +24,11 @@ import {
 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
-import * as api from '../../lib/chain/v2';
-import { explorerTxUrl, formatBch, formatDuration } from '../../lib/format';
+import type * as api from '../../lib/chain/v2';
+import { explorerTxUrl, formatBch, formatDuration, parseBch } from '../../lib/format';
+import { NETWORK } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
+import { history, planLink } from '../../lib/walletData';
 import {
   planAddressHash,
   planAddressPrefix,
@@ -42,7 +44,7 @@ import {
   type PrepareAction,
 } from './PlanOverview';
 import { PlanImport } from './PlanImport';
-import { walletPath } from './paths';
+import { isDemoRoute, walletPath } from './paths';
 import {
   Address,
   Badge,
@@ -196,8 +198,7 @@ function ActivityList({
   allPath?: string;
 }) {
   const [all, setAll] = useState(false);
-  const entries = api
-    .history()
+  const entries = history()
     .filter((entry) => all || !plan || entry.plan === plan);
   const visible = preview ? entries.slice(0, 3) : entries;
   return (
@@ -235,7 +236,7 @@ function ActivityList({
             <li key={entry.txid}>
               <a
                 className="pw-row pw-row-link"
-                href={explorerTxUrl(entry.txid, api.NETWORK)}
+                href={explorerTxUrl(entry.txid, NETWORK)}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -399,7 +400,7 @@ function SavePlan({
       <div className="pw-sheet-stack">
         <div className="pw-share-link">
           <strong>Family plan link</strong>
-          <CopyButton value={api.planLink(metadata)} label="Copy family link" />
+          <CopyButton value={planLink(metadata)} label="Copy family link" />
         </div>
         <ButtonLink
           href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(metadata, null, 2))}`}
@@ -465,7 +466,7 @@ function WalletPage() {
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const sendId = useId();
-  const route = location.pathname.replace(/\/$/, '');
+  const route = location.pathname.toLowerCase().replace(/\/$/, '');
   const inherited = route.endsWith('/plan');
   const activity = route === '/wallet/activity';
   const title = activity ? 'Activity' : inherited ? 'Inheritance' : 'Wallet';
@@ -487,7 +488,8 @@ function WalletPage() {
     setIssue('');
     setBusy(true);
     try {
-      const prepared = await api.prepareAction(metadata, action, options);
+      const { prepareAction } = await import('../../lib/chain/v2');
+      const prepared = await prepareAction(metadata, action, options);
       setReview({ prepared, back: dialog });
       setDialog(null);
     } catch (err) {
@@ -499,17 +501,28 @@ function WalletPage() {
 
   function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    try {
-      const sats = api.parseBch(amount.trim());
-      if (sats <= 0n) throw new Error('Enter an amount greater than zero.');
-      void prepare('send', { address: recipient.trim(), amount: sats });
-    } catch (err) {
-      setIssue(err instanceof Error ? err.message : String(err));
+    const sats = parseBch(amount);
+    if (sats === null || sats <= 0n) {
+      setIssue('Enter an amount in BCH greater than zero with up to eight decimal places.');
+      return;
     }
+    void prepare('send', { address: recipient.trim(), amount: sats });
   }
 
   let body: ReactNode;
-  if (activity) {
+  if (NETWORK === 'mainnet' && isDemoRoute(location.pathname, location.search)) {
+    body = (
+      <Card>
+        <EmptyState
+          icon={<Wallet size={21} />}
+          title="Demo available on Chipnet"
+          description="The example uses the Bitcoin Cash test network."
+        >
+          <ButtonLink to="/wallet" variant="secondary">Open your wallet</ButtonLink>
+        </EmptyState>
+      </Card>
+    );
+  } else if (activity) {
     body = <ActivityList plan={metadata?.planCategoryHex} />;
   } else if (!metadata && loading) {
     body = <PlanLoading />;
@@ -710,7 +723,10 @@ function WalletPage() {
                 spellCheck={false}
                 autoCapitalize="off"
                 disabled={busy}
-                onChange={(event) => setRecipient(event.target.value)}
+              onChange={(event) => {
+                setRecipient(event.target.value);
+                setIssue('');
+              }}
                 placeholder={`${planAddressPrefix}…`}
               />
             </label>
@@ -721,7 +737,10 @@ function WalletPage() {
                 inputMode="decimal"
                 value={amount}
                 disabled={busy}
-                onChange={(event) => setAmount(event.target.value)}
+                onChange={(event) => {
+                  setAmount(event.target.value);
+                  setIssue('');
+                }}
                 placeholder="0.001"
               />
             </label>

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink, Hand, Hourglass, Send, Undo2, UsersRound } from 'lucide-react';
 import { planService } from '../../lib/planService';
 import { formatUsd } from '../../lib/format';
+import { NETWORK } from '../../lib/networkName';
 import { MAX_HEIRS } from '../../lib/shares';
 import { HomeFooter } from './HomeFooter';
 import { CONTRACT_URL, DX_LOG_URL, REPO_URL, SOLIDCASH_URL, TESTS_URL } from './links';
@@ -283,9 +284,9 @@ export function HowItWorksScreen() {
 
         <section className="hiw-cta">
           <h2>See it work</h2>
-          <p>Open a sample plan whose waiting time has passed, and send it to its heirs.</p>
+          <p>{NETWORK === 'chipnet' ? 'Open a sample wallet to see its balance and inheritance rules.' : 'Set up a protected wallet with your own inheritance rules.'}</p>
           <div className="hiw-cta__btns">
-            <ButtonLink to="/try" size="lg">Try it now</ButtonLink>
+            {NETWORK === 'chipnet' && <ButtonLink to="/wallet/demo" size="lg">Try it now</ButtonLink>}
             <Link to="/new" className="hiw-cta__link">
               Create a plan <ArrowRight aria-hidden />
             </Link>

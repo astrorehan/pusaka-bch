@@ -11,13 +11,12 @@ import { Contract, Signer, TransactionBuilder } from '@solidcash/solidcash';
 import { StatefulContract } from '@solidcash/solidcash/stateful';
 import { getContractFactory } from '@solidcash/solidcash/contract-factory';
 import { externallySignedUnlocker } from '@solidcash/solidcash/walletconnect';
-import type { DappConnectionManager } from '@wizardconnect/dapp';
 import artifact from './Pusaka.json';
 import type { PlanService, WalletInfo } from '../planService';
-import type { NetworkName, PlanData, PlanState, TxPreview, TxResult } from '../types';
+import type { PlanData, PlanState, TxPreview, TxResult } from '../types';
 import { heirAmounts } from '../shares';
 import { getProvider, lockOfAddress, medianTimePast, pkhOfAddress, plainBalance } from './network';
-import { WalletCancelledError, WizardWallet } from './wizard';
+import { getWizardWallet, setWizardWallet, WalletCancelledError, type WizardWallet } from './wizard';
 
 /** Measured on Chipnet: each stateful call is 9-12 KB at about 1 sat/byte. A margin on top for coin selection. */
 const CALL_FEE = 12_000n;
@@ -26,20 +25,12 @@ const CONSOLIDATE_FEE_PER_INPUT = 200n;
 
 const ART = artifact as never;
 
-let wallet: WizardWallet | null = null;
-let usdCache: { at: number; value: number | null } | null = null;
-
-/** Called by the wallet provider when a WizardConnect session is ready (or gone). */
-export function setWizardManager(manager: DappConnectionManager | null, network: NetworkName) {
-  wallet = manager ? new WizardWallet(manager, network) : null;
-}
-
-export function getWizardWallet(): WizardWallet { return requireWallet(); }
 
 /** A problem the user can fix themselves; its message is shown as is. */
 export class UserFixableError extends Error {}
 
 function requireWallet(): WizardWallet {
+  const wallet = getWizardWallet();
   if (!wallet) throw new UserFixableError('Connect your wallet first.');
   return wallet;
 }
@@ -133,31 +124,19 @@ async function statusOf(plan: PlanData, deadline: bigint, balance: bigint, now: 
   return 'active';
 }
 
-export const chainPlanService: PlanService = {
-  async usdPerBch() {
-    if (usdCache && Date.now() - usdCache.at < 5 * 60_000) return usdCache.value;
-    let value: number | null = null;
-    try {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin-cash&vs_currencies=usd');
-      value = (await r.json())?.['bitcoin-cash']?.usd ?? null;
-    } catch {
-      value = null;
-    }
-    usdCache = { at: Date.now(), value };
-    return value;
-  },
-
+export const chainPlanService: Omit<PlanService, 'usdPerBch'> = {
   // The WizardConnect pairing is driven by the React wallet provider (it shows the QR code); by the time a
   // screen asks, the session is either there or not.
   async connectWallet() {
-    const w = wallet;
+    const w = getWizardWallet();
     if (!w) return { cancelled: true } as const;
     return this.wallet() as WalletInfo;
   },
   async disconnectWallet() {
-    wallet = null;
+    setWizardWallet(null);
   },
   wallet() {
+    const wallet = getWizardWallet();
     if (!wallet) return null;
     return { address: wallet.ownerAddress(), balance: 0n, name: wallet.name };
   },
@@ -175,6 +154,9 @@ export const chainPlanService: PlanService = {
   async createPlan(plan, amount) {
     try {
       const w = requireWallet();
+      if (w.network !== plan.network || w.ownerAddress() !== plan.ownerAddress) {
+        throw new UserFixableError('The connected wallet changed. Reconnect the owner wallet and review the plan again.');
+      }
       const owner = externalSigner(w, 'Pusaka: create your inheritance plan');
       await ensureCoinsAtOwner(w, amount + plan.feeBudget + 20_000n);
       const now = await medianTimePast(plan.network);

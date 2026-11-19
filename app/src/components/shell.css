@@ -154,6 +154,14 @@
 .wallet-panel__bal { font-size: var(--text-16); }
 .wallet-panel__bal strong { font-weight: 600; }
 
+.wallet-pair { display: grid; justify-items: center; gap: var(--space-4); }
+.wallet-pair canvas { display: block; border-radius: var(--radius-input); }
+.wallet-pair__link {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding-left: var(--space-3); border-radius: var(--radius-input);
+  background: var(--surface-2); color: var(--text-muted);
+}
+
 .wallet-note-live { position: absolute; right: 0; top: calc(100% + var(--space-2)); z-index: 40; }
 .wallet-note {
   width: max-content; max-width: min(280px, calc(100vw - 2 * var(--gutter)));

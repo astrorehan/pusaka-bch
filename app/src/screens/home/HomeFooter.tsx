@@ -18,6 +18,7 @@ import {
   TESTS_URL,
 } from './links';
 import { BASE } from '../../lib/asset';
+import { NETWORK } from '../../lib/networkName';
 import './home-footer.css';
 
 function CopyAddress({ address }: { address: string }) {
@@ -70,7 +71,7 @@ function Columns() {
     <nav className="hfoot__cols" aria-label="Footer">
       <div className="hfoot__col">
         <p className="hfoot__label">Product</p>
-        <Link to="/try">Try it now</Link>
+        {NETWORK === 'chipnet' && <Link to="/wallet/demo">Try it now</Link>}
         <Link to="/new">Create a plan</Link>
         <Link to="/how-it-works">How it works</Link>
       </div>

@@ -8,7 +8,7 @@
 // its categoryId, so the real chain layer can find them.
 
 import type { PlanData } from '../../lib/types';
-import { NETWORK } from '../../components/AppShell';
+import { NETWORK } from '../../lib/networkName';
 
 const DAY = 86_400n;
 

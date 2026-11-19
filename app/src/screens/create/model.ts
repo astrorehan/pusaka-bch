@@ -1,6 +1,7 @@
 // The create flow's draft, its validation and the PlanData it becomes. Pure functions, no React.
 import type { Heir, NetworkName, PlanData, SplitMode } from '../../lib/types';
 import { DUST, formatBch, formatUsd } from '../../lib/format';
+import { MAX_HEIR_NAME_LENGTH } from '../../lib/planPayload';
 import { MAX_HEIRS, equalShares, heirAmounts } from '../../lib/shares';
 import { faraid, EMPTY_FAMILY, type Family, type FaraidResult } from './faraid';
 import { checkAddress } from './cashaddr';
@@ -140,7 +141,9 @@ export function validateHeirs(d: Draft, network: NetworkName, ownerAddress?: str
 
   const seen = new Map<string, string>();
   r.heirs.forEach((h) => {
-    if (!h.name.trim()) errors[`${h.id}.name`] = 'Add a name, so you and your heirs know who this is.';
+    const name = h.name.trim();
+    if (!name) errors[`${h.id}.name`] = 'Add a name, so you and your heirs know who this is.';
+    else if (name.length > MAX_HEIR_NAME_LENGTH) errors[`${h.id}.name`] = `Use a name with at most ${MAX_HEIR_NAME_LENGTH} characters.`;
     const a = checkAddress(h.address, network);
     if (!a.ok) {
       errors[`${h.id}.address`] =

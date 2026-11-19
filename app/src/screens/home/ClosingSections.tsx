@@ -3,7 +3,7 @@
 // Reduced motion: no drift and no float.
 import { ArrowRight, Link2 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
-import { NETWORK } from '../../components/AppShell';
+import { NETWORK } from '../../lib/networkName';
 import { SplitWords, useInView } from './motion';
 import { BASE } from '../../lib/asset';
 import { HEIRS } from './payoutHeirs';
@@ -50,10 +50,12 @@ export function ClosingCta() {
               : 'Runs directly on Bitcoin Cash. Your coins never sit with us.'}
           </p>
           <div className={`cta__btns rise-in${seen ? ' is-seen' : ''}`} style={{ animationDelay: '480ms' }}>
-            <ButtonLink to="/try" size="lg" className="pill-fx">
-              Try it now <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
+            <ButtonLink to={NETWORK === 'chipnet' ? '/wallet/demo' : '/new'} size="lg" className="pill-fx">
+              {NETWORK === 'chipnet' ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to="/new" variant="secondary" size="lg" className="pill-fx">Create a plan</ButtonLink>
+            <ButtonLink to={NETWORK === 'chipnet' ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
+              {NETWORK === 'chipnet' ? 'Create a plan' : 'How it works'}
+            </ButtonLink>
           </div>
         </div>
       </div>

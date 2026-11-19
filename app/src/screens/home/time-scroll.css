@@ -38,7 +38,7 @@
 }
 
 /* The glass keeps its lit edges; its shadow comes from the three shadows below, which follow the sun. */
-.ts .glass-water { box-shadow: inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 0 rgba(0, 0, 0, 0.1); }
+.ts .glass-water { box-shadow: inset 1.5px 1.5px 0 var(--gw-edge), inset -1px -1px 0 rgba(0, 0, 0, 0.1); }
 .ts-cast { position: relative; }
 .ts-shadow { position: absolute; inset: 0; border-radius: 20px; pointer-events: none; opacity: 0; }
 .ts .pb .ts-shadow { border-radius: 4px 18px 18px 18px; }

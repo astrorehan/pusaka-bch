@@ -13,15 +13,22 @@ import {
   binToHex,
   binToNumberUint32LE,
   cashAddressToLockingBytecode,
-  decodeCashAddress,
   decodeTransactionBch,
-  encodeCashAddress,
   encodeTransaction,
   hexToBin,
   lockingBytecodeToCashAddress,
   NonFungibleTokenCapability,
   numberToBinUint32LE,
 } from "@bitauth/libauth";
+import { p2pkhCashAddressFromPkh, toBytes20 } from "../cashAddress.ts";
+import {
+  MAX_HEIRS,
+  MAX_INT32,
+  MIN_PLAN_CARRIER_SATS,
+  PUSAKA_V2_VERSION,
+  readV2Metadata,
+  type PusakaV2PlanMetadata,
+} from "./plan-metadata.ts";
 import {
   BIP68_DISABLE_FLAG,
   BIP68_MASK,
@@ -54,11 +61,14 @@ export {
   type Bip68SequenceEncoding,
 };
 
-export const PUSAKA_V2_VERSION = "pusaka-v2" as const;
+export { p2pkhCashAddressFromPkh, toBytes20 };
+export {
+  decodePusakaV2PlanLink, encodePusakaV2PlanLink, MAX_HEIRS, MAX_INT32,
+  MIN_PLAN_CARRIER_SATS, PUSAKA_V2_VERSION, type PusakaV2PlanMetadata,
+} from "./plan-metadata.ts";
 export const PLAN_COMMITMENT_VERSION = 0x02;
 export const PLAN_COMMITMENT_BYTES = 51;
 export const ANCHOR_COMMITMENT_BYTES = 8;
-export const MAX_HEIRS = 10;
 
 export const PLAN_STATUS_ACTIVE = 0x00 as const;
 export const PLAN_STATUS_REVIEW = 0x01 as const;
@@ -74,7 +84,6 @@ export type PlanStatusCode =
 export type PlanStatusName =
   "ACTIVE" | "REVIEW" | "PAID_OUT" | "CLOSED" | "UNINITIALIZED";
 
-export const MIN_PLAN_CARRIER_SATS = 1_000n;
 export const MIN_ANCHOR_SATS = 1_000n;
 export const P2PKH_DUST_SATS = 546n;
 export const DEFAULT_FEE_BUDGET = 5_000n;
@@ -84,7 +93,6 @@ export const MAX_OWNER_TX_FEE = 10_000n;
 export const DEFAULT_AUTH_COIN_RESERVE_SATS = 600n;
 export const DEFAULT_PER_INPUT_FEE_CAP = 600n;
 export const MIN_CLTV_TIMESTAMP = 500_000_000;
-export const MAX_INT32 = 0x7fffffff;
 export const MAX_CLTV_TIMESTAMP = 0xffffffff;
 export const MAX_INBOX_SWEEP_INPUTS = 20;
 
@@ -126,32 +134,6 @@ export interface NormalizedPusakaV2Policy {
   policyBytesHex: string;
   policyHashBytes: Uint8Array;
   policyHashHex: string;
-}
-
-export interface PusakaV2PlanMetadata {
-  protocolRevision?: "assets-1";
-  version: typeof PUSAKA_V2_VERSION;
-  network: string;
-  planCategoryHex: string;
-  ownerPkhHex: string;
-  planAddress: string;
-  planLockHex: string;
-  anchorAddress: string;
-  anchorLockHex: string;
-  inboxAddress: string;
-  inboxLockHex: string;
-  perInputFeeCap: string;
-  policyBytesHex: string;
-  policyHashHex: string;
-  createdAtLocktime: number;
-  inactivityPeriodSeconds: number;
-  reviewSequence: number;
-  reviewUnits: number;
-  effectiveReviewSeconds: number;
-  feeBudget: string;
-  contacts: [string, string, string];
-  totalShares: string;
-  heirs: Array<{ pkhHex: string; share: string; label?: string }>;
 }
 
 export interface PusakaV2CommitmentState {
@@ -245,27 +227,6 @@ export function statusCodeToName(
   }
 }
 
-export function toBytes20(value: Uint8Array | string): Uint8Array {
-  if (value instanceof Uint8Array) {
-    if (value.length !== 20) {
-      throw new Error(`Expected 20-byte PKH, got ${value.length} bytes`);
-    }
-    return value;
-  }
-  const clean = value.trim();
-  if (/^(0x)?[0-9a-fA-F]{40}$/.test(clean)) {
-    return hexToBin(clean.replace(/^0x/, ""));
-  }
-  const decoded = decodeCashAddress(clean);
-  if (typeof decoded !== "string") {
-    if (decoded.type !== "p2pkh" && decoded.type !== "p2pkhWithTokens") {
-      throw new Error(`Expected P2PKH CashAddress, got ${decoded.type}`);
-    }
-    return decoded.payload;
-  }
-  throw new Error(`Invalid PKH or P2PKH address '${value}': ${decoded}`);
-}
-
 export function resolveLockingBytecode(
   addressOrLock: string | Uint8Array,
 ): Uint8Array {
@@ -296,27 +257,6 @@ export function p2pkhLockingBytecode(pkh: Uint8Array | string): Uint8Array {
   out[23] = 0x88;
   out[24] = 0xac;
   return out;
-}
-
-export function p2pkhCashAddressFromPkh(
-  pkh: Uint8Array | string,
-  network: string = "chipnet",
-): string {
-  const prefix =
-    network === "mainnet"
-      ? "bitcoincash"
-      : network === "regtest"
-        ? "bchreg"
-        : "bchtest";
-  const encoded = encodeCashAddress({
-    prefix,
-    type: "p2pkh",
-    payload: toBytes20(pkh),
-  });
-  if (typeof encoded === "string") {
-    throw new Error(encoded);
-  }
-  return encoded.address;
 }
 
 export function lockToCashAddress(
@@ -912,58 +852,9 @@ export function updateMetadataWithPolicy(
   };
 }
 
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text);
-  return btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-function fromBase64Url(text: string): string {
-  if (text.length > 40000) throw new Error("Plan link is too large");
-  return new TextDecoder("utf-8", { fatal: true }).decode(
-    Uint8Array.from(atob(text.replace(/-/g, "+").replace(/_/g, "/")), (c) =>
-      c.charCodeAt(0),
-    ),
-  );
-}
-
-export function encodePusakaV2PlanLink(
-  metadata: PusakaV2PlanMetadata,
-  baseUrl = "https://pusaka.cash/v2/plan",
-): string {
-  const payload = toBase64Url(JSON.stringify(metadata));
-  return `${baseUrl}#${payload}`;
-}
-
-export function decodePusakaV2PlanLink(
-  linkOrFragment: string,
-): PusakaV2PlanMetadata {
-  const hashIdx = linkOrFragment.indexOf("#");
-  const raw = hashIdx >= 0 ? linkOrFragment.slice(hashIdx + 1) : linkOrFragment;
-  if (!raw) {
-    throw new Error("Empty PusakaV2 plan link fragment");
-  }
-  const parsed = JSON.parse(fromBase64Url(raw));
-  if (!parsed || parsed.version !== PUSAKA_V2_VERSION) {
-    throw new Error(
-      `Unsupported Pusaka plan version in link: ${parsed?.version}`,
-    );
-  }
-  return parsed as PusakaV2PlanMetadata;
-}
-
 function verifyMetadataFieldsMatchPolicy(
   metadata: PusakaV2PlanMetadata,
 ): NormalizedPusakaV2Policy {
-  if (metadata.version !== PUSAKA_V2_VERSION) {
-    throw new Error(`Unsupported Pusaka plan version: ${metadata.version}`);
-  }
-  if (
-    metadata.protocolRevision !== undefined &&
-    metadata.protocolRevision !== "assets-1"
-  )
-    throw new Error("Unsupported protocol revision");
   const policy = decodePolicyBytes(metadata.policyBytesHex);
   if (policy.policyHashHex !== metadata.policyHashHex) {
     throw new Error(
@@ -1028,10 +919,11 @@ export async function attachPusakaV2Plan(
   runner: NetworkProvider | Signer,
   options: { verifyOnChain?: boolean } = {},
 ): Promise<PusakaV2PlanHandle> {
-  const metadata: PusakaV2PlanMetadata =
+  const metadata = readV2Metadata(
     typeof metadataOrJson === "string"
       ? JSON.parse(metadataOrJson)
-      : metadataOrJson;
+      : metadataOrJson,
+  );
 
   const policy = verifyMetadataFieldsMatchPolicy(metadata);
   // A caller may use the same SDK version from another package installation.
