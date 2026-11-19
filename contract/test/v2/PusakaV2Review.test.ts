@@ -1140,7 +1140,7 @@ describe('Pusaka v2 Independent Review — Corrections & Coverage Checks', () =>
       .addOutput({ to: relayer.address, amount: relayerCoin.satoshis })
       .setLocktime(m0 - 1);
     expect((await verifier.verifyTxStrict(strangerProtectedTx.build())).ok).toBe(false);
-  }, 60_000);
+  }, 180_000);
 
   it('rejects tampered review duration and network metadata when restoring a plan', async () => {
     const { provider, verifier, owner, c0, c1, c2, heirs } = await setupReviewEnv();

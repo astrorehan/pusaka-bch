@@ -13,7 +13,7 @@ npm run build    # type-check + production build
 - `/wallet`: usable protected BCH and fungible receipts.
 - `/new` or `/wallet/new`: new asset-enabled setup.
 - `/wallet/plan`, `/wallet/swap`, `/wallet/activity`: family rules, test-pair swap and local submissions.
-- `/v2/plan#...`: restore a v2 public plan link. `/wallet/demo`: live public Chipnet proof wallet.
+- `/v2/plan#...`: restore a v2 public plan link. `/wallet/demo`: live example plans that any visitor can open a claim on or pay out, with no wallet.
 - `/plan#...`: existing v1 plan support. `/legacy/new` retains the old setup code.
 
 `src/lib/protocol/` is shared by the browser and contract runners. Install app dependencies

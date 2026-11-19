@@ -197,7 +197,7 @@ check). The README says so, but the TypeScript template keeps the relaxed mock.
 **Impact.** A new project's green tests say little about whether its transactions are valid on chain. Stateful
 calls are large (ours are 9 to 12 KB), so the gap matters.
 
-**Suggested fix.** Make the real limits the template default. Ours, with which all 25 tests still pass:
+**Suggested fix.** Make the real limits the template default. Ours, with which all 58 of our tests pass:
 
 ```ts
 mock: {

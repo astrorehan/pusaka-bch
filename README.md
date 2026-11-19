@@ -1,114 +1,97 @@
-> **Judging Pusaka?** Start with [JUDGE.md](JUDGE.md), a 3-minute read: what to press, the transactions you can
-> open, the attack table and exactly what was built during BLAZE.
+> **Judging Pusaka?** Start with [JUDGE.md](JUDGE.md), a three-minute read: the one-minute judge path, the
+> transactions you can open, what the network refuses, and exactly what was built during BLAZE.
 
 # Pusaka
 
-**Decide today who gets your BCH.** If you stop checking in, a contract splits your coins among your heirs by the shares you chose (equal, custom percentages, or Islamic inheritance law), in one transaction, with no company or server in between.
+**A Bitcoin Cash wallet with your inheritance plan built in.** Spend and receive as usual. If you go quiet, a
+claim can open, the network gives you a review period to stop it, and then one transaction pays every heir their
+share: equal, your own split, or Islamic inheritance (faraid). No company or server in between.
 
 *Pusaka* is Indonesian for "heirloom".
 
-> Status: being built during [BCH BLAZE 2026](https://dorahacks.io/hackathon/bchblaze2026) (14 to 22 Nov 2026).
-> Entered for the Mainnet Track and the Best SolidCash Application bounty.
+Built during [BCH BLAZE 2026](https://dorahacks.io/hackathon/bchblaze2026) (14 to 22 Nov 2026) for the Mainnet
+Track and the Best SolidCash Application bounty.
 
-> **Wallet release, 18 Nov:** [open the live Chipnet app](https://astrorehan.github.io/pusaka-bch/wallet/demo).
-> The v2 app now includes a usable protected BCH balance, Send/Receive, contacts,
-> claim review, policy editing and protected fungible token proceeds from a real
-> Cauldron V0 test pair. [Release evidence](docs/proofs/app-and-assets.md) and
-> [owner/family guide](docs/demo-guide.md). Selected qualification: 18 v2/asset
-> tests, 26 earlier contract tests, 3 signing transport tests and 2 browser tests pass.
-> Actual Paytaca phone approval, v2 mainnet execution and a mainnet trading pair
-> remain open gates. The existing funded v1 mainnet plan is separate and untouched.
->
-> The receipts below retain the earlier v1 milestone. They do not prove v2 mainnet use.
-
-## Live now
-
-What works today, each with its proof. A plan was created on mainnet through Paytaca on 17 Nov; the remaining
-mainnet lifecycle actions still need to be verified.
-
-| What | Proof |
+| | |
 |---|---|
-| Guide for judges | [JUDGE.md](JUDGE.md) |
-| Web app | **TODO (owner): hosted URL.** Runs locally today, see [Run it](#run-it) |
-| Presentation (Widget Factory) | **TODO (owner): deck link** |
-| Demo video | **TODO (owner): link, or delete this row** |
-| The contract: create, I'm still here, take back, send to heirs | [`contract/contracts/Pusaka.scash`](contract/contracts/Pusaka.scash), 11 tests in [`contract/test/Pusaka.test.ts`](contract/test/Pusaka.test.ts) |
-| The whole lifecycle on Chipnet (test network) | 5 transactions on 15 Nov and 3 on 16 Nov, listed in [JUDGE.md](JUDGE.md#transactions-you-can-open) |
-| An outside wallet can sign every stateful call over `bch_signTransaction` (with our SDK fix) | Chipnet transactions of 16 Nov, signed by a stand-in wallet in Node ([script](contract/scripts/external-signing-spike.ts)); the [patch](contract/patches/@solidcash+solidcash+0.50.1.patch) and [the log](docs/solidcash-dx-log.md). **TODO (owner): add txids signed in Paytaca and Cashonize** |
-| On mainnet | Plan created in the app through Paytaca: [`4e5b2fd4…1c3d`](https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d), 17 Nov. **TODO (owner): sent to heirs, I'm still here, taken back (txids)** |
-| SolidCash developer feedback | [`docs/solidcash-feedback.md`](docs/solidcash-feedback.md), from the dated [log](docs/solidcash-dx-log.md) |
-| Donation and prize address (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |
-| Repository | https://github.com/astrorehan/pusaka-bch |
+| **Web app** (mainnet) | https://astrorehan.github.io/pusaka-bch/ |
+| **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
+| **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ |
+| **Guide for judges** | [JUDGE.md](JUDGE.md) |
+| **On-chain record** | [`docs/proofs/v2-live.md`](docs/proofs/v2-live.md) |
+| **Feedback for SolidCash** | [`docs/solidcash-feedback.md`](docs/solidcash-feedback.md), from the dated [developer log](docs/solidcash-dx-log.md) |
+| **Prize and donation address** (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |
 
-## Receipts
+## Why
 
-Each claim and where to check it.
+If nobody has your keys when you die, your coins are lost for good. If somebody has them, they can take
+everything today. Existing answers lock the coins away: a dead man's switch you cannot spend from, or a single
+heir through a desktop plugin. Pusaka keeps the coins in a wallet you use every day, and every payment you make
+is proof you are still here.
 
-| Claim | Check it |
-|---|---|
-| One transaction pays every heir their exact share | Chipnet payout [`d76ffee1…25ad`](https://chipnet.imaginary.cash/tx/d76ffee1296a7d11cc94719e696ed57cdd8781a1389f7fda71eaa66ad48e25ad): outputs #3 to #8 are 58,000 sats × 15, 20, 20, 26, 26, 13 ÷ 120, rounded down |
-| Anyone can send to the heirs, not only the owner | Chipnet payout paid by a stranger's wallet: [`187ac296…a90c`](https://chipnet.imaginary.cash/tx/187ac29671c0c75ff40fdf9ab0ceb421f3e08e53e9167173402b62290d13a90c) |
-| I'm still here moves the deadline; only the owner can press it | [`73dabfc1…2a12`](https://chipnet.imaginary.cash/tx/73dabfc17d3804fb6a6351a60885a07764c0cf0075fbd2d86c0195c3e34f2a12) on Chipnet; tests `owner check-in moves the deadline forward and emits CheckedIn` and `a stranger cannot check in` |
-| The contract refuses cheating payouts (early, 1 satoshi off, swapped address, 11 heirs) | The [attack table](JUDGE.md#the-attack-table), each row with its test name |
-| Tests pass under the real BCH 2026 limits, not the relaxed mock defaults | [`contract/solidcash.config.ts`](contract/solidcash.config.ts); `cd contract && npm test` prints "Tests 25 passed" |
-| Time is counted in seconds, so faster blocks in 2027 don't shorten the wait | `checkIn` sets `deadline = tx.locktime + period` and `distribute` requires `tx.time >= this.deadline`, in [`Pusaka.scash`](contract/contracts/Pusaka.scash) |
-| No server stores the plan | The plan lives in the URL after `#`: [`app/src/lib/planLink.ts`](app/src/lib/planLink.ts). The app has no server of its own; it talks only to public BCH (Electrum) servers and a price feed |
-| What existed before BLAZE | Tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) and the section below |
+## How it works
 
-## Before and after BLAZE
+1. **Set up.** Heirs and shares, three trusted contacts, a waiting time and a review period. Your BCH moves into
+   your Pusaka wallet, and you get a plan link to share with your family.
+2. **Use it.** Send, receive and swap. Each payment you send restarts the waiting time.
+3. **A claim opens** once the waiting time passes in silence (anyone can open it), or sooner when two of your
+   three contacts confirm.
+4. **The review period** is enforced by the network with a BIP68 relative time lock. **Stop claim**, or any
+   payment you send, ends the claim.
+5. **Pay the heirs.** After the review anyone can submit the payout. Every node checks each heir's address and
+   amount; the plan pays the fee.
 
-Judges score the work done during the hackathon, so here is exactly what existed before it started (14 Nov 2026, 14:00 UTC).
-
-- **Pusaka on Monad (earlier hackathon, Solidity):** [repo](https://github.com/astrorehan/pusaka) · [demo](https://pusaka-faraid.vercel.app). Reused here: the product idea, the faraid share rules and the flower logo (`brand/`).
-- **This repo at the start of BLAZE:** tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) (commit `8b59ba5`, 14 Nov 02:30 UTC). It holds only a README, the license and `prototype/`, a test contract.
-- **`Preparation/`:** planning notes as they stood at the start, committed at 14:28 UTC on 14 Nov. No code.
-- **Everything after `blaze-start`** is BLAZE work: the SolidCash contract, the web app, the Chipnet runs and the docs. The full list, with commits, is in [JUDGE.md](JUDGE.md#before-and-after-blaze).
+The plan's state lives in a CashTokens NFT that never leaves the plan. Its rules (heirs, shares, contacts, fee
+budget) travel in the plan link after the `#`, which browsers never send to a server, and every claim is checked
+against their hash.
 
 ## What is where
 
 | Folder | What |
 |---|---|
-| [`app/`](app/) | The web app (Vite, React, TypeScript). Connects a wallet with WizardConnect and talks to the contract with the SolidCash SDK. No server of its own |
-| [`contract/`](contract/) | The SolidCash contracts and their SolidHat tests: `Pusaka.scash` (the one the app uses) and `VaultStateless.scash` (the prototype, ported) |
-| [`prototype/`](prototype/) | The pre-BLAZE CashScript covenant and its 12-case test. Kept unchanged as the "before" |
-| [`docs/`](docs/) | [Design rules](docs/DESIGN.md), [UX notes](docs/ux/), the [SolidCash developer log](docs/solidcash-dx-log.md) and [feedback](docs/solidcash-feedback.md), the [deck outline](docs/deck-outline.md) |
-| [`brand/`](brand/) | The Pusaka logo (light, dark, favicon), reused from the Monad version |
-| [`Preparation/`](Preparation/) | Notes from before the start |
+| [`app/`](app/) | The web app (Vite, React, TypeScript). WizardConnect for Paytaca and Cashonize; public Electrum servers; no server of its own |
+| [`app/src/lib/protocol/`](app/src/lib/protocol/) | Browser-safe transaction builders and plan codecs, shared by the app and the scripts |
+| [`contract/contracts/`](contract/contracts/) | The SolidCash contracts. The wallet: `PusakaAssetPlan`, `PusakaV2Inbox`, `PusakaV2Anchor`, `PusakaTokenVault`. Earlier: `PusakaV2Plan` (BCH-only v2), `Pusaka` (v1) and `VaultStateless` (the pre-BLAZE prototype, ported) |
+| [`contract/test/`](contract/test/) | SolidHat tests under the BCH 2026 limits and a strict BIP68 verifier |
+| [`contract/scripts/v2/live.ts`](contract/scripts/v2/live.ts) | Runs the lifecycle and the example plans on Chipnet or mainnet, and keeps their public records |
+| [`docs/`](docs/) | [Design rules](docs/DESIGN.md), [UX notes](docs/ux/), [proofs](docs/proofs/), the [SolidCash developer log](docs/solidcash-dx-log.md) and [feedback](docs/solidcash-feedback.md) |
+| [`prototype/`](prototype/) | The pre-BLAZE CashScript covenant and its 12-case simulator test, kept unchanged |
+| [`brand/`](brand/) | The Pusaka logo |
 
 ## Run it
 
 Needs Node 24.
 
-**The web app** (Chipnet by default):
-
 ```bash
 cd app
 npm install
-npm run dev      # http://localhost:5173
+npm run dev              # the Chipnet app, http://localhost:5173
+npm run build:mainnet    # a mainnet build in dist-mainnet
+npm run build:pages      # the published site: mainnet at /pusaka-bch/, Chipnet at /pusaka-bch/chipnet/
+npm run build && npm run test:ui   # browser tests against the Chipnet build
 ```
-
-`VITE_NETWORK=mainnet npm run dev` runs it against mainnet. Adding `?mock=1` to a URL simulates the network and the
-wallet for the rest of the browser tab, so every screen can be seen without coins. More in [`app/README.md`](app/README.md).
-
-**The contract tests** (SolidHat, no network needed):
 
 ```bash
 cd contract
 npm install
-npm test         # 2 test files, 25 tests
+npm test                 # compiles the contracts, then runs every SolidHat test
 ```
 
-`npm test` compiles and then runs Vitest directly, because `solidhat test` exits without running the tests on Windows.
-
-**The prototype** (CashScript, in a simulator):
+`npm test` runs Vitest directly after compiling, because `solidhat test` exits without running the tests on
+Windows. The live runner needs keys in `contract/.env` (never committed):
 
 ```bash
-cd prototype
-npm install
-npm test         # 12 cases, each printed as PASS
+node --env-file=.env node_modules/@solidcash/solidhat/dist/cli.js run scripts/v2/live.ts --network chipnet
 ```
 
-It covers early payout, underpaying an heir by one satoshi, swapping an heir's address, adding an extra output, and check-in by a stranger.
+## Before and after BLAZE
+
+Pusaka began as a Solidity vault on Monad ([code](https://github.com/astrorehan/pusaka),
+[demo](https://pusaka-faraid.vercel.app)). This repository at tag
+[`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) held only a README, the licence and a
+CashScript prototype. Reused: the idea, the faraid rules and the logo. Everything after `blaze-start` (the
+SolidCash contracts, the wallet, the review period, the token vault, the web app and the live runs) was built
+during BLAZE. Details: [JUDGE.md](JUDGE.md#before-and-after-blaze).
 
 ## License
 

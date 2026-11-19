@@ -1,9 +1,11 @@
 # Pusaka wallet guide
 
-Current public test app: https://astrorehan.github.io/pusaka-bch/wallet/demo
+Live app: https://astrorehan.github.io/pusaka-bch/ (mainnet) and
+https://astrorehan.github.io/pusaka-bch/chipnet/ (Chipnet, the test network).
 
-The public proof wallet is read-only for a different owner. Its balance and status
-come from Chipnet. Create your own wallet to exercise owner actions.
+The demo at `/wallet/demo` opens a live example plan whose owner has gone quiet. Any
+visitor can open its claim or pay its heirs, with no wallet of their own: the plan
+pays the network fee. Create your own wallet to try the owner's actions.
 
 ## Owner
 

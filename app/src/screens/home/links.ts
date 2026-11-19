@@ -5,7 +5,7 @@ export { DOCS_URL, REPO_URL };
 /** The wallet's contracts: PusakaAssetPlan (the plan), PusakaV2Inbox, PusakaV2Anchor and PusakaTokenVault. */
 export const CONTRACT_URL = `${REPO_URL}/tree/main/contract/contracts`;
 export const PLAN_CONTRACT_URL = `${REPO_URL}/blob/main/contract/contracts/PusakaAssetPlan.scash`;
-export const PROOF_URL = `${REPO_URL}/blob/main/docs/proofs/app-and-assets.md`;
+export const PROOF_URL = `${REPO_URL}/blob/main/docs/proofs/v2-live.md`;
 export const TESTS_URL = `${REPO_URL}/tree/main/contract/test`;
 export const DX_LOG_URL = `${REPO_URL}/blob/main/docs/solidcash-dx-log.md`;
 export const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
