@@ -11,8 +11,11 @@ npm 11.6.2, Windows 11. The contract: [`contract/contracts/Pusaka.scash`](../con
 applied with patch-package; the same file is in `app/patches/`).
 **Worked around in our code:** issues 2, 3, 5, 6, 7 and 9. The rest are reports only.
 
-**Upstream status:** none of these is filed yet. On 16 Nov 2026 the tracker held issue #2 and PR #1 from another
-team, and neither covers them. **TODO (owner): file each one (and a PR for issue 1), then put the links here.**
+**Upstream status:** issue 1 is filed as [solidcash/solidcash#3](https://github.com/solidcash/solidcash/issues/3)
+(16 Nov 2026), with the patch and a regression test. Upstream `master` (0.51) has since made ordinary stateful calls ask
+the wallet to sign; our pull request [solidcash/solidcash#7](https://github.com/solidcash/solidcash/pull/7) (17 Nov)
+fixes the paths that still broadcast the placeholder: `StatefulContract.split` / `merge` and split/merge funding, with
+six regression cases. The other items are reported here, each with a reproduction.
 
 ## Summary
 
@@ -128,8 +131,7 @@ outputs and once with `.transfer(lock, each)` per payee:
 | `require(tx.time >= deadline)` + two unrolled transfers | derived | `VM failed at ip 14` |
 | `require(tx.time >= deadline)` + two unrolled transfers | explicit | OK |
 
-Our full reproduction is `contract/contracts/ReproLoop.scash` with `contract/test/repro/loop-transfers.test.ts`.
-**TODO (owner): commit these two files; they are not in the repo yet.**
+The contract above and the nine cases in the table are the complete reproduction.
 
 **Impact.** Any contract that pays a list of people after a date: wills, vesting, payroll, escrow with many parties.
 Pusaka uses ten guarded slots (`if (i < len) this.transfer(...)`) and caps heirs at 10.

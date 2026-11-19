@@ -10,6 +10,24 @@
     <title>Pusaka: Your BCH. Their future.</title>
     <meta name="referrer" content="no-referrer" />
     <script>
+      // GitHub Pages answers every unknown path with the main app's 404 page. A deep link into the test-network
+      // app (a separate build in its own folder) is sent there, and that app puts the full address back.
+      (function () {
+        var app = '%BASE_URL%', chipnet = '%PUSAKA_CHIPNET_BASE%', key = 'pusaka-redirect';
+        if (!chipnet) return;
+        try {
+          if (app !== chipnet && location.pathname.indexOf(chipnet) === 0) {
+            sessionStorage.setItem(key, location.pathname + location.search + location.hash);
+            location.replace(chipnet);
+          } else if (app === chipnet) {
+            var to = sessionStorage.getItem(key);
+            sessionStorage.removeItem(key);
+            if (to && to.indexOf(chipnet) === 0) history.replaceState(null, '', to);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
       try {
         const theme = localStorage.getItem('pusaka-theme');
         if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;

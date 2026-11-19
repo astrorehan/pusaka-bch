@@ -32,7 +32,9 @@ import {
   formatDuration,
   parseBch,
 } from '../../lib/format';
-import { NETWORK } from '../../lib/networkName';
+import { HAS_DEMO } from '../../lib/demo';
+import { friendlyError } from '../../lib/chain/errors';
+import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
 import { history, planLink } from '../../lib/walletData';
 import {
@@ -315,31 +317,61 @@ function ClaimNotice({
   busy: boolean;
   prepare: PrepareAction;
 }) {
-  if (data?.state.status !== 'REVIEW') return null;
+  const state = data?.state;
+  if (!data || !state) return null;
+  const overdue = state.status === 'ACTIVE' && data.now > state.deadline;
+  if (state.status !== 'REVIEW' && !overdue) return null;
   const { review } = data;
+  const ready = Boolean(review?.ready);
+  let heading: string;
+  let detail: string;
+  if (overdue) {
+    heading = owner
+      ? 'Your waiting time has run out'
+      : 'The owner has been inactive past the deadline';
+    detail = owner
+      ? 'Anyone can now open a claim. Press “I’m still here”, or send a payment, to start the waiting time again.'
+      : 'Anyone can open a claim now, with no wallet of their own. The owner still gets the full review period to stop it.';
+  } else if (ready) {
+    heading = 'The review period has ended';
+    detail = owner
+      ? 'Anyone can now pay your heirs. Stop the claim if you are still here.'
+      : 'Anyone can pay the heirs now. The plan pays the network fee, and each heir receives their share.';
+  } else {
+    heading = 'A claim is under review';
+    detail = review?.confirmed
+      ? `About ${formatDuration(BigInt(Math.max(0, review.required - review.age)))} of network review remaining. The owner can stop the claim until then.`
+      : 'The review clock starts after the claim confirms on the network.';
+  }
   return (
     <div className="pw-claim-banner" role="status">
       <ShieldCheck size={22} aria-hidden />
       <div>
-        <strong>A claim is under review</strong>
-        <p>
-          {review?.ready
-            ? 'The review period has ended. The owner can stop the claim until the heirs are paid.'
-            : review?.confirmed
-              ? `About ${formatDuration(BigInt(Math.max(0, review.required - review.age)))} of network review remaining.`
-              : 'The review clock starts after the claim confirms on the network.'}
-        </p>
+        <strong>{heading}</strong>
+        <p>{detail}</p>
       </div>
-      {owner && (
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={busy}
-          onClick={() => void prepare('cancel')}
-        >
-          Stop claim
-        </Button>
-      )}
+      <div className="pw-claim-banner-actions">
+        {overdue && owner && (
+          <Button type="button" variant="secondary" disabled={busy} onClick={() => void prepare('checkIn')}>
+            I’m still here
+          </Button>
+        )}
+        {overdue && !owner && (
+          <Button type="button" disabled={busy} onClick={() => void prepare('open')}>
+            Open the claim
+          </Button>
+        )}
+        {ready && (
+          <Button type="button" variant={owner ? 'secondary' : 'primary'} disabled={busy} onClick={() => void prepare('finalize')}>
+            Pay the heirs
+          </Button>
+        )}
+        {state.status === 'REVIEW' && owner && (
+          <Button type="button" variant={ready ? 'primary' : 'secondary'} disabled={busy} onClick={() => void prepare('cancel')}>
+            Stop claim
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -495,7 +527,7 @@ function WalletPage() {
       setReview({ prepared, back: dialog });
       setDialog(null);
     } catch (err) {
-      setIssue(err instanceof Error ? err.message : String(err));
+      setIssue(friendlyError(err));
     } finally {
       setBusy(false);
     }
@@ -516,17 +548,19 @@ function WalletPage() {
   let body: ReactNode;
   let inspector: ReactNode;
   let supporting: ReactNode;
-  if (
-    NETWORK === 'mainnet' &&
-    isDemoRoute(location.pathname, location.search)
-  ) {
+  if (!HAS_DEMO && isDemoRoute(location.pathname, location.search)) {
     body = (
       <Card>
         <EmptyState
           icon={<Wallet size={21} />}
-          title="Demo available on Chipnet"
-          description="The example uses the Bitcoin Cash test network."
+          title="The example plans are on the test network"
+          description="Try the claim and payout steps there with test BCH, or set up your own protected wallet here."
         >
+          {OTHER_APP && (
+            <ButtonLink href={`${OTHER_APP}wallet/demo`} icon={<ArrowUpRight />}>
+              Open the test-network demo
+            </ButtonLink>
+          )}
           <ButtonLink to="/wallet" variant="secondary">
             Open your wallet
           </ButtonLink>

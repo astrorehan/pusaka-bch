@@ -1,4 +1,4 @@
-import { NETWORK } from '../../lib/networkName';
+import { HAS_DEMO } from '../../lib/demo';
 
 export function isDemoRoute(pathname: string, search: string) {
   const route = pathname.toLowerCase().replace(/\/$/, '');
@@ -8,7 +8,7 @@ export function isDemoRoute(pathname: string, search: string) {
 }
 
 export function isDemoWallet(pathname: string, search: string) {
-  return NETWORK === 'chipnet' && isDemoRoute(pathname, search);
+  return HAS_DEMO && isDemoRoute(pathname, search);
 }
 
 export function walletPath(path: string, demo: boolean) {

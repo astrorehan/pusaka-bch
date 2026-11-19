@@ -89,15 +89,18 @@ test("new wallet flow validates heirs and contacts before review", async ({
 test("real public Chipnet plan follows the demo between screens without replacing a saved wallet", async ({
   page,
 }, testInfo) => {
+  // The demo opens whichever example plan has the most to do, so the copied address is one of theirs.
+  const pool = JSON.parse(readFileSync(new URL("../src/lib/protocol/demo-plans.chipnet.json", import.meta.url), "utf8"));
   const fixture = readFileSync(new URL("../src/lib/protocol/demo-plan.json", import.meta.url));
-  const { inboxAddress } = JSON.parse(fixture.toString("utf8"));
+  const proof = JSON.parse(fixture.toString("utf8"));
+  const inboxAddresses = [...pool, proof].map((plan: { inboxAddress: string }) => plan.inboxAddress);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("wallet/demo");
   await expect(page.locator("#splash")).toHaveCount(0);
   await expect(
-    page.getByRole("note").filter({ hasText: "Live Chipnet proof wallet" }),
+    page.getByRole("note").filter({ hasText: "Live example plan on Chipnet" }),
   ).toBeVisible();
   await expect(page.locator(".pw-balance-number")).toContainText(/\d/, {
     timeout: 30_000,
@@ -114,7 +117,7 @@ test("real public Chipnet plan follows the demo between screens without replacin
   const copy = page.getByRole("button", { name: "Copy BCH receive address" });
   await copy.click();
   await expect(copy.getByText("Copied", { exact: true }).first()).toBeVisible();
-  await expect(page.locator("body")).toHaveAttribute("data-copied-address", inboxAddress);
+  expect(inboxAddresses).toContain(await page.locator("body").getAttribute("data-copied-address"));
   const receive = page.getByRole("button", { name: "Receive", exact: true });
   await receive.click();
   const receiveSheet = page.getByRole("dialog", { name: "Receive BCH" });
@@ -126,7 +129,7 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(receive).toBeFocused();
   await page.getByRole("link", { name: "Inheritance", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Your heirs", exact: true }),
+    page.getByRole("heading", { name: "Heirs", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Trusted contacts", exact: true }),
@@ -176,7 +179,7 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await opener.getByRole("button", { name: "Open plan", exact: true }).click();
   await expect(page).toHaveURL(/\/v2\/plan#/);
   await expect(
-    page.getByRole("heading", { name: "Your heirs", exact: true }),
+    page.getByRole("heading", { name: "Heirs", exact: true }),
   ).toBeVisible({ timeout: 20000 });
   await expect(
     page.getByRole("heading", { name: "Share & recovery" }),

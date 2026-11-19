@@ -34,7 +34,7 @@ const PIN = TRACK + HOLD + UP;
 
 const TITLE = 'While you’re here,\nit waits.\nWhen you’re not,\nit pays.';
 const TITLE_TEXT = 'While you’re here, it waits. When you’re not, it pays.';
-const SUB = 'Press “I’m still here” now and then. If the waiting time passes without it, anyone with the plan link can send every heir their share.';
+const SUB = 'Every payment you send counts as a check-in. If the waiting time passes in silence, a claim opens, and you still get a review period to stop it before your heirs are paid.';
 const MISTS = [
   { src: 'mist-a', cls: 'ps-mist--1', blur: 6 },
   { src: 'mist-b', cls: 'ps-mist--2', blur: 12 },
@@ -54,8 +54,8 @@ function Points({ className = '' }: { className?: string }) {
   return (
     <ul className={`lp-points ${className}`}>
       <li><span className="lp-points__icon" aria-hidden><Hand /></span>“I’m still here” restarts the waiting time from that day.</li>
-      <li><span className="lp-points__icon" aria-hidden><Undo2 /></span>Take your BCH back to your wallet at any time.</li>
-      <li><span className="lp-points__icon" aria-hidden><Send /></span>When the time passes, one payment reaches every heir.</li>
+      <li><span className="lp-points__icon" aria-hidden><Undo2 /></span>Spend, receive or take your BCH back at any time.</li>
+      <li><span className="lp-points__icon" aria-hidden><Send /></span>After the review, one payment reaches every heir.</li>
     </ul>
   );
 }

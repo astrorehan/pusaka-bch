@@ -21,7 +21,9 @@ import {
   type PusakaV2PlanHandle,
 } from "../protocol/pusaka-v2";
 import { NETWORK } from "../networkName";
+import { shortAddress } from "../format";
 import { recordActivity, savePlan } from "../walletData";
+import { friendlyError, isRejection } from "./errors";
 import {
   getProvider,
   medianTimePast,
@@ -120,6 +122,21 @@ async function ownerCoins(address: string): Promise<Utxo[]> {
   return (await getProvider(NETWORK).getUtxos(address))
     .filter((u) => !u.token)
     .sort((a, b) => (a.satoshis > b.satoshis ? -1 : 1));
+}
+/** A coin from the connected wallet that pays a public step's network fee in place of the plan. */
+async function sponsor(prompt: string, what: string) {
+  const connected = getWizardWallet();
+  if (!connected || connected.network !== NETWORK)
+    throw new Error(
+      `${what} needs a small network fee from a wallet. Connect a wallet with at least 0.00006 BCH at its first receive address, then try again.`,
+    );
+  const { w, unlocker } = signing(prompt);
+  const [coin] = await ownerCoins(w.ownerAddress());
+  if (!coin || coin.satoshis < 6000n)
+    throw new Error(
+      `${what} needs a small network fee. Keep at least 0.00006 BCH at the first receive address of the connected wallet.`,
+    );
+  return { sponsorUtxo: coin, sponsorUnlocker: unlocker, sponsorChangeAddress: w.ownerAddress() };
 }
 export async function prepareGather(): Promise<Prepared> {
   const w = walletOnNetwork();
@@ -241,35 +258,56 @@ export async function prepareAction(
   };
   const title = titles[action];
   let result;
+  let sponsored = false;
   if (action === "sweep") {
-    result = buildSweepInboxTx({
-      handle,
-      planUtxo: state.planUtxo,
-      inboxUtxos: state.inboxUtxos.slice(0, 20),
-      mode: "self",
-    });
-  } else if (action === "open") {
-    if (now <= state.deadline)
+    const inboxUtxos = state.inboxUtxos.slice(0, 20);
+    try {
+      result = buildSweepInboxTx({
+        handle,
+        planUtxo: state.planUtxo,
+        inboxUtxos,
+        mode: "self",
+      });
+    } catch {
+      // The covenant caps the fee a receipt may pay for itself, and one or two receipts usually cost more.
+      // A connected wallet pays the network fee instead, and the plan keeps every satoshi received.
+      const fee = await sponsor("Pusaka: pay the fee to collect incoming BCH", "Collecting this payment");
+      result = buildSweepInboxTx({
+        handle,
+        planUtxo: state.planUtxo,
+        inboxUtxos,
+        mode: "sponsored",
+        ...fee,
+      });
+      sponsored = true;
+    }
+  } else if (action === "open" || action === "finalize" || action === "late") {
+    if (action === "open" && now <= state.deadline)
       throw new Error(
         "The network clock has not passed the inactivity deadline.",
       );
-    result = buildOpenClaimByInactivityTx({
-      handle,
-      planUtxo: state.planUtxo,
-      locktime: now - 1,
-    });
-  } else if (action === "finalize") {
-    if (!state.anchorUtxo || !loaded.review?.ready)
+    const anchorUtxo = state.anchorUtxo;
+    if (action === "finalize" && (!anchorUtxo || !loaded.review?.ready))
       throw new Error(
         "Wait for the confirmed claim anchor to complete its network review period.",
       );
-    result = buildFinalizeClaimTx({
-      handle,
-      planUtxo: state.planUtxo,
-      anchorUtxo: state.anchorUtxo,
-    });
-  } else if (action === "late") {
-    result = buildDistributeLateTx({ handle, planUtxo: state.planUtxo });
+    // These steps pay their own fee from the plan. A plan too small for that can still move when a
+    // connected wallet pays the fee, so a small estate is never stuck.
+    const build = (fee?: Awaited<ReturnType<typeof sponsor>>) =>
+      action === "open"
+        ? buildOpenClaimByInactivityTx({ handle, planUtxo: state.planUtxo!, locktime: now - 1, ...fee })
+        : action === "finalize"
+          ? buildFinalizeClaimTx({ handle, planUtxo: state.planUtxo!, anchorUtxo: anchorUtxo!, ...fee })
+          : buildDistributeLateTx({ handle, planUtxo: state.planUtxo!, ...fee });
+    try {
+      result = build();
+    } catch (selfFunded) {
+      const wallet = getWizardWallet();
+      if (!wallet || wallet.network !== NETWORK) throw selfFunded;
+      const prompts = { open: "open the claim", finalize: "pay the heirs", late: "pay the late receipts" };
+      result = build(await sponsor(`Pusaka: pay the network fee to ${prompts[action]}`, "This step"));
+      sponsored = true;
+    }
   } else {
     const { w, unlocker } = signing(`Pusaka: ${title}`);
     const coins = await ownerCoins(w.ownerAddress());
@@ -344,24 +382,41 @@ export async function prepareAction(
       }
     }
   }
-  const rows: Array<[string, string]> = [["Network fee", bch(result.fee)]];
+  const rows: Array<[string, string]> = [[
+    sponsored
+      ? "Network fee (paid by your wallet)"
+      : action === "sweep"
+        ? "Network fee (taken from the payment)"
+        : ["open", "finalize", "late"].includes(action) ? "Network fee (paid from the plan)" : "Network fee",
+    bch(result.fee),
+  ]];
   if (recipient)
     rows.unshift(
       ["To recipient", recipient],
       ["Payment", bch(options.amount!)],
     );
+  if ("inboxSatsSwept" in result)
+    rows.unshift([
+      "Collected into the plan",
+      bch(sponsored ? result.inboxSatsSwept : result.inboxSatsSwept - result.fee),
+    ]);
   if ("protectedFeeSats" in result)
     rows.push(["Fee from Pusaka", bch(result.protectedFeeSats as bigint)]);
   if ("ownerChangeSats" in result)
-    rows.push(["Returns to Paytaca", bch(result.ownerChangeSats as bigint)]);
+    rows.push(["Returns to your wallet", bch(result.ownerChangeSats as bigint)]);
   if ("planSatsAfter" in result)
     rows.push([
-      "Protected change (includes 1,000-sat identity)",
+      "Protected balance afterwards (incl. 1,000-sat reserve)",
       bch(result.planSatsAfter as bigint),
     ]);
-  if ("heirPayouts" in result)
-    for (const payout of result.heirPayouts)
-      rows.push([payout.address, bch(payout.amount)]);
+  if ("heirPayouts" in result) {
+    const names = new Map(metadata.heirs.map((heir, i) => [heir.pkhHex.toLowerCase(), heir.label?.trim() || `Heir ${i + 1}`]));
+    // The heirs come first: they are what the person pressing the button is checking.
+    rows.unshift(...result.heirPayouts.map((payout): [string, string] => {
+      const name = names.get(payout.pkhHex.toLowerCase());
+      return [name ? `${name} · ${shortAddress(payout.address, 6, 6)}` : payout.address, bch(payout.amount)];
+    }));
+  }
   if ("nextDeadline" in result)
     rows.push([
       "Next inactivity deadline",
@@ -381,7 +436,7 @@ export async function prepareAction(
     planCategory: metadata.planCategoryHex,
     before: state.planUtxo,
     handle,
-    walletApproval: !["sweep", "open", "finalize", "late"].includes(action),
+    walletApproval: sponsored || !["sweep", "open", "finalize", "late"].includes(action),
   };
 }
 export async function submit(prepared: Prepared): Promise<string> {
@@ -410,8 +465,10 @@ export async function submit(prepared: Prepared): Promise<string> {
   try {
     response = await getProvider(NETWORK).sendRawTransaction(hex);
   } catch (e) {
+    if (isRejection(e))
+      throw new Error(`The network did not accept this transaction, so nothing was sent. ${friendlyError(e)}`);
     throw new Error(
-      `Submission could not be confirmed. Refresh the plan and check transaction ${expectedTxid} before trying again. ${e instanceof Error ? e.message : String(e)}`,
+      `Submission could not be confirmed. Refresh the plan and check transaction ${expectedTxid} before trying again. ${friendlyError(e)}`,
     );
   }
   const txid =

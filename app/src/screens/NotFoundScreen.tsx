@@ -1,8 +1,8 @@
+import { TRY_IT } from '../lib/demo';
 import { useEffect } from 'react';
 import { Compass } from 'lucide-react';
 import { ButtonLink } from '../components/Button';
 import { StateMessage } from '../components/StateMessage';
-import { NETWORK } from '../lib/networkName';
 
 export function NotFoundScreen() {
   useEffect(() => {
@@ -19,7 +19,7 @@ export function NotFoundScreen() {
         actions={
           <>
             <ButtonLink to="/" size="lg">Back to home</ButtonLink>
-            {NETWORK === 'chipnet' && <ButtonLink to="/wallet/demo" variant="secondary" size="lg">Try it now</ButtonLink>}
+            {TRY_IT && <ButtonLink {...TRY_IT} variant="secondary" size="lg">Try it now</ButtonLink>}
           </>
         }
       />

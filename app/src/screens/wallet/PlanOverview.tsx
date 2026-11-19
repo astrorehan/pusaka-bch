@@ -257,7 +257,7 @@ export function PlanPeople({
     <>
       <Card>
         <CardHeading
-          title="Your heirs"
+          title={editPath ? 'Your heirs' : 'Heirs'}
           description="These shares apply to the BCH and supported tokens held by this plan."
         >
           <Badge>
@@ -400,9 +400,17 @@ export function ClaimProgress({
   busy: boolean;
   prepare: PrepareAction;
 }) {
-  const { state, review, now } = data;
+  const { state, review, now, handle } = data;
   const hasClaim = state.status === 'REVIEW' || state.status === 'PAID_OUT';
   const paid = state.status === 'PAID_OUT';
+  const ready = Boolean(review?.ready);
+  const approvals = state.approvedContactIndices.length;
+  const heirs = BigInt(handle.policy.heirs.length);
+  // Opening a claim and paying it out each take their network fee from the plan, and every heir's share must
+  // be large enough to send. Below this the plan cannot pay its heirs without a wallet covering the fees.
+  const enough =
+    state.planBalanceSats >= 2_000n + 2n * handle.policy.feeBudget + heirs * 546n;
+  const latePayable = paid && state.planBalanceSats - 1_000n >= heirs * 546n;
   const steps = [
     {
       title: 'Plan is on the network',
@@ -411,17 +419,28 @@ export function ClaimProgress({
     },
     {
       title: 'Open a claim',
-      description: `After inactivity or 2 contact confirmations. ${state.approvedContactIndices.length} of 3 contacts have confirmed.`,
+      description:
+        state.status === 'REVIEW'
+          ? approvals >= 2
+            ? 'Opened by two trusted contacts.'
+            : 'Opened after the inactivity deadline passed.'
+          : paid
+            ? 'A claim was opened and reviewed.'
+            : `Anyone can open one after the inactivity deadline, or two trusted contacts can open one sooner. ${approvals} of 3 have confirmed.`,
       done: hasClaim,
     },
     {
       title: 'Wait through the review period',
-      description: 'The owner can stop the claim before the payout.',
-      done: paid || Boolean(review?.ready),
+      description:
+        review?.confirmed && !ready
+          ? `About ${formatDuration(BigInt(Math.max(0, review.required - review.age)))} left. The owner can stop the claim until the payout.`
+          : 'The owner can stop the claim before the payout.',
+      done: paid || ready,
     },
     {
       title: 'Pay the heirs',
-      description: 'Anyone can submit the payout to the listed heirs.',
+      description:
+        'Anyone can submit the payout to the listed heirs. The plan pays the network fee.',
       done: paid,
     },
   ];
@@ -446,38 +465,52 @@ export function ClaimProgress({
           </li>
         ))}
       </ol>
-      {['ACTIVE', 'CLOSED'].includes(state.status) && (
-        <Button
-          type="button"
-          variant="secondary"
-          block
-          disabled={busy || now <= state.deadline}
-          onClick={() => void prepare('open')}
-        >
-          Open inactivity claim
-        </Button>
+      {(state.status === 'ACTIVE' || (state.status === 'CLOSED' && enough)) && (
+        <>
+          {!enough && (
+            <p className="pw-fine">
+              This plan holds too little BCH to pay every heir after network
+              fees. Add BCH before a claim opens.
+            </p>
+          )}
+          <Button
+            type="button"
+            variant={now > state.deadline ? 'primary' : 'secondary'}
+            block
+            disabled={busy || now <= state.deadline}
+            onClick={() => void prepare('open')}
+          >
+            Open inactivity claim
+          </Button>
+        </>
       )}
       {state.status === 'REVIEW' && (
         <Button
           type="button"
           block
-          disabled={busy || !review?.ready}
+          disabled={busy || !ready}
           onClick={() => void prepare('finalize')}
         >
           Pay the heirs
         </Button>
       )}
-      {paid && (
-        <Button
-          type="button"
-          variant="secondary"
-          block
-          disabled={busy}
-          onClick={() => void prepare('late')}
-        >
-          Pay late receipts
-        </Button>
-      )}
+      {paid &&
+        (latePayable ? (
+          <Button
+            type="button"
+            variant="secondary"
+            block
+            disabled={busy}
+            onClick={() => void prepare('late')}
+          >
+            Pay late receipts
+          </Button>
+        ) : (
+          <p className="pw-fine">
+            BCH that arrives later at this plan can be paid to the heirs the
+            same way.
+          </p>
+        ))}
     </Card>
   );
 }

@@ -2,10 +2,12 @@
 import { decodePlan } from '../../lib/planLink';
 import { MAX_PLAN_PAYLOAD } from '../../lib/planPayload';
 import { decodePusakaV2PlanLink, encodePusakaV2PlanLink, readV2Metadata } from '../../lib/protocol/plan-metadata';
+import { otherAppUrl } from '../../lib/networkName';
 import type { NetworkName } from '../../lib/types';
 
 export type PlanDestination = { pathname: '/plan' | '/v2/plan'; hash: string };
-export type PlanLinkCheck = { ok: true; to: PlanDestination } | { ok: false; error: string };
+/** `otherApp`: the plan belongs to the other network, whose app this site also hosts at that address. */
+export type PlanLinkCheck = { ok: true; to: PlanDestination } | { ok: false; error: string; otherApp?: string };
 export const MAX_PLAN_FILE_BYTES = 1_000_000;
 
 const FRAGMENT = /\/plan\/?#([A-Za-z0-9_-]+)/;
@@ -47,9 +49,11 @@ export function checkPlanLink(text: string, network: NetworkName, source: 'paste
 function destination(pathname: PlanDestination['pathname'], hash: string, planNetwork: string, network: NetworkName): PlanLinkCheck {
   if (planNetwork !== network) {
     const planName = planNetwork === 'mainnet' || planNetwork === 'chipnet' ? NETWORK_NAMES[planNetwork] : 'another network';
+    const otherApp = otherAppUrl(planNetwork, pathname + hash);
     return {
       ok: false,
       error: `This plan was made on ${planName}. This site uses ${NETWORK_NAMES[network]}.`,
+      ...(otherApp ? { otherApp } : {}),
     };
   }
   return { ok: true, to: { pathname, hash } };

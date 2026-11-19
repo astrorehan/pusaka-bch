@@ -1,0 +1,810 @@
+{
+  "network": "chipnet",
+  "proof": {
+    "phase": "paid",
+    "steps": [
+      {
+        "step": "create",
+        "at": "2026-11-19T15:39:19.102Z",
+        "txid": "719ac210800e80ce27d0f7557d37165f29857bbc7489ef96eb47fe94eba6615f",
+        "bytes": 315,
+        "fee": "335"
+      },
+      {
+        "step": "receive",
+        "at": "2026-11-19T15:40:38.709Z",
+        "txid": "1b67d2e56e05240fb1e7ff324908bfa2e926979859cd265e3700e1f5e8235abb",
+        "bytes": 195,
+        "note": "3100 sats to the receive address"
+      },
+      {
+        "step": "collect",
+        "at": "2026-11-19T15:40:50.132Z",
+        "txid": "a16c8567566be68be3c5c13625bf853f5986357fbef6b5165900971e7495c90b",
+        "bytes": 4405,
+        "fee": "4425",
+        "note": "fee paid by the owner's wallet; deadline unchanged: a receipt is not proof of life"
+      },
+      {
+        "step": "send",
+        "at": "2026-11-19T15:41:17.174Z",
+        "txid": "fff02ca0aa5302dfce4657f647d87e6a9b815fa976b28df21da26db594818c9d",
+        "bytes": 4089,
+        "fee": "4109",
+        "note": "paid 1000 sats; deadline moved to 2026-12-19T15:39:35.000Z"
+      },
+      {
+        "step": "contact 1 confirms",
+        "at": "2026-11-19T15:41:33.000Z",
+        "txid": "c42d548c67ea6fb5169af9b71b78d52405c381003f5fc7f63e9f758ad46028b5",
+        "bytes": 4178,
+        "note": "first confirmation, no payout right"
+      },
+      {
+        "step": "contact 2 confirms",
+        "at": "2026-11-19T15:42:43.086Z",
+        "txid": "09e2d8303236ffdf7474cf74d96dc62ed11c4fa5466d827c7c4b9892cb3f62e0",
+        "bytes": 4265,
+        "fee": "4285",
+        "note": "quorum reached: review started"
+      },
+      {
+        "step": "early payout refused",
+        "at": "2026-11-19T15:42:46.266Z",
+        "note": "the transaction was rejected by network rules.\n\nnon-BIP68-final (code 64)\n"
+      },
+      {
+        "step": "stop claim",
+        "at": "2026-11-19T15:43:16.042Z",
+        "txid": "3b84434beae5db7f4d2acb653426502ce899586784a8e4c9ce773e8692b3df02",
+        "bytes": 4257,
+        "fee": "4277",
+        "note": "claim cancelled; earlier confirmations no longer count"
+      },
+      {
+        "step": "contact 2 confirms again",
+        "at": "2026-11-19T15:43:35.552Z",
+        "txid": "aaa123ba3a6fc46f8f22a7666bbf51cc421628b410d442315d9a7791afe0b1af",
+        "bytes": 4178,
+        "fee": "4198",
+        "note": "first confirmation, no payout right"
+      },
+      {
+        "step": "contact 3 confirms",
+        "at": "2026-11-19T15:44:09.550Z",
+        "txid": "b591bb97b3f488f65f7c0d67e5b93a61c6d17a77bc1d411d987503a12b8f3e0f",
+        "bytes": 4265,
+        "fee": "4285",
+        "note": "quorum reached: review started"
+      },
+      {
+        "step": "pay the heirs",
+        "at": "2026-11-19T16:07:02.000Z",
+        "txid": "c6076a16f29fe42fb7da5187bfab169a457c2110d9656f386a1c1560f6be65e4",
+        "bytes": 4335,
+        "fee": "4355",
+        "note": "Wife 887, Son 4141, Daughter 2070"
+      }
+    ],
+    "metadata": {
+      "version": "pusaka-v2",
+      "protocolRevision": "assets-1",
+      "network": "chipnet",
+      "planCategoryHex": "014ffc01bd882dc093fb7135dad51497cf65a0363edaf07ec80270dc9449c7d6",
+      "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+      "planAddress": "bchtest:rdgca7rtqjkruheck0jtu67ugmcdqqyph7mwh6vdd3gg2al2wdxcyduk2x2c9",
+      "planLockHex": "aa20518ef86b04ac3e5f38b3e4be6bdc46f0d00081bfb6ebe98d6c508577ea734d8287",
+      "anchorAddress": "bchtest:rdsgvkywk5m28r4t2vucf2jq6gcez8zqtux4u79tan67e9a6xct7xw6ljl8ru",
+      "anchorLockHex": "aa206086588eb536a38eab533984aa40d231911c405f0d5e78abecf5ec97ba3617e387",
+      "inboxAddress": "bchtest:pwx6trz7ruqnlek8yaa9qkv54ngfygc6rlgep54hhvjq2xeaedvjq5uhdptfx",
+      "inboxLockHex": "aa208da58c5e1f013fe6c7277a505994acd092231a1fd190d2b7bb24051b3dcb592087",
+      "perInputFeeCap": "600",
+      "policyBytesHex": "008d27000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea1800000003219178a12ac1914acc1f9e4f2a111d574687ebb3030000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f0e000000a0290a25754e41d6ee94068bbe49dfbc99a94f0007000000",
+      "policyHashHex": "23db7e8edbd41fd94cd6007dfe9cbe6af9aa35d595033c9c3718204e5958db70",
+      "createdAtLocktime": 1795102475,
+      "inactivityPeriodSeconds": 2592000,
+      "reviewSequence": 4194305,
+      "reviewUnits": 1,
+      "effectiveReviewSeconds": 512,
+      "feeBudget": "5000",
+      "contacts": [
+        "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+        "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+        "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+      ],
+      "totalShares": "24",
+      "heirs": [
+        {
+          "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+          "share": "3",
+          "label": "Wife"
+        },
+        {
+          "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+          "share": "14",
+          "label": "Son"
+        },
+        {
+          "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+          "share": "7",
+          "label": "Daughter"
+        }
+      ]
+    },
+    "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIwMTRmZmMwMWJkODgyZGMwOTNmYjcxMzVkYWQ1MTQ5N2NmNjVhMDM2M2VkYWYwN2VjODAyNzBkYzk0NDljN2Q2Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJkZ2NhN3J0cWprcnVoZWNrMGp0dTY3dWdtY2RxcXlwaDdtd2g2dmRkM2dnMmFsMndkeGN5ZHVrMngyYzkiLCJwbGFuTG9ja0hleCI6ImFhMjA1MThlZjg2YjA0YWMzZTVmMzhiM2U0YmU2YmRjNDZmMGQwMDA4MWJmYjZlYmU5OGQ2YzUwODU3N2VhNzM0ZDgyODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZHNndmt5d2s1bTI4cjR0MnZ1Y2YyanE2Z2Nlejh6cXR1eDR1Nzl0YW42N2U5YTZ4Y3Q3eHc2bGpsOHJ1IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA2MDg2NTg4ZWI1MzZhMzhlYWI1MzM5ODRhYTQwZDIzMTkxMWM0MDVmMGQ1ZTc4YWJlY2Y1ZWM5N2JhMzYxN2UzODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB3eDZ0cno3cnVxbmxlazh5YWE5cWt2NTRuZ2Z5Z2M2cmxnZXA1NGhodmpxMnhlYWVkdmpxNXVoZHB0ZngiLCJpbmJveExvY2tIZXgiOiJhYTIwOGRhNThjNWUxZjAxM2ZlNmM3Mjc3YTUwNTk5NGFjZDA5MjIzMWExZmQxOTBkMmI3YmIyNDA1MWIzZGNiNTkyMDg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjAwOGQyNzAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTE4MDAwMDAwMDMyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMDMwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMGUwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMDcwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiMjNkYjdlOGVkYmQ0MWZkOTRjZDYwMDdkZmU5Y2JlNmFmOWFhMzVkNTk1MDMzYzljMzcxODIwNGU1OTU4ZGI3MCIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyNDc1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6MjU5MjAwMCwicmV2aWV3U2VxdWVuY2UiOjQxOTQzMDUsInJldmlld1VuaXRzIjoxLCJlZmZlY3RpdmVSZXZpZXdTZWNvbmRzIjo1MTIsImZlZUJ1ZGdldCI6IjUwMDAiLCJjb250YWN0cyI6WyJmM2NhMWMyZTFlOTdmNmJkYTQwNWM1MzE3Y2IzMmJkYTIxZGJlYjljIiwiYjdmZWIyZTY0ODU4NjczZTZmNjViNGIxNjViNDk5MGNkMWQ2ZWVlNiIsIjU5MzkzODg3YmEyN2FjYjhjZjFjYTc4ZjNjNGU1NTQxZTEzMmY5ZWEiXSwidG90YWxTaGFyZXMiOiIyNCIsImhlaXJzIjpbeyJwa2hIZXgiOiIyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzIiwic2hhcmUiOiIzIiwibGFiZWwiOiJXaWZlIn0seyJwa2hIZXgiOiIxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmIiwic2hhcmUiOiIxNCIsImxhYmVsIjoiU29uIn0seyJwa2hIZXgiOiJhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwIiwic2hhcmUiOiI3IiwibGFiZWwiOiJEYXVnaHRlciJ9XX0"
+  },
+  "demo": [
+    {
+      "title": "demo plan 1",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "7fb4b0435287b540fca2f523056c4ee0600d875acab9e6d88841b8f65bc231e0",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rw8t8jl70hemzx552xntgetfnmq25jhmpy4hl8m7xkhm0y6fw9pck4ea2r5ls",
+        "planLockHex": "aa208eb3cbfe7df3b11a9451a6b465699ec0aa4afb092b7f9f7e35afb7934971438b87",
+        "anchorAddress": "bchtest:rd35ratfc3h9et0cedacqya29l23la3hxz55ycn0peyx97xfufpqgxqme0le6",
+        "anchorLockHex": "aa206341f569c46e5cadf8cb7b8013aa2fd51ff63730a942626f0e4862f8c9e2420487",
+        "inboxAddress": "bchtest:pv230keduzk8w4skndf6nmrluxlm0htcmxugdkgcehf6a0c0c77nylq8ahwwy",
+        "inboxLockHex": "aa201517db2de0ac7756169b53a9ec7fe1bfb7dd78d9b886d918cdd3aebf0fc7bd3287",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795102954,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI3ZmI0YjA0MzUyODdiNTQwZmNhMmY1MjMwNTZjNGVlMDYwMGQ4NzVhY2FiOWU2ZDg4ODQxYjhmNjViYzIzMWUwIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3OHQ4amw3MGhlbXp4NTUyeG50Z2V0Zm5tcTI1amhtcHk0aGw4bTd4a2htMHk2Znc5cGNrNGVhMnI1bHMiLCJwbGFuTG9ja0hleCI6ImFhMjA4ZWIzY2JmZTdkZjNiMTFhOTQ1MWE2YjQ2NTY5OWVjMGFhNGFmYjA5MmI3ZjlmN2UzNWFmYjc5MzQ5NzE0MzhiODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZDM1cmF0ZmMzaDlldDBjZWRhY3F5YTI5bDIzbGEzaHh6NTV5Y24wcGV5eDk3eGZ1ZnBxZ3hxbWUwbGU2IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA2MzQxZjU2OWM0NmU1Y2FkZjhjYjdiODAxM2FhMmZkNTFmZjYzNzMwYTk0MjYyNmYwZTQ4NjJmOGM5ZTI0MjA0ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB2MjMwa2VkdXprOHc0c2tuZGY2bm1ybHV4bG0waHRjbXh1Z2RrZ2NlaGY2YTBjMGM3N255bHE4YWh3d3kiLCJpbmJveExvY2tIZXgiOiJhYTIwMTUxN2RiMmRlMGFjNzc1NjE2OWI1M2E5ZWM3ZmUxYmZiN2RkNzhkOWI4ODZkOTE4Y2RkM2FlYmYwZmM3YmQzMjg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyOTU0LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T15:45:21.750Z",
+          "txid": "998ab2daf4df4a896f2659b0debf9e9a5091d2891dad3df6b5572e5425ea9b61",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T15:47:04.664Z",
+          "txid": "33b36a469b1bc68a7b6079822a42dd18cb3318e5ee747a86ea69787d61314938",
+          "bytes": 4161,
+          "fee": "4181"
+        },
+        {
+          "step": "top up",
+          "at": "2026-11-19T16:07:25.332Z",
+          "txid": "ca279090d5f56230c9d07e4d6c2f30a599614894f5a89831ac47dafdb1afc562",
+          "note": "9000 sats to the receive address"
+        },
+        {
+          "step": "collect",
+          "at": "2026-11-19T16:07:25.332Z",
+          "txid": "afae060656b877c77659019180ac85b8e335d03d5998b3e8f1b7c3e1f7c9d9f9",
+          "bytes": 4405,
+          "fee": "4425",
+          "note": "collected during the review; the claim and its clock are unchanged"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 2",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "e692f87e27a432a1a8e1676bbf75712ee8574c8506c77a05f5f3dfd5631d8aa8",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:r0e956qum9a08hy9cgjc9w8uectg3mqjf78n7739lv6fw80a4xp2xuplqggcp",
+        "planLockHex": "aa20f25a681cd97af3dc85c22582b8fcce1688ec124f8f3f7a25fb34971dfda982a387",
+        "anchorAddress": "bchtest:rv59adq6yps9usmnsf7ltnjgj5pjpp3ap37pkxcq6ugyq6y826ey7qlu33me3",
+        "anchorLockHex": "aa20285eb41a20605e4373827df5ce48950320863d0c7c1b1b00d71040688756b24f87",
+        "inboxAddress": "bchtest:p0n2utpyvqr445uc0chxdhvqrqa2nj400q4j42725ghl7cw9jkw8k4zznr59d",
+        "inboxLockHex": "aa20e6ae2c2460075ad3987e2e66dd80183aa9caaf782b2aabcaa22fff61c5959c7b87",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000200400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "af7e5dadc7a00f1f0e5405e4cd204dc17fecd7827fe0df6a7a7a8adf8960ea75",
+        "createdAtLocktime": 1795102954,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194306,
+        "reviewUnits": 2,
+        "effectiveReviewSeconds": 1024,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJlNjkyZjg3ZTI3YTQzMmExYThlMTY3NmJiZjc1NzEyZWU4NTc0Yzg1MDZjNzdhMDVmNWYzZGZkNTYzMWQ4YWE4Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnIwZTk1NnF1bTlhMDhoeTljZ2pjOXc4dWVjdGczbXFqZjc4bjc3MzlsdjZmdzgwYTR4cDJ4dXBscWdnY3AiLCJwbGFuTG9ja0hleCI6ImFhMjBmMjVhNjgxY2Q5N2FmM2RjODVjMjI1ODJiOGZjY2UxNjg4ZWMxMjRmOGYzZjdhMjVmYjM0OTcxZGZkYTk4MmEzODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydjU5YWRxNnlwczl1c21uc2Y3bHRuamdqNXBqcHAzYXAzN3BreGNxNnVneXE2eTgyNmV5N3FsdTMzbWUzIiwiYW5jaG9yTG9ja0hleCI6ImFhMjAyODVlYjQxYTIwNjA1ZTQzNzM4MjdkZjVjZTQ4OTUwMzIwODYzZDBjN2MxYjFiMDBkNzEwNDA2ODg3NTZiMjRmODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwbjJ1dHB5dnFyNDQ1dWMwY2h4ZGh2cXJxYTJuajQwMHE0ajQyNzI1Z2hsN2N3OWprdzhrNHp6bnI1OWQiLCJpbmJveExvY2tIZXgiOiJhYTIwZTZhZTJjMjQ2MDA3NWFkMzk4N2UyZTY2ZGQ4MDE4M2FhOWNhYWY3ODJiMmFhYmNhYTIyZmZmNjFjNTk1OWM3Yjg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDIwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiYWY3ZTVkYWRjN2EwMGYxZjBlNTQwNWU0Y2QyMDRkYzE3ZmVjZDc4MjdmZTBkZjZhN2E3YThhZGY4OTYwZWE3NSIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyOTU0LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA2LCJyZXZpZXdVbml0cyI6MiwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6MTAyNCwiZmVlQnVkZ2V0IjoiNTAwMCIsImNvbnRhY3RzIjpbImYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWMiLCJiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2IiwiNTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYSJdLCJ0b3RhbFNoYXJlcyI6IjEyMCIsImhlaXJzIjpbeyJwa2hIZXgiOiIyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzIiwic2hhcmUiOiIxNSIsImxhYmVsIjoiQWlzaGEgKHdpZmUpIn0seyJwa2hIZXgiOiIxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmIiwic2hhcmUiOiIyMCIsImxhYmVsIjoiWXVzdWYgKGZhdGhlcikifSx7InBraEhleCI6ImEwMjkwYTI1NzU0ZTQxZDZlZTk0MDY4YmJlNDlkZmJjOTlhOTRmMDAiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJNYXJpYW0gKG1vdGhlcikifSx7InBraEhleCI6ImFmMTdkNjZhMDYxZjRjZWJkNzcwOTdiOTVjNjI2YzFlNGYwOTE0ZTAiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJPbWFyIChzb24pIn0seyJwa2hIZXgiOiJhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4Iiwic2hhcmUiOiIyNiIsImxhYmVsIjoiSWRyaXMgKHNvbikifSx7InBraEhleCI6IjY1YjAxYzVlY2NhMmY0YmM4Nzc2OTA0NWQ2NWRmYjgyMjgwMGMxZmQiLCJzaGFyZSI6IjEzIiwibGFiZWwiOiJMYXlsYSAoZGF1Z2h0ZXIpIn1dfQ",
+      "reviewSeconds": 1024,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T15:45:59.546Z",
+          "txid": "53c893e8602b95b93bc4c37dc5c0c41bf13c8c137d457e4b2c34f726a59a09a0",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T15:47:42.504Z",
+          "txid": "25cc1a693521a466f78d6c7736643ffb34e342d221f8237d3c1ea1e7fae09109",
+          "bytes": 4161,
+          "fee": "4181"
+        },
+        {
+          "step": "top up",
+          "at": "2026-11-19T16:08:09.385Z",
+          "txid": "33da5bed1b0ec700734460ae2c411b3036467e8fa680216b63fb0969235ca1e0",
+          "note": "9000 sats to the receive address"
+        },
+        {
+          "step": "collect",
+          "at": "2026-11-19T16:08:09.385Z",
+          "txid": "4761eb6c03321633fe5e593682f42870fa2bb076e072671efd7d5124ae3e0045",
+          "bytes": 4405,
+          "fee": "4425",
+          "note": "collected during the review; the claim and its clock are unchanged"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 3",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "3b2746f6d9bb6694acc4bc20c3288a7455b9dd7b74187bdf40a19da42c82ceec",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rwfvpu9g273de8jnmlcwnmyul3kpsw957dgnq3542qapce0rvwkeyr5puakxs",
+        "planLockHex": "aa2092c0f0a857a2dc9e53dff0e9ec9cfc6c1838b4f351304695503a1c65e363ad9287",
+        "anchorAddress": "bchtest:rdqhuneh92a08mnw3qt3s9pddugwyrpzgdl6kv0h2y64rfstv4k4jge39vzh0",
+        "anchorLockHex": "aa20417e4f372abaf3ee6e881718142d6f10e20c22437fab31f7513551a60b656d5987",
+        "inboxAddress": "bchtest:p0uhly44c4wu0j3tjpln98ssemzgyx979qc9d2dr407zst337wtg5z0j3acuv",
+        "inboxLockHex": "aa20f97f92b5c55dc7ca2b907f329e10cec48218be283056a9a3abfc282e31f3968a87",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105813,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzYjI3NDZmNmQ5YmI2Njk0YWNjNGJjMjBjMzI4OGE3NDU1YjlkZDdiNzQxODdiZGY0MGExOWRhNDJjODJjZWVjIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3ZnZwdTlnMjczZGU4am5tbGN3bm15dWwza3Bzdzk1N2RnbnEzNTQycWFwY2UwcnZ3a2V5cjVwdWFreHMiLCJwbGFuTG9ja0hleCI6ImFhMjA5MmMwZjBhODU3YTJkYzllNTNkZmYwZTllYzljZmM2YzE4MzhiNGYzNTEzMDQ2OTU1MDNhMWM2NWUzNjNhZDkyODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZHFodW5laDkyYTA4bW53M3F0M3M5cGRkdWd3eXJwemdkbDZrdjBoMnk2NHJmc3R2NGs0amdlMzl2emgwIiwiYW5jaG9yTG9ja0hleCI6ImFhMjA0MTdlNGYzNzJhYmFmM2VlNmU4ODE3MTgxNDJkNmYxMGUyMGMyMjQzN2ZhYjMxZjc1MTM1NTFhNjBiNjU2ZDU5ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwdWhseTQ0YzR3dTBqM3RqcGxuOThzc2Vtemd5eDk3OXFjOWQyZHI0MDd6c3QzMzd3dGc1ejBqM2FjdXYiLCJpbmJveExvY2tIZXgiOiJhYTIwZjk3ZjkyYjVjNTVkYzdjYTJiOTA3ZjMyOWUxMGNlYzQ4MjE4YmUyODMwNTZhOWEzYWJmYzI4MmUzMWYzOTY4YTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:35:34.578Z",
+          "txid": "2712cd692ff14cf6e170beab1e6e07f6941cf332eac58c3179b2c23796a37a7a",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T16:39:03.960Z",
+          "txid": "44fdc0f002f4e5acd024cd2f7a0ae6781351fce9ceb74ef5876e53fd102ba2e9",
+          "bytes": 4161,
+          "fee": "4181"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 4",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "2e887ed188f0401dd0d7102dae0484cd99419ce9d4201bdc85ea09df71119366",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rvdnktqj8qc0jq3hz3xqvsqq3a5djkxmltdp90ftzn6ay5nmesnyzke79m857",
+        "planLockHex": "aa201b3b2c123830f90237144c0640008f68d958dbfada12bd2b14f5d2527bcc264187",
+        "anchorAddress": "bchtest:rw04h5hhcmdfvm6wa9zvj4jtemprkwuxh3nwj9rs5c2d405v933f272ksyuew",
+        "anchorLockHex": "aa209f5bd2f7c6da966f4ee944c9564bcec23b3b86bc66e91470a614dabe8c2c629587",
+        "inboxAddress": "bchtest:p0pznpv8nsty98tydfze7yusga9yspcpajxf4je4uut0gnrarjhmw26y50up0",
+        "inboxLockHex": "aa20c22985879c16429d646a459f1390474a480701ec8c9acb35e716f44c7d1cafb787",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105813,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIyZTg4N2VkMTg4ZjA0MDFkZDBkNzEwMmRhZTA0ODRjZDk5NDE5Y2U5ZDQyMDFiZGM4NWVhMDlkZjcxMTE5MzY2Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ2ZG5rdHFqOHFjMGpxM2h6M3hxdnNxcTNhNWRqa3htbHRkcDkwZnR6bjZheTVubWVzbnl6a2U3OW04NTciLCJwbGFuTG9ja0hleCI6ImFhMjAxYjNiMmMxMjM4MzBmOTAyMzcxNDRjMDY0MDAwOGY2OGQ5NThkYmZhZGExMmJkMmIxNGY1ZDI1MjdiY2MyNjQxODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydzA0aDVoaGNtZGZ2bTZ3YTl6dmo0anRlbXBya3d1eGgzbndqOXJzNWMyZDQwNXY5MzNmMjcya3N5dWV3IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA5ZjViZDJmN2M2ZGE5NjZmNGVlOTQ0Yzk1NjRiY2VjMjNiM2I4NmJjNjZlOTE0NzBhNjE0ZGFiZThjMmM2Mjk1ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwcHpucHY4bnN0eTk4dHlkZnplN3l1c2dhOXlzcGNwYWp4ZjRqZTR1dXQwZ25yYXJqaG13MjZ5NTB1cDAiLCJpbmJveExvY2tIZXgiOiJhYTIwYzIyOTg1ODc5YzE2NDI5ZDY0NmE0NTlmMTM5MDQ3NGE0ODA3MDFlYzhjOWFjYjM1ZTcxNmY0NGM3ZDFjYWZiNzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:36:07.867Z",
+          "txid": "8f76debef27b945be9c8e378265cb0488babf6616e63f07756ac7674bc9a41fa",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T16:39:32.537Z",
+          "txid": "0c610dff11d65a6c772263643f92c17176d96826a722302489347f05ef6653a2",
+          "bytes": 4161,
+          "fee": "4181"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 5",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "e612d39c28e2493d3a26880c05183d248ae6c5c3b5aa7a4781e80662a04560c9",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rd4ndv8q7s3h0q0ufm0mj9k5s5wlrphvhyydlenvducww6kjy9lc252mkz6zm",
+        "planLockHex": "aa206b36b0e0f4237781fc4edfb916d4851df186ecb908dfe66c6f30e76ad2217f8587",
+        "anchorAddress": "bchtest:rw6hwd264wxt0aela2alvdrrwfxuyv889xaqn02w7e4g6p9xk3t5jwmra2rqh",
+        "anchorLockHex": "aa20b577355aab8cb7f73feabbf63463724dc230e729ba09bd4ef66a8d04a6b4574987",
+        "inboxAddress": "bchtest:p0v9eedfveae28f5tmzysy693pjyc95zhw4k0q4xslfqah0fzlaqjqm6mvrqt",
+        "inboxLockHex": "aa20d85ce5a9667b951d345ec448134588644c1682bbab6782a687d20edde917fa0987",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105813,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJlNjEyZDM5YzI4ZTI0OTNkM2EyNjg4MGMwNTE4M2QyNDhhZTZjNWMzYjVhYTdhNDc4MWU4MDY2MmEwNDU2MGM5Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJkNG5kdjhxN3MzaDBxMHVmbTBtajlrNXM1d2xycGh2aHl5ZGxlbnZkdWN3dzZrank5bGMyNTJta3o2em0iLCJwbGFuTG9ja0hleCI6ImFhMjA2YjM2YjBlMGY0MjM3NzgxZmM0ZWRmYjkxNmQ0ODUxZGYxODZlY2I5MDhkZmU2NmM2ZjMwZTc2YWQyMjE3Zjg1ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydzZod2QyNjR3eHQwYWVsYTJhbHZkcnJ3Znh1eXY4ODl4YXFuMDJ3N2U0ZzZwOXhrM3Q1andtcmEycnFoIiwiYW5jaG9yTG9ja0hleCI6ImFhMjBiNTc3MzU1YWFiOGNiN2Y3M2ZlYWJiZjYzNDYzNzI0ZGMyMzBlNzI5YmEwOWJkNGVmNjZhOGQwNGE2YjQ1NzQ5ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwdjllZWRmdmVhZTI4ZjV0bXp5c3k2OTNwanljOTV6aHc0azBxNHhzbGZxYWgwZnpsYXFqcW02bXZycXQiLCJpbmJveExvY2tIZXgiOiJhYTIwZDg1Y2U1YTk2NjdiOTUxZDM0NWVjNDQ4MTM0NTg4NjQ0YzE2ODJiYmFiNjc4MmE2ODdkMjBlZGRlOTE3ZmEwOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:36:39.611Z",
+          "txid": "2477a7013e720c47278f5c5b8520662621a4734b8b659b905e11c3b893942607",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T16:40:02.845Z",
+          "txid": "769edfcc76ce0b1e11a1c07dcaa33894d9a47c308ece46ebfc2fa81b86639a84",
+          "bytes": 4161,
+          "fee": "4181"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 6",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "861730c703621e82baf3cf0a1ace2286032868df956610f4499e40f17f1fe59e",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:r0k53ax7gvmg3w7emjrr3q870h59dhzupz3a75yq24n5hr45edn5wd58k9ajn",
+        "planLockHex": "aa20ed48f4de433688bbd9dc863880fe7de856dc5c08a3df508055674b8eb4cb674787",
+        "anchorAddress": "bchtest:rvnwt6s4zkaazkn2jhqfg2yzek7zkvd4ezemv0yfjvp244zewc5kvyd88eu8s",
+        "anchorLockHex": "aa2026e5ea1515bbd15a6a95c0942882cdbc2b31b5c8b3b63c899302aad45976296687",
+        "inboxAddress": "bchtest:p0nlppp2z7jjnk2ls57xlmee5nptny5afalra566fwhjf6zzwj32j89ktmxnk",
+        "inboxLockHex": "aa20e7f0842a17a529d95f853c6fef39a4c2b9929d4f7e3ed35a4baf24e84274a2a987",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105846,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI4NjE3MzBjNzAzNjIxZTgyYmFmM2NmMGExYWNlMjI4NjAzMjg2OGRmOTU2NjEwZjQ0OTllNDBmMTdmMWZlNTllIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnIwazUzYXg3Z3ZtZzN3N2VtanJyM3E4NzBoNTlkaHp1cHozYTc1eXEyNG41aHI0NWVkbjV3ZDU4azlham4iLCJwbGFuTG9ja0hleCI6ImFhMjBlZDQ4ZjRkZTQzMzY4OGJiZDlkYzg2Mzg4MGZlN2RlODU2ZGM1YzA4YTNkZjUwODA1NTY3NGI4ZWI0Y2I2NzQ3ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydm53dDZzNHprYWF6a24yamhxZmcyeXplazd6a3ZkNGV6ZW12MHlmanZwMjQ0emV3YzVrdnlkODhldThzIiwiYW5jaG9yTG9ja0hleCI6ImFhMjAyNmU1ZWExNTE1YmJkMTVhNmE5NWMwOTQyODgyY2RiYzJiMzFiNWM4YjNiNjNjODk5MzAyYWFkNDU5NzYyOTY2ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwbmxwcHAyejdqam5rMmxzNTd4bG1lZTVucHRueTVhZmFscmE1NjZmd2hqZjZ6endqMzJqODlrdG14bmsiLCJpbmJveExvY2tIZXgiOiJhYTIwZTdmMDg0MmExN2E1MjlkOTVmODUzYzZmZWYzOWE0YzJiOTkyOWQ0ZjdlM2VkMzVhNGJhZjI0ZTg0Mjc0YTJhOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "review",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:37:23.210Z",
+          "txid": "f5d8ea340f00b192bdd5f0f1696fddb975b9ef51c25c051084685c0c3c0babe0",
+          "bytes": 315,
+          "fee": "335"
+        },
+        {
+          "step": "open claim after inactivity",
+          "at": "2026-11-19T16:40:30.791Z",
+          "txid": "7bffadc151d6401b096176c2a882f1a3d4f7128d995bc862ea33205b8c54ff3e",
+          "bytes": 4161,
+          "fee": "4181"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 7",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "341aea5243e43a15392b95683d314e17d2fb5e70e965f0d8f2033b08d8f26301",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rwkfmttst9u65htcxz3nxqucpmy7dmd5uj9mqwr3wtx03gx0em2xgrdqkksr4",
+        "planLockHex": "aa20ac9dad705979aa5d7830a33303980ec9e6edb4e48bb0387172ccf8a0cfced46487",
+        "anchorAddress": "bchtest:rdezggue9vu5lgk8vm50vmdvtz4tj3tmgug67tdqnv4w3x7n3cfjcekwh05h6",
+        "anchorLockHex": "aa20722423992b394fa2c766e8f66dac58aab9457b4711af2da09b2ae89bd38e132c87",
+        "inboxAddress": "bchtest:pdzqpq8a93t4vyuwf0y8lx4wdvur8x6gtjeasanvtu3272mpv5jz27rfyezv5",
+        "inboxLockHex": "aa20440080fd2c5756138e4bc87f9aae6b38339b485cb3d8766c5f22af2b6165242587",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105846,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzNDFhZWE1MjQzZTQzYTE1MzkyYjk1NjgzZDMxNGUxN2QyZmI1ZTcwZTk2NWYwZDhmMjAzM2IwOGQ4ZjI2MzAxIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3a2ZtdHRzdDl1NjVodGN4ejNueHF1Y3BteTdkbWQ1dWo5bXF3cjN3dHgwM2d4MGVtMnhncmRxa2tzcjQiLCJwbGFuTG9ja0hleCI6ImFhMjBhYzlkYWQ3MDU5NzlhYTVkNzgzMGEzMzMwMzk4MGVjOWU2ZWRiNGU0OGJiMDM4NzE3MmNjZjhhMGNmY2VkNDY0ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZGV6Z2d1ZTl2dTVsZ2s4dm01MHZtZHZ0ejR0ajN0bWd1ZzY3dGRxbnY0dzN4N24zY2ZqY2Vrd2gwNWg2IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA3MjI0MjM5OTJiMzk0ZmEyYzc2NmU4ZjY2ZGFjNThhYWI5NDU3YjQ3MTFhZjJkYTA5YjJhZTg5YmQzOGUxMzJjODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnBkenFwcThhOTN0NHZ5dXdmMHk4bHg0d2R2dXI4eDZndGplYXNhbnZ0dTMyNzJtcHY1anoyN3JmeWV6djUiLCJpbmJveExvY2tIZXgiOiJhYTIwNDQwMDgwZmQyYzU3NTYxMzhlNGJjODdmOWFhZTZiMzgzMzliNDg1Y2IzZDg3NjZjNWYyMmFmMmI2MTY1MjQyNTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "keepActive": true,
+      "phase": "active",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:37:59.477Z",
+          "txid": "7ddb141db3dc1cc46574fec639c318a433d1beab1e946e7de1fd978cac9c07d3",
+          "bytes": 315,
+          "fee": "335"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 8",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-1",
+        "network": "chipnet",
+        "planCategoryHex": "0940d3a62ba795715ed8411fcd8b0ff16ad79182a7c2d1f8edf1739a7a2121ce",
+        "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+        "planAddress": "bchtest:rwx2j2dvnw6phayhhr8w70fsm65enyjuz40zgv9sdtmx2amc2vgq65hrttghf",
+        "planLockHex": "aa208ca929ac9bb41bf497b8ceef3d30dea999925c155e2430b06af665777853100d87",
+        "anchorAddress": "bchtest:r0yllys6fx6gm8gz8zzg0z2mh3sm6hy9z4g4v04wyuz0elq625kkzep4jewkc",
+        "anchorLockHex": "aa20c9ff921a49b48d9d02388487895bbc61bd5c851551563eae2704fcfc1a552d6187",
+        "inboxAddress": "bchtest:pv3kej3ewuhrwf6q48u99c980a6uqhvp5zn4j9ucct3r4wcep4ntu0h99ntpg",
+        "inboxLockHex": "aa20236cca39772e372740a9f852e0a77f75c05d81a0a7591798c2e23abb190d66be87",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea7800000006219178a12ac1914acc1f9e4f2a111d574687ebb30f0000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f14000000a0290a25754e41d6ee94068bbe49dfbc99a94f0014000000af17d66a061f4cebd77097b95c626c1e4f0914e01a000000a0234e1e837f7cea3f563f00e804ace3fa7a68c81a00000065b01c5ecca2f4bc87769045d65dfb822800c1fd0d000000",
+        "policyHashHex": "dc5f41a88e5036c43e94aabb892cc6cc23c7fbd4fbeda4033ee3b1e5e9da086b",
+        "createdAtLocktime": 1795105846,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+          "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+          "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "af17d66a061f4cebd77097b95c626c1e4f0914e0",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "a0234e1e837f7cea3f563f00e804ace3fa7a68c8",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "65b01c5ecca2f4bc87769045d65dfb822800c1fd",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIwOTQwZDNhNjJiYTc5NTcxNWVkODQxMWZjZDhiMGZmMTZhZDc5MTgyYTdjMmQxZjhlZGYxNzM5YTdhMjEyMWNlIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3eDJqMmR2bnc2cGhheWhocjh3NzBmc202NWVueWp1ejQwemd2OXNkdG14MmFtYzJ2Z3E2NWhydHRnaGYiLCJwbGFuTG9ja0hleCI6ImFhMjA4Y2E5MjlhYzliYjQxYmY0OTdiOGNlZWYzZDMwZGVhOTk5OTI1YzE1NWUyNDMwYjA2YWY2NjU3Nzc4NTMxMDBkODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyMHlsbHlzNmZ4NmdtOGd6OHp6ZzB6Mm1oM3NtNmh5OXo0ZzR2MDR3eXV6MGVscTYyNWtremVwNGpld2tjIiwiYW5jaG9yTG9ja0hleCI6ImFhMjBjOWZmOTIxYTQ5YjQ4ZDlkMDIzODg0ODc4OTViYmM2MWJkNWM4NTE1NTE1NjNlYWUyNzA0ZmNmYzFhNTUyZDYxODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB2M2tlajNld3VocndmNnE0OHU5OWM5ODBhNnVxaHZwNXpuNGo5dWNjdDNyNHdjZXA0bnR1MGg5OW50cGciLCJpbmJveExvY2tIZXgiOiJhYTIwMjM2Y2NhMzk3NzJlMzcyNzQwYTlmODUyZTBhNzdmNzVjMDVkODFhMGE3NTkxNzk4YzJlMjNhYmIxOTBkNjZiZTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "keepActive": true,
+      "phase": "active",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-19T16:38:31.948Z",
+          "txid": "306ad3c5ee40f1fb2e48d2885f11b1612fa8d3fe7dd6553bff31f886c43d5ce3",
+          "bytes": 315,
+          "fee": "335"
+        }
+      ]
+    }
+  ]
+}

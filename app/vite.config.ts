@@ -2,6 +2,11 @@ import { createHash } from 'node:crypto'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
+// The published site holds two builds of the same app: mainnet at PAGES_BASE and the Chipnet (test network)
+// app at PAGES_BASE + 'chipnet/'. `npm run build:pages` builds both into dist-pages.
+const PAGES_BASE = '/pusaka-bch/'
+const CHIPNET_BASE = `${PAGES_BASE}chipnet/`
+
 // GitHub Pages serves static HTML. Put the policy in the page so deep links get the same protection.
 function productionHtml(pages: boolean): Plugin {
   return {
@@ -40,17 +45,42 @@ function productionHtml(pages: boolean): Plugin {
   }
 }
 
+/** Fill in where the Chipnet app lives, before the policy above hashes the inline scripts. */
+function chipnetPath(chipnet: string): Plugin {
+  return {
+    name: 'pusaka-chipnet-path',
+    transformIndexHtml: { order: 'pre', handler: (html) => html.replaceAll('%PUSAKA_CHIPNET_BASE%', chipnet) },
+  }
+}
+
+const network = (name: 'mainnet' | 'chipnet', otherApp = '') => ({
+  'import.meta.env.VITE_NETWORK': JSON.stringify(name),
+  'import.meta.env.VITE_MOCK': JSON.stringify('0'),
+  // Where plan links for the other network open; '' when this build has no partner.
+  'import.meta.env.VITE_OTHER_APP': JSON.stringify(otherApp),
+})
+
 // Keep the mainnet wallet preview outside dist: a normal build empties that directory.
-export default defineConfig(({ mode }) => ({
-  plugins: [react(), productionHtml(mode === 'pages')],
-  resolve: { dedupe: ['react', 'react-dom', '@solidcash/solidcash', '@solidcash/utils', '@bitauth/libauth', '@cashlab/common', '@cashlab/cauldron'] },
-  ...(mode === 'pages' ? { base: '/pusaka-bch/', build: { outDir: 'dist-pages' } } : {}),
-  ...(mode === 'mainnet' ? {
-    define: {
-      'import.meta.env.VITE_NETWORK': JSON.stringify('mainnet'),
-      'import.meta.env.VITE_MOCK': JSON.stringify('0'),
-    },
-    build: { outDir: 'dist-mainnet' },
-    preview: { host: 'localhost', port: 4180, strictPort: true },
-  } : {}),
-}))
+export default defineConfig(({ mode }) => {
+  const pages = mode === 'pages' || mode === 'pages-chipnet'
+  return {
+    plugins: [react(), chipnetPath(pages ? CHIPNET_BASE : ''), productionHtml(mode === 'pages')],
+    resolve: { dedupe: ['react', 'react-dom', '@solidcash/solidcash', '@solidcash/utils', '@bitauth/libauth', '@cashlab/common', '@cashlab/cauldron'] },
+    ...(mode === 'pages' ? {
+      base: PAGES_BASE,
+      define: network('mainnet', CHIPNET_BASE),
+      build: { outDir: 'dist-pages' },
+    } : {}),
+    // Built after `pages`, into its chipnet/ folder (a `pages` build empties dist-pages).
+    ...(mode === 'pages-chipnet' ? {
+      base: CHIPNET_BASE,
+      define: network('chipnet', PAGES_BASE),
+      build: { outDir: 'dist-pages/chipnet' },
+    } : {}),
+    ...(mode === 'mainnet' ? {
+      define: network('mainnet'),
+      build: { outDir: 'dist-mainnet' },
+      preview: { host: 'localhost', port: 4180, strictPort: true },
+    } : {}),
+  }
+})

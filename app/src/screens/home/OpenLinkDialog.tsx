@@ -43,6 +43,7 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
     e.preventDefault();
     const r = checkPlanLink(text, NETWORK);
     if (r.ok) go(r.to);
+    else if (r.otherApp) location.assign(r.otherApp);
     else {
       setError(r.error);
       inputRef.current?.focus();
@@ -70,6 +71,7 @@ export function OpenLinkDialog({ open, onClose }: OpenLinkDialogProps) {
     }
     const r = checkPlanLink(content, NETWORK, 'file');
     if (r.ok) go(r.to);
+    else if (r.otherApp) location.assign(r.otherApp);
     else setError(r.error);
   }
 

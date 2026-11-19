@@ -1,5 +1,5 @@
 import { BASE } from './asset';
-import { NETWORK } from './networkName';
+import { NETWORK, openInOtherApp } from './networkName';
 import { decodePusakaV2PlanLink, encodePusakaV2PlanLink, readV2Metadata, type PusakaV2PlanMetadata } from './protocol/plan-metadata';
 
 const PLANS_KEY = `pusaka.v2.plans.${NETWORK}`;
@@ -38,6 +38,9 @@ export function importPlan(fragment: string): PusakaV2PlanMetadata {
     throw new Error('Could not read this plan. Paste the complete plan link or choose the saved plan file.');
   }
   if (plan.network !== NETWORK) {
+    if (openInOtherApp(plan.network, `v2/plan${encodePusakaV2PlanLink(plan, '')}`)) {
+      throw new Error(`Opening this plan in the Pusaka app for the ${plan.network === 'mainnet' ? 'main' : 'test'} network…`);
+    }
     throw new Error('Open this plan in the Pusaka app for its Bitcoin Cash network.');
   }
   return plan;

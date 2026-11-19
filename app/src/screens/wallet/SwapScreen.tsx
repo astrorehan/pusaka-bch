@@ -1,3 +1,4 @@
+import { friendlyError } from '../../lib/chain/errors';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import {
   ArrowDown,
@@ -13,7 +14,7 @@ import type { Utxo } from '@solidcash/solidcash';
 import { Button, ButtonLink } from '../../components/Button';
 import type * as api from '../../lib/chain/v2';
 import { formatBch, parseBch } from '../../lib/format';
-import { NETWORK } from '../../lib/networkName';
+import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import testPair from '../../lib/protocol/test-pair.json';
 import { useWallet } from '../../lib/wallet';
 import { planAddressHash, useCurrentPlan } from './currentPlan';
@@ -77,8 +78,14 @@ export function SwapScreen() {
               <EmptyState
                 icon={<ArrowLeftRight size={21} />}
                 title="No mainnet swap pairs yet"
-                description="The PSK test pair is available in the Chipnet app."
-              />
+                description="Swaps into protected tokens run on the test network for now, with the PSK test pair."
+              >
+                {OTHER_APP && (
+                  <ButtonLink href={`${OTHER_APP}wallet/swap?demo=1`} variant="secondary">
+                    Try a swap on the test network
+                  </ButtonLink>
+                )}
+              </EmptyState>
             ) : !metadata ? (
               <EmptyState
                 icon={<Wallet size={21} />}
@@ -211,7 +218,7 @@ function SwapForm({
         );
       }
     } catch (error) {
-      setIssue(error instanceof Error ? error.message : String(error));
+      setIssue(friendlyError(error));
       setQuote(null);
     } finally {
       setBusy(false);
@@ -358,7 +365,7 @@ export function TokenAssets({
     try {
       setPrepared(await next(await import('../../lib/chain/v2')));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }

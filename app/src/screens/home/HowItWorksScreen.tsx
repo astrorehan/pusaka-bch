@@ -1,20 +1,20 @@
-// "How it works": the plain-words lifecycle, what happens if this website disappears, the honest
+// "How it works": the plain-words life of a Pusaka wallet, what happens if this website disappears, the honest
 // limits, and one section for the technical reader. The only page allowed to say "contract".
+import { TRY_IT } from '../../lib/demo';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, Hand, Hourglass, Send, Undo2, UsersRound } from 'lucide-react';
+import { ArrowRight, ExternalLink, Hourglass, Send, ShieldCheck, Undo2, UsersRound, WalletCards } from 'lucide-react';
 import { planService } from '../../lib/planService';
 import { formatUsd } from '../../lib/format';
-import { NETWORK } from '../../lib/networkName';
 import { MAX_HEIRS } from '../../lib/shares';
 import { HomeFooter } from './HomeFooter';
-import { CONTRACT_URL, DX_LOG_URL, REPO_URL, SOLIDCASH_URL, TESTS_URL } from './links';
+import { CONTRACT_URL, DX_LOG_URL, PLAN_CONTRACT_URL, PROOF_URL, REPO_URL, SOLIDCASH_URL, TESTS_URL } from './links';
 import { ButtonLink } from '../../components/Button';
 import './how-it-works.css';
 
-/** Measured on Chipnet: every plan action is a 9 to 12 KB transaction at about 1 satoshi per byte. */
-const FEE_LOW = 9_000n;
-const FEE_HIGH = 12_000n;
+/** Measured on Chipnet: opening a claim or paying the heirs is a 4 to 5 KB transaction at 1 satoshi per byte. */
+const FEE_LOW = 4_000n;
+const FEE_HIGH = 5_000n;
 
 function useUsdPerBch(): number | null {
   const [usd, setUsd] = useState<number | null>(null);
@@ -35,20 +35,21 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-const CODE = `function distribute() public {
-  require(tx.time >= this.deadline);
-  int pot = this.balance - feeBudget;
-  payHeir(0, pot);
-  // … one slot per heir, up to payHeir(9, pot)
+const CODE = `// PusakaV2Anchor: the review period, kept by the network itself
+function finalize() {
+  require(tx.version >= 2, "BIP68 needs version 2");
+  require(this.age >= reviewSequence, "review delay has not elapsed");
 }
 
-function payHeir(int i, int pot) internal {
-  if (i < int(this.heirs.length)) {
-    this.transfer(
-      new LockingBytecodeP2PKH(this.heirs[i].pkh),
-      pot * this.heirs[i].share / totalShares
-    );
-  }
+// PusakaAssetPlan.finalizeClaim: every heir, exactly their share
+for (int i = 0; i < heirCount; i++) {
+  bytes entry = heirsSlice.slice(i * 24, i * 24 + 24);
+  bytes pkhBytes, bytes shareBytes = entry.split(20);
+  int expected = (pot * int(shareBytes)) / totalShares;
+  require(expected >= 546, "heir share below dust");
+  require(tx.outputs[1 + i].lockingBytecode ==
+    new LockingBytecodeP2PKH(unsafe_bytes20(pkhBytes)), "wrong heir address");
+  require(tx.outputs[1 + i].value == expected, "wrong heir amount");
 }`;
 
 export function HowItWorksScreen() {
@@ -72,53 +73,68 @@ export function HowItWorksScreen() {
           <p className="hiw-eyebrow">How it works</p>
           <h1>What happens to your BCH, step by step</h1>
           <p className="hiw__lead">
-            A Pusaka plan holds your BCH on the Bitcoin Cash network, not with us. It waits for you to say you're still
-            here. If you stop, it sends each heir their share.
+            Pusaka is a Bitcoin Cash wallet with your inheritance plan built in. You spend and receive as usual. If you
+            go quiet, a claim can open, you get time to stop it, and then each heir receives their share. The Bitcoin
+            Cash network holds the coins and keeps the rules, not us.
           </p>
         </header>
 
         {/* ------------------------------------------------ lifecycle */}
         <section className="hiw-section" aria-labelledby="hiw-life">
-          <h2 id="hiw-life" className="sr-only">The life of a plan</h2>
+          <h2 id="hiw-life" className="sr-only">The life of a Pusaka wallet</h2>
           <ol className="timeline">
             <li className="timeline__step">
               <span className="timeline__icon" aria-hidden><UsersRound /></span>
               <div>
-                <h3>1. Make a plan</h3>
+                <h3>1. Set up your wallet</h3>
                 <p>
-                  Add your heirs (up to {MAX_HEIRS}), choose their shares and a waiting time, for example six months.
-                  Your BCH moves from your wallet into the plan. You get a <strong>plan link</strong>: save it, and
-                  share it with your heirs.
+                  Choose your heirs (up to {MAX_HEIRS}) and how they share: equally, your own split, or Islamic faraid.
+                  Name three <strong>trusted contacts</strong>, and pick a waiting time and a review period. Your BCH
+                  moves into your Pusaka wallet. You get a <strong>plan link</strong>: save it, and share it with your
+                  family.
                 </p>
               </div>
             </li>
             <li className="timeline__step">
-              <span className="timeline__icon" aria-hidden><Hand /></span>
+              <span className="timeline__icon" aria-hidden><WalletCards /></span>
               <div>
-                <h3>2. I'm still here</h3>
+                <h3>2. Use it like any wallet</h3>
                 <p>
-                  Now and then, open your plan and tap <strong>I'm still here</strong>. Your wallet signs, and the
-                  waiting time starts again from that moment. Nothing else changes.
+                  Send and receive from Pusaka. <strong>Every payment you send</strong>, or a tap on{' '}
+                  <strong>I'm still here</strong>, starts the waiting time again. BCH that others send you arrives at
+                  your receive address and follows the same rules.
                 </p>
               </div>
             </li>
             <li className="timeline__step">
               <span className="timeline__icon" aria-hidden><Hourglass /></span>
               <div>
-                <h3>3. The waiting time runs out</h3>
+                <h3>3. A claim opens</h3>
                 <p>
-                  If you don't tap it in time, the waiting time ends. Until then, only you can move the BCH in your plan.
+                  If the waiting time runs out, anyone can open a claim. Two of your three trusted contacts can open
+                  one sooner, for example after an accident. Opening a claim moves nothing: your BCH stays put.
+                </p>
+              </div>
+            </li>
+            <li className="timeline__step">
+              <span className="timeline__icon" aria-hidden><ShieldCheck /></span>
+              <div>
+                <h3>4. The review period</h3>
+                <p>
+                  The claim then waits through a review period, a week for example. The network itself enforces it: a
+                  payout sent early is refused. If you are still here, <strong>Stop claim</strong>, or any payment you
+                  send, ends the claim.
                 </p>
               </div>
             </li>
             <li className="timeline__step">
               <span className="timeline__icon timeline__icon--done" aria-hidden><Send /></span>
               <div>
-                <h3>4. Send to heirs</h3>
+                <h3>5. Pay the heirs</h3>
                 <p>
-                  Now anyone with the plan link can press <strong>Send to heirs</strong>: an heir, a friend, a lawyer.
-                  One payment pays every heir their share at the same moment. Nobody, not even the person who presses,
-                  can change who gets what.
+                  After the review, anyone with the plan link can press <strong>Pay the heirs</strong>: an heir, a
+                  friend, a lawyer. One payment pays every heir their share at the same moment, and the plan pays the
+                  network fee. Nobody, not even the person who presses, can change who gets what.
                 </p>
               </div>
             </li>
@@ -127,10 +143,10 @@ export function HowItWorksScreen() {
           <div className="anytime">
             <span className="timeline__icon" aria-hidden><Undo2 /></span>
             <div>
-              <h3>At any time before that: take my BCH back</h3>
+              <h3>At any time before that: change the plan, or take your BCH back</h3>
               <p>
-                Changed your mind, or your family changed? Until the BCH is sent to your heirs, you can take all of it
-                back to your wallet, and make a new plan if you like.
+                Changed your mind, or your family changed? Edit the heirs, shares, contacts and times, or take the
+                available BCH back to your own wallet. Each change needs your wallet's approval, and nobody else's.
               </p>
             </div>
           </div>
@@ -143,19 +159,19 @@ export function HowItWorksScreen() {
           <ul className="facts">
             <li>
               <h3>Your BCH is not with us</h3>
-              <p>It sits in a contract on the Bitcoin Cash network, which only follows the rules of your plan.</p>
+              <p>It sits in contracts on the Bitcoin Cash network, which only follow the rules of your plan.</p>
             </li>
             <li>
               <h3>The plan link carries everything</h3>
               <p>
-                Heirs, shares, waiting time: it's all inside the link, after the <code>#</code>. Browsers never send
-                that part to a server, so we never see it.
+                Heirs, shares, contacts and times: it's all inside the link, after the <code>#</code>. Browsers never
+                send that part to a server, so we never see it.
               </p>
             </li>
             <li>
               <h3>Anyone can run the code</h3>
               <p>
-                The app is open source. Anyone can host a copy, open the plan link there and send the BCH to your
+                The app is open source. Anyone can host a copy, open the plan link there, open the claim and pay your
                 heirs.
               </p>
             </li>
@@ -168,16 +184,21 @@ export function HowItWorksScreen() {
           <p className="hiw-section__lead">The honest limits, before you trust it with your savings.</p>
           <ul className="limits">
             <li>
-              <strong>Keep the plan link.</strong> Without it, nobody can find your plan to send it. Give it to your
-              heirs, or keep it where they will look.
+              <strong>Keep the plan link.</strong> Without it, nobody can open a claim or pay your heirs. Give it to
+              your heirs and contacts, and share it again after every change.
             </li>
             <li>
-              <strong>Every action has a network fee</strong> of about {fee}, paid by whoever presses the button.
-              That includes Send to heirs, so whoever sends needs a little BCH in their own wallet.
+              <strong>Opening a claim and paying the heirs each cost a network fee</strong> of about {fee}, taken from
+              the plan itself, so an heir needs no BCH of their own. Your own payments and changes cost a similar fee
+              from your wallet.
             </li>
             <li>
-              <strong>Pusaka takes no fee of its own.</strong> Making a plan costs only the network fee, and you see
-              every amount before your wallet asks you to sign.
+              <strong>Pusaka takes no fee of its own today.</strong> You see every amount before your wallet asks you
+              to sign.
+            </li>
+            <li>
+              <strong>Trusted contacts can start a claim, never take your BCH.</strong> Each needs their own wallet with
+              a little BCH to confirm. Any payment you send ends their claim.
             </li>
             <li>
               <strong>Dates are right to about an hour.</strong> The Bitcoin Cash network's clock runs about an hour
@@ -185,18 +206,14 @@ export function HowItWorksScreen() {
             </li>
             <li>
               <strong>Up to {MAX_HEIRS} heirs per plan.</strong> Each heir needs a BCH address, and each share must be
-              at least 546 satoshis.
-            </li>
-            <li>
-              <strong>Shares are fixed when you make the plan.</strong> If your family changes, take your BCH back and
-              make a new plan.
+              at least 546 satoshis when it is paid. 1,000 satoshis always stay in the plan to carry its rules.
             </li>
             <li>
               <strong>Islamic inheritance (faraid)</strong> shares are worked out in your browser from the family you
               describe. The network then enforces those numbers; it does not check the rules of faraid itself.
             </li>
             <li>
-              <strong>It is not a legal will.</strong> It only moves the BCH in the plan.
+              <strong>It is not a legal will.</strong> It only moves the BCH and tokens held by the plan.
             </li>
           </ul>
         </section>
@@ -206,87 +223,96 @@ export function HowItWorksScreen() {
           <p className="hiw-eyebrow">For the technical reader</p>
           <h2 id="hiw-tech">Under the hood</h2>
           <p className="hiw-section__lead">
-            Each plan is its own <Ext href={SOLIDCASH_URL}>SolidCash</Ext> contract: Solidity-style source, compiled to
-            native Bitcoin Cash script. No server, no oracle, no admin key.
+            Each wallet is a small set of <Ext href={SOLIDCASH_URL}>SolidCash</Ext> contracts: Solidity-style source,
+            compiled to native Bitcoin Cash script. No server, no oracle, no admin key.
           </p>
 
           <dl className="tech">
             <div>
               <dt>State</dt>
               <dd>
-                <code>deadline</code> in unix seconds, and <code>heirs[]</code>, each a public key hash and a share. The
-                owner, the waiting time, the share total and a fee budget are fixed when the plan is made.
+                A CashTokens NFT that never leaves the plan carries 51 bytes of state: status, claim round, contact
+                approvals, deadline, waiting time and a hash of the policy. The policy itself (heirs, shares, contacts,
+                fee budget) travels in the plan link, and every claim transaction is checked against that hash.
               </dd>
             </div>
             <div>
-              <dt>I'm still here</dt>
+              <dt>Your wallet</dt>
               <dd>
-                <code>checkIn()</code>. The owner's own ordinary coin must be spent in the same transaction
-                (<code>tx.origin</code>), so any WizardConnect wallet can sign it. It sets{' '}
-                <code>deadline = tx.locktime + period</code>.
+                <code>PusakaAssetPlan</code> holds the BCH. <code>send</code>, <code>checkIn</code>,{' '}
+                <code>cancelClaim</code>, <code>updatePolicy</code> and <code>ownerExit</code> need the owner's own
+                ordinary coin in the same transaction, so any WizardConnect wallet can sign them. Each one moves the
+                deadline and cancels a pending claim.
               </dd>
             </div>
             <div>
-              <dt>Take my BCH back</dt>
-              <dd><code>withdraw()</code>. Same owner check; everything goes to the owner's address.</dd>
+              <dt>Receiving</dt>
+              <dd>
+                <code>PusakaV2Inbox</code> is the receive address. Anyone may collect its coins, but only into the plan,
+                with the plan's state unchanged and a capped fee.
+              </dd>
             </div>
             <div>
-              <dt>Send to heirs</dt>
+              <dt>Claims</dt>
               <dd>
-                <code>distribute()</code>. Needs no signature, only <code>tx.time &gt;= deadline</code>. Each heir gets{' '}
-                <code>pot × share ÷ total</code>, rounded down; leftover satoshis stay in the plan with its small minimum balance.
+                <code>openClaimByInactivity</code> needs <code>tx.time &gt;= deadline</code>.{' '}
+                <code>contactApprove</code> records a distinct registered contact; the second one opens the claim. Both
+                mint a claim marker to <code>PusakaV2Anchor</code>.
+              </dd>
+            </div>
+            <div>
+              <dt>The review period</dt>
+              <dd>
+                The marker can pay out only once <code>this.age &gt;= reviewSequence</code>: a time-based relative lock
+                (BIP68) the network enforces. On Chipnet the network refused an early payout as non-final, then
+                accepted it after the review.
               </dd>
             </div>
             <div>
               <dt>Where the shares are enforced</dt>
               <dd>
-                In <code>distribute()</code> itself. Every node checks the payment's outputs against the heirs in the
-                contract's state. A payment that is early, pays any heir one satoshi less, or swaps an address is
-                invalid and never confirms.
+                In <code>finalizeClaim</code> itself, which loops over the heirs in the policy. Each gets{' '}
+                <code>pot × share ÷ total</code>, rounded down, and every node checks each output's address and amount.
+                A payout that is early, pays any heir one satoshi less, or swaps an address never confirms.
               </dd>
             </div>
             <div>
               <dt>Time, not blocks</dt>
               <dd>
-                The waiting time is counted in seconds. Bitcoin Cash moves to one-minute blocks in May 2027; a timer
-                counted in blocks would then run out ten times too early.
-              </dd>
-            </div>
-            <div>
-              <dt>Why {MAX_HEIRS} heirs</dt>
-              <dd>
-                In SolidCash 0.50 a payout loop can't be combined with a time check, so the payout uses ten unrolled
-                slots. A ten-heir payout is about a 12 KB transaction.
+                The waiting time is counted in seconds and the review in 512-second steps. Bitcoin Cash moves to
+                one-minute blocks in May 2027; a timer counted in blocks would then run out ten times too early.
               </dd>
             </div>
             <div>
               <dt>Tested</dt>
               <dd>
-                Tests in solidhat run under the real 2026 network limits. On 15 November 2026 the whole lifecycle ran
-                on Chipnet: create, I'm still here, take back, and a payout to six heirs in one 11,896-byte
-                transaction.
+                58 tests in SolidHat run under the 2026 network limits. On 19 November 2026 the whole lifecycle ran on
+                Chipnet: create, receive, collect, send, two contacts open a claim, an early payout refused, the owner
+                stops it, a second claim, and the payout to three heirs.
               </dd>
             </div>
           </dl>
 
           <figure className="code">
-            <figcaption>The payout, from <code>Pusaka.scash</code></figcaption>
+            <figcaption>The review period and the payout, from <code>PusakaV2Anchor.scash</code> and <code>PusakaAssetPlan.scash</code></figcaption>
             <pre tabIndex={0}><code>{CODE}</code></pre>
           </figure>
 
           <ul className="tech-links">
-            <li><Ext href={CONTRACT_URL}>Contract source</Ext></li>
+            <li><Ext href={PLAN_CONTRACT_URL}>Plan contract</Ext></li>
+            <li><Ext href={CONTRACT_URL}>All contracts</Ext></li>
             <li><Ext href={TESTS_URL}>Tests</Ext></li>
-            <li><Ext href={DX_LOG_URL}>What we learned porting it to SolidCash</Ext></li>
+            <li><Ext href={PROOF_URL}>On-chain proof</Ext></li>
+            <li><Ext href={DX_LOG_URL}>What we learned building on SolidCash</Ext></li>
             <li><Ext href={REPO_URL}>Repository</Ext></li>
           </ul>
         </section>
 
         <section className="hiw-cta">
           <h2>See it work</h2>
-          <p>{NETWORK === 'chipnet' ? 'Open a sample wallet to see its balance and inheritance rules.' : 'Set up a protected wallet with your own inheritance rules.'}</p>
+          <p>{TRY_IT ? 'Open a live example plan, then open its claim or pay its heirs yourself. No wallet needed.' : 'Set up a protected wallet with your own inheritance rules.'}</p>
           <div className="hiw-cta__btns">
-            {NETWORK === 'chipnet' && <ButtonLink to="/wallet/demo" size="lg">Try it now</ButtonLink>}
+            {TRY_IT && <ButtonLink {...TRY_IT} size="lg">Try it now</ButtonLink>}
             <Link to="/new" className="hiw-cta__link">
               Create a plan <ArrowRight aria-hidden />
             </Link>

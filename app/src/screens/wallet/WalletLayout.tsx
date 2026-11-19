@@ -1,3 +1,4 @@
+import { HAS_DEMO } from '../../lib/demo';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import {
   Link,
@@ -197,7 +198,7 @@ function Sidebar({
         </nav>
         <nav aria-label="Resources" className="pw-nav pw-resources">
           <div className="pw-sidebar-label">Resources</div>
-          {NETWORK === 'chipnet' && (
+          {HAS_DEMO && (
             <Link
               to={demo ? '/wallet' : '/wallet/demo'}
               className="pw-nav-link"

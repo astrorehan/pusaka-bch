@@ -24,7 +24,8 @@ export function PlanImport({
     if (reading) return;
     const result = checkPlanLink(text, NETWORK);
     if (!result.ok) {
-      setError(result.error);
+      if (result.otherApp) location.assign(result.otherApp);
+      else setError(result.error);
       return;
     }
     setText('');

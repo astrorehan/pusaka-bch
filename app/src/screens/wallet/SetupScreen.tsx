@@ -1,3 +1,4 @@
+import { friendlyError } from '../../lib/chain/errors';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -329,7 +330,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
         setPrepared(await prepareCreate(policy, deposit));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }
@@ -342,7 +343,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
       const { prepareGather } = await import('../../lib/chain/v2');
       setPrepared(await prepareGather());
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }

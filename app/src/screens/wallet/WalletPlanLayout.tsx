@@ -1,20 +1,53 @@
+import { friendlyError } from '../../lib/chain/errors';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import type { LoadedPlan } from '../../lib/chain/v2';
-import { NETWORK } from '../../lib/networkName';
-import type { PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
+import { DEMO_PLAN_DATA, HAS_DEMO } from '../../lib/demo';
+import { readV2Metadata, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import { importPlan, savePlan, savedPlans } from '../../lib/walletData';
-import demoPlan from '../../lib/protocol/demo-plan.json';
 import type { CurrentPlan } from './currentPlan';
 import { isDemoRoute } from './paths';
 
 type Snapshot = { plan: Metadata; data: LoadedPlan | null; error: string };
 
+const DEMO_PLANS: Metadata[] = DEMO_PLAN_DATA.flatMap((value) => {
+  try {
+    return [readV2Metadata(value)];
+  } catch {
+    return [];
+  }
+});
+
+/**
+ * Of the demo plans, open the one a visitor can act on: a payout that is ready, then a claim that can be opened,
+ * then a claim still under review. Otherwise the first plan, which shows a finished payout.
+ */
+async function pickDemo(): Promise<Snapshot> {
+  if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '' };
+  const { loadPlan } = await import('../../lib/chain/v2');
+  const loaded: Snapshot[] = await Promise.all(
+    DEMO_PLANS.map((plan) =>
+      loadPlan(plan).then(
+        (data) => ({ plan, data, error: '' }),
+        (error: unknown) => ({ plan, data: null, error: friendlyError(error) }),
+      ),
+    ),
+  );
+  const rank = ({ data }: Snapshot) => {
+    if (!data) return 9;
+    const { state, review, now } = data;
+    if (state.status === 'REVIEW') return review?.ready ? 0 : 2;
+    if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline) return 1;
+    return 3;
+  };
+  return loaded.reduce((best, next) => (rank(next) < rank(best) ? next : best));
+}
+
 export function WalletPlanLayout() {
   const { pathname, hash, search } = useLocation();
   const route = pathname.toLowerCase().replace(/\/$/, '');
   const requestedDemo = isDemoRoute(pathname, search);
-  const demo = requestedDemo && NETWORK === 'chipnet';
+  const demo = requestedDemo && HAS_DEMO && DEMO_PLANS.length > 0;
   const shared = route === '/v2/plan';
   const activity = route === '/wallet/activity';
   const editing = route === '/wallet/edit';
@@ -26,13 +59,33 @@ export function WalletPlanLayout() {
     } catch (error) {
       return {
         plan: null,
-        error: error instanceof Error ? error.message : String(error),
+        error: friendlyError(error),
       };
     }
   }, [hash, shared]);
-  const selected = requestedDemo ? (demo ? demoPlan as Metadata : null) : shared ? fromLink?.plan ?? null : saved;
+  const [demoPick, setDemoPick] = useState<Snapshot | null>(null);
+  const selected = requestedDemo ? (demo ? demoPick?.plan ?? null : null) : shared ? fromLink?.plan ?? null : saved;
   const readEnabled = Boolean(selected && !activity && route !== '/new' && route !== '/wallet/new');
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+
+  useEffect(() => {
+    if (!demo || demoPick) return;
+    let live = true;
+    pickDemo()
+      .catch((error: unknown): Snapshot => ({
+        plan: DEMO_PLANS[0],
+        data: null,
+        error: friendlyError(error),
+      }))
+      .then((pick) => {
+        if (!live) return;
+        setDemoPick(pick);
+        if (pick.data) setSnapshot(pick);
+      });
+    return () => {
+      live = false;
+    };
+  }, [demo, demoPick]);
   const [reading, setReading] = useState<Metadata | null>(null);
   const pending = useRef<Promise<void> | null>(null);
   const savedLink = useRef<Metadata | null>(null);
@@ -61,7 +114,7 @@ export function WalletPlanLayout() {
         setSnapshot({
           plan: selected,
           data: null,
-          error: error instanceof Error ? error.message : String(error),
+          error: friendlyError(error),
         });
       })
       .finally(() => {
@@ -103,7 +156,7 @@ export function WalletPlanLayout() {
     metadata: activity || current?.data ? selected : null,
     data: current?.data ?? null,
     demo,
-    loading: Boolean(readEnabled && (!current || reading === selected)),
+    loading: Boolean(readEnabled && (!current || reading === selected)) || (demo && !demoPick),
     canRefresh: readEnabled,
     error: (demo ? '' : fromLink?.error) || current?.error || '',
     refresh,

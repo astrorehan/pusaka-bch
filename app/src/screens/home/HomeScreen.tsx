@@ -2,6 +2,7 @@
 // The hero stands in the rice terrace at first light. Below it the page passes through one day on the paddy:
 // the family cards, the scroll scene over the water (the plan, then the cheat attempts), the night payout among
 // fireflies, a light sheet with the three steps, the heir box, the closing call and the terraces footer.
+import { TRY_IT } from '../../lib/demo';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Play } from 'lucide-react';
 import { FlowerStage } from './FlowerStage';
@@ -16,7 +17,6 @@ import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL, SOLIDCASH_URL } from './links';
 import { ButtonLink } from '../../components/Button';
 import { BASE } from '../../lib/asset';
-import { NETWORK } from '../../lib/networkName';
 import './home.css';
 import './home-hero.css';
 import './home-landing.css';
@@ -43,14 +43,14 @@ export function HomeScreen() {
           </p>
           <h1 id="home-title" className="home-hero__title">Your BCH. <span>Their future.</span></h1>
           <p className="home-hero__lead">
-            Choose who gets your Bitcoin Cash. If you stop checking in, your family can receive their shares.
+            A Bitcoin Cash wallet you spend from every day, with your inheritance plan built in. If you go quiet, your family receives their shares.
           </p>
           <div className="home-hero__ctas">
-            <ButtonLink to={NETWORK === 'chipnet' ? '/wallet/demo' : '/new'} size="lg" className="pill-fx">
-              {NETWORK === 'chipnet' ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
+            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx">
+              {TRY_IT ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to={NETWORK === 'chipnet' ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
-              {NETWORK === 'chipnet' ? 'Create a plan' : 'How it works'}
+            <ButtonLink to={TRY_IT ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
+              {TRY_IT ? 'Create a plan' : 'How it works'}
             </ButtonLink>
           </div>
           <section className="home-built home-built--hero" aria-label="Built with">

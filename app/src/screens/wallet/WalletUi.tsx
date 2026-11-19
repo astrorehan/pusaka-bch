@@ -34,8 +34,9 @@ export function DemoNotice() {
     <div className="pw-info" role="note">
       <FlaskConical size={17} aria-hidden />
       <p>
-        Live Chipnet proof wallet. Balances and claim status come from the test
-        network.
+        {NETWORK === 'mainnet'
+          ? 'Live example plan on Bitcoin Cash. Anyone can open its claim or pay its heirs, with no wallet of your own. The plan pays the network fee from its real BCH.'
+          : 'Live example plan on Chipnet, the Bitcoin Cash test network. Anyone can open its claim or pay its heirs, with no wallet of your own.'}
       </p>
       <Link to="/wallet">
         Exit demo <ArrowRight aria-hidden size={14} />
@@ -264,7 +265,8 @@ export function TransactionReview({
       const { submit } = await import('../../lib/chain/v2');
       done(await submit(prepared));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const { friendlyError } = await import('../../lib/chain/errors');
+      setError(friendlyError(err));
       setBusy(false);
     }
   }

@@ -1,5 +1,6 @@
 // Footer for the home and How it works pages: links, donation address, licence, and the
 // before/after note the README promises (what existed before BCH BLAZE 2026).
+import { TRY_IT } from '../../lib/demo';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
@@ -18,7 +19,6 @@ import {
   TESTS_URL,
 } from './links';
 import { BASE } from '../../lib/asset';
-import { NETWORK } from '../../lib/networkName';
 import './home-footer.css';
 
 function CopyAddress({ address }: { address: string }) {
@@ -71,7 +71,7 @@ function Columns() {
     <nav className="hfoot__cols" aria-label="Footer">
       <div className="hfoot__col">
         <p className="hfoot__label">Product</p>
-        {NETWORK === 'chipnet' && <Link to="/wallet/demo">Try it now</Link>}
+        {TRY_IT && ('to' in TRY_IT ? <Link to={TRY_IT.to}>Try it now</Link> : <a href={TRY_IT.href}>Try it now</a>)}
         <Link to="/new">Create a plan</Link>
         <Link to="/how-it-works">How it works</Link>
       </div>

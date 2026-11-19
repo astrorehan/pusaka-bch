@@ -1,6 +1,7 @@
 // /plan#<data>: a plan from its link. /try: the judge path, a ready-made plan whose waiting time has passed.
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { openInOtherApp } from '../../lib/networkName';
 import { usePlan } from './usePlan';
 import { PlanView } from './PlanView';
 import { PlanMessage, PlanSkeleton } from './PlanMessage';
@@ -23,6 +24,11 @@ export function PlanScreen({ demo = false }: { demo?: boolean }) {
 function Loaded({ demo, hash }: { demo: boolean; hash: string }) {
   const { load, reload, refresh } = usePlan(demo, hash);
   const slow = useDelay(300, load.kind === 'loading');
+  const otherNetwork = load.kind === 'other-network' ? load.plan.network : null;
+  // A link made on the other network opens in that network's app, which this site also hosts.
+  useEffect(() => {
+    if (otherNetwork && !demo) openInOtherApp(otherNetwork, `plan${hash}`);
+  }, [otherNetwork, demo, hash]);
 
   switch (load.kind) {
     case 'loading':

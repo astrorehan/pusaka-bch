@@ -1,6 +1,7 @@
 // The end of the landing: a box for heirs who arrive with a plan link, and the closing call to action, where a
 // bloom on its lily pad drifts in from the right edge of the screen and floats there.
 // Reduced motion: no drift and no float.
+import { TRY_IT } from '../../lib/demo';
 import { ArrowRight, Link2 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
 import { NETWORK } from '../../lib/networkName';
@@ -27,7 +28,7 @@ export function HeirBand({ onOpenLink }: { onOpenLink: () => void }) {
           <div className="hb-share glass-lite">
             <span className="hb-share__who"><span className="hb-share__dot" />Your share, {HEIRS[0].name}</span>
             <strong className="num">{HEIRS[0].bch} BCH</strong>
-            <span className="hb-share__when">Can be sent once the waiting time passes</span>
+            <span className="hb-share__when">Can be sent after the waiting time and review</span>
           </div>
         </div>
       </div>
@@ -50,11 +51,11 @@ export function ClosingCta() {
               : 'Runs directly on Bitcoin Cash. Your coins never sit with us.'}
           </p>
           <div className={`cta__btns rise-in${seen ? ' is-seen' : ''}`} style={{ animationDelay: '480ms' }}>
-            <ButtonLink to={NETWORK === 'chipnet' ? '/wallet/demo' : '/new'} size="lg" className="pill-fx">
-              {NETWORK === 'chipnet' ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
+            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx">
+              {TRY_IT ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to={NETWORK === 'chipnet' ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
-              {NETWORK === 'chipnet' ? 'Create a plan' : 'How it works'}
+            <ButtonLink to={TRY_IT ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
+              {TRY_IT ? 'Create a plan' : 'How it works'}
             </ButtonLink>
           </div>
         </div>

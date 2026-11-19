@@ -1,4 +1,4 @@
-// "Set once, check in, stay sure.": a light sheet with big rounded corners rises over the night. A wide frame looks
+// "Set once, spend freely, stay sure.": a light sheet with big rounded corners rises over the night. A wide frame looks
 // out over the terraces at golden hour; on it, a glass card shows what each of the three steps looks like in the
 // app. The steps under the frame advance on their own while in view (a thin line fills under the active one);
 // hovering the section pauses it, and picking a step shows it. Reduced motion: no auto-advance.
@@ -14,12 +14,12 @@ import { HEIRS } from './payoutHeirs';
 
 const STEPS = [
   { title: 'Choose heirs', line: 'Add up to 10 people, their BCH addresses and the share each one gets.' },
-  { title: 'Check in now and then', line: 'Tap “I’m still here” before your waiting time runs out. It starts again from that day.' },
-  { title: 'Missed it? They receive their shares', line: 'Once the waiting time has passed, every heir is paid their share in one payment.' },
+  { title: 'Use it like any wallet', line: 'Every payment you send, or a tap on “I’m still here”, starts your waiting time again.' },
+  { title: 'Gone quiet? They receive their shares', line: 'A claim opens after the waiting time, or sooner if two trusted contacts confirm. After a review period you can stop, every heir is paid in one payment.' },
 ];
 
 const PERIOD = 180 * 86400;
-const TITLE = 'Set once, check in, stay sure.';
+const TITLE = 'Set once, spend freely, stay sure.';
 
 function HeirsUi() {
   return (

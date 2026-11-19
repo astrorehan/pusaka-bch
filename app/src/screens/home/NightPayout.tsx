@@ -242,7 +242,7 @@ export function NightPayout() {
               </span>
             )}
           </p>
-          <p className="np__fee">The network fee, about 9,000 to 12,000 satoshis, is paid by whoever presses the button.</p>
+          <p className="np__fee">The network fee, about 5,000 satoshis, comes out of the plan itself, so whoever presses the button needs no BCH of their own.</p>
         </div>
       </div>
       <div className="np__tail" aria-hidden />

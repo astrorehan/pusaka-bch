@@ -338,8 +338,8 @@ export function SubakPayout() {
               )}
             </p>
             <p className="np__fee">
-              The network fee, about 9,000 to 12,000 satoshis, is paid by whoever presses the button. An heir with no
-              BCH can ask anyone who has the plan link to press it: each share still goes only to its heir.
+              The network fee, about 5,000 satoshis, comes out of the plan itself, so an heir with no BCH can press
+              the button, or ask anyone who has the plan link to: each share still goes only to its heir.
             </p>
           </div>
         </div>
