@@ -6,3 +6,6 @@ Thumbs.db
 
 # Private working notes (plans, research, drafts); never published
 notes/
+
+# Local working files (presentation exports, release staging); never published
+work/
