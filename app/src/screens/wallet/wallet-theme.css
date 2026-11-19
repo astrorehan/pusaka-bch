@@ -1,0 +1,83 @@
+/* The workspace theme also reaches the wallet-pairing dialog, which is outside the router. */
+body:has(.pw-app) {
+  --pw-ledger: #111c2d;
+  --pw-ledger-text: #fff8ec;
+  --pw-ledger-muted: #c9d3e3;
+  --pw-ledger-line: #536782;
+  --pw-ledger-tint: #a9e9de;
+  --pw-ledger-gold: #f0c98e;
+  --pw-ledger-gold-hover: #ffddaa;
+  --pw-ledger-on-gold: #251b13;
+}
+
+body:has(.pw-app[data-wallet-theme='dark']) {
+  color-scheme: dark;
+  --bg: #0c1320;
+  --surface: #121d2e;
+  --surface-2: #1c2a3f;
+  --surface-hover: #223149;
+  --border: #2d3b50;
+  --border-strong: #51637e;
+  --text: #fff8ef;
+  --text-muted: #b9c5d7;
+  --primary: #f0c98e;
+  --primary-hover: #ffddaa;
+  --on-primary: #251b13;
+  --gold: #f0c98e;
+  --accent-text: #91e6d7;
+  --accent-soft: #183c3b;
+  --danger: #ffb0ae;
+  --danger-soft: #492c38;
+  --warning: #ffe0ad;
+  --warning-soft: #3b2d21;
+  --focus: #91e6d7;
+  --scrim: rgb(4 8 15 / 0.72);
+  --shadow: 0 18px 44px rgb(4 8 15 / 0.35);
+  --heir-1: #81b8ff;
+  --heir-2: #c2aaff;
+  --heir-3: #8ee3d4;
+  --heir-4: #ffb2d3;
+  --heir-5: #e7cc91;
+  --pw-sidebar-bg: #111b2b;
+  --pw-inspector-bg: #101a28;
+  --pw-active: #f0d6ae;
+  --pw-active-text: #201b21;
+  --pw-focus-surface: var(--bg);
+  --pw-focus-fade: var(--bg);
+}
+
+body:has(.pw-app[data-wallet-theme='light']) {
+  color-scheme: light;
+  --bg: #f1f4fa;
+  --surface: #fffefd;
+  --surface-2: #e8edf6;
+  --surface-hover: #eff2f8;
+  --border: #d3dce9;
+  --border-strong: #8494ac;
+  --text: #141f34;
+  --text-muted: #43516a;
+  --primary: #213756;
+  --primary-hover: #304b74;
+  --on-primary: #fff8ef;
+  --gold: #925625;
+  --accent-text: #0d615b;
+  --accent-soft: #daf2ed;
+  --danger: #972b38;
+  --danger-soft: #ffebed;
+  --warning: #7a421c;
+  --warning-soft: #f9e8d4;
+  --focus: #236395;
+  --scrim: rgb(17 30 54 / 0.45);
+  --shadow: 0 18px 44px rgb(22 37 62 / 0.14);
+  --heir-1: #2353a3;
+  --heir-2: #6b39b3;
+  --heir-3: #126a68;
+  --heir-4: #9f3a71;
+  --heir-5: #7b541f;
+  --pw-sidebar-bg: #fffefd;
+  --pw-inspector-bg: #f7f8fc;
+  --pw-active: #dbe7fa;
+  --pw-active-text: #182f55;
+  --pw-focus-surface: var(--pw-ledger);
+  --pw-focus-fade: var(--pw-ledger);
+}

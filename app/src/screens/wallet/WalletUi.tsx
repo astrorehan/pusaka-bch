@@ -17,7 +17,7 @@ import {
 import { Button } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
-import { explorerTxUrl, shortAddress } from '../../lib/format';
+import { explorerTxUrl } from '../../lib/format';
 import type { Prepared } from '../../lib/chain/v2';
 import { NETWORK } from '../../lib/networkName';
 import './wallet-app.css';
@@ -168,11 +168,7 @@ export function TransactionNotice({
       <Check size={18} aria-hidden />
       <div>
         Transaction accepted by the network.{' '}
-        <a
-          href={explorerTxUrl(txid, NETWORK)}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={explorerTxUrl(txid, NETWORK)} target="_blank" rel="noreferrer">
           View transaction <ExternalLink size={12} aria-hidden />
         </a>
       </div>
@@ -201,10 +197,22 @@ export function Address({
 }) {
   return (
     <div className={`pw-address${full ? ' pw-address--full' : ''}`}>
-      <span className="mono" title={value}>
-        {full ? value : shortAddress(value, 5, 5)}
-      </span>
-      <CopyButton value={value} label={label} />
+      <code className="pw-address-value mono" title={value}>
+        {full ? (
+          value
+        ) : (
+          <>
+            <span className="pw-address-start">{value.slice(0, -8)}</span>
+            <span>{value.slice(-8)}</span>
+          </>
+        )}
+      </code>
+      <CopyButton
+        value={value}
+        label={label}
+        className="pw-address-copy"
+        showText
+      />
     </div>
   );
 }

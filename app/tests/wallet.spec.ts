@@ -89,6 +89,8 @@ test("new wallet flow validates heirs and contacts before review", async ({
 test("real public Chipnet plan follows the demo between screens without replacing a saved wallet", async ({
   page,
 }, testInfo) => {
+  const fixture = readFileSync(new URL("../src/lib/protocol/demo-plan.json", import.meta.url));
+  const { inboxAddress } = JSON.parse(fixture.toString("utf8"));
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -106,6 +108,13 @@ test("real public Chipnet plan follows the demo between screens without replacin
     path: testInfo.outputPath("wallet-live-desktop.png"),
     fullPage: true,
   });
+  await page.evaluate(() => {
+    navigator.clipboard.writeText = async (text) => { document.body.dataset.copiedAddress = text; };
+  });
+  const copy = page.getByRole("button", { name: "Copy BCH receive address" });
+  await copy.click();
+  await expect(copy.getByText("Copied", { exact: true }).first()).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute("data-copied-address", inboxAddress);
   const receive = page.getByRole("button", { name: "Receive", exact: true });
   await receive.click();
   const receiveSheet = page.getByRole("dialog", { name: "Receive BCH" });
@@ -159,9 +168,7 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(
     page.getByRole("heading", { name: "Create your protected wallet" }),
   ).toBeVisible();
-  const shared = readFileSync(
-    new URL("../src/lib/protocol/demo-plan.json", import.meta.url),
-  ).toString("base64url");
+  const shared = fixture.toString("base64url");
   await page.goto("./");
   await page.getByRole("button", { name: "Open a plan link", exact: true }).click();
   const opener = page.getByRole("dialog", { name: "Open a plan link" });
@@ -202,9 +209,14 @@ test("the workspace folds on desktop, opens a drawer on tablet, and keeps the la
   ).toBeFocused();
 
   await page.setViewportSize({ width: 320, height: 750 });
+  await expect(page.locator(".pw-app")).toHaveAttribute("data-wallet-theme", "dark");
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await drawer.getByRole("button", { name: "Switch to light theme" }).click();
+  await page.reload();
+  await expect(page.locator(".pw-app")).toHaveAttribute("data-wallet-theme", "light");
   await page.getByRole("button", { name: "Open navigation" }).click();
   await drawer.getByRole("button", { name: "Switch to dark theme" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator(".pw-app")).toHaveAttribute("data-wallet-theme", "dark");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Open a plan", exact: true }).click();
   const plan = page.getByRole("dialog", { name: "Open a saved plan" });
@@ -232,6 +244,7 @@ test("the workspace folds on desktop, opens a drawer on tablet, and keeps the la
   await page.goto("./");
   await expect(page.locator(".shell--home")).toBeVisible();
   await expect(page.locator(".pw-app")).toHaveCount(0);
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme", "dark");
 });
 
 test("invalid saved plan data and failed copies have recoverable messages", async ({ page }) => {

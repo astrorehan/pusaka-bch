@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
+import { Logo } from '../../components/Logo';
 import { formatDuration, shortAddress } from '../../lib/format';
 import { p2pkhCashAddressFromPkh } from '../../lib/cashAddress';
 import type * as api from '../../lib/chain/v2';
@@ -73,6 +74,41 @@ export function ShareBreakdown({ shares }: { shares: number[] }) {
   );
 }
 
+function PlanMap({ metadata }: { metadata: Metadata }) {
+  const count = metadata.heirs.length;
+  const contacts = metadata.contacts.length;
+  const shown = metadata.heirs.slice(0, 4);
+  return (
+    <div className="pw-plan-map">
+      <div className="pw-plan-map-visual" aria-hidden>
+        <span className="pw-plan-map-root">
+          <Logo size={27} />
+        </span>
+        <div className="pw-plan-map-leaves">
+          {shown.map((heir, i) => (
+            <span
+              key={i}
+              title={heir.label || `Heir ${i + 1}`}
+              style={{ color: `var(--heir-${i + 1})` }}
+            >
+              {heir.label?.trim()[0]?.toUpperCase() || <Users size={15} />}
+            </span>
+          ))}
+          {count > shown.length && <span>+{count - shown.length}</span>}
+        </div>
+      </div>
+      <div className="pw-plan-map-counts">
+        <span>
+          <strong>{count}</strong> {count === 1 ? 'heir' : 'heirs'}
+        </span>
+        <span>
+          <strong>{contacts}</strong> trusted contacts
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function PlanRules({
   metadata,
   data,
@@ -91,17 +127,14 @@ export function PlanRules({
   planPath?: string;
 }) {
   const state = data?.state;
+  const canCheckIn =
+    state && ['ACTIVE', 'REVIEW', 'CLOSED'].includes(state.status);
   return (
     <Card>
-      <CardHeading title="Inheritance rules">
-        {planPath ? (
-          <span className="pw-symbol pw-symbol--accent">
-            <ShieldCheck aria-hidden size={19} />
-          </span>
-        ) : (
-          <PlanStatus state={state} loading={loading} />
-        )}
+      <CardHeading title={planPath ? 'Inheritance plan' : 'Inheritance rules'}>
+        <PlanStatus state={state} loading={loading} />
       </CardHeading>
+      {planPath && <PlanMap metadata={metadata} />}
       <dl className="pw-rules">
         <div>
           <Clock3 aria-hidden />
@@ -117,7 +150,11 @@ export function PlanRules({
         </div>
         <div>
           <Timer aria-hidden />
-          <dt>Inactivity deadline</dt>
+          <dt>
+            {state?.status === 'PAID_OUT'
+              ? 'Last inactivity deadline'
+              : 'Inactivity deadline'}
+          </dt>
           <dd>
             {state?.deadline
               ? `About ${formatDeadline.format(state.deadline * 1000)}`
@@ -127,20 +164,18 @@ export function PlanRules({
           </dd>
         </div>
       </dl>
-      <p className="pw-fine">
-        Sending BCH or pressing “I’m still here” starts the waiting time again.
-      </p>
+      {owner && canCheckIn && (
+        <p className="pw-fine">
+          Press “I’m still here” to start the waiting time again.
+        </p>
+      )}
       {owner && (
         <Button
           type="button"
           variant="secondary"
           block
           icon={<HeartPulse />}
-          disabled={
-            busy ||
-            !state?.planUtxo ||
-            !['ACTIVE', 'REVIEW', 'CLOSED'].includes(state.status)
-          }
+          disabled={busy || !state?.planUtxo || !canCheckIn}
           onClick={() => void prepare('checkIn')}
         >
           I’m still here
@@ -159,9 +194,7 @@ export function PlanStarter() {
   return (
     <Card>
       <CardHeading title="Inheritance plan">
-        <span className="pw-symbol pw-symbol--accent">
-          <ShieldCheck aria-hidden size={19} />
-        </span>
+        <Badge>Not set up</Badge>
       </CardHeading>
       <p className="pw-muted">
         Decide who receives the BCH you keep in Pusaka.
@@ -235,10 +268,7 @@ export function PlanPeople({
         <ShareBreakdown shares={shares} />
         <ul className="pw-rows">
           {metadata.heirs.map((heir, i) => {
-            const address = p2pkhCashAddressFromPkh(
-              heir.pkhHex,
-              NETWORK,
-            );
+            const address = p2pkhCashAddressFromPkh(heir.pkhHex, NETWORK);
             const name = heir.label || `Heir ${i + 1}`;
             return (
               <li className="pw-row" key={i}>

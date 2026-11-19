@@ -1,26 +1,19 @@
 .pw-app {
-  --pw-sidebar-width: 238px;
+  --pw-sidebar-width: 252px;
   --pw-banner-height: 41px;
-  --pw-header-height: 64px;
-  --pw-gutter: clamp(20px, 3vw, 40px);
-  --pw-radius: 16px;
-  --pw-sidebar-bg: var(--surface);
-  --pw-active: var(--accent-soft);
-  --pw-active-text: var(--accent-text);
-  --pw-ledger: #172440;
-  --pw-ledger-text: #f9f6ef;
-  --pw-ledger-muted: #c1cce1;
-  --pw-ledger-line: #394765;
-  --pw-ledger-tint: #a4e3d3;
+  --pw-header-height: 66px;
+  --pw-gutter: clamp(22px, 2.8vw, 48px);
+  --pw-radius: 18px;
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .pw-app--rail { --pw-sidebar-width: 72px; }
 .pw-app .skip-link { z-index: 55; }
 .pw-banner { position: sticky; top: 0; z-index: 42; }
+.pw-banner .blaze { background: var(--pw-sidebar-bg); }
 .pw-frame { display: flex; align-items: flex-start; min-height: calc(100dvh - var(--pw-banner-height)); }
 .pw-workspace { flex: 1; min-width: 0; }
 .pw-workspace main { min-width: 0; scroll-margin-top: var(--shell-top); }
@@ -41,10 +34,10 @@
 .pw-sidebar-body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
   height: 100%;
   min-width: 0;
-  padding: 16px 14px;
+  padding: 18px 16px;
   background: var(--pw-sidebar-bg);
 }
 
@@ -52,15 +45,27 @@
 .pw-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding-inline: 7px;
+  gap: 11px;
+  min-height: 48px;
+  padding-inline: 2px;
   border-radius: 10px;
   color: var(--text);
-  font-size: 21px;
-  font-weight: 650;
-  letter-spacing: -0.055em;
+  font-size: 25px;
+  font-weight: 670;
+  letter-spacing: -0.045em;
   text-decoration: none;
+}
+.pw-brand-mark {
+  --text: var(--pw-ledger-gold);
+  --gold: var(--pw-ledger-text);
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--pw-ledger-gold) 40%, var(--pw-ledger));
+  border-radius: 12px;
+  background: var(--pw-ledger);
 }
 
 .pw-icon {
@@ -85,8 +90,8 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
-  min-height: 64px;
-  padding: 9px;
+  min-height: 66px;
+  padding: 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface-hover);
@@ -103,27 +108,27 @@
 }
 .pw-profile div { min-width: 0; }
 .pw-profile strong, .pw-profile small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pw-profile strong { font-size: 13px; font-weight: 620; }
-.pw-profile small { color: var(--text-muted); font-size: 11px; }
+.pw-profile strong { font-size: 15px; font-weight: 630; }
+.pw-profile small { color: var(--text-muted); font-size: 13px; }
 
 .pw-sidebar-scroll { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 20px; overflow: auto; overscroll-behavior: contain; }
 .pw-sidebar-scroll::-webkit-scrollbar-thumb { background: transparent; }
 .pw-sidebar-scroll:hover::-webkit-scrollbar-thumb, .pw-sidebar-scroll:focus-within::-webkit-scrollbar-thumb { background: var(--border-strong); }
 .pw-nav { display: flex; flex-direction: column; gap: 3px; }
-.pw-sidebar-label { padding: 0 10px 4px; color: var(--text-muted); font-size: 12px; font-weight: 550; }
+.pw-sidebar-label { padding: 0 10px 4px; color: var(--text-muted); font-size: 14px; font-weight: 550; }
 .pw-nav-link {
   display: flex;
   align-items: center;
   gap: 11px;
   width: 100%;
-  min-height: 44px;
+  min-height: 46px;
   padding: 8px 11px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 11px;
   background: transparent;
   color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 540;
   line-height: 1.25;
   text-align: left;
   text-decoration: none;
@@ -166,9 +171,12 @@
   background: var(--surface);
 }
 .pw-topbar .wallet { flex: none; }
-.pw-topbar .wallet-btn { border-radius: 10px; font-size: 14px; }
+.pw-topbar .wallet-btn { border-radius: var(--radius-full); font-size: 15px; }
+.pw-topbar .wallet-btn:not(.wallet-btn--on) { background: var(--primary); color: var(--on-primary); border-color: transparent; }
+.pw-topbar .wallet-btn:not(.wallet-btn--on):hover { background: var(--primary-hover); }
 .pw-topbar .wallet-btn .btn__icon svg { width: 17px; height: 17px; }
-.pw-location { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; font-size: 14px; }
+.pw-mobile-brand { display: none; }
+.pw-location { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; font-size: 15px; }
 .pw-location-root { color: var(--text-muted); text-decoration: none; }
 .pw-location-root:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .pw-location-divider { color: var(--text-muted); flex: none; }
@@ -181,7 +189,7 @@
   border-radius: 999px;
   background: var(--warning-soft);
   color: var(--warning);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 620;
 }
 .pw-testnet i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -217,15 +225,17 @@ html:has(.pw-nav-drawer[open]) { overflow: hidden; }
 @media (max-width: 767px) {
   .pw-app { --pw-header-height: 58px; --pw-gutter: 16px; }
   .pw-topbar { gap: 8px; padding: 6px 12px; }
-  .pw-location-root, .pw-location-divider { display: none; }
-  .pw-location { font-size: 13px; }
+  .pw-location { display: none; }
+  .pw-mobile-brand { display: flex; flex: 1; align-items: center; gap: 7px; min-width: 0; color: var(--text); text-decoration: none; font-size: 17px; font-weight: 660; }
+  .pw-mobile-brand .logo { flex: none; }
   .pw-menu-trigger { margin-left: -4px; }
-  .pw-testnet { padding-inline: 7px; font-size: 11px; }
-  .pw-topbar .wallet-btn { padding-inline: 10px; }
+  .pw-testnet { padding-inline: 7px; font-size: 12px; }
+  .pw-topbar .wallet-btn { padding-inline: 10px; font-size: 14px; }
 }
 
 @media (max-width: 359px) {
   .pw-topbar { gap: 5px; padding-inline: 8px; }
+  .pw-mobile-brand { gap: 5px; font-size: 15px; }
   .pw-testnet i { display: none; }
 }
 

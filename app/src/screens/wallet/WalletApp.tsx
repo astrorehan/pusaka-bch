@@ -24,8 +24,14 @@ import {
 } from 'lucide-react';
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
+import { Logo } from '../../components/Logo';
 import type * as api from '../../lib/chain/v2';
-import { explorerTxUrl, formatBch, formatDuration, parseBch } from '../../lib/format';
+import {
+  explorerTxUrl,
+  formatBch,
+  formatDuration,
+  parseBch,
+} from '../../lib/format';
 import { NETWORK } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
 import { history, planLink } from '../../lib/walletData';
@@ -40,7 +46,6 @@ import {
   PlanRules,
   PlanShare,
   PlanStarter,
-  PlanStatus,
   type PrepareAction,
 } from './PlanOverview';
 import { PlanImport } from './PlanImport';
@@ -59,6 +64,7 @@ import {
   TransactionReview,
   WalletSheet,
 } from './WalletUi';
+import terraceEngraving from './terrace-engraving.webp';
 
 const TokenAssets = lazy(() =>
   import('./SwapScreen').then((module) => ({ default: module.TokenAssets })),
@@ -70,40 +76,49 @@ type PlanState = api.LoadedPlan['state'];
 
 function EmptyWallet({ inherited }: { inherited: boolean }) {
   return (
-    <Card className="pw-balance pw-balance--empty">
-      <LedgerArtwork />
-      <div className="pw-balance-content">
-        <div className="pw-balance-caption">
-          <BchMark />{' '}
-          {inherited ? 'Bitcoin Cash inheritance' : 'Bitcoin Cash wallet'}
-        </div>
-        <div className="pw-balance-intro">
-          <h2>
-            {inherited
-              ? 'Create your inheritance plan'
-              : 'Create your protected wallet'}
-          </h2>
-          <p>
-            {inherited
-              ? 'Choose who inherits, how they share the balance, and when a claim can begin.'
-              : 'Send and receive BCH from Pusaka. Set an inheritance plan for the balance you leave behind.'}
-          </p>
-        </div>
-        <ButtonLink to="/wallet/new" className="pw-fit" icon={<ArrowUpRight />}>
+    <WalletFocus>
+      <div className="pw-balance-caption">
+        <BchMark size={21} />{' '}
+        {inherited ? 'Bitcoin Cash inheritance' : 'Bitcoin Cash wallet'}
+      </div>
+      <div className="pw-balance-intro">
+        <h2>
+          {inherited
+            ? 'Create your inheritance plan'
+            : 'Create your protected wallet'}
+        </h2>
+        <p>
+          {inherited
+            ? 'Choose who inherits, how they share the balance, and when a claim can begin.'
+            : 'Send and receive BCH from Pusaka. Set an inheritance plan for the balance you leave behind.'}
+        </p>
+      </div>
+      <div className="pw-balance-actions">
+        <ButtonLink to="/wallet/new" icon={<ArrowUpRight />}>
           Set up my wallet
         </ButtonLink>
       </div>
-    </Card>
+    </WalletFocus>
   );
 }
 
-function LedgerArtwork() {
+function WalletFocus({
+  children,
+  loading,
+}: {
+  children: ReactNode;
+  loading?: boolean;
+}) {
   return (
-    <div className="pw-ledger-art" aria-hidden>
-      <div className="pw-ledger-outline">
-        <Wallet size={35} strokeWidth={1.35} />
+    <section className="pw-balance" aria-busy={loading || undefined}>
+      <img src={terraceEngraving} alt="" className="pw-balance-art" />
+      <div className="pw-balance-content">
+        <span className="pw-balance-seal">
+          <Logo size={40} />
+        </span>
+        {children}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -124,67 +139,53 @@ function Balance({
 }) {
   const state = data?.state;
   const found = state && state.status !== 'UNINITIALIZED';
+  const canSend = owner && state && ['ACTIVE', 'REVIEW'].includes(state.status);
   return (
-    <Card className="pw-balance">
-      <LedgerArtwork />
-      <div className="pw-balance-content" aria-busy={loading && !state}>
-        <div className="pw-balance-top">
-          <div className="pw-balance-caption">
-            <BchMark /> Protected BCH balance
-          </div>
-          <PlanStatus state={state} loading={loading} />
-        </div>
-        <div>
-          <p className="pw-balance-number num">
-            {found ? formatBch(state.spendableBalanceSats) : '—'}{' '}
-            <span>BCH</span>
-          </p>
-          <p className="pw-balance-note">
-            {state?.status === 'PAID_OUT' || state?.status === 'CLOSED'
-              ? 'Your receive address still follows these inheritance rules.'
-              : 'Available to spend, with 1,000 satoshis reserved to keep your wallet active.'}
-          </p>
-        </div>
-        <div className="pw-actions">
-          <Button
-            type="button"
-            icon={<ArrowUpRight />}
-            disabled={
-              !owner ||
-              busy ||
-              !state ||
-              !['ACTIVE', 'REVIEW'].includes(state.status)
-            }
-            onClick={() => open('send')}
-          >
-            Send
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            icon={<ArrowDownLeft />}
-            onClick={() => open('receive')}
-          >
-            Receive
-          </Button>
-          <ButtonLink
-            to={swapPath}
-            variant="secondary"
-            icon={<ArrowLeftRight />}
-          >
-            Swap
-          </ButtonLink>
-          <button
-            type="button"
-            className="pw-icon pw-balance-more"
-            aria-label="More wallet actions"
-            onClick={() => open('more')}
-          >
-            <Ellipsis aria-hidden />
-          </button>
-        </div>
+    <WalletFocus loading={loading && !state}>
+      <div className="pw-balance-caption">
+        <BchMark size={21} /> Protected BCH balance
       </div>
-    </Card>
+      <div className="pw-balance-value">
+        <p className="pw-balance-number num">
+          {found ? formatBch(state.spendableBalanceSats) : '—'} <span>BCH</span>
+        </p>
+        <p className="pw-balance-note">
+          {state?.status === 'PAID_OUT' || state?.status === 'CLOSED'
+            ? 'Your receive address still follows these inheritance rules.'
+            : 'Available to spend, with 1,000 satoshis reserved to keep your wallet active.'}
+        </p>
+      </div>
+      <div className="pw-balance-actions">
+        <Button
+          type="button"
+          variant={canSend ? 'primary' : 'secondary'}
+          icon={<ArrowUpRight />}
+          disabled={busy || !canSend}
+          onClick={() => open('send')}
+        >
+          Send
+        </Button>
+        <Button
+          type="button"
+          variant={canSend ? 'secondary' : 'primary'}
+          icon={<ArrowDownLeft />}
+          onClick={() => open('receive')}
+        >
+          Receive
+        </Button>
+        <ButtonLink to={swapPath} variant="secondary" icon={<ArrowLeftRight />}>
+          Swap
+        </ButtonLink>
+        <button
+          type="button"
+          className="pw-icon pw-balance-more"
+          aria-label="More wallet actions"
+          onClick={() => open('more')}
+        >
+          <Ellipsis aria-hidden />
+        </button>
+      </div>
+    </WalletFocus>
   );
 }
 
@@ -198,8 +199,9 @@ function ActivityList({
   allPath?: string;
 }) {
   const [all, setAll] = useState(false);
-  const entries = history()
-    .filter((entry) => all || !plan || entry.plan === plan);
+  const entries = history().filter(
+    (entry) => all || !plan || entry.plan === plan,
+  );
   const visible = preview ? entries.slice(0, 3) : entries;
   return (
     <Card>
@@ -503,14 +505,21 @@ function WalletPage() {
     event.preventDefault();
     const sats = parseBch(amount);
     if (sats === null || sats <= 0n) {
-      setIssue('Enter an amount in BCH greater than zero with up to eight decimal places.');
+      setIssue(
+        'Enter an amount in BCH greater than zero with up to eight decimal places.',
+      );
       return;
     }
     void prepare('send', { address: recipient.trim(), amount: sats });
   }
 
   let body: ReactNode;
-  if (NETWORK === 'mainnet' && isDemoRoute(location.pathname, location.search)) {
+  let inspector: ReactNode;
+  let supporting: ReactNode;
+  if (
+    NETWORK === 'mainnet' &&
+    isDemoRoute(location.pathname, location.search)
+  ) {
     body = (
       <Card>
         <EmptyState
@@ -518,7 +527,9 @@ function WalletPage() {
           title="Demo available on Chipnet"
           description="The example uses the Bitcoin Cash test network."
         >
-          <ButtonLink to="/wallet" variant="secondary">Open your wallet</ButtonLink>
+          <ButtonLink to="/wallet" variant="secondary">
+            Open your wallet
+          </ButtonLink>
         </EmptyState>
       </Card>
     );
@@ -541,153 +552,150 @@ function WalletPage() {
       </Card>
     );
   } else if (!metadata) {
-    body = (
-      <div className="pw-columns">
-        <div className="pw-column">
-          <EmptyWallet inherited={inherited} />
-          {!inherited && <ActivityList preview allPath="/wallet/activity" />}
-        </div>
-        <aside className="pw-column">
-          <PlanStarter />
-        </aside>
-      </div>
-    );
+    body = <EmptyWallet inherited={inherited} />;
+    inspector = <PlanStarter />;
+    if (!inherited)
+      supporting = <ActivityList preview allPath="/wallet/activity" />;
   } else {
     body = (
       <>
         <ClaimNotice data={data} owner={owner} busy={busy} prepare={prepare} />
-        <div className="pw-columns">
-          <div className="pw-column">
-            {!inherited && (
-              <Balance
-                data={data}
-                loading={loading}
-                owner={owner}
-                busy={busy}
-                swapPath={walletPath('/wallet/swap', demo)}
-                open={open}
-              />
-            )}
-            <Incoming state={state} busy={busy} prepare={prepare} />
-            {inherited ? (
-              <>
-                <PlanPeople
-                  metadata={metadata}
-                  state={state}
-                  editPath={
-                    owner ? walletPath('/wallet/edit', demo) : undefined
-                  }
-                  contact={contact}
-                  busy={busy}
-                  prepare={prepare}
-                />
-                <PlanShare metadata={metadata} save={() => open('export')} />
-              </>
-            ) : (
-              <>
-                <Card>
-                  <CardHeading
-                    title="BCH receive address"
-                    description="Funds received here follow this wallet’s inheritance rules."
-                  />
-                  <Address
-                    value={metadata.inboxAddress}
-                    label="Copy BCH receive address"
-                  />
-                </Card>
-                {metadata.protocolRevision === 'assets-1' && (
-                  <Suspense
-                    fallback={
-                      <Card
-                        className="pw-loading"
-                        aria-label="Loading protected assets"
-                      >
-                        <span />
-                        <span />
-                      </Card>
-                    }
-                  >
-                    <TokenAssets
-                      key={metadata.planCategoryHex}
-                      metadata={metadata}
-                      data={data}
-                      refresh={refresh}
-                    />
-                  </Suspense>
-                )}
-                <ActivityList
-                  plan={metadata.planCategoryHex}
-                  preview
-                  allPath={walletPath('/wallet/activity', demo)}
-                />
-              </>
-            )}
-          </div>
-          <aside className="pw-column">
-            <PlanRules
+        {!inherited && (
+          <Balance
+            data={data}
+            loading={loading}
+            owner={owner}
+            busy={busy}
+            swapPath={walletPath('/wallet/swap', demo)}
+            open={open}
+          />
+        )}
+        <Incoming state={state} busy={busy} prepare={prepare} />
+        {inherited && (
+          <>
+            <PlanPeople
               metadata={metadata}
-              data={data}
-              loading={loading}
-              owner={owner}
+              state={state}
+              editPath={owner ? walletPath('/wallet/edit', demo) : undefined}
+              contact={contact}
               busy={busy}
               prepare={prepare}
-              planPath={
-                inherited ? undefined : walletPath('/wallet/plan', demo)
-              }
             />
-            {inherited && data && state?.status !== 'UNINITIALIZED' && (
-              <ClaimProgress data={data} busy={busy} prepare={prepare} />
-            )}
-            <div className="pw-footnote">
-              <ShieldCheck size={16} aria-hidden />
-              <p>
-                Only assets held at your Pusaka addresses follow these
-                inheritance rules. Your ordinary Paytaca balance stays separate.
-              </p>
-            </div>
-          </aside>
+            <PlanShare metadata={metadata} save={() => open('export')} />
+          </>
+        )}
+      </>
+    );
+    if (!inherited) {
+      supporting = (
+        <>
+          <Card className="pw-receive-row">
+            <header className="pw-receive-heading">
+              <BchMark size={24} />
+              <h2>BCH receive address</h2>
+            </header>
+            <Address
+              value={metadata.inboxAddress}
+              label="Copy BCH receive address"
+            />
+          </Card>
+          {metadata.protocolRevision === 'assets-1' && (
+            <Suspense
+              fallback={
+                <Card
+                  className="pw-loading"
+                  aria-label="Loading protected assets"
+                >
+                  <span />
+                  <span />
+                </Card>
+              }
+            >
+              <TokenAssets
+                key={metadata.planCategoryHex}
+                metadata={metadata}
+                data={data}
+                refresh={refresh}
+              />
+            </Suspense>
+          )}
+          <ActivityList
+            plan={metadata.planCategoryHex}
+            preview
+            allPath={walletPath('/wallet/activity', demo)}
+          />
+        </>
+      );
+    }
+    inspector = (
+      <>
+        <PlanRules
+          metadata={metadata}
+          data={data}
+          loading={loading}
+          owner={owner}
+          busy={busy}
+          prepare={prepare}
+          planPath={inherited ? undefined : walletPath('/wallet/plan', demo)}
+        />
+        {inherited && data && state?.status !== 'UNINITIALIZED' && (
+          <ClaimProgress data={data} busy={busy} prepare={prepare} />
+        )}
+        <div className="pw-footnote">
+          <ShieldCheck size={17} aria-hidden />
+          <p>
+            Inheritance rules apply to the assets held at your Pusaka addresses.
+          </p>
         </div>
       </>
     );
   }
 
   return (
-    <div className="pw-page">
-      <PageHeading
-        title={title}
-        description={
-          activity
-            ? 'Review transactions submitted from this browser.'
-            : inherited
-              ? 'Manage who inherits and how claims are reviewed.'
-              : 'Manage your BCH and the inheritance plan that protects it.'
-        }
-      >
-        <Button
-          type="button"
-          variant="secondary"
-          icon={<FileUp />}
-          onClick={() => open('import')}
+    <div className={`pw-page${inspector ? ' pw-page--inspected' : ''}`}>
+      <div className="pw-page-body">
+        <PageHeading
+          title={title}
+          description={
+            activity
+              ? 'Review transactions submitted from this browser.'
+              : inherited
+                ? 'Manage who inherits and how claims are reviewed.'
+                : 'Manage your BCH and the inheritance plan that protects it.'
+          }
         >
-          Open a plan
-        </Button>
-        {canRefresh && !activity && (
           <Button
             type="button"
             variant="secondary"
-            loading={loading}
-            icon={<RefreshCw className={loading ? 'pw-spin' : undefined} />}
-            onClick={() => void refresh()}
+            icon={<FileUp />}
+            onClick={() => open('import')}
           >
-            Refresh
+            Open a plan
           </Button>
-        )}
-      </PageHeading>
-      {demo && <DemoNotice />}
-      {error && <ErrorNotice>{error}</ErrorNotice>}
-      {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
-      {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
-      {body}
+          {canRefresh && !activity && (
+            <Button
+              type="button"
+              variant="secondary"
+              loading={loading}
+              icon={<RefreshCw className={loading ? 'pw-spin' : undefined} />}
+              onClick={() => void refresh()}
+            >
+              Refresh
+            </Button>
+          )}
+        </PageHeading>
+        {demo && <DemoNotice />}
+        {error && <ErrorNotice>{error}</ErrorNotice>}
+        {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
+        {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
+        {body}
+      </div>
+      {inspector && (
+        <aside className="pw-inspector" aria-label="Inheritance overview">
+          {inspector}
+        </aside>
+      )}
+      {supporting && <div className="pw-page-support">{supporting}</div>}
 
       <PlanImport open={dialog === 'import'} close={() => setDialog(null)} />
       {dialog === 'receive' && metadata && (
@@ -723,10 +731,10 @@ function WalletPage() {
                 spellCheck={false}
                 autoCapitalize="off"
                 disabled={busy}
-              onChange={(event) => {
-                setRecipient(event.target.value);
-                setIssue('');
-              }}
+                onChange={(event) => {
+                  setRecipient(event.target.value);
+                  setIssue('');
+                }}
                 placeholder={`${planAddressPrefix}…`}
               />
             </label>

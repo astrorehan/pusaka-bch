@@ -21,7 +21,7 @@
   border-radius: 8px;
   background: none;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 570;
   text-align: left;
   line-height: 1.2;
@@ -52,12 +52,12 @@
 .pw-split-options button[aria-pressed='true'] { border-color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-text); background: var(--accent-soft); }
 .pw-split-top { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; gap: 4px; color: var(--accent-text); }
 .pw-split-top .pw-symbol { width: 34px; height: 34px; background: var(--surface-hover); }
-.pw-split-options strong { font-size: 14px; font-weight: 650; }
-.pw-split-options .pw-muted { font-size: 12px; line-height: 1.4; }
+.pw-split-options strong { font-size: 16px; font-weight: 650; }
+.pw-split-options .pw-muted { font-size: 14px; line-height: 1.4; }
 
 .pw-heir-fields { display: grid; gap: 10px; }
 .pw-heir-fields fieldset { min-width: 0; margin: 0; padding: 0 10px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-hover); }
-.pw-heir-fields legend { padding: 0 4px; color: var(--text-muted); font-size: 12px; font-weight: 580; }
+.pw-heir-fields legend { padding: 0 4px; color: var(--text-muted); font-size: 14px; font-weight: 580; }
 .pw-heir-input { display: grid; grid-template-columns: minmax(93px, 0.8fr) minmax(0, 1.7fr) auto; align-items: end; gap: 8px; }
 .pw-heir-input:has(> label:nth-of-type(3)) { grid-template-columns: minmax(86px, 0.8fr) minmax(0, 1.7fr) minmax(68px, 0.48fr) auto; }
 .pw-heir-input label:nth-of-type(2) input, .pw-setup-form .pw-form input { font-family: var(--font-mono); letter-spacing: -0.035em; }
@@ -68,10 +68,10 @@
 .pw-family-parents label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
 .pw-family-parents input { width: 17px; min-height: 17px; margin: 0; accent-color: var(--accent-text); }
 
-.pw-setup-hint { display: flex; gap: 10px; padding: 12px; border-radius: 9px; background: var(--surface-2); color: var(--text-muted); font-size: 13px; }
+.pw-setup-hint { display: flex; gap: 10px; padding: 12px; border-radius: 9px; background: var(--surface-2); color: var(--text-muted); font-size: 15px; }
 .pw-setup-hint svg { flex: none; }
 .pw-setup-distribution > ul { display: grid; gap: 4px; margin: 10px 0 0; padding: 0; list-style: none; }
-.pw-setup-distribution li { display: flex; justify-content: space-between; gap: 10px; color: var(--text-muted); font-size: 13px; }
+.pw-setup-distribution li { display: flex; justify-content: space-between; gap: 10px; color: var(--text-muted); font-size: 15px; }
 .pw-setup-distribution li span { min-width: 0; overflow-wrap: anywhere; }
 .pw-setup-distribution li i { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; vertical-align: 1px; }
 .pw-setup-distribution strong { color: var(--text); }
@@ -90,7 +90,7 @@
   background: var(--surface);
   box-shadow: 0 -3px 20px color-mix(in srgb, var(--text) 5%, transparent);
 }
-.pw-setup-back { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 13px; }
+.pw-setup-back { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 14px; }
 .pw-setup-back > a { align-self: center; margin-inline: 8px; }
 
 @media (min-width: 940px) {
@@ -103,7 +103,7 @@
 }
 
 @media (max-width: 520px) {
-  .pw-stepper button { flex-direction: column; justify-content: center; gap: 4px; min-height: 58px; padding-inline: 3px; text-align: center; font-size: 11px; }
+  .pw-stepper button { flex-direction: column; justify-content: center; gap: 4px; min-height: 64px; padding-inline: 4px; text-align: center; font-size: 13px; }
   .pw-split-options { grid-template-columns: minmax(0, 1fr); }
   .pw-split-options button { display: grid; grid-template-columns: 34px minmax(0, 1fr) 16px; grid-template-rows: auto auto; gap: 2px 9px; min-height: 58px; padding: 9px; }
   .pw-split-top { display: contents; }

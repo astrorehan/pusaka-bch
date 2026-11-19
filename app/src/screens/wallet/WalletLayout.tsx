@@ -29,12 +29,14 @@ import { Logo } from '../../components/Logo';
 import { useMedia } from '../../components/useMedia';
 import { shortAddress } from '../../lib/format';
 import { NETWORK } from '../../lib/networkName';
-import { applyTheme, getTheme } from '../../lib/theme';
+import { getTheme } from '../../lib/theme';
 import { useWallet } from '../../lib/wallet';
 import { isDemoWallet, walletPath } from './paths';
+import './wallet-theme.css';
 import './wallet-layout.css';
 
 const FOLD_KEY = 'pusaka.sidebar.folded';
+const THEME_KEY = 'pusaka.wallet.theme';
 const NAVIGATION = [
   { path: '/wallet', title: 'Wallet', icon: WalletCards },
   { path: '/wallet/swap', title: 'Swap', icon: ArrowLeftRight },
@@ -48,6 +50,16 @@ function readFolded() {
   } catch {
     return false;
   }
+}
+
+function readWalletTheme(): 'dark' | 'light' {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'dark' || saved === 'light') return saved;
+  } catch {
+    /* storage may be blocked */
+  }
+  return getTheme() === 'light' ? 'light' : 'dark';
 }
 
 function sectionFor(pathname: string) {
@@ -122,7 +134,9 @@ function Sidebar({
           className="pw-brand"
           aria-label="Pusaka workspace"
         >
-          <Logo size={27} />
+          <span className="pw-brand-mark">
+            <Logo size={24} />
+          </span>
           <span className="pw-nav-label">Pusaka</span>
         </Link>
         <button
@@ -161,14 +175,13 @@ function Sidebar({
                 ? shortAddress(wallet.address)
                 : status === 'connecting'
                   ? 'Connecting…'
-                  : 'Wallet disconnected'}
+                  : 'Not connected'}
           </small>
         </div>
       </div>
 
       <div className="pw-sidebar-scroll">
         <nav aria-label="Wallet navigation" className="pw-nav">
-          <div className="pw-sidebar-label">Workspace</div>
           {NAVIGATION.map(({ path, title, icon: Icon }) => (
             <Link
               key={path}
@@ -230,8 +243,7 @@ function Sidebar({
 export function WalletLayout() {
   const location = useLocation();
   const desktop = useMedia('(min-width: 1280px)');
-  const systemDark = useMedia('(prefers-color-scheme: dark)');
-  const [theme, setTheme] = useState(getTheme);
+  const [theme, setTheme] = useState(readWalletTheme);
   const [folded, setFolded] = useState(readFolded);
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
   const banner = useRef<HTMLDivElement>(null);
@@ -302,20 +314,28 @@ export function WalletLayout() {
     setDrawerKey(null);
   }
 
-  const dark = theme === 'dark' || (theme === 'system' && systemDark);
+  const dark = theme === 'dark';
   const sidebarProps = {
     demo,
     pathname: location.pathname,
     dark,
     toggleTheme: () => {
       const next = dark ? 'light' : 'dark';
-      applyTheme(next);
       setTheme(next);
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        /* use this visit's choice */
+      }
     },
   };
 
   return (
-    <div className={`pw-app${rail ? ' pw-app--rail' : ''}`} ref={app}>
+    <div
+      className={`pw-app${rail ? ' pw-app--rail' : ''}`}
+      data-wallet-theme={theme}
+      ref={app}
+    >
       <a
         className="skip-link"
         href="#wallet-main"
@@ -346,6 +366,13 @@ export function WalletLayout() {
             >
               <Menu aria-hidden />
             </button>
+            <Link
+              to={walletPath('/wallet', demo)}
+              className="pw-mobile-brand"
+              aria-label="Pusaka workspace"
+            >
+              <Logo size={19} /> <span>Pusaka</span>
+            </Link>
             <div className="pw-location">
               <Link
                 to={walletPath('/wallet', demo)}
