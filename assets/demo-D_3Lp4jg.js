@@ -1,0 +1,1 @@
+import{n as e}from"./networkName-Bfuma7xD.js";var t=[],n=t.length>0,r=n?{to:`/wallet/demo`}:{href:`${e}wallet/demo`};export{n,r,t};

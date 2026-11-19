@@ -1,0 +1,1 @@
+var e=`(min-width: 900px)`,t={wide:{aspect:2.4,width:1920,height:800,anchorX:.5,anchorY:.5},tall:{aspect:1.25,width:1e3,height:800,anchorX:.5,anchorY:.4}};export{e as n,t};

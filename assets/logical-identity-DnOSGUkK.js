@@ -1,1 +1,0 @@
-export{t as buildLogicalIdentityCommitment,a as deriveLogicalCreateAddress,d as resolveLogicalIdentity}from"./logical-identity-CWQ-qKC0.js";

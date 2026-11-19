@@ -1,0 +1,1 @@
+var e=`/pusaka-bch/chipnet/`;export{e as t};

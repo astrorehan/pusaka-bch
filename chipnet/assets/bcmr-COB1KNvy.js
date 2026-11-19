@@ -1,0 +1,1 @@
+export{t as importMetadataRegistry}from"./bcmr-BjmBxxiV.js";

@@ -1,0 +1,1 @@
+import{t as e}from"./TransactionBuilder-DAIlj4S9.js";var t=class extends e{checkMaxFee(e){}};export{t};

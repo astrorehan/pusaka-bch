@@ -1,0 +1,1 @@
+var e=`pusaka-theme`;function t(){try{let t=localStorage.getItem(e);return t===`light`||t===`dark`?t:`system`}catch{return`system`}}function n(t){t===`system`?document.documentElement.removeAttribute(`data-theme`):document.documentElement.setAttribute(`data-theme`,t);try{t===`system`?localStorage.removeItem(e):localStorage.setItem(e,t)}catch{}}export{t as n,n as t};

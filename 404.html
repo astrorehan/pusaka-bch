@@ -1,95 +1,78 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; &#39;sha256-HwuZnbRjQJEwOvV6RSgT3Vid90JPJhe3uuTTesDXMQ4=&#39; &#39;sha256-f2bjWzO6UX8VN/EQWCBLEIWpPJlkCOO6VjMZDlZ76wo=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:; connect-src &#39;self&#39; https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest">
+
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Choose who gets your Bitcoin Cash. If you stop checking in, your family can receive their shares through your inheritance plan." />
+    <meta name="description" content="A Bitcoin Cash wallet you spend from every day, with your inheritance plan built in. If you go quiet, your family receives their shares." />
     <meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0E1222" media="(prefers-color-scheme: dark)" />
     <title>Pusaka: Your BCH. Their future.</title>
+    <meta name="referrer" content="no-referrer" />
     <script>
-      // Before first paint: apply the saved theme (no flash of the wrong one), and run the splash clock.
-      // The splash greets every full page load with one bloom (DESIGN.md "The bloom"); in-app navigation skips it.
+      // GitHub Pages answers every unknown path with the main app's 404 page. A deep link into the test-network
+      // app (a separate build in its own folder) is sent there, and that app puts the full address back.
       (function () {
+        var app = '/pusaka-bch/', chipnet = '/pusaka-bch/chipnet/', key = 'pusaka-redirect';
+        if (!chipnet) return;
         try {
-          var t = localStorage.getItem('pusaka-theme');
-          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+          if (app !== chipnet && location.pathname.indexOf(chipnet) === 0) {
+            sessionStorage.setItem(key, location.pathname + location.search + location.hash);
+            location.replace(chipnet);
+          } else if (app === chipnet) {
+            var to = sessionStorage.getItem(key);
+            sessionStorage.removeItem(key);
+            if (to && to.indexOf(chipnet) === 0) history.replaceState(null, '', to);
+          }
         } catch (e) {}
-        // The bloom takes 700 ms. Then the line glides to full, and the splash lifts while the page settles in.
-        var BLOOM = 700, FINISH = 360, LIFT = 700, REVEAL = 1600, shownAt = 0;
-        var root = document.documentElement;
-        function el() { return document.getElementById('splash'); }
-        window.__pusakaSplash = {
-          // Called right after the splash markup, so it covers the very first paint.
-          show: function () {
-            var s = el();
-            if (!s) return;
-            s.classList.add('show'); shownAt = performance.now();
-            root.classList.add('splashing'); // holds the page's entrance until the splash lifts
-          },
-          // Called by the app once it has rendered.
-          hide: function () {
-            var s = el();
-            if (!s) return;
-            if (!shownAt) { s.remove(); return; }
-            var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
-            setTimeout(function () {
-              // Finish the line from wherever it has reached, so it never jumps.
-              var fill = s.querySelector('.line i');
-              if (fill && fill.animate) {
-                var now = getComputedStyle(fill).transform;
-                fill.style.animation = 'none';
-                fill.animate([{ transform: now }, { transform: 'scaleX(1)' }],
-                  { duration: FINISH, easing: 'cubic-bezier(0.33, 0, 0.2, 1)', fill: 'forwards' });
-              }
-              setTimeout(function () {
-                s.classList.add('done');
-                root.classList.remove('splashing');
-                root.classList.add('splash-reveal');
-                setTimeout(function () { s.remove(); }, LIFT);
-                setTimeout(function () { root.classList.remove('splash-reveal'); }, REVEAL);
-              }, FINISH - 80);
-            }, wait);
-          },
-        };
       })();
     </script>
-    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;--s-track:#e3dcd0;--s-ease:cubic-bezier(.23, 1, .32, 1);z-index:100;background:var(--s-bg);opacity:0;visibility:hidden;pointer-events:none;place-content:center;justify-items:center;gap:32px;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e;--s-track:#2c3349}#splash.show{visibility:visible;pointer-events:auto;opacity:1}#splash.done{pointer-events:none;animation:.56s cubic-bezier(.4,0,.2,1) .12s both splash-out}#splash.done svg{animation:s-lift .44s var(--s-ease) both}#splash.done .line{opacity:0;transition:opacity .24s}@keyframes splash-out{0%{opacity:1}to{opacity:0}}@keyframes s-lift{to{opacity:0;transform:scale(1.08)}}#splash svg{width:72px;height:72px;display:block;overflow:visible}@media (width>=768px){#splash svg{width:96px;height:96px}}#splash path{fill:var(--s-ink)}#splash circle{fill:var(--s-gold)}#splash path,#splash circle{transform-box:view-box;transform-origin:16px 16px;opacity:0}#splash.show circle{animation:s-seed .2s var(--s-ease) forwards}#splash.show path{animation:s-petal .24s var(--s-ease) forwards}#splash.show path:first-of-type{--dx:1;--dy:-1;animation-delay:.2s}#splash.show path:nth-of-type(2){--dx:1;--dy:1;animation-delay:.28s}#splash.show path:nth-of-type(3){--dx:-1;--dy:1;animation-delay:.36s}#splash.show path:nth-of-type(4){--dx:-1;--dy:-1;animation-delay:.44s}@keyframes s-seed{0%{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}@keyframes s-petal{0%{opacity:0;transform:translate(calc(var(--dx) * -2px), calc(var(--dy) * -2px)) scale(.8)}to{opacity:1;transform:none}}#splash .line{background:var(--s-track);border-radius:2px;width:120px;height:2px;overflow:hidden}#splash .line i{border-radius:inherit;background:var(--s-gold);transform-origin:0;will-change:transform;height:100%;display:block;transform:scaleX(0)}#splash.show .line i{animation:2.6s cubic-bezier(.16,1,.3,1) forwards s-line}@keyframes s-line{0%{transform:scaleX(0)}to{transform:scaleX(.9)}}@media (prefers-reduced-motion:reduce){#splash.show path,#splash.show circle{animation:.15s forwards s-fade}@keyframes s-fade{0%{opacity:0}to{opacity:1}}#splash.done svg{animation:.24s both s-fade-out}@keyframes s-fade-out{to{opacity:0}}}</style>
-    <script type="module" crossorigin src="/pusaka-bch/assets/index-IaWc7Wex.js"></script>
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {}
+      const base = '/pusaka-bch/';
+      if (location.pathname.replace(/\/$/, '') === base.slice(0, -1)) {
+        const frame = matchMedia('(min-width: 900px)').matches ? 'wide' : 'tall';
+        const theme = document.documentElement.dataset.theme;
+        const dark = theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches);
+        const poster = document.createElement('link');
+        poster.rel = 'preload';
+        poster.as = 'image';
+        poster.fetchPriority = 'high';
+        poster.href = base + 'hero/pusaka-sawah-v3-' + frame + (dark ? '-dark' : '') + '.webp';
+        document.head.append(poster);
+      }
+    </script>
+    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;z-index:100;color:var(--s-ink);background:var(--s-bg);place-items:center;animation:.16s .18s both loading-in;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e}#splash svg{fill:currentColor;width:72px;height:72px}#splash circle{fill:var(--s-gold)}@keyframes loading-in{0%{opacity:0}to{opacity:1}}</style>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-DxUdMx2N.js"></script>
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/rolldown-runtime-XKyaHtl9.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/shares-BXGItO3z.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/jsx-runtime-5Hkpnz6L.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/react-dom-DxZp6J3S.js">
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/preload-helper-0Xy_vY0d.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/planService-UCX6_AjJ.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/react-dom-B8Yh5ZCa.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/format-DlS_Q1NV.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/AppShell-GMpKZwzK.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/asset-CSW43OTh.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/HomeFooter-GxWi0qQn.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/sawahFrame-BoDVQecf.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/undo-2-B9Xgknf-.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/planLink-Dqj9Fy2g.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/StateMessage-BQlM8tpa.js">
-    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/Sheet-BvGA5ZLM.js">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/format-QjaKUGcu.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/AppShell-DXjdJ300.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/HomeFooter-DHI3K_qA.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/StateMessage-XOYfdz3d.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/Sheet-BAC3QdIj.css">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-C5ahq95a.css">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/planService-dxI5N4T3.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/networkName-Bfuma7xD.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/wallet-CQFCq39i.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-DLkEYoXP.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-CvoVMR-m.css">
   </head>
   <body>
-    <div id="splash" aria-hidden="true">
-      <svg viewBox="6.6 6.6 18.8 18.8">
+    <div id="splash" role="status" aria-label="Loading Pusaka">
+      <svg aria-hidden="true" viewBox="6.6 6.6 18.8 18.8">
         <path d="M24.415 7.585A5.2 3.4 -45 0 0 17.061 14.939A5.2 3.4 -45 0 0 24.415 7.585Z" />
         <path d="M24.415 24.415A5.2 3.4 45 0 1 17.061 17.061A5.2 3.4 45 0 1 24.415 24.415Z" />
         <path d="M7.585 24.415A5.2 3.4 -45 0 0 14.939 17.061A5.2 3.4 -45 0 0 7.585 24.415Z" />
         <path d="M7.585 7.585A5.2 3.4 45 0 1 14.939 14.939A5.2 3.4 45 0 1 7.585 7.585Z" />
         <circle cx="16" cy="16" r="1.2" />
       </svg>
-      <div class="line"><i></i></div>
     </div>
-    <script>window.__pusakaSplash.show();</script>
-    <div id="root"></div>
+    <noscript>
+      <style>#splash{display:none}</style>
+      <p>Enable JavaScript to use Pusaka.</p>
+    </noscript>
+    <div id="root"></div>
   </body>
 </html>

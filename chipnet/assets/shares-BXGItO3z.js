@@ -1,0 +1,1 @@
+function e(e,t,n){let r=t.map(t=>e*t/n);return{amounts:r,leftover:e-r.reduce((e,t)=>e+t,0n)}}function t(e){return{shares:Array.from({length:e},()=>1n),total:BigInt(Math.max(e,1))}}function n(e,t){return t===0n?0:Number((e*10000n+t/2n)/t)/100}export{e as n,n as r,t};
