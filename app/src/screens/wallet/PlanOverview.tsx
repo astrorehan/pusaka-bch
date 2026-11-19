@@ -13,7 +13,10 @@ import {
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { formatDuration, shortAddress } from '../../lib/format';
-import * as api from '../../lib/chain/v2';
+import { p2pkhCashAddressFromPkh } from '../../lib/cashAddress';
+import type * as api from '../../lib/chain/v2';
+import { NETWORK } from '../../lib/networkName';
+import { planLink } from '../../lib/walletData';
 import { Badge, Card, CardHeading } from './WalletUi';
 
 export type PrepareAction = (
@@ -232,9 +235,9 @@ export function PlanPeople({
         <ShareBreakdown shares={shares} />
         <ul className="pw-rows">
           {metadata.heirs.map((heir, i) => {
-            const address = api.p2pkhCashAddressFromPkh(
+            const address = p2pkhCashAddressFromPkh(
               heir.pkhHex,
-              api.NETWORK,
+              NETWORK,
             );
             const name = heir.label || `Heir ${i + 1}`;
             return (
@@ -278,7 +281,7 @@ export function PlanPeople({
         </CardHeading>
         <ul className="pw-rows">
           {metadata.contacts.map((pkh, i) => {
-            const address = api.p2pkhCashAddressFromPkh(pkh, api.NETWORK);
+            const address = p2pkhCashAddressFromPkh(pkh, NETWORK);
             const confirmed = state?.approvedContactIndices.includes(i);
             return (
               <li className="pw-row" key={pkh}>
@@ -343,7 +346,7 @@ export function PlanShare({
           <strong>Family plan link</strong>
           <p>View balances, heirs, and claim progress.</p>
         </div>
-        <CopyButton value={api.planLink(metadata)} label="Copy plan link" />
+        <CopyButton value={planLink(metadata)} label="Copy plan link" />
       </div>
       <Button
         type="button"

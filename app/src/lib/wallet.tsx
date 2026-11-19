@@ -1,9 +1,9 @@
 // Wallet state shared by every screen. The wallet button lives at the top right (organiser's rule).
 // Real mode pairs a wallet over WizardConnect (QR code or wiz:// link); mock mode (`?mock`) simulates one.
-import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { isMockMode, planService, type WalletInfo } from './planService';
 import type { BridgeApi, BridgeProps } from './wizardBridge';
-import type { NetworkName } from './types';
+import { NETWORK } from './networkName';
 
 type WalletStatus = 'disconnected' | 'connecting' | 'connected';
 
@@ -16,7 +16,7 @@ interface WalletCtx {
 }
 
 const Ctx = createContext<WalletCtx | null>(null);
-const NETWORK: NetworkName = (import.meta.env.VITE_NETWORK as NetworkName) ?? 'chipnet';
+const WIZARD_SESSION_KEY = 'wizardconnect-session';
 
 function MockWalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletInfo | null>(planService.wallet());
@@ -43,8 +43,8 @@ function MockWalletProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={{ status, wallet, connect, disconnect }}>{children}</Ctx.Provider>;
 }
 
-/** WizardConnect loads after the first paint (or at once when someone presses Connect), see wizardBridge.tsx. */
-const WizardBridge = lazy(() =>
+/** Load WizardConnect when a user connects or has a session to restore. */
+const WizardBridge = lazy<ComponentType<BridgeProps>>(() =>
   import('./wizardBridge').catch(() => ({
     // Offline or a failed deploy: say "not connected" instead of breaking the page.
     default: function Unavailable({ onState, onSettle }: BridgeProps) {
@@ -73,35 +73,37 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
   /** connect() was pressed before WizardConnect finished loading */
   const [waitingForBridge, setWaitingForBridge] = useState(false);
   const api = useRef<BridgeApi | null>(null);
-  const pending = useRef<((ok: boolean) => void) | null>(null);
+  const pending = useRef<{ promise: Promise<boolean>; resolve: (ok: boolean) => void } | null>(null);
 
-  // Load WizardConnect once the page has drawn, so a saved session comes back without slowing the first screen.
-  useEffect(() => whenIdle(() => setLoad(true)), []);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(WIZARD_SESSION_KEY)) return whenIdle(() => setLoad(true));
+    } catch { /* Connect remains available if browser storage is blocked. */ }
+  }, []);
 
   const onReady = useCallback((a: BridgeApi) => {
     const first = !api.current;
     api.current = a;
     if (first && pending.current) {
-      setWaitingForBridge(false);
       a.connect();
     }
   }, []);
   const onSettle = useCallback((ok: boolean) => {
     setWaitingForBridge(false);
-    pending.current?.(ok);
+    pending.current?.resolve(ok);
     pending.current = null;
   }, []);
 
   const connect = useCallback(() => {
     if (session.wallet) return Promise.resolve(true);
-    return new Promise<boolean>((resolve) => {
-      pending.current = resolve;
-      if (api.current) api.current.connect();
-      else {
-        setWaitingForBridge(true);
-        setLoad(true);
-      }
-    });
+    if (pending.current) return pending.current.promise;
+    let settle!: (ok: boolean) => void;
+    const promise = new Promise<boolean>((resolve) => { settle = resolve; });
+    pending.current = { promise, resolve: settle };
+    setWaitingForBridge(true);
+    if (api.current) api.current.connect();
+    else setLoad(true);
+    return promise;
   }, [session.wallet]);
 
   const disconnect = useCallback(async () => {
@@ -116,7 +118,7 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
       {children}
       {load && (
         <Suspense fallback={null}>
-          <WizardBridge network={NETWORK} onReady={onReady} onState={setSession} onSettle={onSettle} />
+          <WizardBridge network={NETWORK} sessionKey={WIZARD_SESSION_KEY} onReady={onReady} onState={setSession} onSettle={onSettle} />
         </Suspense>
       )}
     </Ctx.Provider>
@@ -124,7 +126,9 @@ function WizardWalletProvider({ children }: { children: ReactNode }) {
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  return isMockMode() ? <MockWalletProvider>{children}</MockWalletProvider> : <WizardWalletProvider>{children}</WizardWalletProvider>;
+  return import.meta.env.DEV && isMockMode()
+    ? <MockWalletProvider>{children}</MockWalletProvider>
+    : <WizardWalletProvider>{children}</WizardWalletProvider>;
 }
 
 export function useWallet(): WalletCtx {

@@ -17,7 +17,7 @@ export function PlanScreen({ demo = false }: { demo?: boolean }) {
   }, [demo]);
 
   if (empty) return <div className="pl-page"><PlanMessage kind="empty" /></div>;
-  return <div className="pl-page"><Loaded demo={demo} hash={hash} /></div>;
+  return <div className="pl-page"><Loaded key={hash} demo={demo} hash={hash} /></div>;
 }
 
 function Loaded({ demo, hash }: { demo: boolean; hash: string }) {

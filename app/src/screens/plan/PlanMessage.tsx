@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { CircleAlert, CloudOff, FileUp, Link2, Link2Off, Network, SearchX, WifiOff } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { StateMessage } from '../../components/StateMessage';
-import { NETWORK } from '../../components/AppShell';
-import { checkPlanLink } from '../home/readPlanLink';
+import { NETWORK } from '../../lib/networkName';
+import { checkPlanLink, MAX_PLAN_FILE_BYTES, type PlanDestination } from '../home/readPlanLink';
 
 export type MessageKind = 'empty' | 'broken' | 'missing' | 'other-network' | 'offline' | 'error';
 
@@ -59,13 +59,13 @@ export function PlanMessage({ kind, planNetwork, onRetry }: Props) {
         </>
       }
     >
-      {opening && <OpenLink autoFocus={kind !== 'empty'} onOpen={(hash) => navigate({ pathname: '/plan', hash })} />}
+      {opening && <OpenLink autoFocus={kind !== 'empty'} onOpen={(to) => navigate(to)} />}
     </StateMessage>
   );
 }
 
 /** Paste a plan link or choose the saved file. Same checks and words as the home page's "Open a plan link". */
-function OpenLink({ onOpen, autoFocus }: { onOpen(hash: string): void; autoFocus: boolean }) {
+function OpenLink({ onOpen, autoFocus }: { onOpen(to: PlanDestination): void; autoFocus: boolean }) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   const input = useRef<HTMLInputElement>(null);
@@ -81,15 +81,22 @@ function OpenLink({ onOpen, autoFocus }: { onOpen(hash: string): void; autoFocus
       return;
     }
     setError('');
-    onOpen('#' + r.fragment);
+    onOpen(r.to);
   }
 
   async function onFile(f: File | undefined) {
     if (!f) return;
+    if (f.size > MAX_PLAN_FILE_BYTES) {
+      setError('This saved plan is too large to open.');
+      return;
+    }
     let content = '';
-    try { content = f.size > 1_000_000 ? '' : await f.text(); } catch { content = ''; }
+    try { content = await f.text(); } catch {
+      setError("This file couldn't be read. Choose it again or paste the plan link.");
+      return;
+    }
     const r = checkPlanLink(content, NETWORK, 'file');
-    if (r.ok) onOpen('#' + r.fragment);
+    if (r.ok) onOpen(r.to);
     else setError(r.error);
   }
 
@@ -122,7 +129,7 @@ function OpenLink({ onOpen, autoFocus }: { onOpen(hash: string): void; autoFocus
       <input
         ref={file}
         type="file"
-        accept=".html,.htm,.txt,.url,text/html,text/plain"
+        accept=".json,.html,.htm,.txt,.url,application/json,text/html,text/plain"
         hidden
         onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ''; }}
       />

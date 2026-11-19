@@ -1,6 +1,6 @@
 // Small building blocks used only by the plan page.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { copyText } from './util';
+import { copyText } from '../../lib/clipboard';
 import { Check, ChevronDown, Copy } from 'lucide-react';
 import { formatBch, formatUsd, shortAddress } from '../../lib/format';
 

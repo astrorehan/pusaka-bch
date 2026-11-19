@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import type { Utxo } from '@solidcash/solidcash';
 import { Button, ButtonLink } from '../../components/Button';
-import * as api from '../../lib/chain/v2';
-import { formatBch } from '../../lib/format';
+import type * as api from '../../lib/chain/v2';
+import { formatBch, parseBch } from '../../lib/format';
+import { NETWORK } from '../../lib/networkName';
+import testPair from '../../lib/protocol/test-pair.json';
 import { useWallet } from '../../lib/wallet';
 import { planAddressHash, useCurrentPlan } from './currentPlan';
 import { walletPath } from './paths';
@@ -36,7 +38,7 @@ type Metadata = api.PusakaV2PlanMetadata;
 
 export function SwapScreen() {
   const { data, metadata, demo, loading, refresh, error } = useCurrentPlan();
-  const supported = api.NETWORK === 'chipnet' && Boolean(api.testPair.category);
+  const supported = NETWORK === 'chipnet' && Boolean(testPair.category);
 
   return (
     <div className="pw-page">
@@ -196,13 +198,16 @@ function SwapForm({
     setBusy(true);
     setIssue('');
     try {
-      if (quote) setPrepared(await api.prepareSwap(metadata, quote));
-      else {
-        const sats = api.parseBch(amount.trim());
-        if (sats <= 0n)
-          throw new Error('Enter a BCH amount greater than zero.');
+      if (quote) {
+        const { prepareSwap } = await import('../../lib/chain/v2');
+        setPrepared(await prepareSwap(metadata, quote));
+      } else {
+        const sats = parseBch(amount);
+        if (sats === null || sats <= 0n)
+          throw new Error('Enter an amount in BCH greater than zero with up to eight decimal places.');
+        const { getSwapQuote } = await import('../../lib/chain/v2');
         setQuote(
-          await api.getSwapQuote(sats, Math.round(Number(slippage) * 100)),
+          await getSwapQuote(sats, Math.round(Number(slippage) * 100)),
         );
       }
     } catch (error) {
@@ -342,15 +347,16 @@ export function TokenAssets({
   const [txid, setTxid] = useState('');
   const [busy, setBusy] = useState(false);
   if (metadata.protocolRevision !== 'assets-1') return null;
-  const address = data ? api.tokenVault(data.handle).tokenAddress : null;
+  const address = data?.tokenReceiveAddress;
   const owner =
     wallet && planAddressHash(wallet.address) === metadata.ownerPkhHex;
 
-  async function prepare(next: () => Promise<api.Prepared>) {
+  async function prepare(next: (chain: typeof api) => Promise<api.Prepared>) {
+    if (busy) return;
     setBusy(true);
     setError('');
     try {
-      setPrepared(await next());
+      setPrepared(await next(await import('../../lib/chain/v2')));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -384,7 +390,7 @@ export function TokenAssets({
               <div className="pw-row-main">
                 <strong className="num">
                   {utxo.token!.amount.toLocaleString('en-US')}{' '}
-                  {utxo.token!.category === api.testPair.category
+                  {utxo.token!.category === testPair.category
                     ? 'PSK'
                     : 'units'}
                 </strong>
@@ -413,7 +419,7 @@ export function TokenAssets({
                   variant="secondary"
                   disabled={busy}
                   onClick={() =>
-                    void prepare(() => api.prepareTokenPayout(metadata, utxo))
+                    void prepare((chain) => chain.prepareTokenPayout(metadata, utxo))
                   }
                 >
                   Pay heirs
@@ -458,17 +464,17 @@ export function TokenAssets({
             className="pw-form"
             onSubmit={(event) => {
               event.preventDefault();
-              void prepare(async () => {
-                const amount = BigInt(units.trim());
-                if (amount <= 0n)
+              void prepare(async (chain) => {
+                const value = units.trim();
+                if (!/^[0-9]{1,19}$/.test(value) || BigInt(value) <= 0n)
                   throw new Error(
                     'Enter a positive whole number of token units.',
                   );
-                return api.prepareTokenSend(
+                return chain.prepareTokenSend(
                   metadata,
                   receipt,
                   recipient.trim(),
-                  amount,
+                  BigInt(value),
                 );
               });
             }}

@@ -17,10 +17,9 @@ import { DOCS_URL, REPO_URL } from './banner-config';
 import { useWallet } from '../lib/wallet';
 import { planService } from '../lib/planService';
 import { formatBch, formatUsd, shortAddress } from '../lib/format';
+import { NETWORK } from '../lib/networkName';
 import { applyTheme, getTheme, type Theme } from '../lib/theme';
 import './shell.css';
-
-export const NETWORK: 'mainnet' | 'chipnet' = (import.meta.env.VITE_NETWORK as 'mainnet' | 'chipnet') ?? 'chipnet';
 
 /** On phones (under 480 px) the wallet button shortens to "Connect" so the header fits beside the logo, the
     test-network badge and the menu. With the full label it needed about 470 px and pushed the page sideways. */
@@ -152,7 +151,7 @@ export function WalletButton({ pill }: { pill: boolean }) {
       <div className="wallet-note-live" aria-live="polite">
         {note && (
           <p className="wallet-note" role="status">
-            Cancelled in your wallet. You can connect any time.
+            Wallet connection didn’t complete. You can try again.
           </p>
         )}
       </div>

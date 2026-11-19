@@ -173,6 +173,7 @@
 .pw-rules dt, .pw-details dt { color: var(--text-muted); font-size: 13px; }
 .pw-rules dd { grid-column: 2; margin: 0; font-size: 14px; font-weight: 620; }
 .pw-details > div { display: flex; align-items: baseline; justify-content: space-between; gap: 10px 16px; padding: 9px 0; }
+.pw-details dt { min-width: 0; overflow-wrap: anywhere; }
 .pw-details dd { min-width: 0; max-width: 62%; margin: 0; text-align: right; font-size: 13px; font-weight: 580; overflow-wrap: anywhere; }
 
 .pw-steps-list, .pw-timeline, .pw-rows { display: grid; list-style: none; margin: 0; padding: 0; }

@@ -8,7 +8,7 @@ import { planUrl } from '../../lib/planLink';
 import { heirAmounts, sharePercent } from '../../lib/shares';
 import type { PlanData } from '../../lib/types';
 import { LeaveDialog } from './LeaveDialog';
-import { copyText } from '../plan/util';
+import { copyText } from '../../lib/clipboard';
 import { heirColor } from './model';
 
 interface Props {
@@ -39,7 +39,7 @@ function planFile(plan: PlanData, url: string, amount: bigint): string {
 
 export function SuccessScreen({ plan, txid, amount, usd }: Props) {
   const url = planUrl(plan);
-  const path = url.slice(window.location.origin.length);
+  const path = `/plan${new URL(url).hash}`;
   const [saved, setSaved] = useState<Saved>(null);
   const [copied, setCopied] = useState(false);
   /** the owner chose "Leave anyway" */

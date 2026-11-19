@@ -11,26 +11,6 @@ export function useNow(ms: number): number {
   return now;
 }
 
-export async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Older browsers and insecure origins: fall back to a hidden textarea.
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch { ok = false; }
-    ta.remove();
-    return ok;
-  }
-}
-
 /** Heir colour for the i-th heir; repeats after five. */
 export const heirColor = (i: number) => `var(--heir-${(i % 5) + 1})`;
 

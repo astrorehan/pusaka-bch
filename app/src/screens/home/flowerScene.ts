@@ -7,7 +7,7 @@ import { disposeLandscapeTextures, loadLandscapeTextures } from './sawahAssets';
 import { createFlower, GRASP, SEED_HEIGHT } from './sawahFlower';
 import {
   domeFragment, domeVertex, egretFragment, egretVertex, fireflyFragment, fireflyVertex, mistFragment, mistVertex,
-  riceFragment, riceVertex, waterFragment, waterVertex,
+  riceFragment, riceVertex, waterFragment, waterVertex, WATER_DROP_LIFE, WATER_DROP_LIMIT,
 } from './sawahShaders';
 
 type FrameName = keyof typeof FRAMES;
@@ -33,6 +33,10 @@ const SUN_CRADLE = 0.78;
 const TAU = Math.PI * 2;
 /** A drag across the bloom's own radius turns it by this many radians, so it feels the same on any screen. */
 const TURN_PER_RADIUS = 1.5;
+const GREETING_LENGTH = 1.7;
+const ACTIVE_FRAME_MS = 1000 / 60;
+const SETTLE_FRAME_MS = 1000 / 30;
+const REFLECTION_INTERVAL = 1 / 24;
 
 // Use coarser texture mip levels as the landscape recedes, without blurring the foreground render.
 const blurBias = (strength: number) => strength * 0.3;
@@ -293,8 +297,9 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   // Neutral keeps the brand indigo and bronze true; only the bloom's own materials pass through it.
   renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.domElement.setAttribute('aria-hidden', 'true');
-  host.append(renderer.domElement);
+  const canvas = renderer.domElement;
+  canvas.setAttribute('aria-hidden', 'true');
+  host.append(canvas);
 
   const zone = host.closest<HTMLElement>('.home-hero') ?? host;
   const wideQuery = matchMedia(WIDE_QUERY);
@@ -306,6 +311,8 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   const rand = seeded(20261116);
 
   const scene = new THREE.Scene();
+  // Both render passes share the same world transforms.
+  scene.matrixWorldAutoUpdate = false;
   const fog = new THREE.FogExp2(0xffffff, 0.0115);
   scene.fog = fog;
   const camera = new THREE.PerspectiveCamera(30, 2.4, 0.5, 2000);
@@ -353,13 +360,14 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   let environment: THREE.WebGLRenderTarget | undefined;
 
   // ---- water
+  const drops = Array.from({ length: WATER_DROP_LIMIT }, () => new THREE.Vector4());
   const waterMaterial = new THREE.ShaderMaterial({
     vertexShader: waterVertex, fragmentShader: waterFragment, toneMapped: false,
     uniforms: {
       tReflection: { value: reflection.texture }, uTextureMatrix: { value: textureMatrix }, uTime, uFocal, uSunDir,
       uGlitter: { value: live.color.glitter }, uBody: { value: live.color.body }, uReflectMin: { value: 0.8 },
       uHaze, uFogDensity, uStem: { value: new THREE.Vector3(0, 0, reducedMotion ? 0.6 : 1) },
-      uDrops: { value: [new THREE.Vector4(0, 0, 0, 0), new THREE.Vector4(0, 0, 0, 0), new THREE.Vector4(0, 0, 0, 0)] },
+      uDrops: { value: drops }, uDropCount: { value: 0 },
       uLamp, uLampColor,
     },
   });
@@ -492,8 +500,6 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   // ---- the bloom: a water lily on its stem, with pads round its foot and its light in the air
   const flower = createFlower({ uSunDir, uTime, uFocal });
   scene.add(flower.plant, flower.pads, flower.aura, flower.core, flower.motes);
-  // A horizontal drag over the bloom turns it; a vertical one still scrolls the page on touch screens.
-  renderer.domElement.style.touchAction = 'pan-y';
 
   // ---------------------------------------------------------------- state
 
@@ -502,7 +508,10 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   let inView = true;
   let frame = 0;
   let lastDraw = 0;
-  let idle = 0;
+  let nextDraw = 0;
+  let nextMirror = 0;
+  let immediate = false;
+  let activeUntil = 0;
   let clock = 0;
   let motion = 0;
   let quality = 1;
@@ -513,13 +522,15 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   let themeMix = 0;
   let themeGoal = 0;
   let staleSky = true;
-  let nextDrop = 0;
-  let lastDropAt = 0;
+  let dropCount = 0;
   let bloomAt = -10;
   /** Bloom radius on screen, in CSS pixels; a drag is measured against it. */
   let bloomPixels = 200;
+  let zoneHeight = 1;
+  let latestMove: PointerEvent | null = null;
   const pointer = { x: 0, y: 0, open: 0, scroll: 0 };
   const eased = { x: 0, y: 0, open: 0, scroll: 0 };
+  const trail = { x: 0, y: 0, nextAt: 0, pressed: false };
   /**
    * The bloom's turn about its stem and its nod, with their speeds; `rest` is the whole turn it is settling on and
    * `pull` how quickly it gets there. `held` is the drag that has hold of it, if any.
@@ -530,9 +541,8 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
   } | null = null;
   const full = new THREE.Vector2(1, 1);
   const offset = new THREE.Vector2();
-  const size = new THREE.Vector2(1, 1);
+  const size = new THREE.Vector2();
   const lookAt = new THREE.Vector3();
-  const lastDrop = new THREE.Vector3(1e3, 0, 0);
   const hit = new THREE.Vector3();
   const ndc = new THREE.Vector2();
   const raycaster = new THREE.Raycaster();
@@ -610,7 +620,7 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
       applyPalette();
       staleSky = true;
     }
-    wake();
+    refresh();
   }
 
   function setShot(name: FrameName) {
@@ -637,23 +647,27 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     const name: FrameName = wideQuery.matches ? 'wide' : 'tall';
     if (name !== frameName || !started) setShot(name);
     const frameShape = FRAMES[name];
-    // Sharp enough, never wasteful: at most 1.5 device pixels and about two million of them.
-    const ratio = Math.max(0.75, Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(2e6 / (width * height)))) * quality;
-    renderer.setPixelRatio(ratio);
-    renderer.setSize(width, height, false);
-    reflection.setSize(Math.max(2, Math.round(width * ratio * 0.6)), Math.max(2, Math.round(height * ratio * 0.6)));
+    // Keep the scene within a pixel budget, with a softer reflection at half resolution.
+    const ratio = Math.min(window.devicePixelRatio || 1, 1.25, Math.sqrt(1.5e6 / (width * height))) * quality;
+    if (renderer.getPixelRatio() !== ratio) renderer.setPixelRatio(ratio);
+    if (width !== size.x || height !== size.y) renderer.setSize(width, height, false);
+    reflection.setSize(Math.max(2, Math.round(canvas.width * 0.5)), Math.max(2, Math.round(canvas.height * 0.5)));
     // Crop the base frame exactly as object-fit: cover crops the poster.
     if (width / height < frameShape.aspect) full.set(height * frameShape.aspect, height);
     else full.set(width, width / frameShape.aspect);
     offset.set((full.x - width) * frameShape.anchorX, (full.y - height) * frameShape.anchorY);
     size.set(width, height);
+    camera.setViewOffset(full.x, full.y, offset.x, offset.y, width, height);
+    // The mirror is upside down, which also swaps left and right.
+    mirror.setViewOffset(full.x, full.y, full.x - offset.x - width, offset.y, width, height);
+    zoneHeight = Math.max(zone.offsetHeight, 1);
     uFocal.value = (full.y * ratio) / (2 * Math.tan(THREE.MathUtils.degToRad(shot.fov) / 2));
     // The petals reach about a metre from the seed; that is how far a drag must go to turn it by TURN_PER_RADIUS.
     bloomPixels = uFocal.value / ratio / Math.hypot(shot.eye[0], shot.eye[1] - SEED_HEIGHT, shot.eye[2]);
     refresh();
   }
 
-  function placeCameras() {
+  function placeCamera() {
     const [ex, ey, ez] = shot.eye;
     const [lx, ly, lz] = shot.look;
     // Translate the eye and its target together. Turning the camera would sweep the sky and stars
@@ -663,17 +677,28 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     camera.position.set(ex + slideX, ey + slideY, ez);
     lookAt.set(lx + slideX, ly + slideY, lz);
     camera.lookAt(lookAt);
-    camera.setViewOffset(full.x, full.y, offset.x, offset.y, size.x, size.y);
     camera.updateMatrixWorld();
     dome.position.copy(camera.position);
     flare.position.copy(uSunDir.value).multiplyScalar(7.3).add(camera.position);
     flare.quaternion.copy(camera.quaternion);
-    // The mirrored camera is upside down, which also swaps left and right; mirror its crop to match.
+  }
+
+  function reflectScene() {
     mirror.position.set(camera.position.x, -camera.position.y, camera.position.z);
     mirror.lookAt(lookAt.x, -lookAt.y, lookAt.z);
-    mirror.setViewOffset(full.x, full.y, full.x - offset.x - size.x, offset.y, size.x, size.y);
     mirror.updateMatrixWorld();
+    // Keep the projection paired with its texture when the main scene reuses a mirror frame.
     textureMatrix.copy(bias).multiply(mirror.projectionMatrix).multiply(mirror.matrixWorldInverse);
+    water.visible = flare.visible = false;
+    domeMaterial.uniforms.uStars.value = live.level.stars * 0.3;
+    const focal = uFocal.value;
+    uFocal.value *= reflection.height / canvas.height;
+    renderer.setRenderTarget(reflection);
+    renderer.render(scene, mirror);
+    renderer.setRenderTarget(null);
+    uFocal.value = focal;
+    domeMaterial.uniforms.uStars.value = live.level.stars;
+    water.visible = flare.visible = true;
   }
 
   /** It turns a little toward the pointer, as if it had noticed. */
@@ -709,7 +734,7 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
 
   function pose() {
     // The petals open for the pointer, and once in greeting (or at a touch), with a swell of light; then home again.
-    const since = (clock - bloomAt) / 1.7;
+    const since = (clock - bloomAt) / GREETING_LENGTH;
     const greeting = since > 0 && since < 1 ? Math.sin(Math.PI * since) ** 2 : 0;
     flower.pose({
       time: clock, motion, spin: turn.angle, nod: turn.nod, open: Math.max(eased.open, greeting), pulse: greeting,
@@ -719,45 +744,58 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     uTime.value = clock;
   }
 
-  function draw() {
-    if (disposed || !started) return;
+  function draw(forceMirror: boolean) {
     if (staleSky) refreshSky();
-    placeCameras();
+    placeCamera();
     pose();
-    // The mirror pass: everything but the water itself, seen from below. Ripples draw mirrored stars into
-    // streaks, so the water keeps only a hint of them.
-    water.visible = flare.visible = false;
-    domeMaterial.uniforms.uStars.value = live.level.stars * 0.3;
-    renderer.setRenderTarget(reflection);
-    renderer.render(scene, mirror);
-    renderer.setRenderTarget(null);
-    domeMaterial.uniforms.uStars.value = live.level.stars;
-    water.visible = flare.visible = true;
+    scene.updateMatrixWorld();
+    if (forceMirror || clock + 0.002 >= nextMirror) {
+      reflectScene();
+      nextMirror = forceMirror ? clock + REFLECTION_INTERVAL : Math.max(clock + REFLECTION_INTERVAL * 0.5, nextMirror + REFLECTION_INTERVAL);
+    }
+    while (dropCount && clock - drops[0].z >= WATER_DROP_LIFE) discardDrop();
+    waterMaterial.uniforms.uDropCount.value = dropCount;
     renderer.render(scene, camera);
   }
 
-  const running = () => started && !disposed && inView && !document.hidden && !reducedMotion;
+  const canDraw = () => started && !disposed && inView && !document.hidden;
+
+  function stillMoving() {
+    const easing = Math.abs(pointer.x - eased.x) > 0.002 || Math.abs(pointer.y - eased.y) > 0.002 ||
+      Math.abs(pointer.open - eased.open) > 0.002 || Math.abs(pointer.scroll - eased.scroll) > 0.002;
+    const turning = !held && (Math.abs(turn.angle - turn.rest * TAU - facing()) > 0.004 ||
+      Math.abs(turn.nod - eased.y * 0.08) > 0.002 || Math.abs(turn.speed) > 0.02 || Math.abs(turn.nodSpeed) > 0.02);
+    return easing || turning;
+  }
 
   function tick(now: number) {
     frame = 0;
-    if (!running()) return;
-    frame = requestAnimationFrame(tick);
-    const elapsed = Math.min((now - lastDraw) / 1000, 0.1);
+    if (!canDraw()) return;
+    const active = now < activeUntil;
     const shifting = themeMix !== themeGoal;
-    const turning = held !== null || Math.abs(turn.speed) > 0.02 || Math.abs(turn.nodSpeed) > 0.02;
-    idle += elapsed;
-    // With nothing to react to, thirty frames a second carry the water and the breeze.
-    const budget = idle > 1.5 && !shifting && !turning ? 1 / 30 : 1 / 60;
-    if (elapsed < budget - 0.004) { idle -= elapsed; return; }
+    const interval = active || shifting ? ACTIVE_FRAME_MS : SETTLE_FRAME_MS;
+    const due = Math.min(nextDraw, lastDraw + interval);
+    if (!immediate && now + 1 < due) { wake(); return; }
+    const frameTime = lastDraw ? now - lastDraw : interval;
+    const elapsed = Math.min(frameTime / 1000, 0.08);
     lastDraw = now;
-    clock += elapsed;
-    motion = Math.min(1, motion + elapsed / 1.2);
-    const ease = 1 - Math.exp(-elapsed * 5);
-    eased.x += (pointer.x - eased.x) * ease;
-    eased.y += (pointer.y - eased.y) * ease;
-    eased.open += (pointer.open - eased.open) * ease;
-    eased.scroll += (pointer.scroll - eased.scroll) * ease;
-    spin(elapsed);
+    nextDraw = Math.max(now + interval * 0.5, due + interval);
+    const forceMirror = shifting || (held !== null && latestMove !== null);
+    immediate = false;
+    if (!reducedMotion) {
+      clock += elapsed;
+      motion = Math.min(1, motion + elapsed / 1.2);
+      if (latestMove) {
+        trackPointer(latestMove);
+        latestMove = null;
+      }
+      const ease = 1 - Math.exp(-elapsed * 5);
+      eased.x += (pointer.x - eased.x) * ease;
+      eased.y += (pointer.y - eased.y) * ease;
+      eased.open += (pointer.open - eased.open) * ease;
+      eased.scroll += (pointer.scroll - eased.scroll) * ease;
+      spin(elapsed);
+    }
     if (shifting) {
       const before = themeMix;
       themeMix = themeGoal > themeMix ? Math.min(themeGoal, themeMix + elapsed / 0.5) : Math.max(themeGoal, themeMix - elapsed / 0.5);
@@ -765,44 +803,63 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
       // The bloom's reflections follow the sky: once halfway through the change and once at its end.
       if (themeMix === themeGoal || (before - 0.5) * (themeMix - 0.5) < 0) staleSky = true;
     }
-    draw();
-    // A device that cannot keep up gets fewer pixels, twice at most.
-    load = load * 0.92 + (elapsed / budget) * 0.08;
-    if (++settled > 90 && load > 1.5 && quality > 0.65) {
-      quality *= 0.8;
-      settled = 0;
-      load = 1;
-      layout();
+    draw(forceMirror);
+    if (!reducedMotion && (active || dropCount || clock < bloomAt + GREETING_LENGTH || themeMix !== themeGoal || stillMoving())) {
+      // A device that consistently misses its frame budget shades fewer pixels.
+      if (quality > 0.65 && !forceMirror) {
+        load += (Math.min(frameTime / interval, 4) - load) * 0.08;
+        if (++settled > 24 && load > 1.45) {
+          quality *= 0.8;
+          settled = 0;
+          load = 1;
+          layout();
+        }
+      }
+      wake();
+    } else {
+      lastDraw = nextDraw = 0;
     }
   }
 
   function wake() {
-    if (disposed || !started) return;
-    if (reducedMotion) { draw(); return; }
-    if (!frame && running()) {
-      lastDraw = performance.now();
-      frame = requestAnimationFrame(tick);
-    }
+    if (!frame && canDraw()) frame = requestAnimationFrame(tick);
   }
 
-  /** Draw now when nothing else will: under reduced motion, or while the loop is paused. */
   function refresh() {
-    if (!started) return;
-    if (reducedMotion || !running()) draw();
-    else wake();
+    nextMirror = 0;
+    immediate = true;
+    wake();
+  }
+
+  function pause() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = lastDraw = nextDraw = 0;
+  }
+
+  function discardDrop() {
+    const oldest = drops[0];
+    drops.copyWithin(0, 1, dropCount);
+    drops[--dropCount] = oldest;
   }
 
   function ring(x: number, z: number, strength: number) {
-    waterMaterial.uniforms.uDrops.value[nextDrop].set(x, z, clock, strength);
-    nextDrop = (nextDrop + 1) % 3;
-    lastDropAt = clock;
-    lastDrop.set(x, 0, z);
+    if (dropCount === drops.length) discardDrop();
+    drops[dropCount++].set(x, z, clock, strength);
+  }
+
+  function interact(prompt = false) {
+    activeUntil = performance.now() + 160;
+    if (prompt) immediate = true;
+    wake();
   }
 
   /** Cast the pointer into the scene: how near it passes to the seed, and where it meets the water (in hit). */
   function aim(event: PointerEvent) {
     const stage = host.getBoundingClientRect();
-    ndc.set(((event.clientX - stage.left) / stage.width) * 2 - 1, 1 - ((event.clientY - stage.top) / stage.height) * 2);
+    const x = (event.clientX - stage.left) / stage.width;
+    const y = (event.clientY - stage.top) / stage.height;
+    ndc.set(x * 2 - 1, 1 - y * 2);
+    if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) return { near: Infinity, onWater: false };
     raycaster.setFromCamera(ndc, camera);
     const { origin, direction } = raycaster.ray;
     const reach = direction.y < -0.01 ? -origin.y / direction.y : Infinity;
@@ -828,62 +885,90 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     held.lastX = event.clientX;
     held.lastY = event.clientY;
     held.lastAt = event.timeStamp;
-    idle = 0;
-    wake();
+  }
+
+  function paintWater(event: PointerEvent, pressed: boolean, gap: number) {
+    ring(hit.x, hit.z, pressed ? 1.3 : 0.55);
+    trail.x = event.clientX;
+    trail.y = event.clientY;
+    trail.nextAt = event.timeStamp + gap;
+  }
+
+  function trackPointer(event: PointerEvent) {
+    if (held) { drag(event); return; }
+    const { near, onWater } = aim(event);
+    pointer.x = clamp(ndc.x, -1, 1);
+    pointer.y = clamp(-ndc.y, -1, 1);
+    pointer.open = 1 - THREE.MathUtils.smoothstep(near, 0.9, 2.3);
+    const cursor = near < GRASP ? 'grab' : '';
+    if (canvas.style.cursor !== cursor) canvas.style.cursor = cursor;
+    const pressed = (event.buttons & 1) !== 0;
+    if (!onWater || near < GRASP || (!pressed && event.buttons !== 0)) {
+      trail.pressed = false;
+      return;
+    }
+    // Measure brush spacing on screen so the trail feels consistent at different water depths.
+    const spacing = pressed ? 14 : 34;
+    const moved = Math.hypot(event.clientX - trail.x, event.clientY - trail.y) >= spacing;
+    if ((pressed && !trail.pressed) || (event.timeStamp >= trail.nextAt && moved)) {
+      paintWater(event, pressed, pressed ? 80 : 180);
+    }
+    trail.pressed = pressed;
   }
 
   function onPointerMove(event: PointerEvent) {
-    if (held && event.pointerId === held.id) {
-      drag(event);
-      return;
-    }
-    if (event.pointerType === 'touch') return;
-    const area = zone.getBoundingClientRect();
-    pointer.x = clamp(((event.clientX - area.left) / area.width - 0.5) * 2, -1, 1);
-    pointer.y = clamp(((event.clientY - area.top) / area.height - 0.5) * 2, -1, 1);
-    // Near the bloom the petals open and it can be taken hold of; over the water the pointer leaves a ring.
-    const { near, onWater } = aim(event);
-    pointer.open = 1 - THREE.MathUtils.smoothstep(near, 0.9, 2.3);
-    renderer.domElement.style.cursor = near < GRASP ? 'grab' : '';
-    if (onWater && near >= GRASP && clock - lastDropAt > 0.35 && hit.distanceTo(lastDrop) > 0.7) ring(hit.x, hit.z, 1);
-    idle = 0;
-    wake();
+    if (!event.isPrimary || (held ? event.pointerId !== held.id : event.pointerType === 'touch')) return;
+    latestMove = event;
+    interact();
   }
 
   /** A press on the bloom takes hold of it; a press elsewhere on the water leaves a ring. */
   function onPointerDown(event: PointerEvent) {
-    if (held) return;
+    if (held || !event.isPrimary || event.button !== 0) return;
+    latestMove = null;
     const { near, onWater } = aim(event);
-    if (near < GRASP && event.target instanceof Node && host.contains(event.target)) {
+    if (near < GRASP) {
       held = {
         id: event.pointerId, x: event.clientX, y: event.clientY, at: event.timeStamp, lastX: event.clientX, lastY: event.clientY,
         lastAt: event.timeStamp, moved: false, caught: Math.abs(turn.speed) > 1,
       };
       // Keep the drag even when the pointer leaves the canvas; without capture it still works inside it.
-      try { renderer.domElement.setPointerCapture(event.pointerId); } catch { /* not an active pointer */ }
-      renderer.domElement.style.cursor = 'grabbing';
+      try { canvas.setPointerCapture(event.pointerId); } catch { /* not an active pointer */ }
+      canvas.style.cursor = 'grabbing';
       // No text selection or image drag while the bloom is held; catching a spinning bloom stops it.
       event.preventDefault();
       turn.speed = 0;
       turn.nodSpeed = 0;
-    } else if (onWater) ring(hit.x, hit.z, 1.3);
-    idle = 0;
-    wake();
+    } else if (onWater) {
+      // The first stroke can follow the splash as soon as the pointer moves far enough.
+      paintWater(event, true, 0);
+      trail.pressed = true;
+    } else return;
+    interact(true);
   }
 
   function release() {
     if (!held) return;
     const { id } = held;
     held = null;
-    if (renderer.domElement.hasPointerCapture(id)) renderer.domElement.releasePointerCapture(id);
+    if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
   }
 
   /** Letting go throws the bloom if it was dragged; a short press that did not move is a tap, and the bloom answers it. */
   function onPointerUp(event: PointerEvent) {
-    if (!held || event.pointerId !== held.id) return;
+    if (!event.isPrimary) return;
+    if (!held) {
+      if (latestMove) trackPointer(latestMove);
+      latestMove = null;
+      trail.pressed = false;
+      return;
+    }
+    if (event.pointerId !== held.id) return;
+    if (latestMove) drag(latestMove);
+    latestMove = null;
     const { moved, caught, at, lastAt } = held;
     release();
-    renderer.domElement.style.cursor = event.pointerType === 'mouse' ? 'grab' : '';
+    canvas.style.cursor = event.pointerType === 'mouse' && aim(event).near < GRASP ? 'grab' : '';
     if (moved) {
       // A drag that came to rest before letting go is set down, not thrown.
       letGo(event.timeStamp - lastAt > 90 ? 0 : clamp(turn.speed, -18, 18));
@@ -895,52 +980,66 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     } else {
       letGo(0);
     }
-    idle = 0;
-    wake();
+    interact(true);
   }
 
   function onPointerCancel(event: PointerEvent) {
-    if (!held || event.pointerId !== held.id) return;
-    release();
-    renderer.domElement.style.cursor = '';
-    letGo(0);
+    if (held?.id === event.pointerId || (!held && event.type === 'pointercancel' && event.isPrimary)) resetPointer();
+  }
+
+  function resetPointer() {
+    if (held) { release(); letGo(0); }
+    latestMove = null;
+    pointer.x = pointer.y = pointer.open = 0;
+    trail.nextAt = 0;
+    trail.pressed = false;
+    canvas.style.cursor = '';
     wake();
   }
 
-  function onPointerLeave() {
-    pointer.x = pointer.y = pointer.open = 0;
-    idle = 0;
-    wake();
+  function onPointerLeave(event: PointerEvent) {
+    if (!held && event.isPrimary) resetPointer();
   }
 
   function onScroll() {
-    pointer.scroll = clamp(window.scrollY / Math.max(zone.offsetHeight, 1), 0, 1);
-    idle = 0;
+    const scroll = clamp(window.scrollY / zoneHeight, 0, 1);
+    if (scroll === pointer.scroll) return;
+    pointer.scroll = scroll;
     wake();
+  }
+
+  function updateVisibility() {
+    if (canDraw()) {
+      if (!reducedMotion) onScroll();
+      refresh();
+    } else {
+      resetPointer();
+      pause();
+    }
   }
 
   const resized = new ResizeObserver(layout);
   resized.observe(host);
   const visible = new IntersectionObserver(([entry]) => {
     inView = entry.isIntersecting;
-    if (inView) refresh();
-    else { cancelAnimationFrame(frame); frame = 0; }
+    updateVisibility();
   });
   visible.observe(host);
   const themed = new MutationObserver(theme);
   themed.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   scheme.addEventListener('change', theme);
   wideQuery.addEventListener('change', layout);
-  document.addEventListener('visibilitychange', refresh);
-  renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+  document.addEventListener('visibilitychange', updateVisibility);
+  canvas.addEventListener('webglcontextlost', onContextLost);
   if (!reducedMotion) {
-    zone.addEventListener('pointermove', onPointerMove);
-    zone.addEventListener('pointerleave', onPointerLeave);
-    zone.addEventListener('pointerdown', onPointerDown);
-    zone.addEventListener('pointerup', onPointerUp);
-    zone.addEventListener('pointercancel', onPointerCancel);
-    renderer.domElement.addEventListener('lostpointercapture', onPointerCancel);
+    canvas.addEventListener('pointermove', onPointerMove, { passive: true });
+    canvas.addEventListener('pointerleave', onPointerLeave);
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerCancel);
+    canvas.addEventListener('lostpointercapture', onPointerCancel);
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('blur', resetPointer);
   }
   theme();
   layout();
@@ -968,7 +1067,7 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     terraceMaterial.needsUpdate = bankMaterial.needsUpdate = true;
     applyPalette();
     refreshSky();
-    placeCameras();
+    placeCamera();
     await renderer.compileAsync(scene, camera);
     if (disposed) return;
     started = true;
@@ -976,10 +1075,13 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
     if (!reducedMotion) {
       bloomAt = 0.25;
       ring(0.02, 0, 1);
+      onScroll();
     }
-    layout();
-    draw();
-    wake();
+    if (canDraw()) {
+      draw(true);
+      immediate = false;
+      if (!reducedMotion) wake();
+    }
   })();
 
   return {
@@ -988,27 +1090,28 @@ export function mountFlowerScene(host: HTMLElement, reducedMotion: boolean, onCo
       if (disposed) return;
       disposed = true;
       controller.abort();
-      cancelAnimationFrame(frame);
+      pause();
       resized.disconnect();
       visible.disconnect();
       themed.disconnect();
       scheme.removeEventListener('change', theme);
       wideQuery.removeEventListener('change', layout);
-      document.removeEventListener('visibilitychange', refresh);
-      zone.removeEventListener('pointermove', onPointerMove);
-      zone.removeEventListener('pointerleave', onPointerLeave);
-      zone.removeEventListener('pointerdown', onPointerDown);
-      zone.removeEventListener('pointerup', onPointerUp);
-      zone.removeEventListener('pointercancel', onPointerCancel);
-      renderer.domElement.removeEventListener('lostpointercapture', onPointerCancel);
+      document.removeEventListener('visibilitychange', updateVisibility);
+      canvas.removeEventListener('pointermove', onPointerMove);
+      canvas.removeEventListener('pointerleave', onPointerLeave);
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointerup', onPointerUp);
+      canvas.removeEventListener('pointercancel', onPointerCancel);
+      canvas.removeEventListener('lostpointercapture', onPointerCancel);
       window.removeEventListener('scroll', onScroll);
-      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      window.removeEventListener('blur', resetPointer);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
       disposeTree(scene, skyScene);
       reflection.dispose();
       environment?.dispose();
       pmrem.dispose();
       renderer.dispose();
-      renderer.domElement.remove();
+      canvas.remove();
     },
   };
 }
