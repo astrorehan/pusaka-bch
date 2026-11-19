@@ -1,15 +1,15 @@
 # App and fungible asset release
 
-18 November 2026. This is the current implementation and qualification record.
-Stages 4 and 5 have executable app and contract implementations. Stage 6 has a
-published Chipnet demo, automated qualification and a Paytaca phone signing check
-on Chipnet. V2 mainnet transactions and a qualified mainnet trading pair remain
-open gates.
+18 November 2026, test counts updated 19 November. The implementation record for the app and the
+token-enabled plan revision (`assets-1`), with the swap and token payout run on Chipnet and the Paytaca
+phone signing check. The whole wallet lifecycle on 19 November is recorded separately in
+[v2-live.md](v2-live.md). What this record does not yet show is listed [at the end](#not-yet-shown).
 The previous funded v1 mainnet plan was not migrated or spent.
 
 ## Application
 
-Public demo: https://astrorehan.github.io/pusaka-bch/wallet/demo
+Published app: https://astrorehan.github.io/pusaka-bch/ (mainnet) and
+https://astrorehan.github.io/pusaka-bch/chipnet/ (Chipnet). Example plans: `/wallet/demo` on either.
 
 The desktop sidebar folds into a rail. Phones use a drawer. Wallet, inheritance,
 activity, setup and swap are separate routes. Transaction dialogs show recipients,
@@ -119,32 +119,27 @@ same browser.
 
 ## Automated qualification
 
-- Compiler: 12 contracts compile without errors.
-- V2, metadata, review and asset suites: **18/18** pass under the BCH 2026 VM and
-  strict BIP68 verifier. Coverage includes actual pool script execution, early
-  payout rejection, recipient hijack, policy changes, 10 heirs, tiny indivisible
-  amounts, partial token sends, protected token change, expired quotes and theft.
-- V1 / Stage 1 / Stage 2: **26/26** pass.
+- Compiler: all 11 contract files compile without errors.
+- SolidHat contract tests: **58/58** pass (`npm test` in `contract/`) under the BCH 2026 VM and a
+  strict BIP68 verifier. The v2, metadata, review and asset suites cover actual pool script execution,
+  early payout rejection, recipient hijack, policy changes, 10 heirs, tiny indivisible amounts, partial
+  token sends, protected token change, expired quotes and theft; the rest cover v1 and stages 1 and 2.
 - WizardConnect actual JSON transport: **3/3** pass, including tampered-output rejection.
-- Browser tests: **2/2** pass locally and **2/2** on the hosted app. They exercise
-  setup, faraid, phone navigation and live public plan recovery without signing.
+- Browser tests: **6/6** pass (`npm run test:ui` in `app/`). They exercise setup validation, the
+  desktop, tablet and phone layouts, a live public Chipnet plan without signing, recoverable errors,
+  wallet pairing and the landing page.
 - Normal, mainnet and hosted-path production builds pass TypeScript and Vite.
 
 These are selected applicable tests, not a claim that every historical scratch
 test in this repository passes. Mainnet builds compiling does not prove mainnet
 execution. A phone-sized browser viewport does not prove Paytaca mobile signing.
 
-## Remaining user-dependent qualification
+## Not yet shown
 
 1. Paytaca on the phone: creation, rejection, partial send and reconnect passed on
-   Chipnet (above). Still open: receive into the plan, send again, and restore
-   from saved plan data in a fresh session.
-2. Use small reviewed v2 mainnet transactions to prove owner use, false-claim
-   cancellation and the valid multi-heir lifecycle. Keep the existing v1 plan separate.
-3. Select and review a real mainnet fungible pair, then prove protected proceeds
-   and token payout with wallet approvals. The Chipnet test token is not that proof.
-4. Transfer the current presentation content into the organiser's Slides template
-   and set the public presentation URL. The checked-in outline is the release content.
-
-No seed phrase is needed for these checks. The app must never label this release
-fully mainnet-qualified until those receipts exist.
+   Chipnet (above). Not yet run on the phone: receive into the plan, a second send,
+   and restore from saved plan data in a fresh session.
+2. The v2 lifecycle on mainnet. It ran end to end on Chipnet ([v2-live.md](v2-live.md));
+   the earlier v1 plan is the mainnet record so far, and stays separate.
+3. A mainnet token pair. Swaps and token payouts are proven with the Chipnet test token
+   above, which is not that proof, so the mainnet app does not offer swaps yet.

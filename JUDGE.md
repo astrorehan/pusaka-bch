@@ -8,7 +8,7 @@ is in the [README](README.md).
 | **Web app** (Bitcoin Cash mainnet) | https://astrorehan.github.io/pusaka-bch/ |
 | **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
 | **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ · [its demo](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) |
-| **Presentation** | Linked from the banner at the top of every page of the app |
+| **Presentation** | [Pusaka-BCH-BLAZE-2026.pdf](docs/Pusaka-BCH-BLAZE-2026.pdf), also linked from the banner at the top of every page of the app |
 | **Code now** | https://github.com/astrorehan/pusaka-bch (`main`) |
 | **Code before BLAZE** | tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) and [Pusaka on Monad](https://github.com/astrorehan/pusaka) |
 | **Demo before BLAZE** | [pusaka-faraid.vercel.app](https://pusaka-faraid.vercel.app) (the Monad version) |
@@ -51,8 +51,8 @@ its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)),
 
 The demo picks whichever example plan has the most to do: a payout that is ready, then a claim anyone can open,
 then one still under review. The example plans and their transactions are listed in
-[`docs/proofs/v2-live.md`](docs/proofs/v2-live.md). If every mainnet example has been used, the page links to the
-same demo on Chipnet.
+[`docs/proofs/v2-live.md`](docs/proofs/v2-live.md). While mainnet has no example plans, the link opens the same
+demo on Chipnet; once every mainnet example has paid its heirs, the page links there.
 
 ## The owner path: five minutes, with Paytaca or Cashonize
 

@@ -1,17 +1,16 @@
 # Pusaka v2 delivery scope
 
-18 November 2026. Work breakdown implementing [PRODUCT.md](PRODUCT.md).
-Stages 1?3 and the app/asset implementations for stages 4?5 are available.
-The current selected suites pass 18 v2/asset tests, 26 earlier contract tests and
-3 wallet transport tests. Two browser tests pass locally and on the published
-Chipnet app. Live Chipnet proves swap, protected token return, contact quorum,
-early-finalize rejection, mature BCH payout and the exact multi-heir token payout.
-See [current evidence and open qualification gates](proofs/app-and-assets.md).
+18 November 2026, status updated 19 November. The work breakdown that implemented
+[PRODUCT.md](PRODUCT.md), kept as the plan of record. Stages 1 to 5 are implemented. All
+58 SolidHat tests, 3 wallet transport tests and 6 browser tests pass. Chipnet proves swap,
+protected token return, contact quorum, early-finalize rejection, mature BCH payout and the
+exact multi-heir token payout ([record](proofs/app-and-assets.md)), and on 19 November the
+whole wallet lifecycle in one plan ([record](proofs/v2-live.md)).
 
-Stage 6 remains partially qualified. Paytaca phone signing passed on Chipnet for
-creation, rejection, partial send and reconnect. V2 mainnet transactions, a mainnet
-pair and the organiser's public presentation upload need user participation. A public Chipnet release and demo script are available.
-The existing v1 mainnet plan remains separate and untouched.
+Stage 6 is partly done: the app is published for mainnet and Chipnet, and Paytaca phone
+signing passed on Chipnet for creation, rejection, partial send and reconnect. V2
+transactions on mainnet and a mainnet token pair are still to come. The existing v1 mainnet
+plan remains separate and untouched.
 
 ## Intended outcome
 
