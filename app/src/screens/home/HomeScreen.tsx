@@ -16,6 +16,7 @@ import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL, SOLIDCASH_URL } from './links';
 import { ButtonLink } from '../../components/Button';
 import { BASE } from '../../lib/asset';
+import { NETWORK } from '../../lib/networkName';
 import './home.css';
 import './home-hero.css';
 import './home-landing.css';
@@ -45,10 +46,12 @@ export function HomeScreen() {
             Choose who gets your Bitcoin Cash. If you stop checking in, your family can receive their shares.
           </p>
           <div className="home-hero__ctas">
-            <ButtonLink to="/wallet/demo" size="lg" className="pill-fx">
-              Try it now <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
+            <ButtonLink to={NETWORK === 'chipnet' ? '/wallet/demo' : '/new'} size="lg" className="pill-fx">
+              {NETWORK === 'chipnet' ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
-            <ButtonLink to="/new" variant="secondary" size="lg" className="pill-fx">Create a plan</ButtonLink>
+            <ButtonLink to={NETWORK === 'chipnet' ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">
+              {NETWORK === 'chipnet' ? 'Create a plan' : 'How it works'}
+            </ButtonLink>
           </div>
           <section className="home-built home-built--hero" aria-label="Built with">
             <p className="home-label">Built with</p>

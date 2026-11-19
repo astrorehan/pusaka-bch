@@ -23,11 +23,12 @@ import {
   WalletCards,
   X,
 } from 'lucide-react';
-import { NETWORK, WalletButton } from '../../components/AppShell';
+import { WalletButton } from '../../components/AppShell';
 import { Banner } from '../../components/Banner';
 import { Logo } from '../../components/Logo';
 import { useMedia } from '../../components/useMedia';
 import { shortAddress } from '../../lib/format';
+import { NETWORK } from '../../lib/networkName';
 import { applyTheme, getTheme } from '../../lib/theme';
 import { useWallet } from '../../lib/wallet';
 import { isDemoWallet, walletPath } from './paths';

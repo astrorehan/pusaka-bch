@@ -18,7 +18,8 @@ import { Button } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
 import { explorerTxUrl, shortAddress } from '../../lib/format';
-import * as api from '../../lib/chain/v2';
+import type { Prepared } from '../../lib/chain/v2';
+import { NETWORK } from '../../lib/networkName';
 import './wallet-app.css';
 
 export function Card({
@@ -168,7 +169,7 @@ export function TransactionNotice({
       <div>
         Transaction accepted by the network.{' '}
         <a
-          href={explorerTxUrl(txid, api.NETWORK)}
+          href={explorerTxUrl(txid, NETWORK)}
           target="_blank"
           rel="noreferrer"
         >
@@ -238,7 +239,7 @@ export function TransactionReview({
   close,
   done,
 }: {
-  prepared: api.Prepared;
+  prepared: Prepared;
   close: () => void;
   done: (txid: string) => void;
 }) {
@@ -248,10 +249,12 @@ export function TransactionReview({
   const actionLabel = walletApproval ? 'Approve in wallet' : 'Send transaction';
 
   async function approve() {
+    if (busy) return;
     setBusy(true);
     setError('');
     try {
-      done(await api.submit(prepared));
+      const { submit } = await import('../../lib/chain/v2');
+      done(await submit(prepared));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setBusy(false);
@@ -298,7 +301,7 @@ export function TransactionReview({
         <Details rows={prepared.rows} />
         {error && <ErrorNotice>{error}</ErrorNotice>}
         <p className="pw-fine">
-          {api.NETWORK === 'chipnet'
+          {NETWORK === 'chipnet'
             ? 'This uses test BCH.'
             : 'This transaction uses real BCH.'}{' '}
           Confirmation follows after the network includes it in a block.

@@ -97,12 +97,10 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(
     page.getByRole("note").filter({ hasText: "Live Chipnet proof wallet" }),
   ).toBeVisible();
-  await expect(
-    page.getByText("Protected BCH balance", { exact: true }),
-  ).toBeVisible();
   await expect(page.locator(".pw-balance-number")).toContainText(/\d/, {
-    timeout: 55000,
+    timeout: 30_000,
   });
+  await expect(page.getByText("Protected BCH balance", { exact: true })).toBeVisible();
   await expect(page.locator(".pw-error")).toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath("wallet-live-desktop.png"),
@@ -164,7 +162,12 @@ test("real public Chipnet plan follows the demo between screens without replacin
   const shared = readFileSync(
     new URL("../src/lib/protocol/demo-plan.json", import.meta.url),
   ).toString("base64url");
-  await page.goto(`v2/plan#${shared}`);
+  await page.goto("./");
+  await page.getByRole("button", { name: "Open a plan link", exact: true }).click();
+  const opener = page.getByRole("dialog", { name: "Open a plan link" });
+  await opener.getByRole("textbox", { name: "Plan link", exact: true }).fill(`/v2/plan#${shared}`);
+  await opener.getByRole("button", { name: "Open plan", exact: true }).click();
+  await expect(page).toHaveURL(/\/v2\/plan#/);
   await expect(
     page.getByRole("heading", { name: "Your heirs", exact: true }),
   ).toBeVisible({ timeout: 20000 });
@@ -229,4 +232,64 @@ test("the workspace folds on desktop, opens a drawer on tablet, and keeps the la
   await page.goto("./");
   await expect(page.locator(".shell--home")).toBeVisible();
   await expect(page.locator(".pw-app")).toHaveCount(0);
+});
+
+test("invalid saved plan data and failed copies have recoverable messages", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => {
+    localStorage.setItem("pusaka.v2.plans.chipnet", "{}");
+    localStorage.setItem("pusaka.v2.activity.chipnet", "[null,{}]");
+    navigator.clipboard.writeText = async () => { throw new Error("Clipboard unavailable"); };
+    document.execCommand = () => false;
+  });
+  await page.goto("wallet");
+  await expect(page.getByRole("heading", { name: "Create your protected wallet" })).toBeVisible();
+  const copy = page.getByRole("button", { name: "Copy donation address (accepts CashTokens)" });
+  await copy.click();
+  await expect(copy).toHaveAttribute("title", "Could not copy");
+  await expect(copy).toBeFocused();
+
+  await page.getByRole("button", { name: "Open a plan", exact: true }).click();
+  const opener = page.getByRole("dialog", { name: "Open a saved plan" });
+  await opener.getByLabel("Or choose saved plan data").setInputFiles({
+    name: "large-plan.json",
+    mimeType: "application/json",
+    buffer: Buffer.alloc(1_000_001),
+  });
+  await expect(opener.getByRole("alert")).toContainText("too large");
+
+  const saved = JSON.parse(readFileSync(new URL("../src/lib/protocol/demo-plan.json", import.meta.url), "utf8"));
+  await opener.getByRole("textbox").fill(JSON.stringify({ ...saved, network: "mainnet" }));
+  await opener.getByRole("button", { name: "Open plan", exact: true }).click();
+  await expect(opener.getByRole("alert")).toContainText("This site uses the test network");
+  await opener.getByRole("textbox").fill(JSON.stringify({ ...saved, heirs: null }));
+  await opener.getByRole("button", { name: "Open plan", exact: true }).click();
+  await expect(opener.getByRole("alert")).toContainText("Paste the complete plan link");
+  await expect(page).toHaveURL(/\/wallet$/);
+});
+
+test("wallet pairing opens an accessible QR and wallet link under the production policy", async ({ page }) => {
+  const violations: string[] = [];
+  page.on("console", (message) => {
+    if (message.text().includes("Content Security Policy")) violations.push(message.text());
+  });
+  await page.setViewportSize({ width: 320, height: 750 });
+  await page.goto("wallet");
+  await page.getByRole("button", { name: "Connect wallet", exact: true }).click();
+  const pairing = page.getByRole("dialog", { name: "Connect your wallet" });
+  await expect(pairing.getByRole("img", { name: "Wallet connection QR code" })).toBeVisible();
+  await expect(pairing.getByRole("link", { name: "Open in wallet" })).toHaveAttribute("href", /^wiz:\/\//);
+  await page.keyboard.press("Escape");
+  await expect(pairing).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toBeEnabled();
+  expect(violations).toEqual([]);
+
+  const inlineScriptRan = await page.evaluate(() => {
+    const script = document.createElement("script");
+    script.textContent = "document.documentElement.dataset.policyProbe = 'ran'";
+    document.head.append(script);
+    script.remove();
+    return document.documentElement.dataset.policyProbe === "ran";
+  });
+  expect(inlineScriptRan).toBe(false);
 });

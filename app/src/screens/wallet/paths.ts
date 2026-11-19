@@ -1,11 +1,14 @@
-import { NETWORK } from '../../components/AppShell';
+import { NETWORK } from '../../lib/networkName';
+
+export function isDemoRoute(pathname: string, search: string) {
+  const route = pathname.toLowerCase().replace(/\/$/, '');
+  return route === '/wallet/demo' ||
+    (['/wallet', '/wallet/plan', '/wallet/swap', '/wallet/activity'].includes(route) &&
+      new URLSearchParams(search).get('demo') === '1');
+}
 
 export function isDemoWallet(pathname: string, search: string) {
-  return (
-    NETWORK === 'chipnet' &&
-    (pathname.replace(/\/$/, '') === '/wallet/demo' ||
-      new URLSearchParams(search).get('demo') === '1')
-  );
+  return NETWORK === 'chipnet' && isDemoRoute(pathname, search);
 }
 
 export function walletPath(path: string, demo: boolean) {

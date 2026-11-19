@@ -1,7 +1,7 @@
 // The plan-link card: copy, the native share sheet where there is one, and a calendar reminder.
 import { useEffect, useRef, useState } from 'react';
 import { CalendarPlus, Check, Copy, Share } from 'lucide-react';
-import { copyText } from './util';
+import { copyText } from '../../lib/clipboard';
 
 interface Props {
   url: string;

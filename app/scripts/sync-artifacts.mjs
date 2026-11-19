@@ -6,6 +6,13 @@ const names = [
   "PusakaAssetPlan",
   "PusakaTokenVault",
 ];
+
+function comparableArtifact(artifact) {
+  // Checkout line endings change the compiler's source text and build timestamp.
+  const { updatedAt: _updatedAt, source, ...compiled } = artifact;
+  return { ...compiled, source: source?.replace(/\r\n/g, "\n") };
+}
+
 for (const name of names) {
   const source = new URL(
     `../../contract/artifacts/solidcash/contracts/${name}.scash/${name}.json`,
@@ -18,8 +25,8 @@ for (const name of names) {
   const data = JSON.stringify(artifact, null, 2) + "\n";
   if (process.argv.includes("--check")) {
     if (
-      JSON.stringify(JSON.parse(await readFile(target, "utf8"))) !==
-      JSON.stringify(artifact)
+      JSON.stringify(comparableArtifact(JSON.parse(await readFile(target, "utf8")))) !==
+      JSON.stringify(comparableArtifact(artifact))
     )
       throw new Error(`Stale bundled artifact: ${name}`);
   } else await writeFile(target, data);

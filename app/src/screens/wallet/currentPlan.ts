@@ -1,10 +1,9 @@
 import { useOutletContext } from 'react-router-dom';
-import { addressPrefix, binToHex, pkhOfAddress } from '../../lib/chain/network';
-import {
-  NETWORK,
-  type LoadedPlan,
-  type PusakaV2PlanMetadata,
-} from '../../lib/chain/v2';
+import { binToHex } from '@bitauth/libauth/build/lib/format/hex.js';
+import { addressPrefix, toBytes20 } from '../../lib/cashAddress';
+import type { LoadedPlan } from '../../lib/chain/v2';
+import { NETWORK } from '../../lib/networkName';
+import type { PusakaV2PlanMetadata } from '../../lib/protocol/plan-metadata';
 
 export const planAddressPrefix = `${addressPrefix(NETWORK)}:`;
 
@@ -12,7 +11,7 @@ export function planAddressHash(value: string) {
   const address = value.trim();
   if (!address.startsWith(planAddressPrefix)) return null;
   try {
-    const payload = pkhOfAddress(address);
+    const payload = toBytes20(address);
     return payload.length === 20 ? binToHex(payload) : null;
   } catch {
     return null;
@@ -27,7 +26,7 @@ export interface CurrentPlan {
   canRefresh: boolean;
   error: string;
   refresh(): Promise<void>;
-  selectPlan(plan: PusakaV2PlanMetadata, data?: LoadedPlan): void;
+  selectPlan(plan: PusakaV2PlanMetadata): void;
 }
 
 export function useCurrentPlan() {

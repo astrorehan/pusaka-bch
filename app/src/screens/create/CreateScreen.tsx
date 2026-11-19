@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '../../components/Button';
-import { NETWORK } from '../../components/AppShell';
+import { NETWORK } from '../../lib/networkName';
 import { planService } from '../../lib/planService';
 import type { PlanData, SplitMode } from '../../lib/types';
 import { useWallet } from '../../lib/wallet';

@@ -8,127 +8,55 @@
     <meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0E1222" media="(prefers-color-scheme: dark)" />
     <title>Pusaka: Your BCH. Their future.</title>
+    <meta name="referrer" content="no-referrer" />
     <script>
-      // Before first paint: apply the saved theme (no flash of the wrong one), and run the splash clock.
-      // The splash greets every full page load with one bloom (DESIGN.md "The bloom"); in-app navigation skips it.
-      (function () {
-        try {
-          var t = localStorage.getItem('pusaka-theme');
-          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
-        // The bloom takes 700 ms. Then the line glides to full, and the splash lifts while the page settles in.
-        var BLOOM = 700, FINISH = 360, LIFT = 700, REVEAL = 1600, shownAt = 0;
-        var root = document.documentElement;
-        function el() { return document.getElementById('splash'); }
-        window.__pusakaSplash = {
-          // Called right after the splash markup, so it covers the very first paint.
-          show: function () {
-            var s = el();
-            if (!s) return;
-            s.classList.add('show'); shownAt = performance.now();
-            root.classList.add('splashing'); // holds the page's entrance until the splash lifts
-          },
-          // Called by the app once it has rendered.
-          hide: function () {
-            var s = el();
-            if (!s) return;
-            if (!shownAt) { s.remove(); return; }
-            var wait = Math.max(0, BLOOM - (performance.now() - shownAt)); // let the bloom finish
-            setTimeout(function () {
-              // Finish the line from wherever it has reached, so it never jumps.
-              var fill = s.querySelector('.line i');
-              if (fill && fill.animate) {
-                var now = getComputedStyle(fill).transform;
-                fill.style.animation = 'none';
-                fill.animate([{ transform: now }, { transform: 'scaleX(1)' }],
-                  { duration: FINISH, easing: 'cubic-bezier(0.33, 0, 0.2, 1)', fill: 'forwards' });
-              }
-              setTimeout(function () {
-                s.classList.add('done');
-                root.classList.remove('splashing');
-                root.classList.add('splash-reveal');
-                setTimeout(function () { s.remove(); }, LIFT);
-                setTimeout(function () { root.classList.remove('splash-reveal'); }, REVEAL);
-              }, FINISH - 80);
-            }, wait);
-          },
-        };
-      })();
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {}
+      const base = '%BASE_URL%';
+      if (location.pathname.replace(/\/$/, '') === base.slice(0, -1)) {
+        const frame = matchMedia('(min-width: 900px)').matches ? 'wide' : 'tall';
+        const theme = document.documentElement.dataset.theme;
+        const dark = theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches);
+        const poster = document.createElement('link');
+        poster.rel = 'preload';
+        poster.as = 'image';
+        poster.fetchPriority = 'high';
+        poster.href = base + 'hero/pusaka-sawah-v3-' + frame + (dark ? '-dark' : '') + '.webp';
+        document.head.append(poster);
+      }
     </script>
     <style>
-      /* Splash: plain HTML and CSS so it shows before the app's JavaScript loads. Colours mirror tokens.css. */
       #splash {
-        --s-bg: #FAF7F2; --s-ink: #131B33; --s-gold: #93633A; --s-track: #E3DCD0;
-        --s-ease: cubic-bezier(0.23, 1, 0.32, 1);
-        position: fixed; inset: 0; z-index: 100;
-        display: grid; place-content: center; justify-items: center; gap: 32px;
-        background: var(--s-bg); opacity: 0; visibility: hidden; pointer-events: none;
+        --s-bg: #FAF7F2; --s-ink: #131B33; --s-gold: #93633A;
+        position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+        color: var(--s-ink); background: var(--s-bg);
+        animation: loading-in 160ms ease 180ms both;
       }
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme='light']) #splash { --s-bg: #0E1222; --s-ink: #FFF8EC; --s-gold: #E3CA8E; --s-track: #2C3349; }
+        :root:not([data-theme='light']) #splash { --s-bg: #0E1222; --s-ink: #FFF8EC; --s-gold: #E3CA8E; }
       }
-      :root[data-theme='dark'] #splash { --s-bg: #0E1222; --s-ink: #FFF8EC; --s-gold: #E3CA8E; --s-track: #2C3349; }
-
-      /* Opaque from the first paint, so the unstyled page never shows through. */
-      #splash.show { visibility: visible; pointer-events: auto; opacity: 1; }
-      /* Lifting: the bloom swells a little and fades, then the paper dissolves into the page. */
-      #splash.done { pointer-events: none; animation: splash-out 560ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both; }
-      #splash.done svg { animation: s-lift 440ms var(--s-ease) both; }
-      #splash.done .line { transition: opacity 240ms ease; opacity: 0; }
-      @keyframes splash-out { from { opacity: 1; } to { opacity: 0; } }
-      @keyframes s-lift { to { opacity: 0; transform: scale(1.08); } }
-
-      /* The logo: 72 px on phones, 96 px from 768 px. */
-      #splash svg { display: block; width: 72px; height: 72px; overflow: visible; }
-      @media (min-width: 768px) { #splash svg { width: 96px; height: 96px; } }
-      #splash path { fill: var(--s-ink); }
+      :root[data-theme='dark'] #splash { --s-bg: #0E1222; --s-ink: #FFF8EC; --s-gold: #E3CA8E; }
+      #splash svg { width: 72px; height: 72px; fill: currentColor; }
       #splash circle { fill: var(--s-gold); }
-      #splash path, #splash circle { transform-box: view-box; transform-origin: 16px 16px; opacity: 0; }
-
-      /* The bloom: seed first (fade, scale 0.6 to 1, 200 ms), then the petals clockwise from the top right,
-         each fading, sliding out from the seed and scaling 0.8 to 1 over 240 ms, 80 ms apart. About 700 ms. */
-      #splash.show circle { animation: s-seed 200ms var(--s-ease) forwards; }
-      #splash.show path { animation: s-petal 240ms var(--s-ease) forwards; }
-      #splash.show path:nth-of-type(1) { --dx: 1; --dy: -1; animation-delay: 200ms; }
-      #splash.show path:nth-of-type(2) { --dx: 1; --dy: 1; animation-delay: 280ms; }
-      #splash.show path:nth-of-type(3) { --dx: -1; --dy: 1; animation-delay: 360ms; }
-      #splash.show path:nth-of-type(4) { --dx: -1; --dy: -1; animation-delay: 440ms; }
-      @keyframes s-seed { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
-      @keyframes s-petal {
-        from { opacity: 0; transform: translate(calc(var(--dx) * -2px), calc(var(--dy) * -2px)) scale(0.8); }
-        to { opacity: 1; transform: none; }
-      }
-
-      /* The progress line: 120 x 2 px, border track, gold fill. It eases toward 90% (it can't know the real
-         progress, so it never claims done), slowing as it goes, and glides to full when the app is ready. */
-      #splash .line { width: 120px; height: 2px; border-radius: 2px; background: var(--s-track); overflow: hidden; }
-      #splash .line i {
-        display: block; height: 100%; border-radius: inherit; background: var(--s-gold);
-        transform-origin: left; transform: scaleX(0); will-change: transform;
-      }
-      #splash.show .line i { animation: s-line 2600ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      @keyframes s-line { from { transform: scaleX(0); } to { transform: scaleX(0.9); } }
-
-      @media (prefers-reduced-motion: reduce) {
-        #splash.show path, #splash.show circle { animation: s-fade 150ms ease forwards; animation-delay: 0ms; }
-        @keyframes s-fade { from { opacity: 0; } to { opacity: 1; } }
-        #splash.done svg { animation: s-fade-out 240ms ease both; }
-        @keyframes s-fade-out { to { opacity: 0; } }
-      }
+      @keyframes loading-in { from { opacity: 0; } to { opacity: 1; } }
     </style>
   </head>
   <body>
-    <div id="splash" aria-hidden="true">
-      <svg viewBox="6.6 6.6 18.8 18.8">
+    <div id="splash" role="status" aria-label="Loading Pusaka">
+      <svg aria-hidden="true" viewBox="6.6 6.6 18.8 18.8">
         <path d="M24.415 7.585A5.2 3.4 -45 0 0 17.061 14.939A5.2 3.4 -45 0 0 24.415 7.585Z" />
         <path d="M24.415 24.415A5.2 3.4 45 0 1 17.061 17.061A5.2 3.4 45 0 1 24.415 24.415Z" />
         <path d="M7.585 24.415A5.2 3.4 -45 0 0 14.939 17.061A5.2 3.4 -45 0 0 7.585 24.415Z" />
         <path d="M7.585 7.585A5.2 3.4 45 0 1 14.939 14.939A5.2 3.4 45 0 1 7.585 7.585Z" />
         <circle cx="16" cy="16" r="1.2" />
       </svg>
-      <div class="line"><i></i></div>
     </div>
-    <script>window.__pusakaSplash.show();</script>
+    <noscript>
+      <style>#splash { display: none; }</style>
+      <p>Enable JavaScript to use Pusaka.</p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

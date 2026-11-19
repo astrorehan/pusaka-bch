@@ -12,6 +12,7 @@ import { addressOfPubkey, binToHex, lockOfAddress } from './network.ts';
 
 /** How far into each HD path we look for the user's coins. Fresh wallets use the first few addresses. */
 const SCAN_DEPTH = 20;
+const APPROVAL_TIMEOUT_MS = 120_000;
 const PATHS: { child: number; name: 'receive' | 'change' }[] = [
   { child: 0, name: 'receive' },
   { child: 1, name: 'change' },
@@ -29,6 +30,16 @@ export class WalletCancelledError extends Error {
   constructor() {
     super('Cancelled in your wallet. Nothing was sent.');
   }
+}
+
+let connectedWallet: WizardWallet | null = null;
+
+export function setWizardWallet(wallet: WizardWallet | null) {
+  connectedWallet = wallet;
+}
+
+export function getWizardWallet() {
+  return connectedWallet;
 }
 
 export class WizardWallet {
@@ -70,8 +81,8 @@ export class WizardWallet {
   }
 
   /** The SDK-facing signer: signs whichever empty inputs belong to this wallet. */
-  signer(userPrompt?: string): ExternalTransactionSigner {
-    const byLock = new Map(this.derivedAddresses().map((d) => [d.lockHex, d]));
+  signer(userPrompt?: string, addresses = this.derivedAddresses()): ExternalTransactionSigner {
+    const byLock = new Map(addresses.map((d) => [d.lockHex, d]));
     return {
       signTransaction: async (request) => {
         const inputPaths: [number, string, number][] = [];
@@ -81,6 +92,7 @@ export class WizardWallet {
           if (known) inputPaths.push([i, known.path, known.index]);
         });
         let response;
+        const signal = AbortSignal.timeout(APPROVAL_TIMEOUT_MS);
         try {
           response = await this.manager.signTransaction({
             transaction: {
@@ -98,8 +110,9 @@ export class WizardWallet {
               userPrompt: userPrompt ?? request.userPrompt,
             },
             inputPaths,
-          });
+          }, { signal });
         } catch (e) {
+          if (signal.aborted) throw new Error('Wallet approval timed out. Open your wallet and try again.');
           if (isCancel(e)) throw new WalletCancelledError();
           throw e;
         }

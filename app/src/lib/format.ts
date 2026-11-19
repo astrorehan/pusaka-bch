@@ -14,10 +14,11 @@ export function formatBch(sats: bigint): string {
 
 /** "0.25" -> 25_000_000n. Returns null for invalid input or more than 8 decimals. */
 export function parseBch(input: string): bigint | null {
-  const s = input.trim().replace(/,/g, '');
-  if (!/^\d*(\.\d{0,8})?$/.test(s) || s === '' || s === '.') return null;
+  const s = input.trim();
+  if (!/^\d{0,8}(\.\d{0,8})?$/.test(s) || s === '' || s === '.') return null;
   const [w, f = ''] = s.split('.');
-  return BigInt(w || '0') * SATS_PER_BCH + BigInt(f.padEnd(8, '0'));
+  const sats = BigInt(w || '0') * SATS_PER_BCH + BigInt(f.padEnd(8, '0'));
+  return sats <= 21_000_000n * SATS_PER_BCH ? sats : null;
 }
 
 /** Dollar value, always approximate. `usdPerBch` may be unknown. */

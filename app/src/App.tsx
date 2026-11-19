@@ -1,13 +1,9 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AppShell } from './components/AppShell';
 import { WalletProvider } from './lib/wallet';
-import { HomeScreen } from './screens/home/HomeScreen';
-import { NotFoundScreen } from './screens/NotFoundScreen';
 
 // A data router, so screens can use useBlocker (the plan-link gate on the create flow's success screen) and the
 // shell can restore scroll (a new page starts at the top; Back returns to where you were).
-// Only the home page is in the first download; the other pages load when first opened (the router keeps the
-// current page on screen meanwhile, so there is no blank flash).
+// Load only the matched screen and shell, including on direct links to the wallet.
 /** While the first lazily loaded page arrives, the splash (index.html) stays up; nothing to draw under it. */
 function FirstLoad() {
   return null;
@@ -87,10 +83,13 @@ export const router = createBrowserRouter(
       ],
     },
     {
-      element: <AppShell />,
+      lazy: async () => ({ Component: (await import('./components/AppShell')).AppShell }),
       HydrateFallback: FirstLoad,
       children: [
-        { index: true, element: <HomeScreen /> },
+        {
+          index: true,
+          lazy: async () => ({ Component: (await import('./screens/home/HomeScreen')).HomeScreen }),
+        },
         {
           path: 'how-it-works',
           lazy: async () => ({
@@ -98,7 +97,10 @@ export const router = createBrowserRouter(
               .HowItWorksScreen,
           }),
         },
-        { path: '*', element: <NotFoundScreen /> },
+        {
+          path: '*',
+          lazy: async () => ({ Component: (await import('./screens/NotFoundScreen')).NotFoundScreen }),
+        },
       ],
     },
   ],
