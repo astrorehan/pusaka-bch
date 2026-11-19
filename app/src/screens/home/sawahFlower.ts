@@ -442,7 +442,6 @@ export function createFlower(shared: { uSunDir: { value: THREE.Vector3 }; uTime:
       hinge.rotation.x = LEAN_REST - LEAN_OPEN * p.open + (breath + flutter) * p.motion;
     }
 
-    plant.updateMatrixWorld(true);
     seed.getWorldPosition(seedWorld);
     toEye.subVectors(camera.position, seedWorld).normalize();
     aura.position.copy(seedWorld).addScaledVector(toEye, -0.5);

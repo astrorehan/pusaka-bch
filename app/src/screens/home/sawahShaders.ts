@@ -128,6 +128,9 @@ void main() {
 
 // ---------------------------------------------------------------- water
 
+export const WATER_DROP_LIMIT = 6;
+export const WATER_DROP_LIFE = 0.85;
+
 export const waterVertex = /* glsl */ `
 uniform mat4 uTextureMatrix;
 varying vec4 vProj;
@@ -153,7 +156,8 @@ uniform float uReflectMin;
 uniform vec3 uHaze;
 uniform float uFogDensity;
 uniform vec3 uStem;
-uniform vec4 uDrops[3];
+uniform vec4 uDrops[${WATER_DROP_LIMIT}];
+uniform int uDropCount;
 uniform vec4 uLamp;
 uniform vec3 uLampColor;
 varying vec4 vProj;
@@ -173,15 +177,18 @@ void main() {
   vec2 p = vWorld.xz;
   float pixelsPerMetre = uFocal * abs(cameraPosition.y) / max(dist * dist, 1.0);
 
-  vec2 warp = vec2(vnoise(p * 0.21 + uTime * 0.05), vnoise(p * 0.21 + 31.7 - uTime * 0.04)) - 0.5;
-  vec2 q = p + warp * 1.6;
-  float breeze = smoothstep(0.27, 0.66, fbm3(p * 0.035 + vec2(uTime * 0.012, 0.0)));
   vec2 slope = vec2(0.0);
-  slope += wave(q, vec2(0.86, 0.51), 1.7, 0.9, 0.0032, pixelsPerMetre);
-  slope += wave(q, vec2(-0.42, 0.91), 2.9, 1.3, 0.0024, pixelsPerMetre);
-  slope += wave(q, vec2(0.25, 0.97), 5.3, 1.9, 0.0017, pixelsPerMetre);
-  slope += wave(q, vec2(-0.91, 0.41), 8.7, 2.6, 0.0011, pixelsPerMetre);
-  slope *= mix(0.28, 1.0, breeze);
+  // Beyond this point even the longest wave is too small to resolve.
+  if (pixelsPerMetre > 0.32) {
+    float warp = vnoise(p * 0.21 + uTime * 0.05) - 0.5;
+    vec2 q = p + vec2(1.5, -0.9) * warp;
+    float breeze = smoothstep(0.19, 0.57, fbm2(p * 0.035 + vec2(uTime * 0.012, 0.0)));
+    slope += wave(q, vec2(0.86, 0.51), 1.7, 0.9, 0.0032, pixelsPerMetre);
+    slope += wave(q, vec2(-0.42, 0.91), 2.9, 1.3, 0.0024, pixelsPerMetre);
+    slope += wave(q, vec2(0.25, 0.97), 5.3, 1.9, 0.0017, pixelsPerMetre);
+    slope += wave(q, vec2(-0.91, 0.41), 8.7, 2.6, 0.0011, pixelsPerMetre);
+    slope *= mix(0.28, 1.0, breeze);
+  }
 
   // Rings leave the stem where it meets the water.
   vec2 fromStem = p - uStem.xy;
@@ -189,17 +196,26 @@ void main() {
   float ring = cos(r * 6.5 - uTime * 2.3) * exp(-r * 0.55) * smoothstep(0.04, 0.3, r);
   slope += fromStem / max(r, 0.001) * ring * 0.011 * uStem.z;
 
-  // And from wherever the pointer last touched the water.
-  for (int i = 0; i < 3; i++) {
+  // Pointer ripples have a finite footprint and a little shading even on a flat reflection.
+  float detail = 0.0;
+  for (int i = 0; i < ${WATER_DROP_LIMIT}; i++) {
+    if (i >= uDropCount) break;
     vec4 drop = uDrops[i];
-    float age = uTime - drop.z;
-    if (drop.w > 0.0 && age > 0.0 && age < 6.0) {
-      vec2 fromDrop = p - drop.xy;
-      float rd = length(fromDrop);
-      float x = rd - age * 1.5;
-      float envelope = exp(-x * x * 1.5) * exp(-age * 0.7) * drop.w;
-      slope += fromDrop / max(rd, 0.001) * cos(x * 7.0) * envelope * 0.02;
-    }
+    float age = max(0.0, uTime - drop.z);
+    float radius = 0.19 + age * 2.5;
+    vec2 fromDrop = p - drop.xy;
+    float distanceSquared = dot(fromDrop, fromDrop);
+    float inner = max(0.0, radius - 0.5);
+    float outer = radius + 0.5;
+    if (distanceSquared < inner * inner || distanceSquared > outer * outer) continue;
+
+    float rd = sqrt(distanceSquared);
+    float edge = rd - radius;
+    float fade = max(0.0, 1.0 - age / ${WATER_DROP_LIFE});
+    float ripple = cos(edge * 12.0) * (1.0 - smoothstep(0.04, 0.5, abs(edge))) * fade * fade * drop.w;
+    ripple *= smoothstep(0.0, 0.16, rd);
+    detail += ripple;
+    slope += fromDrop / max(rd, 0.001) * ripple * 0.012;
   }
 
   vec2 uv = vProj.xy / vProj.w;
@@ -213,6 +229,7 @@ void main() {
   float facing = clamp(view.y, 0.0, 1.0);
   float fresnel = mix(uReflectMin, 1.0, pow(1.0 - facing, 5.0));
   vec3 col = mix(uBody, reflection, fresnel);
+  col += clamp(detail, -1.0, 1.0) * (0.16 * col + vec3(0.012, 0.014, 0.018));
 
   // Sun glitter where ripples catch the light.
   vec3 normal = normalize(vec3(-slope.x * 22.0, 1.0, -slope.y * 22.0));

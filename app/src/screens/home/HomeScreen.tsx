@@ -2,7 +2,7 @@
 // The hero stands in the rice terrace at first light. Below it the page passes through one day on the paddy:
 // the family cards, the scroll scene over the water (the plan, then the cheat attempts), the night payout among
 // fireflies, a light sheet with the three steps, the heir box, the closing call and the terraces footer.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Play } from 'lucide-react';
 import { FlowerStage } from './FlowerStage';
 import { SealedLetters } from './SealedLetters';
@@ -14,7 +14,6 @@ import { ClosingCta, HeirBand } from './ClosingSections';
 import { OpenLinkDialog } from './OpenLinkDialog';
 import { HomeFooter } from './HomeFooter';
 import { DEMO_VIDEO_URL, SOLIDCASH_URL } from './links';
-import { useGlide } from './useGlide';
 import { ButtonLink } from '../../components/Button';
 import { BASE } from '../../lib/asset';
 import './home.css';
@@ -30,15 +29,12 @@ const BUILT_WITH = [
 
 export function HomeScreen() {
   const [linkOpen, setLinkOpen] = useState(false);
-  const hero = useRef<HTMLElement>(null);
-  const copy = useRef<HTMLDivElement>(null);
-  useGlide(copy, hero);
   useEffect(() => { document.title = 'Pusaka: Your BCH. Their future.'; }, []);
 
   return (
     <div className="home home--studio">
-      <section ref={hero} className="home-hero" aria-labelledby="home-title">
-        <div ref={copy} className="home-hero__text enter">
+      <section className="home-hero" aria-labelledby="home-title">
+        <div className="home-hero__text enter">
           <p className="home-eyebrow">
             <span lang="id">Pusaka</span>
             <span className="sr-only">: </span>
