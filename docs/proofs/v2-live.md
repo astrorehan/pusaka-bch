@@ -1,10 +1,44 @@
 # Pusaka v2 on the network
 
-Generated from the public records of [`contract/scripts/v2/live.ts`](../../contract/scripts/v2/live.ts) (`scripts/v2/.live-<network>.json`, transaction IDs and plan rules, never keys) by [`live-report.py`](../../contract/scripts/v2/live-report.py). The script builds every transaction with the same builders the app uses ([`app/src/lib/protocol/`](../../app/src/lib/protocol/)).
+Generated from the public records of [`contract/scripts/v2/live.ts`](../../contract/scripts/v2/live.ts) (`scripts/v2/.live-<network>[-assets-2].json`, transaction IDs and plan rules) by [`live-report.py`](../../contract/scripts/v2/live-report.py). The script builds every transaction with the same builders the app uses ([`app/src/lib/protocol/`](../../app/src/lib/protocol/)).
 
 ## Mainnet
 
-### The whole lifecycle, one plan
+### Revised review anchor (`assets-2`)
+
+#### The whole lifecycle, one plan
+
+Heirs and shares (of 24): Wife 3, Son 14, Daughter 7. Three trusted contacts. Waiting time 30 days; review 512 seconds; fee budget 5,000 sats. Revision `assets-2`.
+
+Plan link: [open it in the app](https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI0ZGM3NGMzNTZhNWM5YzM4OTNjMjgzNmMwMjZhMTM5YWFkYjc5MmZmYmIwMDZiNmNiM2YwZWJhMTNhOGE2OWI5Iiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydm1xd25zNnJ1bGVmeGQybHQzeHV1d3hzNHE2cW5rdXNncW5jMG1xMmM5eWd5aGNkNTIzN3NzMHU5enV1IiwicGxhbkxvY2tIZXgiOiJhYTIwMzYwNzRlMWExZjNmOTQ5OWFhZmFlMjZlNzFjNjg1NDFhMDRlZGM4MjAxM2MzZjYwNTYwYTQ0MTJmODZkMTUxZjg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnIwZ3VyeTgzMmg2cWU3YXp4NDd6dnM0bW5nbjc1MHp2MDBnZWR1eGd4NHVoOXpndnR2cHJrbWZydHdxNzQiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGQxYzE5MGYxNTVmNDBjZmJhMjM1N2MyNjQyYmI5YTI3ZWEzYzRjN2JkMTk2ZjBjODM1Nzk3Mjg5MGM1YjAyM2I4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB3cHF1YTd6dmVlbWQwam53M3h6ajJwcmYybHc0Zng2eGsyemRoYzB3ZnFzbTJzNHU0eDc1ZnU0bDZnbmsiLCJpbmJveExvY2tIZXgiOiJhYTIwODIwZTc3YzI2NjczYjZiZTUzNzQ0YzI5MjgyMzRhYmVlYWE0ZGEzNTk0MjZkZjBmNzI0MTBkYWExNWU1NGRlYTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjAwOGQyNzAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTE4MDAwMDAwMDM5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMDMwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMGUwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MDcwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiYjhmMmI5MDgzZmEwZTYwN2FiMGU0MjU4NjJiYzNjMjkyZTVlOGQ3ZmY1NGI1ODYwMTI3NjA1NmMzYjcwMmY0ZiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY2NTA1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6MjU5MjAwMCwicmV2aWV3U2VxdWVuY2UiOjQxOTQzMDUsInJldmlld1VuaXRzIjoxLCJlZmZlY3RpdmVSZXZpZXdTZWNvbmRzIjo1MTIsImZlZUJ1ZGdldCI6IjUwMDAiLCJjb250YWN0cyI6WyI2NzhmOTcwM2M4M2JjNjBiZjNiMzQ2M2YzZTA5NTU3MjdmYjdjNzdhIiwiZTMzMTZmYTQ1N2RmZGIxMmY2MmEwZDk5M2Y0ZDMyYmUxMTI0MDhiZSIsImY5ZjVkMTk4MWFlNWM0M2NiMTY3MmU1MDIwMGVlZmUzZjNmN2Q4YjkiXSwidG90YWxTaGFyZXMiOiIyNCIsImhlaXJzIjpbeyJwa2hIZXgiOiI5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczIiwic2hhcmUiOiIzIiwibGFiZWwiOiJXaWZlIn0seyJwa2hIZXgiOiJjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzIiwic2hhcmUiOiIxNCIsImxhYmVsIjoiU29uIn0seyJwa2hIZXgiOiJmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2Iiwic2hhcmUiOiI3IiwibGFiZWwiOiJEYXVnaHRlciJ9XX0). State now: **paid**.
+
+| Step | Time | Transaction | Size | Fee | Note |
+|---|---|---|---|---|---|
+| create | 20 Nov, 10:07:29 UTC | [`ce41df22…60b6`](https://explorer.bch.ninja/tx/ce41df221e15a53e98bb9a2f3a827cc522a05d9b382533632a08065cde0660b6) | 315 bytes | 335 sats |  |
+| receive | 20 Nov, 10:07:55 UTC | [`6ca113f6…fee1`](https://explorer.bch.ninja/tx/6ca113f671ea728f252c9d64af4e9169bae696b3699aa8d395d5e55e90c8fee1) | 195 bytes |  | 3100 sats to the receive address |
+| collect | 20 Nov, 10:08:15 UTC | [`6933d723…8e39`](https://explorer.bch.ninja/tx/6933d723d813ed1db5990404fe9a42501c250dd3c493efdf1507fe3aecca8e39) | 4,405 bytes | 4,425 sats | fee paid by the owner's wallet; deadline unchanged: a receipt is not proof of life |
+| send | 20 Nov, 10:08:33 UTC | [`b6d35876…76d0`](https://explorer.bch.ninja/tx/b6d358769ea9715686d3d42c872092924413f205a56bd3032f13883478ad76d0) | 4,089 bytes | 4,109 sats | paid 1000 sats; deadline moved to 2026-12-20T09:21:45.000Z |
+| contact 1 confirms | 20 Nov, 10:08:54 UTC | [`1bf12906…00b0`](https://explorer.bch.ninja/tx/1bf1290660538e28b3c3370f614fe44bed75f6cc802b872907e952d3624f00b0) | 4,178 bytes | 4,198 sats | first confirmation, no payout right |
+| contact 2 confirms | 20 Nov, 10:09:15 UTC | [`d67385bf…59b4`](https://explorer.bch.ninja/tx/d67385bf569de43505549743b0e4fefad225d979fd6eba8498a5e1623aba59b4) | 4,265 bytes | 4,285 sats | quorum reached: review started |
+| owner-sponsored early payout refused | 20 Nov, 10:09:29 UTC | refused by the network |  |  | the transaction was rejected by network rules. non-BIP68-final (code 64) |
+| stop claim | 20 Nov, 10:09:44 UTC | [`a723442a…74fb`](https://explorer.bch.ninja/tx/a723442a22bd6037dfba1f1ff7db4f466d522d3120f473df41e33843a7fa74fb) | 4,341 bytes | 4,361 sats | claim cancelled; earlier confirmations no longer count |
+| contact 2 confirms again | 20 Nov, 10:10:06 UTC | [`3fb4f7a6…342c`](https://explorer.bch.ninja/tx/3fb4f7a6f6ef1400f8743b6b6e1da6669117f8517fb696430839fd499cc7342c) | 4,178 bytes | 4,198 sats | first confirmation, no payout right |
+| contact 3 confirms | 20 Nov, 10:10:28 UTC | [`7cd4fdf8…47e8`](https://explorer.bch.ninja/tx/7cd4fdf8af4c3582476a42b8c53db3a622de30ad4a25643d9eec429299a947e8) | 4,265 bytes | 4,285 sats | quorum reached: review started |
+| pay the heirs | 20 Nov, 10:52:27 UTC | [`af544d63…f011`](https://explorer.bch.ninja/tx/af544d637c5e7d271a6334d53a9b82ae928ab1c0223cac6fd16632fd550bf011) | 4,419 bytes | 4,439 sats | Wife 887, Son 4141, Daughter 2070 |
+
+#### Example plans for visitors
+
+[Open the live demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) to try a claim or a payout without a wallet. Each plan has the same six-heir faraid family and a one-minute waiting time.
+
+| Plan | Review | Created | Claim opened | Heirs paid | Plan link |
+|---|---|---|---|---|---|
+| demo plan 1 | 512 s | [`8232c930…fef9`](https://explorer.bch.ninja/tx/8232c93026f6f84a14d60e2a1fcd850bd68875bd48f952e2d6076c8efa86fef9) | [`401cd17d…d675`](https://explorer.bch.ninja/tx/401cd17d920cd905efba521acc1c20585548131b98928d8b5dfa59c62c82d675) | — | [link](https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJiZTBiZGYwYTJjZGY2ZDk5NWY3MzA2ODc1M2I0MGI2NjYzNmIyY2Y1YzBlODkyZjg4YzM0MjY3ZDg3ZTkyYWFjIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyMG4ybDI2czVjN3NraGZmbmw5NzIzYTRhNjA1MzA1NzM4MzRyMmZ3bnpwdmphMnJrbWQ0cXR1ZjlqMng0IiwicGxhbkxvY2tIZXgiOiJhYTIwZTZhZmFiNTBhNjNkMGI1ZDI5OWZjYmU1NDdiNWVlOWY0OGJlOWU4OWUzNTFhOTJlOTg4MmM5NzU0M2I2ZGI1MDg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ2cHhhNXlja3Nsc211dGxsYXN5cGRqaGhwem54aHZjczhlNzBucWRoZzJsYThqY2s2ajN5enAzZXl1OHUiLCJhbmNob3JMb2NrSGV4IjoiYWEyMDAyNmVkMDk4YjQzZjBkZjE3ZmZmNjA0MGI2NTdiODQ1MzM1ZDk4ODFmM2U3Y2MwZGJhMTVmZTllNThiNmE1MTI4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB2ZG42dnE1emYwd24wd3h1NmpoMnd5amp1NTR6OXU5d2NsOWNhcmh1ZmFhNWF6YzM1dDBqcnZqN3dua2oiLCJpbmJveExvY2tIZXgiOiJhYTIwMWIzZDMwMTQxMjVlZTliZGM2ZTZhNTc1Mzg5Mjk3Mjk1MTE3ODU3NjNlNWM3NDc3ZTI3YmRhNzQ1ODhkMTZmOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY2NTA1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19) |
+
+Payouts made by visitors appear in each plan's history on the explorer.
+
+### Earlier release (`assets-1`)
+
+#### The whole lifecycle, one plan
 
 Heirs and shares (of 24): Wife 3, Son 14, Daughter 7. Three trusted contacts. Waiting time 30 days; review 512 seconds; fee budget 5,000 sats. Revision `assets-1`.
 
@@ -24,9 +58,9 @@ Plan link: [open it in the app](https://astrorehan.github.io/pusaka-bch/v2/plan#
 | contact 3 confirms | 20 Nov, 09:21:29 UTC | [`3560d7d3…bf19`](https://explorer.bch.ninja/tx/3560d7d3ec564b201153836ee52e08d9a19ebc0637b85846f2df68b3a331bf19) | 4,265 bytes | 4,285 sats | quorum reached: review started |
 | pay the heirs | 20 Nov, 09:26:37 UTC | [`ad0e1a36…4689`](https://explorer.bch.ninja/tx/ad0e1a36ddf25e510ecb9901925953007a0d922d3253a220c4d36e1fc7634689) | 4,335 bytes | 4,355 sats | Wife 2575, Son 12016, Daughter 6008 |
 
-### Example plans for visitors
+#### Example plans for visitors
 
-[`https://astrorehan.github.io/pusaka-bch/wallet/demo`](https://astrorehan.github.io/pusaka-bch/wallet/demo) opens whichever of these has the most to do: a payout that is ready, then a claim anyone can open, then one under review. Each has the same six-heir faraid family and a one-minute waiting time.
+These earlier examples are available as fallbacks when the current revision has no action ready. Each plan has the same six-heir faraid family and a one-minute waiting time.
 
 | Plan | Review | Created | Claim opened | Heirs paid | Plan link |
 |---|---|---|---|---|---|
@@ -63,7 +97,7 @@ Plan link: [open it in the app](https://astrorehan.github.io/pusaka-bch/chipnet/
 
 ### Example plans for visitors
 
-[`https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo`](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) opens whichever of these has the most to do: a payout that is ready, then a claim anyone can open, then one under review. Each has the same six-heir faraid family and a one-minute waiting time.
+[Open the live demo](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) to try a claim or a payout without a wallet. Each plan has the same six-heir faraid family and a one-minute waiting time.
 
 | Plan | Review | Created | Claim opened | Heirs paid | Plan link |
 |---|---|---|---|---|---|

@@ -49,9 +49,9 @@ its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)),
 | If the banner says **The owner has been inactive past the deadline**, press **Open the claim**, then **Send transaction** | After the claim confirms and the network review expires, the banner offers **Pay the heirs** |
 | Open the demo again | The next example plan with something left to do |
 
-The demo picks whichever example plan has the most to do: a payout that is ready, then a claim anyone can open,
-then one still under review. Mainnet has six funded examples. Four started review ahead of judging and two
-were left for visitors to open. The page links to Chipnet once every mainnet example has paid its heirs.
+The demo starts with the revised `assets-2` plan when a payout or claim is ready. Six earlier funded examples
+are available as fallbacks and are labeled in the app. The demo links to Chipnet once the mainnet examples
+have paid their heirs.
 [Mainnet example records](docs/proofs/v2-live.md#mainnet)
 
 ## The owner path: five minutes, with Paytaca or Cashonize
@@ -71,6 +71,11 @@ Every review sheet shows each output and fee before your wallet is asked to sign
 broadcasts the exact transaction you reviewed and checks its ID.
 
 ## Transactions you can open
+
+**Revised mainnet review anchor (`assets-2`), 20 November 2026.** The node refused a payout sponsored and
+signed by the owner before the review matured. The same owner then stopped the claim and returned the plan
+to active use. When a second review matured, a wallet-free transaction paid 887, 4,141 and 2,070 sats to the three heirs.
+[New plan](https://explorer.bch.ninja/tx/ce41df221e15a53e98bb9a2f3a827cc522a05d9b382533632a08065cde0660b6) · [Stop claim](https://explorer.bch.ninja/tx/a723442a22bd6037dfba1f1ff7db4f466d522d3120f473df41e33843a7fa74fb) · [Mature payout](https://explorer.bch.ninja/tx/af544d637c5e7d271a6334d53a9b82ae928ab1c0223cac6fd16632fd550bf011) · [Full record](docs/proofs/v2-live.md#revised-review-anchor-assets-2)
 
 **Earlier mainnet release (`assets-1`), 20 November 2026.** The lifecycle used the same transaction builders as the app. The network
 refused an early payout with `non-BIP68-final`. The owner stopped that claim. Contacts opened a second review,

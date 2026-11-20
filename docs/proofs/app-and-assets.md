@@ -16,7 +16,7 @@ fees, protected change and returned authorization funds before signing.
 `app/src/lib/protocol/` contains the browser-safe codecs, artifacts and builders.
 The contract runner re-exports the same module. No filesystem loaders, test keys,
 mnemonics or chain runners enter the client bundle. `npm run check:artifacts`
-compares all five bundled artifacts with compiler output.
+compares all six bundled artifacts with compiler output.
 
 The app discovers live plan/inbox/token UTXOs and uses confirmed-anchor chain age
 for review readiness. It checks for stale plan state before signing. Wallet
@@ -74,6 +74,23 @@ The UI supports BCH-to-token purchase for this pair, not arbitrary pairs or sale
 Protocol reference: https://docs.riftenlabs.com/cauldron/swap/
 
 ## Live Chipnet evidence
+
+The revised `assets-2` plan bought 199,519 PSK units into its vault. The node rejected an
+immediate BCH payout with `non-BIP68-final`. At tip 339493 the confirmed anchor was 571 seconds
+old by median time, past the 512-second review. Both payouts confirmed in block 339495. The token
+payout distributed 66,506, 66,506 and 66,507 units.
+
+| Step | Transaction |
+|---|---|
+| Revised plan genesis | [`b444a797…f446`](https://chipnet.chaingraph.cash/tx/b444a7971eacf24e91756fa3747fd4620aed3f84c4c17c5219bbce5f6350f446) |
+| Swap into the vault | [`1fea4089…4df3`](https://chipnet.chaingraph.cash/tx/1fea408934dca29136b1aa2c205088cde230bd6ddc0d52b7df0058803f334df3) |
+| Second contact opens review | [`a85b02a5…bc6b`](https://chipnet.chaingraph.cash/tx/a85b02a52b811a6619f7cca4101ccfbb6fa8426fc1c4cdc967233c9a010ebc6b) |
+| Mature BCH payout | [`eca3ed85…5efa`](https://chipnet.chaingraph.cash/tx/eca3ed85ec524c6c3b16b8e9abaa3affd5ea10de5416e3125cf91c9d92785efa) |
+| Token payout | [`15d07d73…0a6b`](https://chipnet.chaingraph.cash/tx/15d07d735f9b215cf33865785cbc17ef90eede6c07448d10ef3ef50f04780a6b) |
+
+[Revised proof record](../../contract/scripts/v2/.assets-chipnet-proof-assets-2.json)
+
+### Earlier asset release (`assets-1`)
 
 Public machine-readable record:
 [`contract/scripts/v2/.assets-chipnet-proof.json`](../../contract/scripts/v2/.assets-chipnet-proof.json).
@@ -139,8 +156,10 @@ execution. A phone-sized browser viewport does not prove Paytaca mobile signing.
 ## Mainnet v2
 
 The lifecycle ran on mainnet with the same builders as the app. The network accepted creation, collection,
-owner spending, contact approvals, owner cancellation and the payout from a mature claim. Six funded
-examples support the wallet-free demo. [Mainnet transaction record](v2-live.md#mainnet)
+owner spending, contact approvals, owner cancellation and the payout from a mature claim. The revised anchor
+also passed a mainnet check where the owner signed and sponsored an early payout and the network refused it.
+The wallet-free demo prioritizes one funded `assets-2` example, with six earlier plans as fallbacks.
+[Mainnet transaction record](v2-live.md#mainnet)
 
 ## Not yet shown
 

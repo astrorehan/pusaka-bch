@@ -1,0 +1,79 @@
+{
+  "network": "chipnet",
+  "pair": "BCH / Pusaka test FT",
+  "category": "679e2ff052249da51dd39088282b61de5580a1f3b0428bd56d01fac491090bf1",
+  "poolAddress": "bchtest:r0juw4w6m7ql3hr0dl04eefljuxe6gtc6x0e37skdxa05dkwlkd9qu3j8k73a",
+  "withdrawPkh": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+  "metadata": {
+    "version": "pusaka-v2",
+    "protocolRevision": "assets-2",
+    "network": "chipnet",
+    "planCategoryHex": "a28ba3d6e2718680ccbafa15f9091bff4199b455ff0718bb4b938ffccf67198d",
+    "ownerPkhHex": "a31f0c45b4c496e8aa95eb13bcccc75a9e44d144",
+    "planAddress": "bchtest:rdd8kkc603cpdadp3cpn002x8l5c7d5a9cfxmdtyeajhjxtkzal323vfex5x7",
+    "planLockHex": "aa205a7b5b1a7c7016f5a18e0337bd463fe98f369d2e126db564cf65791976177f1587",
+    "anchorAddress": "bchtest:rvsuqp7uyjw4p7p36jslfdy6xzkxpfacj5ctcmecqf88m4p9mrg4uhwkfzar8",
+    "anchorLockHex": "aa2021c007dc249d50f831d4a1f4b49a30ac60a7b89530bc6f38024e7dd425d8d15e87",
+    "inboxAddress": "bchtest:p0vwjfza7uar6uyae66epaf08ml5sdgk0ln5ppvupyt80vutwtlevl4pujjpj",
+    "inboxLockHex": "aa20d8e9245df73a3d709dceb590f52f3eff4835167fe740859c091677b38b72ff9687",
+    "perInputFeeCap": "600",
+    "policyBytesHex": "805101000100400070170000f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9cb7feb2e64858673e6f65b4b165b4990cd1d6eee659393887ba27acb8cf1ca78f3c4e5541e132f9ea0300000003219178a12ac1914acc1f9e4f2a111d574687ebb3010000001e8cdc97dfab9641ec3f4939d8ee6de96bc4791f01000000a0290a25754e41d6ee94068bbe49dfbc99a94f0001000000",
+    "policyHashHex": "e2a7bd26f01d4fa1f1c1cd4ff96dd4a617e22fa59b3318cffbdd94027cbe0b15",
+    "createdAtLocktime": 1795168409,
+    "inactivityPeriodSeconds": 86400,
+    "reviewSequence": 4194305,
+    "reviewUnits": 1,
+    "effectiveReviewSeconds": 512,
+    "feeBudget": "6000",
+    "contacts": [
+      "f3ca1c2e1e97f6bda405c5317cb32bda21dbeb9c",
+      "b7feb2e64858673e6f65b4b165b4990cd1d6eee6",
+      "59393887ba27acb8cf1ca78f3c4e5541e132f9ea"
+    ],
+    "totalShares": "3",
+    "heirs": [
+      {
+        "pkhHex": "219178a12ac1914acc1f9e4f2a111d574687ebb3",
+        "share": "1"
+      },
+      {
+        "pkhHex": "1e8cdc97dfab9641ec3f4939d8ee6de96bc4791f",
+        "share": "1"
+      },
+      {
+        "pkhHex": "a0290a25754e41d6ee94068bbe49dfbc99a94f00",
+        "share": "1"
+      }
+    ]
+  },
+  "mintTxid": "30945ffaa4aa9ecd8cc4f68ee431cc907a09792d8b87963189e27cc162ec1397",
+  "genesisTxid": "b444a7971eacf24e91756fa3747fd4620aed3f84c4c17c5219bbce5f6350f446",
+  "phase": "complete",
+  "swapTxid": "1fea408934dca29136b1aa2c205088cde230bd6ddc0d52b7df0058803f334df3",
+  "unitsReceived": "199519",
+  "tokenVaultAddress": "bchtest:rwknxnwspc097kh6pjs05ehmerfk65ny80rk0dn0wcrd6akkqd0tvzfuw66fe",
+  "contact0Txid": "d695658de6910e235bec41f68a070381eb294e48bdfcd9ea39b997b3eea22375",
+  "contact1Txid": "a85b02a52b811a6619f7cca4101ccfbb6fa8426fc1c4cdc967233c9a010ebc6b",
+  "earlyRejected": true,
+  "maturity": {
+    "tip": 339493,
+    "anchorHeight": 339482,
+    "age": 571
+  },
+  "finalizeTxid": "eca3ed85ec524c6c3b16b8e9abaa3affd5ea10de5416e3125cf91c9d92785efa",
+  "tokenPayoutTxid": "15d07d735f9b215cf33865785cbc17ef90eede6c07448d10ef3ef50f04780a6b",
+  "payouts": [
+    {
+      "address": "bchtest:zqsez79p9tqezjkvr70y72s3r4t5dpltkv2x8ckh8x",
+      "units": "66506"
+    },
+    {
+      "address": "bchtest:zq0gehyhm74evs0v8aynnk8wdh5kh3reruch8wj735",
+      "units": "66506"
+    },
+    {
+      "address": "bchtest:zzszjz39w48yr4hwjsrgh0jfm77fn220qqude3mjm6",
+      "units": "66507"
+    }
+  ]
+}
