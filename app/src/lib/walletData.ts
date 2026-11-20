@@ -4,7 +4,49 @@ import { decodePusakaV2PlanLink, encodePusakaV2PlanLink, readV2Metadata, type Pu
 
 const PLANS_KEY = `pusaka.v2.plans.${NETWORK}`;
 const HISTORY_KEY = `pusaka.v2.activity.${NETWORK}`;
+const PENDING_PREFIX = `pusaka.v2.pending.${NETWORK}.`;
 const TXID = /^[a-f\d]{64}$/i;
+
+export type PendingPlanSubmission = {
+  txid: string;
+  title: string;
+  metadata: PusakaV2PlanMetadata;
+};
+
+export function pendingPlanSubmissions(): PendingPlanSubmission[] {
+  try {
+    return Object.keys(localStorage).flatMap((key) => {
+      if (!key.startsWith(PENDING_PREFIX)) return [];
+      try {
+        const { txid, title, metadata } = JSON.parse(localStorage.getItem(key) ?? 'null');
+        const plan = readV2Metadata(metadata);
+        if (!TXID.test(txid) || key !== PENDING_PREFIX + txid || typeof title !== 'string' || plan.network !== NETWORK) return [];
+        return [{ txid, title, metadata: plan }];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
+export function savePendingPlan(record: PendingPlanSubmission) {
+  try {
+    // One key per transaction preserves both drafts if two tabs submit at the same time.
+    localStorage.setItem(PENDING_PREFIX + record.txid, JSON.stringify(record));
+  } catch {
+    throw new Error('Browser storage could not save the plan recovery data. Enable storage for this site and try again.');
+  }
+}
+
+export function removePendingPlan(txid: string) {
+  try {
+    localStorage.removeItem(PENDING_PREFIX + txid);
+  } catch {
+    // Retaining the recovery copy is safe if the browser cannot remove it.
+  }
+}
 
 export function savedPlans(): PusakaV2PlanMetadata[] {
   return readList(PLANS_KEY).flatMap((value) => {
@@ -21,8 +63,10 @@ export function savePlan(plan: PusakaV2PlanMetadata) {
   const plans = savedPlans().filter((saved) => saved.planCategoryHex !== plan.planCategoryHex);
   try {
     localStorage.setItem(PLANS_KEY, JSON.stringify([plan, ...plans]));
+    return true;
   } catch {
     // The plan link and file can still be shared when browser storage is unavailable.
+    return false;
   }
 }
 

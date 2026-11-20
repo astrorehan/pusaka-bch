@@ -19,7 +19,8 @@ import type { Prepared, PusakaV2PolicyInput } from '../../lib/chain/v2';
 import { formatBch, parseBch } from '../../lib/format';
 import { NETWORK } from '../../lib/networkName';
 import { MAX_HEIR_NAME_LENGTH } from '../../lib/planPayload';
-import { encodePusakaV2PlanLink, MAX_HEIRS, MAX_INT32, MIN_PLAN_CARRIER_SATS, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
+import { claimFunding, DEFAULT_FEE_BUDGET } from '../../lib/protocol/claim-funding';
+import { encodePusakaV2PlanLink, MAX_HEIRS, MAX_INT32, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import type { SplitMode } from '../../lib/types';
 import { useWallet } from '../../lib/wallet';
 import { EMPTY_FAMILY, faraid, type Family } from '../create/faraid';
@@ -119,7 +120,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
   const wallet = useWallet();
   const navigate = useNavigate();
   const { search } = useLocation();
-  const { demo, selectPlan } = useCurrentPlan();
+  const { demo, data } = useCurrentPlan();
   const formId = useId();
   const titleId = useId();
   const stepTitle = useRef<HTMLHeadingElement>(null);
@@ -185,6 +186,11 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     mode === 'equal' ? 1n : shareUnits(heir.share),
   );
   const totalShares = shares.reduce((total, share) => total + share, 0n);
+  const feeBudget = existing ? BigInt(existing.feeBudget) : DEFAULT_FEE_BUDGET;
+  const balance = existing ? data?.state.planBalanceSats ?? null : parseBch(amount);
+  const funding = balance !== null && shares.length && shares.every((share) => share > 0n)
+    ? claimFunding(balance, shares, feeBudget, feeBudget)
+    : null;
   const activeSplit = SPLITS.find((split) => split.id === mode);
   const waitingSeconds = daySeconds(
     days,
@@ -304,7 +310,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
       const policy: PusakaV2PolicyInput = {
         inactivityPeriodSeconds: waitingSeconds,
         reviewPeriodSeconds: reviewSeconds,
-        feeBudget: existing ? BigInt(existing.feeBudget) : 5000n,
+        feeBudget,
         contacts: contacts.map((address) => address.trim()) as [
           string,
           string,
@@ -322,10 +328,6 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
       } else {
         const deposit = parseBch(amount);
         if (deposit === null) throw new Error('Enter the starting transfer in BCH with up to eight decimal places.');
-        if (deposit < MIN_PLAN_CARRIER_SATS)
-          throw new Error(
-            `The starting transfer must be at least ${formatBch(MIN_PLAN_CARRIER_SATS)} BCH.`,
-          );
         const { prepareCreate } = await import('../../lib/chain/v2');
         setPrepared(await prepareCreate(policy, deposit));
       }
@@ -671,6 +673,20 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                       />
                     </label>
                   )}
+                  {funding && (
+                    <>
+                      <Details rows={[
+                        ['Balance to fund a claim without a wallet', `${formatBch(funding.minimum)} BCH`],
+                        ['Smallest heir’s estimated payout after fees', `${funding.smallestPayout.toLocaleString('en-US')} sats`],
+                      ]} />
+                      {funding.shortfall > 0n && (
+                        <p className="pw-fine" role="status">
+                          {existing ? 'The protected balance needs' : 'The starting transfer needs'}{' '}
+                          {formatBch(funding.shortfall)} BCH more to fund each heir’s payout.
+                        </p>
+                      )}
+                    </>
+                  )}
                   <div className="pw-setup-hint">
                     <Wallet size={19} aria-hidden />
                     <p>
@@ -816,11 +832,10 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
         <TransactionReview
           prepared={prepared}
           close={() => setPrepared(null)}
-          done={(txid) => {
-            const plan = prepared.metadata;
+          done={(txid, transaction) => {
+            const plan = transaction.metadata;
             setPrepared(null);
             if (plan) {
-              selectPlan(plan);
               navigate(encodePusakaV2PlanLink(plan, '/v2/plan'), {
                 state: { txid, savePlan: true },
               });

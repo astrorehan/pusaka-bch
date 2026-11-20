@@ -31,7 +31,9 @@ export function StepWallet({ onDone, usd }: Props) {
               <p className="cr-wallet__name">{wallet.name}</p>
               <p className="cr-wallet__addr mono" title={wallet.address}>{shortAddress(wallet.address)}</p>
               <p className="cr-wallet__bal num">
-                {formatBch(wallet.balance)} BCH <span className="muted">{formatUsd(wallet.balance, usd)}</span>
+                {wallet.balance === null ? 'Wallet balance unavailable' : (
+                  <>{formatBch(wallet.balance)} BCH <span className="muted">{formatUsd(wallet.balance, usd)}</span></>
+                )}
               </p>
             </div>
           </div>

@@ -50,7 +50,7 @@ function WalletPanel({ onDisconnect }: { onDisconnect: () => void }) {
     return () => { live = false; };
   }, []);
   if (!wallet) return null;
-  const dollars = formatUsd(wallet.balance, usd);
+  const dollars = wallet.balance === null ? null : formatUsd(wallet.balance, usd);
   return (
     <div className="wallet-panel">
       <p className="wallet-panel__head">
@@ -62,7 +62,7 @@ function WalletPanel({ onDisconnect }: { onDisconnect: () => void }) {
         <CopyButton value={wallet.address} label="Copy your wallet address" />
       </div>
       <p className="wallet-panel__bal num">
-        <strong>{formatBch(wallet.balance)} BCH</strong>
+        <strong>{wallet.balance === null ? 'Wallet balance unavailable' : `${formatBch(wallet.balance)} BCH`}</strong>
         {dollars && <span className="muted"> {dollars}</span>}
       </p>
       <ButtonLink to="/wallet" block icon={<Wallet />}>Open your wallet</ButtonLink>

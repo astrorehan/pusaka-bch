@@ -87,7 +87,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
   }, [phase, previewReady]);
 
   const fee = preview?.networkFee ?? 0n;
-  const short = wallet != null && preview != null && wallet.balance < fee;
+  const short = wallet != null && wallet.balance !== null && preview != null && wallet.balance < fee;
 
   async function confirm() {
     if (!wallet) {
@@ -146,7 +146,7 @@ function Flow({ action, plan, state, usd, onClose, refresh, onReminder, titleId,
               </p>
             )}
             {connectCancelled && !wallet && <p className="ax-note ax-note--muted" role="status">Cancelled in your wallet. Nothing was shared. Connect again when you're ready.</p>}
-            {short && wallet && (
+            {short && wallet && wallet.balance !== null && (
               <p className="ax-note ax-note--danger" role="alert">
                 Your wallet has {formatBch(wallet.balance)} BCH. It needs at least {formatBch(fee)} BCH for the network fee. Add a little BCH, then try again.
               </p>

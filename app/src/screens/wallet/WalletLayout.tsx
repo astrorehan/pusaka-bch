@@ -40,7 +40,7 @@ const FOLD_KEY = 'pusaka.sidebar.folded';
 const THEME_KEY = 'pusaka.wallet.theme';
 const NAVIGATION = [
   { path: '/wallet', title: 'Wallet', icon: WalletCards },
-  { path: '/wallet/swap', title: 'Swap', icon: ArrowLeftRight },
+  { path: '/wallet/swap', title: NETWORK === 'mainnet' ? 'Tokens' : 'Swap', icon: ArrowLeftRight },
   { path: '/wallet/plan', title: 'Inheritance', icon: ShieldCheck },
   { path: '/wallet/activity', title: 'Activity', icon: History },
 ] as const;
@@ -171,7 +171,7 @@ function Sidebar({
           <strong>{demo ? 'Demo wallet' : 'Personal wallet'}</strong>
           <small className={wallet && !demo ? 'mono' : undefined}>
             {demo
-              ? 'Chipnet example'
+              ? (NETWORK === 'mainnet' ? 'Mainnet example' : 'Chipnet example')
               : wallet
                 ? shortAddress(wallet.address)
                 : status === 'connecting'

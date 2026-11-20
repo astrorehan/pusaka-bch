@@ -44,8 +44,10 @@ export function SwapScreen() {
   return (
     <div className="pw-page">
       <PageHeading
-        title="Swap"
-        description="Swap BCH for a supported token that stays under your inheritance rules."
+        title={supported ? 'Swap' : 'Tokens'}
+        description={supported
+          ? 'Swap BCH for a supported token that stays under your inheritance rules.'
+          : 'Receive and manage supported CashTokens held under your inheritance rules.'}
       >
         <ButtonLink
           to={walletPath('/wallet', demo)}
@@ -65,7 +67,7 @@ export function SwapScreen() {
               description={
                 supported
                   ? 'PSK is a test token with no monetary value.'
-                  : 'Exchange BCH directly from Pusaka.'
+                  : undefined
               }
             >
               {supported && (
@@ -135,8 +137,8 @@ export function SwapScreen() {
             <div className="pw-footnote">
               <Coins aria-hidden size={16} />
               <p>
-                Token amounts are whole base units. Any remainder goes to the
-                last listed heir.
+                Whole token units are split per receipt. Any remainder goes to
+                the last listed heir.
               </p>
             </div>
             <a

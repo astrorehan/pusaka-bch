@@ -62,6 +62,10 @@ test("new wallet flow validates heirs and contacts before review", async ({
   await expect(
     page.getByRole("button", { name: "Connect wallet", exact: true }).last(),
   ).toBeVisible();
+  await expect(page.getByText("0.00015368 BCH", { exact: true })).toBeVisible();
+  await page.getByLabel("Starting transfer (BCH)").fill("0.00015367");
+  await expect(page.getByText("545 sats", { exact: true })).toBeVisible();
+  await expect(page.getByText(/starting transfer needs 0\.00000001 BCH more/)).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("wallet");
   await page

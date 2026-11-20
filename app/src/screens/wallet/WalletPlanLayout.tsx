@@ -35,9 +35,9 @@ async function pickDemo(): Promise<Snapshot> {
   );
   const rank = ({ data }: Snapshot) => {
     if (!data) return 9;
-    const { state, review, now } = data;
-    if (state.status === 'REVIEW') return review?.ready ? 0 : 2;
-    if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline) return 1;
+    const { state, review, now, funding } = data;
+    if (state.status === 'REVIEW' && funding.canSelfFund) return review?.ready ? 0 : 2;
+    if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline && funding.canSelfFund) return 1;
     return 3;
   };
   return loaded.reduce((best, next) => (rank(next) < rank(best) ? next : best));
@@ -160,7 +160,6 @@ export function WalletPlanLayout() {
     canRefresh: readEnabled,
     error: (demo ? '' : fromLink?.error) || current?.error || '',
     refresh,
-    selectPlan,
   };
   return <Outlet context={value} />;
 }

@@ -14,6 +14,7 @@ import { addressPrefix } from '../cashAddress.ts';
 
 let provider: ElectrumNetworkProvider | null = null;
 let providerNetwork: NetworkName | null = null;
+let freshProvider: ElectrumNetworkProvider | null = null;
 
 export function getProvider(network: NetworkName): ElectrumNetworkProvider {
   if (!provider || providerNetwork !== network) {
@@ -21,6 +22,13 @@ export function getProvider(network: NetworkName): ElectrumNetworkProvider {
     providerNetwork = network;
   }
   return provider;
+}
+
+export function getFreshProvider(network: NetworkName): ElectrumNetworkProvider {
+  if (!freshProvider || freshProvider.network !== network) {
+    freshProvider = new ElectrumNetworkProvider(network, { listingCacheMilliseconds: 0 });
+  }
+  return freshProvider;
 }
 
 /** The 20-byte public key hash inside a P2PKH cashaddr; throws for anything else. */

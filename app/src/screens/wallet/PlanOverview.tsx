@@ -18,6 +18,7 @@ import { p2pkhCashAddressFromPkh } from '../../lib/cashAddress';
 import type * as api from '../../lib/chain/v2';
 import { NETWORK } from '../../lib/networkName';
 import { planLink } from '../../lib/walletData';
+import { claimFundingMessage } from './currentPlan';
 import { Badge, Card, CardHeading } from './WalletUi';
 
 export type PrepareAction = (
@@ -52,7 +53,6 @@ export function PlanStatus({
     </Badge>
   );
 }
-
 const formatDeadline = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'short',
@@ -395,22 +395,19 @@ export function ClaimProgress({
   data,
   busy,
   prepare,
+  connected,
 }: {
   data: api.LoadedPlan;
   busy: boolean;
   prepare: PrepareAction;
+  connected: boolean;
 }) {
-  const { state, review, now, handle } = data;
+  const { state, review, now, funding } = data;
   const hasClaim = state.status === 'REVIEW' || state.status === 'PAID_OUT';
   const paid = state.status === 'PAID_OUT';
   const ready = Boolean(review?.ready);
   const approvals = state.approvedContactIndices.length;
-  const heirs = BigInt(handle.policy.heirs.length);
-  // Opening a claim and paying it out each take their network fee from the plan, and every heir's share must
-  // be large enough to send. Below this the plan cannot pay its heirs without a wallet covering the fees.
-  const enough =
-    state.planBalanceSats >= 2_000n + 2n * handle.policy.feeBudget + heirs * 546n;
-  const latePayable = paid && state.planBalanceSats - 1_000n >= heirs * 546n;
+  const canPay = funding.canSelfFund || (connected && funding.canSponsor);
   const steps = [
     {
       title: 'Plan is on the network',
@@ -440,7 +437,7 @@ export function ClaimProgress({
     {
       title: 'Pay the heirs',
       description:
-        'Anyone can submit the payout to the listed heirs. The plan pays the network fee.',
+        'Anyone can submit the payout to the listed heirs once the review is complete and the plan has enough BCH.',
       done: paid,
     },
   ];
@@ -465,19 +462,18 @@ export function ClaimProgress({
           </li>
         ))}
       </ol>
-      {(state.status === 'ACTIVE' || (state.status === 'CLOSED' && enough)) && (
+      {(state.status === 'ACTIVE' || state.status === 'CLOSED') && (
         <>
-          {!enough && (
+          {!funding.canSelfFund && (
             <p className="pw-fine">
-              This plan holds too little BCH to pay every heir after network
-              fees. Add BCH before a claim opens.
+              {claimFundingMessage(data, 'open this claim')}
             </p>
           )}
           <Button
             type="button"
             variant={now > state.deadline ? 'primary' : 'secondary'}
             block
-            disabled={busy || now <= state.deadline}
+            disabled={busy || now <= state.deadline || !canPay}
             onClick={() => void prepare('open')}
           >
             Open inactivity claim
@@ -485,17 +481,20 @@ export function ClaimProgress({
         </>
       )}
       {state.status === 'REVIEW' && (
-        <Button
-          type="button"
-          block
-          disabled={busy || !ready}
-          onClick={() => void prepare('finalize')}
-        >
-          Pay the heirs
-        </Button>
+        <>
+          {!funding.canSelfFund && <p className="pw-fine">{claimFundingMessage(data, 'pay the heirs')}</p>}
+          <Button
+            type="button"
+            block
+            disabled={busy || !ready || !canPay}
+            onClick={() => void prepare('finalize')}
+          >
+            Pay the heirs
+          </Button>
+        </>
       )}
       {paid &&
-        (latePayable ? (
+        (canPay ? (
           <Button
             type="button"
             variant="secondary"
@@ -507,8 +506,9 @@ export function ClaimProgress({
           </Button>
         ) : (
           <p className="pw-fine">
-            BCH that arrives later at this plan can be paid to the heirs the
-            same way.
+            {funding.canSponsor
+              ? claimFundingMessage(data, 'pay late receipts')
+              : 'BCH that arrives later at this plan can be paid to the heirs once every share covers the minimum payment.'}
           </p>
         ))}
     </Card>

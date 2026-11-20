@@ -51,7 +51,7 @@ export function StepAmount({ draft, update, resolved, vis, amounts, usd, wallet,
           below={
             <div className="cr-amount__meta num">
               <span className="muted">{amountUsd ?? (usd ? '≈ $0.00' : '')}</span>
-              {wallet && <span className="muted">In your wallet: {formatBch(wallet.balance)} BCH</span>}
+              {wallet && wallet.balance !== null && <span className="muted">In your wallet: {formatBch(wallet.balance)} BCH</span>}
             </div>
           }
         />

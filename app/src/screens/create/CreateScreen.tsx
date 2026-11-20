@@ -89,7 +89,7 @@ export function CreateScreen() {
     if (draft.step === 2) return heirCheck.errors;
     if (draft.step === 3) {
       const e: Errors = {};
-      const a = validateAmount(draft, usd, wallet?.balance);
+      const a = validateAmount(draft, usd, wallet?.balance ?? undefined);
       if (a) e.amount = a;
       const p = validatePeriod(draft);
       if (p) e.period = p;

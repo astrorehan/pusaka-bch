@@ -47,7 +47,8 @@ export function StepReview({ draft, resolved, amounts, leftover, usd, wallet, wa
   }, [plan, amount, attempt]);
 
   const outTotal = preview ? preview.lines.reduce((s, l) => s + l.amount, 0n) + preview.networkFee : null;
-  const tooMuch = wallet && outTotal !== null && outTotal > wallet.balance;
+  const walletBalance = wallet?.balance ?? null;
+  const tooMuch = walletBalance !== null && outTotal !== null && outTotal > walletBalance;
   const period = periodSeconds(draft) ?? 0n;
   const end = now + period - LAG;
   const usdOf = (s: bigint) => formatUsd(s, usd);
@@ -143,7 +144,7 @@ export function StepReview({ draft, resolved, amounts, leftover, usd, wallet, wa
         ) : tooMuch ? (
           <>
             <Notice tone="danger" title="Not enough BCH in your wallet.">
-              Your wallet has {formatBch(wallet.balance)} BCH, and this plan needs {formatBch(outTotal!)} BCH. Lower the amount.
+              Your wallet has {formatBch(walletBalance)} BCH, and this plan needs {formatBch(outTotal)} BCH. Lower the amount.
             </Notice>
             <Button size="lg" block onClick={() => onEdit(3)}>Change the amount</Button>
           </>

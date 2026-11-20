@@ -10,16 +10,20 @@ import {
   ArrowUpRight,
   Check,
   CircleAlert,
+  Download,
   ExternalLink,
   FlaskConical,
   X,
 } from 'lucide-react';
-import { Button } from '../../components/Button';
+import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
+import { friendlyError, StaleReviewError, UnconfirmedPlanSubmission } from '../../lib/chain/errors';
 import { explorerTxUrl } from '../../lib/format';
 import type { Prepared } from '../../lib/chain/v2';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
+import type { PusakaV2PlanMetadata } from '../../lib/protocol/plan-metadata';
+import type { PendingPlanSubmission } from '../../lib/walletData';
 import './wallet-app.css';
 
 export function Card({
@@ -253,6 +257,32 @@ export function Details({ rows }: { rows: Array<[string, ReactNode]> }) {
   );
 }
 
+export function PlanDataDownload({ plan }: { plan: PusakaV2PlanMetadata }) {
+  return (
+    <ButtonLink
+      variant="secondary"
+      href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(plan, null, 2))}`}
+      download={`pusaka-${plan.planCategoryHex.slice(0, 8)}.json`}
+      icon={<Download />}
+    >
+      Download plan data
+    </ButtonLink>
+  );
+}
+
+export function PlanSubmissionDetails({ record }: { record: PendingPlanSubmission }) {
+  return (
+    <div className="pw-sheet-stack">
+      <p className="pw-fine">
+        {record.title} · <a href={explorerTxUrl(record.txid, NETWORK)} target="_blank" rel="noreferrer">
+          View transaction <ExternalLink size={12} aria-hidden />
+        </a>
+      </p>
+      <PlanDataDownload plan={record.metadata} />
+    </div>
+  );
+}
+
 export function TransactionReview({
   prepared,
   close,
@@ -260,11 +290,16 @@ export function TransactionReview({
 }: {
   prepared: Prepared;
   close: () => void;
-  done: (txid: string) => void;
+  done: (txid: string, transaction: Prepared) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const walletApproval = prepared.walletApproval ?? true;
+  const [revised, setRevised] = useState<Prepared | null>(null);
+  const [stale, setStale] = useState(false);
+  const [recovery, setRecovery] = useState<PendingPlanSubmission | null>(null);
+  const transaction = revised ?? prepared;
+  const rebuild = stale ? transaction.rebuild : undefined;
+  const walletApproval = transaction.walletApproval ?? true;
   const actionLabel = walletApproval ? 'Approve in wallet' : 'Send transaction';
 
   async function approve() {
@@ -272,11 +307,19 @@ export function TransactionReview({
     setBusy(true);
     setError('');
     try {
-      const { submit } = await import('../../lib/chain/v2');
-      done(await submit(prepared));
+      if (rebuild) {
+        setRevised(await rebuild());
+        setStale(false);
+      } else {
+        const api = await import('../../lib/chain/v2');
+        const txid = recovery ? await api.checkPlanSubmission(recovery) : await api.submit(transaction);
+        done(txid, transaction);
+      }
     } catch (err) {
-      const { friendlyError } = await import('../../lib/chain/errors');
+      if (err instanceof StaleReviewError) setStale(true);
+      if (err instanceof UnconfirmedPlanSubmission) setRecovery(err.record);
       setError(friendlyError(err));
+    } finally {
       setBusy(false);
     }
   }
@@ -284,7 +327,7 @@ export function TransactionReview({
   return (
     <WalletSheet
       open
-      title={prepared.title}
+      title={transaction.title}
       description={
         walletApproval
           ? 'Check the details before approving this transaction in your wallet.'
@@ -305,21 +348,22 @@ export function TransactionReview({
           <Button
             type="button"
             loading={busy}
+            disabled={stale && !rebuild}
             icon={<ArrowUpRight />}
             onClick={() => void approve()}
           >
-            {busy
-              ? walletApproval
-                ? 'Waiting for wallet or network…'
-                : 'Sending to network…'
+            {rebuild ? 'Refresh transaction review' : recovery ? 'Check submission' : busy
+              ? walletApproval ? 'Waiting for wallet or network…' : 'Sending to network…'
               : actionLabel}
           </Button>
         </>
       }
     >
       <div className="pw-sheet-stack">
-        <Details rows={prepared.rows} />
+        <Details rows={transaction.rows} />
+        {transaction.warning && <p className="pw-fine" role="note">{transaction.warning}</p>}
         {error && <ErrorNotice>{error}</ErrorNotice>}
+        {recovery && <PlanSubmissionDetails record={recovery} />}
         <p className="pw-fine">
           {NETWORK === 'chipnet'
             ? 'This uses test BCH.'

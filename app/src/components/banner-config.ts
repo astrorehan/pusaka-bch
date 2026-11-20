@@ -5,14 +5,15 @@
 // Leave a value as '' to hide its entry. A group with nothing left in it is hidden too.
 
 export const REPO_URL = 'https://github.com/astrorehan/pusaka-bch';
-export const DOCS_URL = `${REPO_URL}/tree/main/docs`;
+const sourceRef = import.meta.env.VITE_RELEASE_REF || 'main';
+export const DOCS_URL = `${REPO_URL}/tree/${sourceRef}/docs`;
 
 export const BANNER = {
   event: 'BCH BLAZE 2026',
   eventUrl: 'https://bchblaze.cash',
 
   /** The presentation in the organiser's template, as a PDF in the repository. A public Google Slides link works too. */
-  slidesUrl: `${REPO_URL}/blob/main/docs/Pusaka-BCH-BLAZE-2026.pdf`,
+  slidesUrl: `${REPO_URL}/blob/${sourceRef}/docs/Pusaka-BCH-BLAZE-2026.pdf`,
 
   /** Pusaka as it was before the hackathon (Solidity on Monad). */
   before: {
@@ -22,7 +23,7 @@ export const BANNER = {
 
   /** What was built during BLAZE. A `demoUrl` starting with '/' is a page of this app: the live example plans. */
   now: {
-    codeUrl: REPO_URL,
+    codeUrl: `${REPO_URL}/tree/${sourceRef}`,
     demoUrl: '/wallet/demo',
   },
 

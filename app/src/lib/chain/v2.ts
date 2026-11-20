@@ -1,6 +1,8 @@
 import { Signer, TransactionBuilder, type Utxo } from "@solidcash/solidcash";
 import { externallySignedUnlocker } from "@solidcash/solidcash/walletconnect";
 import { binToHex, sha256, hexToBin } from "@bitauth/libauth";
+import { claimFunding, DEFAULT_FEE_BUDGET, MIN_ANCHOR_SATS } from "../protocol/claim-funding";
+import { MIN_PLAN_CARRIER_SATS } from "../protocol/plan-metadata";
 import {
   attachPusakaV2Plan,
   buildGenesisV2PlanTx,
@@ -22,9 +24,10 @@ import {
 } from "../protocol/pusaka-v2";
 import { NETWORK } from "../networkName";
 import { shortAddress } from "../format";
-import { recordActivity, savePlan } from "../walletData";
-import { friendlyError, isRejection } from "./errors";
+import { recordActivity, removePendingPlan, savePendingPlan, savePlan, type PendingPlanSubmission } from "../walletData";
+import { friendlyError, isInputConflict, isRejection, StaleReviewError, UnconfirmedPlanSubmission } from "./errors";
 import {
+  getFreshProvider,
   getProvider,
   medianTimePast,
   pkhOfAddress,
@@ -80,8 +83,47 @@ export async function loadPlan(plan: PusakaV2PlanMetadata) {
     } : undefined,
     tokenReceiveAddress: vault?.tokenAddress,
     tokenReceipts: rawReceipts.filter((u) => u.token && !u.token.nft && u.token.category !== plan.planCategoryHex),
+    funding: payoutFunding(handle, state, Number(now)),
   };
 }
+
+function payoutFunding(
+  handle: PusakaV2PlanHandle,
+  state: Awaited<ReturnType<typeof discoverPusakaV2State>>,
+  now: number,
+) {
+  const { planUtxo, deadline, status } = state;
+  const { feeBudget, heirs } = handle.policy;
+  const shares = heirs.map(({ share }) => share);
+  const opening = status === "ACTIVE" || status === "CLOSED";
+  const anchor = status === "REVIEW" && state.anchorMatchesRound ? state.anchorBalanceSats : 0n;
+  const balance = state.planBalanceSats + anchor;
+  let openingFee = opening ? feeBudget : 0n;
+  let openingNeedsSponsor = false;
+  if (opening && planUtxo && now > deadline) {
+    // Size the transaction at a balance that can fund its outputs. The actual balance is used below.
+    try {
+      openingFee = buildOpenClaimByInactivityTx({
+        handle,
+        planUtxo: { ...planUtxo, satoshis: MIN_PLAN_CARRIER_SATS + MIN_ANCHOR_SATS + feeBudget },
+        locktime: deadline,
+      }).fee;
+    } catch {
+      openingNeedsSponsor = true;
+    }
+  }
+  const self = claimFunding(balance, shares, feeBudget, openingFee);
+  const sponsored = opening
+    ? claimFunding(balance + MIN_ANCHOR_SATS, shares, feeBudget)
+    : claimFunding(balance, shares, 0n);
+  return {
+    self,
+    sponsored,
+    canSelfFund: !openingNeedsSponsor && self.shortfall === 0n,
+    canSponsor: sponsored.shortfall === 0n && (status !== "CLOSED" || balance > MIN_PLAN_CARRIER_SATS),
+  };
+}
+
 export type LoadedPlan = Awaited<ReturnType<typeof loadPlan>>;
 export interface Prepared {
   title: string;
@@ -90,14 +132,42 @@ export interface Prepared {
   rows: Array<[string, string]>;
   metadata?: PusakaV2PlanMetadata;
   planCategory?: string;
-  before?: { txid: string; vout: number };
-  handle?: PusakaV2PlanHandle;
   validUntil?: number;
   walletApproval?: boolean;
+  warning?: string;
+  rebuild?: () => Promise<Prepared>;
 }
 function bch(sats: bigint) {
   return `${(Number(sats) / 1e8).toFixed(8)} BCH`;
 }
+
+function requirePayoutFunds(shortfall: bigint, inboxBalanceSats: bigint) {
+  if (shortfall === 0n) return;
+  const collect = inboxBalanceSats > 0n ? "Collect incoming BCH and try again." : "Add BCH at the plan’s receive address and collect it first.";
+  throw new Error(`The plan needs ${bch(shortfall)} more in its protected balance to pay every heir. ${collect}`);
+}
+
+function previewOpenedClaim(handle: PusakaV2PlanHandle, builder: TransactionBuilder, inboxBalanceSats: bigint) {
+  const [plan, anchor] = builder.outputs;
+  const { feeBudget, heirs } = handle.policy;
+  const funding = claimFunding(plan.amount + anchor.amount, heirs.map(({ share }) => share), feeBudget);
+  requirePayoutFunds(funding.shortfall, inboxBalanceSats);
+  // These outputs become the two payout inputs. An outpoint of the same size is enough to quote the payout.
+  const txid = builder.inputs[0].txid;
+  try {
+    buildFinalizeClaimTx({
+      handle,
+      planUtxo: { txid, vout: 0, satoshis: plan.amount, token: plan.token },
+      anchorUtxo: { txid, vout: 1, satoshis: anchor.amount, token: anchor.token },
+    });
+    return funding.smallestPayout;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("exceeds policy feeBudget"))
+      throw new Error("This plan’s network fee budget is too small to pay its heirs without a wallet. Ask the owner to update the plan rules.");
+    throw error;
+  }
+}
+
 function walletOnNetwork() {
   const w = getWizardWallet();
   if (!w) throw new Error("Connect your wallet first.");
@@ -171,6 +241,7 @@ export async function prepareGather(): Promise<Prepared> {
     title: "Prepare wallet",
     builder,
     fee,
+    rebuild: prepareGather,
     rows: [
       ["To your first Paytaca receive address", bch(total - fee)],
       ["Network fee", bch(fee)],
@@ -182,6 +253,10 @@ export async function prepareCreate(
   policy: PusakaV2PolicyInput,
   initialDepositSats: bigint,
 ): Promise<Prepared> {
+  const feeBudget = BigInt(policy.feeBudget ?? DEFAULT_FEE_BUDGET);
+  const funding = claimFunding(initialDepositSats, policy.heirs.map(({ share }) => BigInt(share)), feeBudget, feeBudget);
+  if (funding.shortfall > 0n)
+    throw new Error(`Start with at least ${bch(funding.minimum)} so every heir can be paid after fees without a connected wallet.`);
   const { w, unlocker } = signing("Pusaka: create your protected wallet");
   const coins = await ownerCoins(w.ownerAddress());
   const coin = coins.find(
@@ -207,9 +282,11 @@ export async function prepareCreate(
   return {
     ...result,
     title: "Create Pusaka wallet",
+    rebuild: () => prepareCreate(policy, initialDepositSats),
     rows: [
-      ["Protected balance", bch(initialDepositSats - 1000n)],
-      ["Identity carrier (kept in Pusaka)", bch(1000n)],
+      ["Protected balance", bch(initialDepositSats - MIN_PLAN_CARRIER_SATS)],
+      ["Identity carrier (kept in Pusaka)", bch(MIN_PLAN_CARRIER_SATS)],
+      ["Smallest heir’s estimated payout after fees", bch(funding.smallestPayout)],
       ["Network fee", bch(result.fee)],
       [
         "Returns to Paytaca (counted once)",
@@ -259,6 +336,8 @@ export async function prepareAction(
   const title = titles[action];
   let result;
   let sponsored = false;
+  let smallestPayout: bigint | undefined;
+  let warning: string | undefined;
   if (action === "sweep") {
     const inboxUtxos = state.inboxUtxos.slice(0, 20);
     try {
@@ -291,8 +370,13 @@ export async function prepareAction(
       throw new Error(
         "Wait for the confirmed claim anchor to complete its network review period.",
       );
-    // These steps pay their own fee from the plan. A plan too small for that can still move when a
-    // connected wallet pays the fee, so a small estate is never stuck.
+    const { funding } = loaded;
+    const wallet = getWizardWallet();
+    const canSponsor = wallet?.network === NETWORK && funding.canSponsor;
+    if (!funding.canSelfFund && !canSponsor) {
+      requirePayoutFunds(funding.self.shortfall, state.inboxBalanceSats);
+      if (action === "open") throw new Error("Connect a funded wallet to pay the cost of opening this claim.");
+    }
     const build = (fee?: Awaited<ReturnType<typeof sponsor>>) =>
       action === "open"
         ? buildOpenClaimByInactivityTx({ handle, planUtxo: state.planUtxo!, locktime: now - 1, ...fee })
@@ -301,11 +385,12 @@ export async function prepareAction(
           : buildDistributeLateTx({ handle, planUtxo: state.planUtxo!, ...fee });
     try {
       result = build();
+      if (action === "open") smallestPayout = previewOpenedClaim(handle, result.builder, state.inboxBalanceSats);
     } catch (selfFunded) {
-      const wallet = getWizardWallet();
-      if (!wallet || wallet.network !== NETWORK) throw selfFunded;
+      if (!canSponsor) throw selfFunded;
       const prompts = { open: "open the claim", finalize: "pay the heirs", late: "pay the late receipts" };
       result = build(await sponsor(`Pusaka: pay the network fee to ${prompts[action]}`, "This step"));
+      if (action === "open") smallestPayout = previewOpenedClaim(handle, result.builder, state.inboxBalanceSats);
       sponsored = true;
     }
   } else {
@@ -325,6 +410,7 @@ export async function prepareAction(
         contactUnlocker: unlocker,
         contactChangeAddress: w.ownerAddress(),
       });
+      if (result.enteredReview) smallestPayout = previewOpenedClaim(handle, result.builder, state.inboxBalanceSats);
     } else {
       if (binToHex(pkhOfAddress(w.ownerAddress())) !== metadata.ownerPkhHex)
         throw new Error("Connect the owner wallet for this action.");
@@ -352,6 +438,12 @@ export async function prepareAction(
             recipientAddressOrLock: recipient,
             amount: options.amount,
           });
+          if (result.planSatsAfter < state.planBalanceSats) {
+            const feeBudget = handle.policy.feeBudget;
+            const funding = claimFunding(result.planSatsAfter, handle.policy.heirs.map(({ share }) => share), feeBudget, feeBudget);
+            if (funding.shortfall > 0n)
+              warning = `Allow for a top-up of ${bch(funding.shortfall)} after this payment to leave enough BCH for a wallet-free claim.`;
+          }
           break;
         case "checkIn":
           result = buildCheckInTx(common);
@@ -369,14 +461,25 @@ export async function prepareAction(
             ...common,
             ownerAddress: w.ownerAddress(),
           });
+          if (loaded.tokenReceipts.length) {
+            const feeBudget = handle.policy.feeBudget;
+            const funding = claimFunding(result.carrierSatsAfter, handle.policy.heirs.map(({ share }) => share), feeBudget, feeBudget);
+            warning = `Tokens will stay in the vault. They can be sent to heirs only after a BCH payout. To fund a wallet-free claim again, add and collect about ${bch(funding.shortfall)} at the plan’s BCH receive address.`;
+          }
           break;
-        case "policy":
+        case "policy": {
           if (!options.policy) throw new Error("Enter the updated rules.");
           result = buildUpdatePolicyTx({
             ...common,
             newPolicy: options.policy,
           });
+          const { heirs, feeBudget } = result.nextPolicy;
+          const funding = claimFunding(result.planSatsAfter, heirs.map(({ share }) => share), feeBudget, feeBudget);
+          smallestPayout = funding.smallestPayout;
+          if (funding.shortfall > 0n)
+            warning = `Allow for a top-up of ${bch(funding.shortfall)} after these changes so every heir can be paid without a connected wallet.`;
           break;
+        }
         default:
           throw new Error("Unsupported action");
       }
@@ -424,6 +527,8 @@ export async function prepareAction(
     ]);
   if ("cancelledReview" in result && result.cancelledReview)
     rows.push(["Pending claim", "Cancelled in this same transaction"]);
+  if (smallestPayout !== undefined)
+    rows.push(["Smallest heir’s estimated payout after fees", bch(smallestPayout)]);
   return {
     title,
     builder: result.builder,
@@ -434,39 +539,73 @@ export async function prepareAction(
         ? (result.nextMetadata as PusakaV2PlanMetadata)
         : undefined,
     planCategory: metadata.planCategoryHex,
-    before: state.planUtxo,
-    handle,
+    rebuild: () => prepareAction(metadata, action, options),
     walletApproval: sponsored || !["sweep", "open", "finalize", "late"].includes(action),
+    warning,
   };
 }
+
+function transactionId(hex: string) {
+  return binToHex(sha256.hash(sha256.hash(hexToBin(hex))).reverse());
+}
+
+async function verifyAndSavePlan(record: PendingPlanSubmission) {
+  const provider = getFreshProvider(NETWORK);
+  const handle = await attachPusakaV2Plan(record.metadata, provider, { verifyOnChain: false });
+  const state = await discoverPusakaV2State(handle);
+  if (!state.planUtxo || !state.policyMatchesMetadata)
+    throw new Error("This plan’s new rules are not visible at its address yet. The recovery copy is still saved.");
+  if (savePlan(record.metadata)) removePendingPlan(record.txid);
+}
+
+export async function checkPlanSubmission(record: PendingPlanSubmission) {
+  const provider = getProvider(NETWORK);
+  let raw;
+  try {
+    raw = await provider.performRequest("blockchain.transaction.get", record.txid);
+  } catch {
+    throw new UnconfirmedPlanSubmission(record);
+  }
+  if (typeof raw !== "string" || !/^(?:[a-f\d]{2})+$/i.test(raw) || transactionId(raw) !== record.txid)
+    throw new UnconfirmedPlanSubmission(record);
+  await verifyAndSavePlan(record);
+  recordActivity({ txid: record.txid, title: record.title, at: Date.now(), plan: record.metadata.planCategoryHex, status: "accepted" });
+  return record.txid;
+}
+
 export async function submit(prepared: Prepared): Promise<string> {
   if (prepared.validUntil && Date.now() > prepared.validUntil)
     throw new Error("Quote expired. Close this review and get a fresh quote.");
-  if (prepared.before && prepared.handle) {
-    const fresh = await discoverPusakaV2State(prepared.handle);
-    if (
-      fresh.planUtxo?.txid !== prepared.before.txid ||
-      fresh.planUtxo?.vout !== prepared.before.vout
-    )
-      throw new Error(
-        "The plan changed. Close this review and refresh before trying again.",
-      );
-  }
   const hex = await finalizeBuilderTxHex(prepared.builder);
+  const provider = getProvider(NETWORK);
+  // The inputs may have changed while the owner was approving on a phone.
+  const fresh = getFreshProvider(NETWORK);
+  const available = await Promise.all(prepared.builder.inputs.map(async (input) => {
+    const coins = await fresh.getUtxosForLockingBytecode(input.unlocker.generateLockingBytecode());
+    return coins.some((coin) => coin.txid === input.txid && coin.vout === input.vout);
+  }));
+  if (available.includes(false)) throw new StaleReviewError();
   if (prepared.validUntil && Date.now() > prepared.validUntil)
     throw new Error(
       "Quote expired while awaiting approval. Nothing was broadcast. Get a fresh quote.",
     );
-  const expectedTxid = binToHex(
-    sha256.hash(sha256.hash(hexToBin(hex))).reverse(),
-  );
+  const expectedTxid = transactionId(hex);
+  const pending = prepared.metadata && { txid: expectedTxid, title: prepared.title, metadata: prepared.metadata };
+  if (pending) savePendingPlan(pending);
   // The wallet approves without broadcasting; the app broadcasts the exact reviewed transaction once.
   let response;
   try {
-    response = await getProvider(NETWORK).sendRawTransaction(hex);
+    response = await provider.sendRawTransaction(hex);
   } catch (e) {
-    if (isRejection(e))
+    if (isInputConflict(e)) {
+      if (pending) throw new UnconfirmedPlanSubmission(pending);
+      throw new StaleReviewError();
+    }
+    if (isRejection(e)) {
+      if (pending) removePendingPlan(pending.txid);
       throw new Error(`The network did not accept this transaction, so nothing was sent. ${friendlyError(e)}`);
+    }
+    if (pending) throw new UnconfirmedPlanSubmission(pending);
     throw new Error(
       `Submission could not be confirmed. Refresh the plan and check transaction ${expectedTxid} before trying again. ${friendlyError(e)}`,
     );
@@ -476,9 +615,13 @@ export async function submit(prepared: Prepared): Promise<string> {
       ? response
       : (response as { txid?: string } | null)?.txid;
   if (typeof txid !== "string" || txid.toLowerCase() !== expectedTxid) {
+    if (pending) throw new UnconfirmedPlanSubmission(pending);
     throw new Error(`Submission could not be confirmed. Check transaction ${expectedTxid} before trying again.`);
   }
-  if (prepared.metadata) savePlan(prepared.metadata);
+  if (pending) {
+    // An accepted transaction can take a moment to appear in listings. Keep both copies until it does.
+    await verifyAndSavePlan(pending).catch(() => {});
+  }
   recordActivity({
     txid: expectedTxid,
     title: prepared.title,
@@ -525,14 +668,17 @@ export async function prepareSwap(
     quote,
     locktime: now - 1,
   });
+  const { heirs, feeBudget } = handle.policy;
+  const funding = claimFunding(result.protectedChange, heirs.map(({ share }) => share), feeBudget, feeBudget);
   return {
     title: "Swap BCH for PSK",
     validUntil: quote.expiresAt,
     builder: result.builder,
     fee: result.fee,
-    before: state.planUtxo,
-    handle,
     planCategory: metadata.planCategoryHex,
+    warning: funding.shortfall > 0n
+      ? `Allow for a top-up of ${bch(funding.shortfall)} after this swap to leave enough BCH for a wallet-free claim.`
+      : undefined,
     rows: [
       ["Pay pool (includes liquidity fee)", bch(quote.supply)],
       ["Pool liquidity fee", bch(quote.poolFee)],
@@ -572,8 +718,7 @@ export async function prepareTokenPayout(
     title: "Pay token heirs",
     builder: result.builder,
     fee: result.fee,
-    handle,
-    before: state.planUtxo,
+    rebuild: () => prepareTokenPayout(metadata, receipt),
     planCategory: metadata.planCategoryHex,
     rows: [
       ["Token category", receipt.token!.category],
@@ -585,7 +730,8 @@ export async function prepareTokenPayout(
         bch(BigInt(result.payouts.length) * 800n),
       ],
       ["Network fee (paid by submitter)", bch(result.fee)],
-      ["Rounding", "Indivisible units go to the final configured heir"],
+      ["BCH from this receipt", `${bch(receipt.satoshis)} stays in the token vault and cannot be withdrawn`],
+      ["Rounding per receipt", "Indivisible units go to the final configured heir for each receipt"],
     ],
   };
 }
@@ -620,8 +766,7 @@ export async function prepareTokenSend(
     title: "Send tokens",
     builder: result.builder,
     fee: result.fee,
-    handle,
-    before: state.planUtxo,
+    rebuild: () => prepareTokenSend(metadata, receipt, recipient, units),
     planCategory: metadata.planCategoryHex,
     rows: [
       ["Recipient", destination],

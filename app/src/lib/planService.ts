@@ -7,7 +7,7 @@ import { heirAmounts } from './shares';
 
 export interface WalletInfo {
   address: string;
-  balance: bigint;
+  balance: bigint | null;
   name: string; // e.g. "Paytaca"
 }
 

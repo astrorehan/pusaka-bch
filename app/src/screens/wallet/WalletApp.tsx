@@ -7,7 +7,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowDownLeft,
   ArrowLeftRight,
@@ -37,8 +37,10 @@ import { HAS_DEMO } from '../../lib/demo';
 import { friendlyError } from '../../lib/chain/errors';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
-import { history, planLink } from '../../lib/walletData';
+import { encodePusakaV2PlanLink } from '../../lib/protocol/plan-metadata';
+import { history, pendingPlanSubmissions, planLink, type PendingPlanSubmission } from '../../lib/walletData';
 import {
+  claimFundingMessage,
   planAddressHash,
   planAddressPrefix,
   useCurrentPlan,
@@ -63,6 +65,8 @@ import {
   EmptyState,
   ErrorNotice,
   PageHeading,
+  PlanDataDownload,
+  PlanSubmissionDetails,
   TransactionNotice,
   TransactionReview,
   WalletSheet,
@@ -177,7 +181,7 @@ function Balance({
           Receive
         </Button>
         <ButtonLink to={swapPath} variant="secondary" icon={<ArrowLeftRight />}>
-          Swap
+          {NETWORK === 'mainnet' ? 'Tokens' : 'Swap'}
         </ButtonLink>
         <button
           type="button"
@@ -293,6 +297,7 @@ function Incoming({
         <h2>{formatBch(state.inboxBalanceSats)} BCH incoming</h2>
         <p className="pw-muted">
           Collect the receipts at your receive address to make them spendable.
+          A small collection may need a connected wallet to pay the network fee.
         </p>
       </div>
       <Button
@@ -310,20 +315,23 @@ function Incoming({
 function ClaimNotice({
   data,
   owner,
+  connected,
   busy,
   prepare,
 }: {
   data: api.LoadedPlan | null;
   owner: boolean;
+  connected: boolean;
   busy: boolean;
   prepare: PrepareAction;
 }) {
   const state = data?.state;
   if (!data || !state) return null;
-  const overdue = state.status === 'ACTIVE' && data.now > state.deadline;
+  const overdue = (state.status === 'ACTIVE' || state.status === 'CLOSED') && data.now > state.deadline;
   if (state.status !== 'REVIEW' && !overdue) return null;
-  const { review } = data;
+  const { review, funding } = data;
   const ready = Boolean(review?.ready);
+  const canPay = funding.canSelfFund || (connected && funding.canSponsor);
   let heading: string;
   let detail: string;
   if (overdue) {
@@ -333,11 +341,13 @@ function ClaimNotice({
     detail = owner
       ? 'Anyone can now open a claim. Press “I’m still here”, or send a payment, to start the waiting time again.'
       : 'Anyone can open a claim now, with no wallet of their own. The owner still gets the full review period to stop it.';
+    if (!funding.canSelfFund) detail = claimFundingMessage(data, 'open this claim');
   } else if (ready) {
     heading = 'The review period has ended';
     detail = owner
       ? 'Anyone can now pay your heirs. Stop the claim if you are still here.'
       : 'Anyone can pay the heirs now. The plan pays the network fee, and each heir receives their share.';
+    if (!funding.canSelfFund) detail = claimFundingMessage(data, 'pay the heirs');
   } else {
     heading = 'A claim is under review';
     detail = review?.confirmed
@@ -352,17 +362,17 @@ function ClaimNotice({
         <p>{detail}</p>
       </div>
       <div className="pw-claim-banner-actions">
-        {overdue && owner && (
+        {overdue && owner && state.status === 'ACTIVE' && (
           <Button type="button" variant="secondary" disabled={busy} onClick={() => void prepare('checkIn')}>
             I’m still here
           </Button>
         )}
-        {overdue && !owner && (
+        {overdue && !owner && canPay && (
           <Button type="button" disabled={busy} onClick={() => void prepare('open')}>
             Open the claim
           </Button>
         )}
-        {ready && (
+        {ready && canPay && (
           <Button type="button" variant={owner ? 'secondary' : 'primary'} disabled={busy} onClick={() => void prepare('finalize')}>
             Pay the heirs
           </Button>
@@ -405,7 +415,7 @@ function ReceiveBch({
           Open in wallet
         </ButtonLink>
         <p className="pw-fine">
-          Use the separate token receive address on Swap for supported
+          Use the separate token receive address on {NETWORK === 'mainnet' ? 'Tokens' : 'Swap'} for supported
           CashTokens. Small BCH receipts may need to be collected together.
         </p>
       </div>
@@ -437,15 +447,40 @@ function SavePlan({
           <strong>Family plan link</strong>
           <CopyButton value={planLink(metadata)} label="Copy family link" />
         </div>
-        <ButtonLink
-          href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(metadata, null, 2))}`}
-          download={`pusaka-${metadata.planCategoryHex.slice(0, 8)}.json`}
-          icon={<Download />}
-        >
-          Download plan data
-        </ButtonLink>
+        <PlanDataDownload plan={metadata} />
       </div>
     </WalletSheet>
+  );
+}
+
+function PlanRecovery({ record }: { record: PendingPlanSubmission }) {
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function check() {
+    setBusy(true);
+    setError('');
+    try {
+      const { checkPlanSubmission } = await import('../../lib/chain/v2');
+      const txid = await checkPlanSubmission(record);
+      navigate(encodePusakaV2PlanLink(record.metadata, '/v2/plan'), { state: { txid, savePlan: true } });
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeading title="Recover a plan" description="Check whether the network recorded this transaction before using the saved rules." />
+      <PlanSubmissionDetails record={record} />
+      {error && <ErrorNotice>{error}</ErrorNotice>}
+      <Button className="pw-fit" type="button" loading={busy} onClick={() => void check()}>
+        Check submission
+      </Button>
+    </Card>
   );
 }
 
@@ -491,7 +526,6 @@ function WalletPage() {
     demo,
     canRefresh,
     refresh,
-    selectPlan,
   } = useCurrentPlan();
   const [dialog, setDialog] = useState<Dialog | null>(() =>
     location.state?.savePlan ? 'export' : null,
@@ -511,6 +545,7 @@ function WalletPage() {
   const route = location.pathname.toLowerCase().replace(/\/$/, '');
   const inherited = route.endsWith('/plan');
   const activity = route === '/wallet/activity';
+  const recoveries = route === '/wallet' && !demo ? pendingPlanSubmissions() : [];
   const title = activity ? 'Activity' : inherited ? 'Inheritance' : 'Wallet';
   const state = data?.state;
   const connectedHash =
@@ -601,7 +636,7 @@ function WalletPage() {
   } else {
     body = (
       <>
-        <ClaimNotice data={data} owner={owner} busy={busy} prepare={prepare} />
+        <ClaimNotice data={data} owner={owner} connected={Boolean(wallet)} busy={busy} prepare={prepare} />
         {!inherited && (
           <Balance
             data={data}
@@ -681,7 +716,7 @@ function WalletPage() {
           planPath={inherited ? undefined : walletPath('/wallet/plan', demo)}
         />
         {inherited && data && state?.status !== 'UNINITIALIZED' && (
-          <ClaimProgress data={data} busy={busy} prepare={prepare} />
+          <ClaimProgress data={data} connected={Boolean(wallet)} busy={busy} prepare={prepare} />
         )}
         <div className="pw-footnote">
           <ShieldCheck size={17} aria-hidden />
@@ -730,6 +765,7 @@ function WalletPage() {
         {error && <ErrorNotice>{error}</ErrorNotice>}
         {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
         {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
+        {recoveries.map((record) => <PlanRecovery key={record.txid} record={record} />)}
         {body}
       </div>
       {inspector && (
@@ -820,7 +856,10 @@ function WalletPage() {
             >
               Save plan data
             </Button>
-            {owner && (
+            {owner && state?.status === 'REVIEW' && (
+              <p className="pw-fine">Stop the claim before taking BCH back.</p>
+            )}
+            {owner && (state?.status === 'ACTIVE' || state?.status === 'CLOSED') && (
               <>
                 <Button
                   type="button"
@@ -855,8 +894,7 @@ function WalletPage() {
               setRecipient('');
               setAmount('');
             }
-            if (review.prepared.metadata) selectPlan(review.prepared.metadata);
-            else void refresh();
+            void refresh();
           }}
         />
       )}

@@ -16,7 +16,7 @@ interface WalletCtx {
 }
 
 const Ctx = createContext<WalletCtx | null>(null);
-const WIZARD_SESSION_KEY = 'wizardconnect-session';
+const WIZARD_SESSION_KEY = `wizardconnect-session-${NETWORK}`;
 
 function MockWalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletInfo | null>(planService.wallet());

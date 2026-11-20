@@ -21,6 +21,7 @@ import {
   numberToBinUint32LE,
 } from "@bitauth/libauth";
 import { p2pkhCashAddressFromPkh, toBytes20 } from "../cashAddress.ts";
+import { DEFAULT_FEE_BUDGET, MIN_ANCHOR_SATS, P2PKH_DUST_SATS } from "./claim-funding.ts";
 import {
   MAX_HEIRS,
   MAX_INT32,
@@ -84,9 +85,7 @@ export type PlanStatusCode =
 export type PlanStatusName =
   "ACTIVE" | "REVIEW" | "PAID_OUT" | "CLOSED" | "UNINITIALIZED";
 
-export const MIN_ANCHOR_SATS = 1_000n;
-export const P2PKH_DUST_SATS = 546n;
-export const DEFAULT_FEE_BUDGET = 5_000n;
+export { DEFAULT_FEE_BUDGET, MIN_ANCHOR_SATS, P2PKH_DUST_SATS };
 export const MIN_FEE_BUDGET = 500n;
 export const MAX_FEE_BUDGET = 100_000n;
 export const MAX_OWNER_TX_FEE = 10_000n;

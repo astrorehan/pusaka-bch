@@ -138,7 +138,7 @@ export const chainPlanService: Omit<PlanService, 'usdPerBch'> = {
   wallet() {
     const wallet = getWizardWallet();
     if (!wallet) return null;
-    return { address: wallet.ownerAddress(), balance: 0n, name: wallet.name };
+    return { address: wallet.ownerAddress(), balance: null, name: wallet.name };
   },
 
   async previewCreate(plan, amount) {

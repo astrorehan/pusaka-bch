@@ -62,7 +62,7 @@ export default function WizardBridge({ network, sessionKey, onReady, onState, on
         settle(false);
         return;
       }
-      const info = { address, balance: 0n, name: session.name };
+      const info = { address, balance: null, name: session.name };
       current = session;
       setWizardWallet(session);
       setChainWallet(info);
