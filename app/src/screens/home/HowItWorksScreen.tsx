@@ -35,7 +35,7 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-const CODE = `// PusakaV2Anchor: the review period, kept by the network itself
+const CODE = `// PusakaV2ReviewAnchor: the review period, kept by the network itself
 function finalize() {
   require(tx.version >= 2, "BIP68 needs version 2");
   require(this.age >= reviewSequence, "review delay has not elapsed");
@@ -257,7 +257,7 @@ export function HowItWorksScreen() {
               <dd>
                 <code>openClaimByInactivity</code> needs <code>tx.time &gt;= deadline</code>.{' '}
                 <code>contactApprove</code> records a distinct registered contact; the second one opens the claim. Both
-                mint a claim marker to <code>PusakaV2Anchor</code>.
+                mint a claim marker to <code>PusakaV2ReviewAnchor</code>.
               </dd>
             </div>
             <div>
@@ -294,7 +294,7 @@ export function HowItWorksScreen() {
           </dl>
 
           <figure className="code">
-            <figcaption>The review period and the payout, from <code>PusakaV2Anchor.scash</code> and <code>PusakaAssetPlan.scash</code></figcaption>
+            <figcaption>The review period and the payout, from <code>PusakaV2ReviewAnchor.scash</code> and <code>PusakaAssetPlan.scash</code></figcaption>
             <pre tabIndex={0}><code>{CODE}</code></pre>
           </figure>
 

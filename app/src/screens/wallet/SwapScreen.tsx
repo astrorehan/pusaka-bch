@@ -98,7 +98,7 @@ export function SwapScreen() {
               >
                 {!loading && <ButtonLink to="/wallet">Go to wallet</ButtonLink>}
               </EmptyState>
-            ) : metadata.protocolRevision !== 'assets-1' ? (
+            ) : !metadata.protocolRevision ? (
               <EmptyState
                 icon={<Coins size={21} />}
                 title="This wallet supports BCH"
@@ -114,7 +114,7 @@ export function SwapScreen() {
               />
             )}
           </Card>
-          {metadata?.protocolRevision === 'assets-1' && (
+          {metadata?.protocolRevision && (
             <TokenAssets
               key={metadata.planCategoryHex}
               metadata={metadata}
@@ -355,7 +355,7 @@ export function TokenAssets({
   const [error, setError] = useState('');
   const [txid, setTxid] = useState('');
   const [busy, setBusy] = useState(false);
-  if (metadata.protocolRevision !== 'assets-1') return null;
+  if (!metadata.protocolRevision) return null;
   const address = data?.tokenReceiveAddress;
   const owner =
     wallet && planAddressHash(wallet.address) === metadata.ownerPkhHex;

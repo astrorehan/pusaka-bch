@@ -23,11 +23,13 @@ import {
 import { p2pkhCashAddressFromPkh, toBytes20 } from "../cashAddress.ts";
 import { DEFAULT_FEE_BUDGET, MIN_ANCHOR_SATS, P2PKH_DUST_SATS } from "./claim-funding.ts";
 import {
+  CURRENT_ASSET_REVISION,
   MAX_HEIRS,
   MAX_INT32,
   MIN_PLAN_CARRIER_SATS,
   PUSAKA_V2_VERSION,
   readV2Metadata,
+  type AssetRevision,
   type PusakaV2PlanMetadata,
 } from "./plan-metadata.ts";
 import {
@@ -102,6 +104,7 @@ import artifactPlan from "./PusakaV2Plan.json" with { type: "json" };
 export const PUSAKA_V2_PLAN_ARTIFACT = artifactPlan as Artifact;
 import artifactAnchor from "./PusakaV2Anchor.json" with { type: "json" };
 export const PUSAKA_V2_ANCHOR_ARTIFACT = artifactAnchor as Artifact;
+import artifactReviewAnchor from "./PusakaV2ReviewAnchor.json" with { type: "json" };
 import artifactInbox from "./PusakaV2Inbox.json" with { type: "json" };
 export const PUSAKA_V2_INBOX_ARTIFACT = artifactInbox as Artifact;
 
@@ -153,7 +156,7 @@ export interface PusakaV2AnchorCommitment {
 }
 
 export interface PusakaV2Contracts {
-  protocolRevision?: "assets-1";
+  protocolRevision?: AssetRevision;
   provider: NetworkProvider;
   network: string;
   planCategoryHex: string;
@@ -707,7 +710,7 @@ function contractLockingBytes(contract: Contract): Uint8Array {
 }
 
 export function instantiatePusakaV2Contracts(params: {
-  protocolRevision?: "assets-1";
+  protocolRevision?: AssetRevision;
   provider: NetworkProvider;
   planCategoryHex: string;
   ownerPkh: Uint8Array | string;
@@ -720,7 +723,7 @@ export function instantiatePusakaV2Contracts(params: {
   const perInputFeeCap = params.perInputFeeCap ?? DEFAULT_PER_INPUT_FEE_CAP;
 
   const anchor = new Contract(
-    PUSAKA_V2_ANCHOR_ARTIFACT,
+    params.protocolRevision === CURRENT_ASSET_REVISION ? (artifactReviewAnchor as Artifact) : PUSAKA_V2_ANCHOR_ARTIFACT,
     [planCategoryVmBytes, ownerPkh],
     { provider: params.provider, addressType: "p2sh32" },
   );
@@ -732,7 +735,7 @@ export function instantiatePusakaV2Contracts(params: {
   }
 
   const plan = new Contract(
-    params.protocolRevision === "assets-1"
+    params.protocolRevision
       ? (assetPlanArtifact as Artifact)
       : PUSAKA_V2_PLAN_ARTIFACT,
     [planCategoryVmBytes, ownerPkh, anchorLockingBytecode],
@@ -1167,7 +1170,7 @@ function measureExactFee(
 }
 
 export function buildGenesisV2PlanTx(params: {
-  protocolRevision?: "assets-1";
+  protocolRevision?: AssetRevision;
   provider: NetworkProvider;
   genesisUtxo: Utxo;
   ownerUnlocker: Unlocker;

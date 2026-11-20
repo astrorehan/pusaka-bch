@@ -37,8 +37,9 @@ is proof you are still here.
 2. **Use it.** Send, receive and swap. Each payment you send restarts the waiting time.
 3. **A claim opens** once the waiting time passes in silence (anyone can open it), or sooner when two of your
    three contacts confirm.
-4. **The review period** uses a BIP68 relative time lock for payouts submitted without the owner's signature.
-   **Stop claim**, or any payment you send, ends the claim. See the [current limits](JUDGE.md#current-limits).
+4. **The review period** on newly created plans uses a BIP68 relative time lock for every inheritance payout,
+   including when the owner pays its fee. **Stop claim**, or any payment you send, ends the claim.
+   See the [limits of earlier plans](JUDGE.md#current-limits).
 5. **Pay the heirs.** After review, anyone can submit the payout when the plan covers the fee and each heir's
    minimum payment. Every node checks each heir's address and amount.
 
@@ -52,7 +53,7 @@ against their hash.
 |---|---|
 | [`app/`](app/) | The web app (Vite, React, TypeScript). WizardConnect for Paytaca and Cashonize; public Electrum servers; no server of its own |
 | [`app/src/lib/protocol/`](app/src/lib/protocol/) | Browser-safe transaction builders and plan codecs, shared by the app and the scripts |
-| [`contract/contracts/`](contract/contracts/) | The SolidCash contracts. The wallet: `PusakaAssetPlan`, `PusakaV2Inbox`, `PusakaV2Anchor`, `PusakaTokenVault`. Earlier: `PusakaV2Plan` (BCH-only v2), `Pusaka` (v1) and `VaultStateless` (the pre-BLAZE prototype, ported) |
+| [`contract/contracts/`](contract/contracts/) | The SolidCash contracts. The wallet uses `PusakaAssetPlan`, `PusakaV2Inbox`, `PusakaV2ReviewAnchor`, and `PusakaTokenVault`. Earlier artifacts preserve the original addresses and proofs |
 | [`contract/test/`](contract/test/) | SolidHat tests under the BCH 2026 limits and a strict BIP68 verifier |
 | [`contract/scripts/v2/live.ts`](contract/scripts/v2/live.ts) | Runs the lifecycle and the example plans on Chipnet or mainnet, and keeps their public records |
 | [`docs/`](docs/) | [Design rules](docs/DESIGN.md), [UX notes](docs/ux/), [proofs](docs/proofs/), the [SolidCash developer log](docs/solidcash-dx-log.md) and [feedback](docs/solidcash-feedback.md) |

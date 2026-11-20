@@ -188,6 +188,7 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(
     page.getByRole("heading", { name: "Share & recovery" }),
   ).toBeVisible();
+  await expect(page.getByText(/This plan uses the earlier review contract/)).toBeVisible();
   expect(errors).toEqual([]);
 });
 

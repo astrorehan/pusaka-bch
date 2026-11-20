@@ -2,7 +2,7 @@
 import { BANNER, DOCS_URL, REPO_URL } from '../../components/banner-config';
 
 export { DOCS_URL, REPO_URL };
-/** The wallet's contracts: PusakaAssetPlan (the plan), PusakaV2Inbox, PusakaV2Anchor and PusakaTokenVault. */
+/** The wallet's contracts: PusakaAssetPlan (the plan), PusakaV2Inbox, PusakaV2ReviewAnchor and PusakaTokenVault. */
 export const CONTRACT_URL = `${REPO_URL}/tree/main/contract/contracts`;
 export const PLAN_CONTRACT_URL = `${REPO_URL}/blob/main/contract/contracts/PusakaAssetPlan.scash`;
 export const PROOF_URL = `${REPO_URL}/blob/main/docs/proofs/v2-live.md`;

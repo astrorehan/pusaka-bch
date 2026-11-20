@@ -100,7 +100,11 @@ Links use base64url-encoded UTF-8 JSON fragments (`https://pusaka.cash/v2/plan#<
 
 ## Asset-enabled revision
 
-New app setups add `protocolRevision: assets-1`. Missing revision retains the original
-v2 contract artifact; unknown revisions are rejected. The state and policy bytes
-remain unchanged, but the plan locking script uses `PusakaAssetPlan`. Its separate
-fungible vault binds that exact plan locking script. See [the current asset proof](../proofs/app-and-assets.md).
+New plans record `protocolRevision: assets-2`. This revision uses [`PusakaV2ReviewAnchor.scash`](../../contract/contracts/PusakaV2ReviewAnchor.scash).
+The owner can cancel a review only by returning the plan to `ACTIVE` at the next round with all approvals cleared.
+Every inheritance payout therefore spends the anchor through the BIP68 branch, including payouts whose fee the owner pays.
+
+Both asset revisions use `PusakaAssetPlan`, and the separate fungible vault binds that exact plan locking script.
+The anchor revision determines the plan, inbox, and token vault addresses. Metadata with `assets-1` reconstructs
+the earlier asset plan. Metadata with no revision reconstructs the original BCH-only plan. The app checks the
+derived locks and the live policy when reading either format. [Asset proof](../proofs/app-and-assets.md)

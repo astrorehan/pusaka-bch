@@ -11,6 +11,7 @@
  *   proof   the lifecycle: create, receive, send, two contacts open a claim, an early payout refused by the
  *           network, the owner stops the claim, contacts open a second claim; then, once the review has
  *           matured (PUSAKA_LIVE_WAIT=1 waits up to an hour), anyone pays the heirs
+ *           PUSAKA_LIVE_SMALL_PROOF=1 uses the Chipnet-size deposits on mainnet.
  *   demo    example plans for visitors: each opens a claim after its inactivity period, so anyone can press
  *           "Pay the heirs" in the app once the review matures. PUSAKA_LIVE_DEMO lists the review
  *           durations in seconds, one plan each (default "512,512,512"); "512:active" leaves that plan
@@ -18,7 +19,8 @@
  *   sweep   send every plain coin the helper keys hold back to the owner key (index 0)
  *
  * Broadcasting on mainnet also needs PUSAKA_LIVE_MAINNET=yes. The public record of every transaction and
- * plan is kept in scripts/v2/.live-<network>.json (no keys).
+ * plan is kept in scripts/v2/.live-<network>-assets-2.json (no keys).
+ * PUSAKA_LIVE_REVISION=assets-1 uses the earlier contracts and the original record.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -26,6 +28,7 @@ import { ethers, network } from '@solidcash/solidhat/hardhat3';
 import { SignatureTemplate, Signer, TransactionBuilder, type Utxo } from '@solidcash/solidcash';
 import { ElectrumNetworkProvider } from '@solidcash/solidcash/network/electrum';
 import { binToHex, encodeTransaction, hexToBin, sha256 } from '@bitauth/libauth';
+import { CURRENT_ASSET_REVISION } from '../../../app/src/lib/protocol/plan-metadata.ts';
 import {
   attachPusakaV2Plan,
   buildCancelClaimTx,
@@ -60,7 +63,9 @@ type LiveRecord = { network: string; proof?: ProofRecord; demo: DemoRecord[] };
 const NET = network.name;
 if (NET !== 'chipnet' && NET !== 'mainnet') throw new Error(`Use --network chipnet or --network mainnet (got ${NET})`);
 const JOB = process.env.PUSAKA_LIVE ?? 'status';
-const FILE = resolve(`scripts/v2/.live-${NET}.json`);
+const REVISION = process.env.PUSAKA_LIVE_REVISION ?? CURRENT_ASSET_REVISION;
+if (REVISION !== 'assets-1' && REVISION !== CURRENT_ASSET_REVISION) throw new Error(`Unsupported asset revision ${REVISION}`);
+const FILE = resolve(`scripts/v2/.live-${NET}${REVISION === 'assets-1' ? '' : `-${REVISION}`}.json`);
 const provider = process.env.ELECTRUM_HOST
   ? new ElectrumNetworkProvider(NET, { hostname: process.env.ELECTRUM_HOST })
   : new ElectrumNetworkProvider(NET);
@@ -110,11 +115,10 @@ async function retry<T>(fn: () => Promise<T>, label: string, attempts = 5): Prom
 async function medianTimePast(height?: number): Promise<number> {
   return retry(async () => {
     const tip = height ?? Number(await provider.getBlockHeight());
-    const times: number[] = [];
-    for (let h = tip; h > tip - 11; h--) {
-      const header = hexToBin(String(await provider.performRequest('blockchain.block.header', h)));
-      times.push(new DataView(header.buffer, header.byteOffset).getUint32(68, true));
-    }
+    const times = await Promise.all(Array.from({ length: 11 }, async (_, offset) => {
+      const header = hexToBin(String(await provider.performRequest('blockchain.block.header', tip - offset)));
+      return new DataView(header.buffer, header.byteOffset).getUint32(68, true);
+    }));
     return times.sort((a, b) => a - b)[5];
   }, 'medianTimePast');
 }
@@ -252,7 +256,7 @@ async function createPlan(
     log(`  prepared a coin at output 0: ${explorer}${preTxid}`);
   }
   const genesis = buildGenesisV2PlanTx({
-    protocolRevision: 'assets-1',
+    protocolRevision: REVISION,
     provider,
     genesisUtxo,
     ownerUnlocker: signer.unlockP2PKH(),
@@ -303,7 +307,7 @@ async function proof() {
   const { owner, sender, contacts, heirs } = await actors();
   const record = load();
   const p: ProofRecord = (record.proof ??= { phase: 'start', steps: [] });
-  const small = NET === 'chipnet';
+  const small = NET === 'chipnet' || process.env.PUSAKA_LIVE_SMALL_PROOF === '1';
   const save$ = () => save(record);
 
   if (p.phase === 'start') {
@@ -443,7 +447,12 @@ async function proof() {
   if (p.phase === 'review1') {
     log('5. an immediate payout is refused by the network');
     const { handle, state } = await planState(metadata);
-    const early = buildFinalizeClaimTx({ handle, planUtxo: state.planUtxo!, anchorUtxo: state.anchorUtxo! });
+    const ownerSponsor = REVISION === CURRENT_ASSET_REVISION ? {
+      sponsorUtxo: await coinAt(owner.address, 6_000n),
+      sponsorUnlocker: externalSigner('owner', owner).unlockP2PKH(),
+      sponsorChangeAddress: owner.address,
+    } : {};
+    const early = buildFinalizeClaimTx({ handle, planUtxo: state.planUtxo!, anchorUtxo: state.anchorUtxo!, ...ownerSponsor });
     canBroadcast();
     try {
       await provider.sendRawTransaction(await finalizeBuilderTxHex(early.builder));
@@ -452,7 +461,8 @@ async function proof() {
       const message = String((err as Error)?.message ?? err);
       if (!/BIP68|non-final|sequence/i.test(message)) throw err;
       log(`  refused: ${message.slice(0, 160)}`);
-      step(p.steps, 'early payout refused', { note: message.slice(0, 200) });
+      const label = REVISION === CURRENT_ASSET_REVISION ? 'owner-sponsored early payout refused' : 'early payout refused';
+      step(p.steps, label, { note: message.slice(0, 200) });
     }
     log('6. the owner stops the claim');
     const signer = externalSigner('owner', owner);

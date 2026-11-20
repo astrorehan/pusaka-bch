@@ -1,10 +1,8 @@
 # App and fungible asset release
 
-18 November 2026, test counts updated 19 November. The implementation record for the app and the
-token-enabled plan revision (`assets-1`), with the swap and token payout run on Chipnet and the Paytaca
-phone signing check. The whole wallet lifecycle on 19 November is recorded separately in
-[v2-live.md](v2-live.md). What this record does not yet show is listed [at the end](#not-yet-shown).
-The previous funded v1 mainnet plan was not migrated or spent.
+The first asset release (`assets-1`) proved swaps and token payouts on Chipnet and Paytaca phone signing.
+The revised anchor (`assets-2`) binds owner cancellation to a new active round and applies the review period
+to owner-sponsored payouts. The BCH lifecycle records are in [v2-live.md](v2-live.md).
 
 ## Application
 
@@ -37,7 +35,7 @@ holding a spending key. Saved browser data is a convenience, not the sole backup
 
 ## Asset revision
 
-Metadata retains `version: pusaka-v2` and adds `protocolRevision: assets-1`.
+The first asset release retained `version: pusaka-v2` and added `protocolRevision: assets-1`.
 Missing revision selects the original v2 artifact. Unknown revisions fail closed.
 The new `PusakaAssetPlan` retains the prior state machine and adds:
 
@@ -119,11 +117,13 @@ same browser.
 
 ## Automated qualification
 
-- Compiler: all 11 contract files compile without errors.
-- SolidHat contract tests: **58/58** pass (`npm test` in `contract/`) under the BCH 2026 VM and a
+- Compiler: all 12 contract files compile without errors.
+- SolidHat contract tests: **61/61** pass (`npm test` in `contract/`) under the BCH 2026 VM and a
   strict BIP68 verifier. The v2, metadata, review and asset suites cover actual pool script execution,
   early payout rejection, recipient hijack, policy changes, 10 heirs, tiny indivisible amounts, partial
   token sends, protected token change, expired quotes and theft; the rest cover v1 and stages 1 and 2.
+- Review anchor regressions cover owner-sponsored payout before and after maturity, all owner actions that
+  cancel a review, and invalid cancellation successors. Earlier plan links still reconstruct their own addresses.
 - Wallet and transaction regressions: **11/11** pass in the same suite. They cover small-plan funding, sponsored
   collection, token-only exit, recovery after a lost creation or edit response, and spent inputs after signing.
 - WizardConnect actual JSON transport: **3/3** pass, including tampered-output rejection.

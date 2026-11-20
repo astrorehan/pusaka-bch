@@ -14,17 +14,28 @@ import {
   decodeTransactionBch,
   hexToBin,
   encodeTransaction,
+  NonFungibleTokenCapability,
 } from "@bitauth/libauth";
 import {
   lockToCashAddress,
+  buildCancelClaimTx,
+  buildCheckInTx,
   buildGenesisV2PlanTx,
   buildOpenClaimByInactivityTx,
   buildFinalizeClaimTx,
+  buildSendTx,
   buildUpdatePolicyTx,
   attachPusakaV2Plan,
   discoverPusakaV2State,
+  encodeAnchorCommitment,
+  encodePlanStateCommitment,
   finalizeBuilderTxHex,
+  PLAN_STATUS_ACTIVE,
+  PLAN_STATUS_PAID_OUT,
+  PLAN_STATUS_REVIEW,
+  type PlanStatusCode,
 } from "../../../app/src/lib/protocol/pusaka-v2";
+import { CURRENT_ASSET_REVISION, type AssetRevision } from "../../../app/src/lib/protocol/plan-metadata";
 import {
   buildSwapTx,
   quoteBuy,
@@ -36,7 +47,7 @@ import {
 } from "../../../app/src/lib/protocol/assets";
 import { StrictBip68ChainVerifier } from "../../scripts/v2/claim-review-verifier";
 
-async function fixture(count = 3) {
+async function fixture(count = 3, protocolRevision: AssetRevision = CURRENT_ASSET_REVISION) {
   const provider = new MockNetworkProvider();
   const verifier = new StrictBip68ChainVerifier(provider);
   await verifier.init();
@@ -69,7 +80,7 @@ async function fixture(count = 3) {
   }
   const genesisCoin = await fund(owner.address, 800000n);
   const genesis = buildGenesisV2PlanTx({
-    protocolRevision: "assets-1",
+    protocolRevision,
     provider,
     genesisUtxo: genesisCoin,
     ownerUnlocker: owner.tpl.unlockP2PKH(),
@@ -123,6 +134,100 @@ async function fixture(count = 3) {
     send,
   };
 }
+
+describe("strict review anchor", () => {
+  it("accepts cancellation only into the next ACTIVE round with cleared approvals", async () => {
+    const f = await fixture();
+    const { planCategoryHex, anchor, anchorAddress } = f.handle.contracts;
+    const planSigner = f.contacts[0];
+    const planUnlocker = planSigner.tpl.unlockP2PKH();
+    const planAddress = lockToCashAddress(planUnlocker.generateLockingBytecode(), "chipnet", true);
+    const commitment = (status: PlanStatusCode, round: number, approvalsMask = 0) => binToHex(encodePlanStateCommitment({
+      status, round, approvalsMask, deadline: f.now + 600,
+      inactivityPeriodSeconds: 600, policyHashBytes: f.handle.policy.policyHashBytes,
+    }));
+    const minting = { category: planCategoryHex, amount: 0n, nft: {
+      capability: NonFungibleTokenCapability.minting, commitment: commitment(PLAN_STATUS_REVIEW, 7),
+    } };
+    // A test signer supplies the synthetic state input to verify the anchor independently.
+    const plan = await f.fund(planAddress, 20_000n, minting);
+    const marker = await f.fund(anchorAddress, 1_000n, { category: planCategoryHex, amount: 0n, nft: {
+      capability: NonFungibleTokenCapability.none, commitment: binToHex(encodeAnchorCommitment(7, f.handle.policy.reviewSequence)),
+    } });
+    const check = async (successor: string) => f.verifier.verifyTxStrict(await finalizeBuilderTxHex(
+      new TransactionBuilder({ provider: f.provider, allowImplicitNftBurn: true })
+        .addInput(plan, planUnlocker)
+        .addInput(marker, anchor.unlock.cancel())
+        .addInput(f.auth, f.owner.tpl.unlockP2PKH())
+        .addOutput({ to: planAddress, amount: 20_000n, token: { ...minting, nft: { ...minting.nft, commitment: successor } } }),
+    ));
+
+    expect(await check(commitment(PLAN_STATUS_ACTIVE, 8))).toMatchObject({ ok: true });
+    for (const invalid of [
+      commitment(PLAN_STATUS_PAID_OUT, 7),
+      commitment(PLAN_STATUS_REVIEW, 8),
+      commitment(PLAN_STATUS_ACTIVE, 7),
+      commitment(PLAN_STATUS_ACTIVE, 8, 1),
+    ]) {
+      expect(await check(invalid)).toMatchObject({ ok: false, stage: "vm", error: expect.stringMatching(/input index 1/) });
+    }
+  });
+
+  it("keeps owner cancellation available and applies the same review time to an owner-sponsored payout", async () => {
+    const f = await fixture(10);
+    const open = async () => {
+      await f.verifier.advanceTimeAndMine(601, 6);
+      const locktime = (await f.verifier.getCurrentSpendContext()).spendMtp - 1;
+      const { planUtxo } = await discoverPusakaV2State(f.handle);
+      await f.send(buildOpenClaimByInactivityTx({ handle: f.handle, planUtxo: planUtxo!, locktime }).builder);
+      return discoverPusakaV2State(f.handle);
+    };
+    const review = await open();
+    const common = {
+      handle: f.handle, planUtxo: review.planUtxo!, anchorUtxo: review.anchorUtxo!,
+      ownerUtxo: f.auth, ownerUnlocker: f.owner.tpl.unlockP2PKH(), ownerChangeAddress: f.owner.address,
+      locktime: (await f.verifier.getCurrentSpendContext()).spendMtp - 1,
+    };
+    const cancel = buildCancelClaimTx(common);
+    for (const { builder } of [
+      cancel,
+      buildSendTx({ ...common, recipientAddressOrLock: f.sponsor.address, amount: 1_000n }),
+      buildCheckInTx(common),
+      buildUpdatePolicyTx({ ...common, newPolicy: {
+        inactivityPeriodSeconds: 900, reviewPeriodSeconds: 512, feeBudget: 5_000n,
+        contacts: [f.contacts[0].pkh, f.contacts[1].pkh, f.contacts[2].pkh],
+        heirs: f.heirs.map(({ pkh }) => ({ pkh, share: 1 })),
+      } }),
+    ]) {
+      expect(await f.verifier.verifyTxStrict(await finalizeBuilderTxHex(builder))).toMatchObject({ ok: true });
+    }
+    await f.send(cancel.builder);
+    expect(await discoverPusakaV2State(f.handle)).toMatchObject({ status: "ACTIVE", round: review.round + 1, approvalsMask: 0 });
+
+    const reopened = await open();
+    const planInputs = { handle: f.handle, planUtxo: reopened.planUtxo!, anchorUtxo: reopened.anchorUtxo! };
+    const selfFunded = buildFinalizeClaimTx(planInputs);
+    expect(selfFunded.fee).toBeLessThanOrEqual(f.handle.policy.feeBudget);
+    const ownerCoin = await f.fund(f.owner.address, 10_000n);
+    const payout = buildFinalizeClaimTx({ ...planInputs,
+      sponsorUtxo: ownerCoin, sponsorUnlocker: f.owner.tpl.unlockP2PKH(), sponsorChangeAddress: f.owner.address,
+    });
+    const raw = await finalizeBuilderTxHex(payout.builder);
+    expect(await f.verifier.verifyTxStrict(raw)).toMatchObject({ ok: false, stage: "bip68-sequence" });
+    await f.verifier.advanceTimeAndMine(512, 6);
+    await f.verifier.sendTxStrict(raw);
+    expect(await discoverPusakaV2State(f.handle)).toMatchObject({ status: "PAID_OUT" });
+    expect(payout.heirPayouts.map(({ address }) => address)).toEqual(f.heirs.map(({ address }) => address));
+  }, 120000);
+
+  it("restores the earlier revision and rejects relabeling it as a hardened plan", async () => {
+    const f = await fixture(3, "assets-1");
+    const restored = await attachPusakaV2Plan(f.handle.metadata, f.provider);
+    expect(restored.metadata.protocolRevision).toBe("assets-1");
+    await expect(attachPusakaV2Plan({ ...restored.metadata, protocolRevision: CURRENT_ASSET_REVISION }, f.provider))
+      .rejects.toThrow(/derived PusakaV2Anchor/);
+  });
+});
 
 describe("Cauldron swap and protected fungible inheritance", () => {
   it('spends part of a token receipt, renews life and preserves protected token change', async () => {

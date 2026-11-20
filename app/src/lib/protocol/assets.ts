@@ -38,7 +38,7 @@ export type Quote = {
   category: string;
 };
 export function tokenVault(handle: PusakaV2PlanHandle) {
-  if (handle.metadata.protocolRevision !== "assets-1")
+  if (!handle.metadata.protocolRevision)
     throw new Error(
       "This older plan supports BCH only. Create a separate asset-enabled wallet to use Swap.",
     );

@@ -2,7 +2,7 @@ import { Signer, TransactionBuilder, type Utxo } from "@solidcash/solidcash";
 import { externallySignedUnlocker } from "@solidcash/solidcash/walletconnect";
 import { binToHex, sha256, hexToBin } from "@bitauth/libauth";
 import { claimFunding, DEFAULT_FEE_BUDGET, MIN_ANCHOR_SATS } from "../protocol/claim-funding";
-import { MIN_PLAN_CARRIER_SATS } from "../protocol/plan-metadata";
+import { CURRENT_ASSET_REVISION, MIN_PLAN_CARRIER_SATS } from "../protocol/plan-metadata";
 import {
   attachPusakaV2Plan,
   buildGenesisV2PlanTx,
@@ -62,7 +62,7 @@ export async function loadPlan(plan: PusakaV2PlanMetadata) {
     throw new Error("The plan rules have changed. Ask the owner for the latest link or file.");
   }
 
-  const vault = handle.metadata.protocolRevision === "assets-1" ? tokenVault(handle) : null;
+  const vault = handle.metadata.protocolRevision ? tokenVault(handle) : null;
   const anchorHeight = state.status === "REVIEW" && state.anchorMatchesRound &&
     state.anchorSequence === handle.policy.reviewSequence ? state.anchorUtxo?.blockHeight ?? 0 : 0;
   const [rawReceipts, anchorTime] = await Promise.all([
@@ -267,7 +267,7 @@ export async function prepareCreate(
       "Prepare wallet first. Setup needs a funded output at your first receive address, with at least 2,500 sats left for fees and a reusable authorization coin.",
     );
   const result = buildGenesisV2PlanTx({
-    protocolRevision: "assets-1",
+    protocolRevision: CURRENT_ASSET_REVISION,
     provider: getProvider(NETWORK),
     genesisUtxo: coin,
     ownerUnlocker: unlocker,

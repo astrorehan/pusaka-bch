@@ -37,7 +37,7 @@ import { HAS_DEMO } from '../../lib/demo';
 import { friendlyError } from '../../lib/chain/errors';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
-import { encodePusakaV2PlanLink } from '../../lib/protocol/plan-metadata';
+import { CURRENT_ASSET_REVISION, encodePusakaV2PlanLink } from '../../lib/protocol/plan-metadata';
 import { history, pendingPlanSubmissions, planLink, type PendingPlanSubmission } from '../../lib/walletData';
 import {
   claimFundingMessage,
@@ -636,6 +636,12 @@ function WalletPage() {
   } else {
     body = (
       <>
+        {metadata.protocolRevision !== CURRENT_ASSET_REVISION && (
+          <div className="pw-info" role="note">
+            <ShieldCheck size={17} aria-hidden />
+            <p>This plan uses the earlier review contract. A payout signed and sponsored by its owner can complete before the review ends.</p>
+          </div>
+        )}
         <ClaimNotice data={data} owner={owner} connected={Boolean(wallet)} busy={busy} prepare={prepare} />
         {!inherited && (
           <Balance
@@ -676,7 +682,7 @@ function WalletPage() {
               label="Copy BCH receive address"
             />
           </Card>
-          {metadata.protocolRevision === 'assets-1' && (
+          {metadata.protocolRevision && (
             <Suspense
               fallback={
                 <Card

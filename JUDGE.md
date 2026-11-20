@@ -27,15 +27,15 @@ Pusaka is a Bitcoin Cash wallet with the inheritance plan built in.
 2. **Use it like any wallet.** Send, receive and swap. Every payment you send proves you are still here and
    restarts the waiting time. No reminders to press, unless you go a long time without paying anyone.
 3. **If you go quiet,** anyone can open a claim once the waiting time has passed, or two of your three contacts
-   can open one sooner. The network enforces a review period for a payout without the owner’s signature. One tap on **Stop claim**, or any payment you
-   send, ends the claim.
+   can open one sooner. The revised plans enforce the review period even when the owner pays the payout fee.
+   **Stop claim**, or a payment you send, ends the claim and returns the plan to active use.
 4. **After the review,** anyone can press **Pay the heirs**. When the plan covers the network fee and every heir’s
    minimum payment, a visitor can submit the payout without a wallet.
 
 No company holds the coins and no server stores the plan. Four [SolidCash](https://solidcash.org) contracts do the
 work: the plan ([`PusakaAssetPlan`](contract/contracts/PusakaAssetPlan.scash)) with its state in a CashTokens NFT,
 its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)), the review clock
-([`PusakaV2Anchor`](contract/contracts/PusakaV2Anchor.scash), a BIP68 relative time lock) and a token vault
+([`PusakaV2ReviewAnchor`](contract/contracts/PusakaV2ReviewAnchor.scash), a BIP68 relative time lock) and a token vault
 ([`PusakaTokenVault`](contract/contracts/PusakaTokenVault.scash)) that keeps swapped tokens under the same rules.
 
 ## The judge path: one minute, no wallet
@@ -72,7 +72,7 @@ broadcasts the exact transaction you reviewed and checks its ID.
 
 ## Transactions you can open
 
-**Mainnet, 20 November 2026.** The v2 lifecycle used the same transaction builders as the app. The network
+**Earlier mainnet release (`assets-1`), 20 November 2026.** The lifecycle used the same transaction builders as the app. The network
 refused an early payout with `non-BIP68-final`. The owner stopped that claim. Contacts opened a second review,
 then a self-funded transaction paid all three heirs once the anchor matured.
 
@@ -127,7 +127,9 @@ limits and a strict BIP68 verifier ([`contract/test/v2/`](contract/test/v2/)).
 
 | Someone tries to | Result | Test |
 |---|---|---|
-| Pay out without the owner’s signature one second before the review ends | Refused: the anchor is not old enough | `rejects backdated openClaim locktime, unconfirmed anchor, insufficient MTP shift, and elapsed = delay - 1s` |
+| Pay out one second before the review ends | Refused: the anchor is not old enough | `rejects backdated openClaim locktime, unconfirmed anchor, insufficient MTP shift, and elapsed = delay - 1s` |
+| Pay out early with the owner paying the fee on the revised anchor | Refused until BIP68 review matures | `keeps owner cancellation available and applies the same review time to an owner-sponsored payout` |
+| Use owner cancellation to produce a paid, stale, or still-approved plan | Refused by the revised anchor | `accepts cancellation only into the next ACTIVE round with cleared approvals` |
 | Open a claim with a backdated time, or skip the review with a wrong sequence | Refused | `rejects non-version-2 tx, disabled/height-mode/too-short sequence, and open+finalize in same tx` |
 | Swap an heir's address, or use a fake or stale claim marker | Refused | `rejects substituted, plain-BCH, wrong-plan, wrong-round anchors, repeated openClaim, and hijacked payout` |
 | Vote twice as the same contact, replay a vote, forge the policy, or skim the receive address | Refused | `rejects all adversarial attack vectors (fee-reserve siphon, contact double-vote/replay, substitution, policy forgery, CLTV bypass, inbox skim)` |
@@ -147,10 +149,9 @@ cd app && npm install && npm run build && npm run test:ui
 
 ## Current limits
 
-- **Payout with the owner’s signature.** The current review anchor allows the owner to sponsor a BCH payout before
-  the review ends. The owner must sign and the covenant still pays the registered heirs at their configured shares.
-  The app waits for the anchor to mature before offering **Pay the heirs**. Changing this rule on-chain requires a
-  new anchor artifact and fresh on-chain proofs.
+- **Earlier plan addresses.** The app still opens plans created with the earlier review anchor and labels them.
+  Those contracts allow an early payout signed and sponsored by the owner to the registered heirs. The revised
+  anchor enforces the delay for owner-sponsored payouts on newly created `assets-2` plans.
 - **Token inheritance after taking BCH back.** Token payouts follow a completed BCH payout. If the owner takes
   back the available BCH and leaves tokens in the vault, the plan needs a BCH top-up before the heirs can claim them.
 
@@ -164,7 +165,7 @@ regression tests. [Issue #3](https://github.com/solidcash/solidcash/issues/3) ·
 |---|---|
 | Stateful Solidity-style contract with structs, state variables, events and modifiers | [v1 plan](contract/contracts/Pusaka.scash) |
 | Input and output introspection, NFT state transitions, policy hashing and a bounded payout loop | [v2 asset plan](contract/contracts/PusakaAssetPlan.scash) |
-| Time-based BIP68 review and a round-bound anchor | [Review anchor](contract/contracts/PusakaV2Anchor.scash) |
+| Time-based BIP68 review and cancellation that advances the round and clears approvals | [Review anchor](contract/contracts/PusakaV2ReviewAnchor.scash) |
 | Contract co-spends that bind receipts and token distributions to a plan | [Receive inbox](contract/contracts/PusakaV2Inbox.scash) and [token vault](contract/contracts/PusakaTokenVault.scash) |
 
 ## Before and after BLAZE

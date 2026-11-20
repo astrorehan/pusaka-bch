@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import type { LoadedPlan } from '../../lib/chain/v2';
 import { DEMO_PLAN_DATA, HAS_DEMO } from '../../lib/demo';
-import { readV2Metadata, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
+import { CURRENT_ASSET_REVISION, readV2Metadata, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import { importPlan, savePlan, savedPlans } from '../../lib/walletData';
 import type { CurrentPlan } from './currentPlan';
 import { isDemoRoute } from './paths';
@@ -19,8 +19,7 @@ const DEMO_PLANS: Metadata[] = DEMO_PLAN_DATA.flatMap((value) => {
 });
 
 /**
- * Of the demo plans, open the one a visitor can act on: a payout that is ready, then a claim that can be opened,
- * then a claim still under review. Otherwise the first plan, which shows a finished payout.
+ * Prefer actionable plans on the current revision, with earlier funded examples as fallbacks.
  */
 async function pickDemo(): Promise<Snapshot> {
   if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '' };
@@ -33,12 +32,16 @@ async function pickDemo(): Promise<Snapshot> {
       ),
     ),
   );
-  const rank = ({ data }: Snapshot) => {
+  const rank = ({ plan, data }: Snapshot) => {
     if (!data) return 9;
     const { state, review, now, funding } = data;
-    if (state.status === 'REVIEW' && funding.canSelfFund) return review?.ready ? 0 : 2;
-    if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline && funding.canSelfFund) return 1;
-    return 3;
+    const current = plan.protocolRevision === CURRENT_ASSET_REVISION;
+    if (funding.canSelfFund) {
+      if (state.status === 'REVIEW' && review?.ready) return current ? 0 : 2;
+      if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline && funding.canSelfFund) return current ? 1 : 3;
+      if (state.status === 'REVIEW') return current ? 4 : 5;
+    }
+    return current ? 6 : 7;
   };
   return loaded.reduce((best, next) => (rank(next) < rank(best) ? next : best));
 }

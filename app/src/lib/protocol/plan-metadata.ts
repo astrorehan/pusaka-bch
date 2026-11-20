@@ -4,9 +4,11 @@ export const PUSAKA_V2_VERSION = "pusaka-v2" as const;
 export const MAX_HEIRS = 10;
 export const MAX_INT32 = 0x7fffffff;
 export const MIN_PLAN_CARRIER_SATS = 1_000n;
+export const CURRENT_ASSET_REVISION = "assets-2";
+export type AssetRevision = "assets-1" | typeof CURRENT_ASSET_REVISION;
 
 export interface PusakaV2PlanMetadata {
-  protocolRevision?: "assets-1";
+  protocolRevision?: AssetRevision;
   version: typeof PUSAKA_V2_VERSION;
   network: string;
   planCategoryHex: string;
@@ -52,7 +54,7 @@ export function readV2Metadata(value: unknown): PusakaV2PlanMetadata {
   } = value as PusakaV2PlanMetadata;
   if (
     version !== PUSAKA_V2_VERSION ||
-    (protocolRevision !== undefined && protocolRevision !== "assets-1") ||
+    (protocolRevision !== undefined && protocolRevision !== "assets-1" && protocolRevision !== CURRENT_ASSET_REVISION) ||
     typeof network !== "string" || !/^[a-z0-9-]{1,24}$/.test(network) ||
     !hex(planCategoryHex, 64) || !pkh(ownerPkhHex) ||
     !address(planAddress) || !hex(planLockHex, 70) ||

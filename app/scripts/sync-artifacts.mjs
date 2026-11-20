@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 const names = [
   "PusakaV2Plan",
   "PusakaV2Anchor",
+  "PusakaV2ReviewAnchor",
   "PusakaV2Inbox",
   "PusakaAssetPlan",
   "PusakaTokenVault",
@@ -31,4 +32,4 @@ for (const name of names) {
       throw new Error(`Stale bundled artifact: ${name}`);
   } else await writeFile(target, data);
 }
-console.log("Five protocol artifacts match the compiled contracts.");
+console.log(`${names.length} protocol artifacts match the compiled contracts.`);

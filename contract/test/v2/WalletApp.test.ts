@@ -5,6 +5,7 @@ import { MockNetworkProvider } from '@solidcash/solidcash/network/mock';
 import { prepareAction, checkPlanSubmission, submit } from '../../../app/src/lib/chain/v2';
 import { NETWORK } from '../../../app/src/lib/networkName';
 import { claimFunding } from '../../../app/src/lib/protocol/claim-funding';
+import { CURRENT_ASSET_REVISION } from '../../../app/src/lib/protocol/plan-metadata';
 import {
   attachPusakaV2Plan, buildGenesisV2PlanTx, buildSweepInboxTx, buildUpdatePolicyTx,
   p2pkhCashAddressFromPkh, type PusakaV2PlanMetadata, type PusakaV2PolicyInput,
@@ -58,7 +59,7 @@ async function genesis(deposit: bigint) {
   const utxo = await provider.addUtxo(ownerAddress, ownerCoin);
   return buildGenesisV2PlanTx({
     provider,
-    protocolRevision: 'assets-1',
+    protocolRevision: CURRENT_ASSET_REVISION,
     genesisUtxo: utxo,
     ownerUnlocker,
     ownerAddress,

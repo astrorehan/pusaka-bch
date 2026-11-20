@@ -33,7 +33,8 @@ import {
   tokenVault,
   buildTokenPayoutTx,
 } from "../../../app/src/lib/protocol/assets.ts";
-const file = "scripts/v2/.assets-chipnet-proof.json";
+import { CURRENT_ASSET_REVISION } from "../../../app/src/lib/protocol/plan-metadata.ts";
+const file = `scripts/v2/.assets-chipnet-proof-${CURRENT_ASSET_REVISION}.json`;
 const p = new ElectrumNetworkProvider("chipnet");
 const log = (...args: unknown[]) =>
   console.log(new Date().toISOString().slice(11, 19), ...args);
@@ -128,7 +129,10 @@ async function main() {
     const coins = (await p.getUtxos(owner.address)).filter((u) => !u.token);
     const consolidate = new TransactionBuilder({ provider: p });
     for (const u of coins) consolidate.addInput(u, tpl(owner).unlockP2PKH());
-    consolidate.addOutput({ to: owner.address, amount: balance - 1000n });
+    consolidate.addOutput({ to: owner.address, amount: balance });
+    const fee = BigInt(consolidate.getTransactionSize()) + 20n;
+    if (balance - fee < 110_000n) throw Error("Need 110,000 test sats after consolidation fees");
+    consolidate.outputs[0].amount = balance - fee;
     await send(consolidate);
     const gen = await ensureGenesisUtxo({
       provider: p,
@@ -159,7 +163,7 @@ async function main() {
       minimumSats: 65000n,
     });
     const genesis = buildGenesisV2PlanTx({
-      protocolRevision: "assets-1",
+      protocolRevision: CURRENT_ASSET_REVISION,
       provider: p,
       genesisUtxo: planGen.genesisUtxo,
       ownerUnlocker: external.unlockP2PKH(),

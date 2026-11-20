@@ -1,7 +1,7 @@
 """Write docs/proofs/v2-live.md from the public records of contract/scripts/v2/live.ts.
 
 Run from the repository root: python contract/scripts/v2/live-report.py
-The records (scripts/v2/.live-<network>.json) hold transaction IDs and plan metadata, never keys.
+The records hold transaction IDs and plan metadata, never keys.
 """
 import json
 import os
@@ -18,8 +18,9 @@ APP = {
 }
 
 
-def load(network):
-    path = os.path.join(ROOT, 'contract', 'scripts', 'v2', f'.live-{network}.json')
+def load(network, revision='assets-1'):
+    suffix = '' if revision == 'assets-1' else '-' + revision
+    path = os.path.join(ROOT, 'contract', 'scripts', 'v2', f'.live-{network}{suffix}.json')
     if not os.path.exists(path):
         return None
     with open(path, encoding='utf-8') as f:
@@ -58,13 +59,12 @@ def plan_line(metadata):
             f"fee budget {num(metadata['feeBudget'])} sats. Revision `{metadata.get('protocolRevision', 'v2')}`.")
 
 
-def section(network, record):
-    name = 'Mainnet' if network == 'mainnet' else 'Chipnet (test network)'
-    out = [f'## {name}', '']
+def section(network, record, heading='###', earlier=False):
+    out = []
     proof = record.get('proof')
     if proof:
         out += [
-            '### The whole lifecycle, one plan',
+            f'{heading} The whole lifecycle, one plan',
             '',
             plan_line(proof['metadata']),
             '',
@@ -75,12 +75,13 @@ def section(network, record):
         ]
     demo = record.get('demo') or []
     if demo:
+        demo_note = ('These earlier examples are available as fallbacks when the current revision has no action ready.'
+                     if earlier else
+                     f"[Open the live demo]({APP[network]}wallet/demo) to try a claim or a payout without a wallet.")
         out += [
-            '### Example plans for visitors',
+            f'{heading} Example plans for visitors',
             '',
-            f"[`{APP[network]}wallet/demo`]({APP[network]}wallet/demo) opens whichever of these has the most to do: "
-            'a payout that is ready, then a claim anyone can open, then one under review. Each has the same six-heir '
-            'faraid family and a one-minute waiting time.',
+            f'{demo_note} Each plan has the same six-heir faraid family and a one-minute waiting time.',
             '',
             '| Plan | Review | Created | Claim opened | Heirs paid | Plan link |',
             '|---|---|---|---|---|---|',
@@ -107,15 +108,25 @@ def main():
         '# Pusaka v2 on the network',
         '',
         'Generated from the public records of [`contract/scripts/v2/live.ts`](../../contract/scripts/v2/live.ts) '
-        '(`scripts/v2/.live-<network>.json`, transaction IDs and plan rules, never keys) by '
+        '(`scripts/v2/.live-<network>[-assets-2].json`, transaction IDs and plan rules) by '
         '[`live-report.py`](../../contract/scripts/v2/live-report.py). The script builds every transaction with the '
         'same builders the app uses ([`app/src/lib/protocol/`](../../app/src/lib/protocol/)).',
         '',
     ]
     for network in ('mainnet', 'chipnet'):
-        record = load(network)
-        if record:
-            lines += section(network, record)
+        current, earlier = load(network, 'assets-2'), load(network)
+        if not current and not earlier:
+            continue
+        name = 'Mainnet' if network == 'mainnet' else 'Chipnet (test network)'
+        lines += [f'## {name}', '']
+        if current:
+            lines += ['### Revised review anchor (`assets-2`)', '']
+            lines += section(network, current, heading='####')
+            if earlier:
+                lines += ['### Earlier release (`assets-1`)', '']
+                lines += section(network, earlier, heading='####', earlier=True)
+        else:
+            lines += section(network, earlier)
     path = os.path.join(ROOT, 'docs', 'proofs', 'v2-live.md')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(lines).rstrip() + '\n')
