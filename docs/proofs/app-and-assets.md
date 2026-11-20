@@ -124,6 +124,8 @@ same browser.
   strict BIP68 verifier. The v2, metadata, review and asset suites cover actual pool script execution,
   early payout rejection, recipient hijack, policy changes, 10 heirs, tiny indivisible amounts, partial
   token sends, protected token change, expired quotes and theft; the rest cover v1 and stages 1 and 2.
+- Wallet and transaction regressions: **11/11** pass in the same suite. They cover small-plan funding, sponsored
+  collection, token-only exit, recovery after a lost creation or edit response, and spent inputs after signing.
 - WizardConnect actual JSON transport: **3/3** pass, including tampered-output rejection.
 - Browser tests: **6/6** pass (`npm run test:ui` in `app/`). They exercise setup validation, the
   desktop, tablet and phone layouts, a live public Chipnet plan without signing, recoverable errors,
@@ -134,12 +136,16 @@ These are selected applicable tests, not a claim that every historical scratch
 test in this repository passes. Mainnet builds compiling does not prove mainnet
 execution. A phone-sized browser viewport does not prove Paytaca mobile signing.
 
+## Mainnet v2
+
+The lifecycle ran on mainnet with the same builders as the app. The network accepted creation, collection,
+owner spending, contact approvals, owner cancellation and the payout from a mature claim. Six funded
+examples support the wallet-free demo. [Mainnet transaction record](v2-live.md#mainnet)
+
 ## Not yet shown
 
 1. Paytaca on the phone: creation, rejection, partial send and reconnect passed on
    Chipnet (above). Not yet run on the phone: receive into the plan, a second send,
    and restore from saved plan data in a fresh session.
-2. The v2 lifecycle on mainnet. It ran end to end on Chipnet ([v2-live.md](v2-live.md));
-   the earlier v1 plan is the mainnet record so far, and stays separate.
-3. A mainnet token pair. Swaps and token payouts are proven with the Chipnet test token
+2. A mainnet token pair. Swaps and token payouts are proven with the Chipnet test token
    above, which is not that proof, so the mainnet app does not offer swaps yet.

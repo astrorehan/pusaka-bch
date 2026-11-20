@@ -9,7 +9,7 @@ is in the [README](README.md).
 | **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
 | **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ · [its demo](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) |
 | **Presentation** | [Pusaka-BCH-BLAZE-2026.pdf](docs/Pusaka-BCH-BLAZE-2026.pdf), also linked from the banner at the top of every page of the app |
-| **Code now** | https://github.com/astrorehan/pusaka-bch (`main`) |
+| **Code now** | [BLAZE release branch](https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness) |
 | **Code before BLAZE** | tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) and [Pusaka on Monad](https://github.com/astrorehan/pusaka) |
 | **Demo before BLAZE** | [pusaka-faraid.vercel.app](https://pusaka-faraid.vercel.app) (the Monad version) |
 | **Entered for** | BCH BLAZE 2026 Mainnet Track and the Best SolidCash Application bounty |
@@ -27,10 +27,10 @@ Pusaka is a Bitcoin Cash wallet with the inheritance plan built in.
 2. **Use it like any wallet.** Send, receive and swap. Every payment you send proves you are still here and
    restarts the waiting time. No reminders to press, unless you go a long time without paying anyone.
 3. **If you go quiet,** anyone can open a claim once the waiting time has passed, or two of your three contacts
-   can open one sooner. The network then enforces a review period. One tap on **Stop claim**, or any payment you
+   can open one sooner. The network enforces a review period for a payout without the owner’s signature. One tap on **Stop claim**, or any payment you
    send, ends the claim.
-4. **After the review,** anyone can press **Pay the heirs**. One transaction pays every heir their exact share,
-   and the plan pays the network fee, so an heir with no BCH can still collect.
+4. **After the review,** anyone can press **Pay the heirs**. When the plan covers the network fee and every heir’s
+   minimum payment, a visitor can submit the payout without a wallet.
 
 No company holds the coins and no server stores the plan. Four [SolidCash](https://solidcash.org) contracts do the
 work: the plan ([`PusakaAssetPlan`](contract/contracts/PusakaAssetPlan.scash)) with its state in a CashTokens NFT,
@@ -46,13 +46,13 @@ its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)),
 | The banner says **The review period has ended**: press **Pay the heirs** | A review sheet listing each heir by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet |
 | Press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The plan now shows **Paid to heirs** |
 | Open **View transaction** | One transaction, one output per heir: pot × share ÷ 120, rounded down |
-| If the banner says **The owner has been inactive past the deadline** instead, press **Open the claim**, then **Send transaction** | The claim opens and the review period starts. A few minutes later the banner offers **Pay the heirs** |
+| If the banner says **The owner has been inactive past the deadline**, press **Open the claim**, then **Send transaction** | After the claim confirms and the network review expires, the banner offers **Pay the heirs** |
 | Open the demo again | The next example plan with something left to do |
 
 The demo picks whichever example plan has the most to do: a payout that is ready, then a claim anyone can open,
-then one still under review. The example plans and their transactions are listed in
-[`docs/proofs/v2-live.md`](docs/proofs/v2-live.md). While mainnet has no example plans, the link opens the same
-demo on Chipnet; once every mainnet example has paid its heirs, the page links there.
+then one still under review. Mainnet has six funded examples. Four started review ahead of judging and two
+were left for visitors to open. The page links to Chipnet once every mainnet example has paid its heirs.
+[Mainnet example records](docs/proofs/v2-live.md#mainnet)
 
 ## The owner path: five minutes, with Paytaca or Cashonize
 
@@ -71,6 +71,21 @@ Every review sheet shows each output and fee before your wallet is asked to sign
 broadcasts the exact transaction you reviewed and checks its ID.
 
 ## Transactions you can open
+
+**Mainnet, 20 November 2026.** The v2 lifecycle used the same transaction builders as the app. The network
+refused an early payout with `non-BIP68-final`. The owner stopped that claim. Contacts opened a second review,
+then a self-funded transaction paid all three heirs once the anchor matured.
+
+| What happened | Transaction |
+|---|---|
+| Created the wallet with 20,000 sats | [`c6f33435…eaad`](https://explorer.bch.ninja/tx/c6f33435902959af93d2e557b546a2a58ed8e9b193a418129342f9c23605eaad) |
+| Collected 7,600 sats without moving the inactivity deadline | [`091172af…d07d`](https://explorer.bch.ninja/tx/091172af383a4f80ae7caaa9fa5b41be028be0d69d78ea0baca3ccdd0c19d07d) |
+| Sent 2,000 sats and renewed the inactivity deadline | [`b15d8470…2c47`](https://explorer.bch.ninja/tx/b15d847046b0ea643e1fa72273b6166e6b53e6260ba195437a9b1eaf00a92c47) |
+| The owner stopped the first claim | [`55c065a1…40de`](https://explorer.bch.ninja/tx/55c065a1577a58ad50015f96e285875d239f3bc73e34ba1b6677ce8c5e6640de) |
+| Contacts opened a second claim | [`3560d7d3…bf19`](https://explorer.bch.ninja/tx/3560d7d3ec564b201153836ee52e08d9a19ebc0637b85846f2df68b3a331bf19) |
+| The mature payout paid wife 2,575, son 12,016 and daughter 6,008 sats | [`ad0e1a36…4689`](https://explorer.bch.ninja/tx/ad0e1a36ddf25e510ecb9901925953007a0d922d3253a220c4d36e1fc7634689) |
+
+The full sequence and six demo plans are in the [mainnet record](docs/proofs/v2-live.md#mainnet).
 
 **Chipnet, 19 November 2026, 15:39 to 16:07 UTC: the whole v2 lifecycle on one plan.** Built by
 [`contract/scripts/v2/live.ts`](contract/scripts/v2/live.ts) with the same transaction builders the app uses.
@@ -102,11 +117,8 @@ claim the tokens were paid to the heirs by share
 ([record](docs/proofs/app-and-assets.md#live-chipnet-evidence): swap
 `e2f4f53e…a32b`, token payout `edd44574…5f67`).
 
-**Mainnet.** The app at the site root runs on mainnet. On 17 November an earlier (v1) plan was created there in
-the web app and signed in Paytaca:
-[`4e5b2fd4…1c3d`](https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d).
-The mainnet example plans for the judge path, and their transactions, are in
-[`docs/proofs/v2-live.md`](docs/proofs/v2-live.md#mainnet).
+**Earlier v1 mainnet proof.** A v1 plan was created in the web app and signed in Paytaca on 17 November.
+[`4e5b2fd4…1c3d`](https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d)
 
 ## What the network refuses
 
@@ -115,7 +127,7 @@ limits and a strict BIP68 verifier ([`contract/test/v2/`](contract/test/v2/)).
 
 | Someone tries to | Result | Test |
 |---|---|---|
-| Pay out before the review period ends, by one second | Refused: the anchor is not old enough | `rejects backdated openClaim locktime, unconfirmed anchor, insufficient MTP shift, and elapsed = delay - 1s` |
+| Pay out without the owner’s signature one second before the review ends | Refused: the anchor is not old enough | `rejects backdated openClaim locktime, unconfirmed anchor, insufficient MTP shift, and elapsed = delay - 1s` |
 | Open a claim with a backdated time, or skip the review with a wrong sequence | Refused | `rejects non-version-2 tx, disabled/height-mode/too-short sequence, and open+finalize in same tx` |
 | Swap an heir's address, or use a fake or stale claim marker | Refused | `rejects substituted, plain-BCH, wrong-plan, wrong-round anchors, repeated openClaim, and hijacked payout` |
 | Vote twice as the same contact, replay a vote, forge the policy, or skim the receive address | Refused | `rejects all adversarial attack vectors (fee-reserve siphon, contact double-vote/replay, substitution, policy forgery, CLTV bypass, inbox skim)` |
@@ -132,6 +144,28 @@ its link. Run them yourself (Node 24):
 cd contract && npm install && npm test     # all contract tests, v1 and v2
 cd app && npm install && npm run build && npm run test:ui
 ```
+
+## Current limits
+
+- **Payout with the owner’s signature.** The current review anchor allows the owner to sponsor a BCH payout before
+  the review ends. The owner must sign and the covenant still pays the registered heirs at their configured shares.
+  The app waits for the anchor to mature before offering **Pay the heirs**. Changing this rule on-chain requires a
+  new anchor artifact and fresh on-chain proofs.
+- **Token inheritance after taking BCH back.** Token payouts follow a completed BCH payout. If the owner takes
+  back the available BCH and leaves tokens in the vault, the plan needs a BCH top-up before the heirs can claim them.
+
+## SolidCash implementation
+
+The wallet integration led to an SDK signing report and a patch for funded split and merge. The upstream issue
+includes the stateful signing reproduction. The pull request covers the remaining split and merge paths with
+regression tests. [Issue #3](https://github.com/solidcash/solidcash/issues/3) · [Pull request #7](https://github.com/solidcash/solidcash/pull/7)
+
+| Feature | Where it runs |
+|---|---|
+| Stateful Solidity-style contract with structs, state variables, events and modifiers | [v1 plan](contract/contracts/Pusaka.scash) |
+| Input and output introspection, NFT state transitions, policy hashing and a bounded payout loop | [v2 asset plan](contract/contracts/PusakaAssetPlan.scash) |
+| Time-based BIP68 review and a round-bound anchor | [Review anchor](contract/contracts/PusakaV2Anchor.scash) |
+| Contract co-spends that bind receipts and token distributions to a plan | [Receive inbox](contract/contracts/PusakaV2Inbox.scash) and [token vault](contract/contracts/PusakaTokenVault.scash) |
 
 ## Before and after BLAZE
 
@@ -156,7 +190,7 @@ BLAZE hacking started on **14 Nov 2026, 14:00 UTC**.
 | The first SolidCash plan contract (v1: create, I'm still here, take back, send to heirs), its Chipnet lifecycle and a mainnet plan created in Paytaca | [`contract/contracts/Pusaka.scash`](contract/contracts/Pusaka.scash) |
 | The v2 wallet contracts: spendable balance, receive address, trusted contacts, the BIP68 review, token vault and Cauldron swaps | [`contract/contracts/`](contract/contracts/) |
 | The tests for all of them | [`contract/test/`](contract/test/) |
-| A fix to the SolidCash SDK so a wallet can sign stateful calls, reported upstream | [`contract/patches/`](contract/patches/), [issue #3](https://github.com/solidcash/solidcash/issues/3) |
+| A fix to the SolidCash SDK so a wallet can sign stateful calls | [`contract/patches/`](contract/patches/) |
 | The web app: landing, How it works, wallet, setup, inheritance, swap, WizardConnect | [`app/`](app/) |
 | The live runner and its records | [`contract/scripts/v2/`](contract/scripts/v2/) |
 | Design rules, UX notes, the SolidCash developer log and feedback | [`docs/`](docs/) |
@@ -167,7 +201,8 @@ Check it: `git diff --stat blaze-start HEAD`.
 
 | Problem | What to do |
 |---|---|
-| "Another transaction just used this plan. Refresh it and try again." | Another judge pressed the same button a moment earlier. Open the demo again for the next example plan |
+| An input was spent during review | Press **Refresh transaction review** to prepare from the current state. In the demo, you can also open the next example |
+| The broadcast reply was lost during setup or a rules edit | Open **Recover a plan** in the wallet and press **Check submission**. The app keeps the recovery file while the network status is uncertain |
 | "The network clock has not reached this step yet." | The network's clock runs behind real time. Wait a few minutes and press **Refresh** |
 | "Could not reach the Bitcoin Cash network." | The app could not reach a public BCH server. Press **Refresh** |
 | A **Testnet** badge at the top | You are in the Chipnet app. The mainnet app is at the site root |

@@ -37,10 +37,10 @@ is proof you are still here.
 2. **Use it.** Send, receive and swap. Each payment you send restarts the waiting time.
 3. **A claim opens** once the waiting time passes in silence (anyone can open it), or sooner when two of your
    three contacts confirm.
-4. **The review period** is enforced by the network with a BIP68 relative time lock. **Stop claim**, or any
-   payment you send, ends the claim.
-5. **Pay the heirs.** After the review anyone can submit the payout. Every node checks each heir's address and
-   amount; the plan pays the fee.
+4. **The review period** uses a BIP68 relative time lock for payouts submitted without the owner's signature.
+   **Stop claim**, or any payment you send, ends the claim. See the [current limits](JUDGE.md#current-limits).
+5. **Pay the heirs.** After review, anyone can submit the payout when the plan covers the fee and each heir's
+   minimum payment. Every node checks each heir's address and amount.
 
 The plan's state lives in a CashTokens NFT that never leaves the plan. Its rules (heirs, shares, contacts, fee
 budget) travel in the plan link after the `#`, which browsers never send to a server, and every claim is checked
