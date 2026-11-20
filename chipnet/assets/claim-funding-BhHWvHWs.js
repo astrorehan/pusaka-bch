@@ -1,1 +1,0 @@
-import{n as e}from"./plan-metadata-yXxPKBwG.js";var t=1000n,n=546n,r=5000n;function i(t,r,i,a=0n){let o=r.reduce((e,t)=>e+t,0n),s=r.reduce((e,t)=>t<e?t:e,o),c=(n*o+s-1n)/s,l=e+i,u=l+c+a,d=t-l-a;return{minimum:u,shortfall:t<u?u-t:0n,smallestPayout:d>0n?d*s/o:0n}}export{i,t as n,n as r,r as t};
