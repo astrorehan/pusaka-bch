@@ -44,7 +44,11 @@ async function pickDemo(): Promise<Snapshot> {
     }
     return current ? 6 : 7;
   };
-  return loaded.reduce((best, next) => (rank(next) < rank(best) ? next : best));
+  // Several examples are equally ready. Spread visitors over them, so two people opening the demo at the same
+  // time rarely reach the same plan, where the second payout would find its inputs already spent.
+  const best = Math.min(...loaded.map(rank));
+  const ties = loaded.filter((snapshot) => rank(snapshot) === best);
+  return ties[Math.floor(Math.random() * ties.length)];
 }
 
 export function WalletPlanLayout() {

@@ -542,6 +542,8 @@ async function demo() {
   // Opening the claim (about 4,200 sats), the claim marker (1,000), the payout fee budget (5,000) and the
   // plan's own 1,000 all come out of the deposit before the six heirs share the rest.
   const deposit = BigInt(process.env.PUSAKA_LIVE_DEMO_DEPOSIT ?? '22000');
+  // Swept payouts arrive as many small coins; a new plan needs one coin that covers its deposit.
+  if (record.demo.length < wanted.length) await mergeOwnerCoins(owner);
 
   for (let i = record.demo.length; i < wanted.length; i++) {
     log(`demo plan ${i + 1}: create (review ${wanted[i].seconds}s${wanted[i].keepActive ? ', left for a visitor to open' : ''})`);
@@ -599,6 +601,18 @@ async function demo() {
 }
 
 // ---------------------------------------------------------------- sweep
+
+/** Merge the owner's plain coins into one, so a plan deposit can come from a single coin. */
+async function mergeOwnerCoins(owner: Actor) {
+  const coins = (await plainCoins(owner.address)).filter((u) => !spent.has(key(u)));
+  if (coins.length < 2) return;
+  const total = coins.reduce((s, u) => s + u.satoshis, 0n);
+  const fee = 200n + 150n * BigInt(coins.length);
+  const builder = new TransactionBuilder({ provider });
+  for (const u of coins) builder.addInput(u, template(owner).unlockP2PKH());
+  builder.addOutput({ to: owner.address, amount: total - fee });
+  await broadcast(builder, `merge ${coins.length} owner coins`);
+}
 
 async function sweepHelpers() {
   const { owner, all } = await actors();

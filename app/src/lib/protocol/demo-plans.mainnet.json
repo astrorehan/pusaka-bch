@@ -61,6 +61,186 @@
   },
   {
     "version": "pusaka-v2",
+    "protocolRevision": "assets-2",
+    "network": "mainnet",
+    "planCategoryHex": "3ba90a1ae9f35aa98e6c800c140ef22d01c1e4fdcce78b6d0afe79c27329795b",
+    "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+    "planAddress": "bitcoincash:rvxmrcdwccafvx4fz3ar0ym0gwwstqx53d4flfv2eyqt4pwt8y7673zwa8605",
+    "planLockHex": "aa200db1e1aec63a961aa9147a37936f439d0580d48b6a9fa58ac900ba85cb393daf87",
+    "anchorAddress": "bitcoincash:rd72dfauv252ydwck0sv98eg6uty4q7rtv8k0y2xrhc6jhgfu4xs5ttdr86ts",
+    "anchorLockHex": "aa207ca6a7bc62a8a235d8b3e0c29f28d7164a83c35b0f6791461df1a95d09e54d0a87",
+    "inboxAddress": "bitcoincash:pv8gy0s3k2tgm02krmxrh29vstyup90qfdrn778y93lpqc0cuz25cypl65u38",
+    "inboxLockHex": "aa200e823e11b2968dbd561ecc3ba8ac82c9c095e04b473f78e42c7e1061f8e0954c87",
+    "perInputFeeCap": "600",
+    "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+    "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+    "createdAtLocktime": 1795240325,
+    "inactivityPeriodSeconds": 60,
+    "reviewSequence": 4194305,
+    "reviewUnits": 1,
+    "effectiveReviewSeconds": 512,
+    "feeBudget": "5000",
+    "contacts": [
+      "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+      "e3316fa457dfdb12f62a0d993f4d32be112408be",
+      "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+    ],
+    "totalShares": "120",
+    "heirs": [
+      {
+        "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+        "share": "15",
+        "label": "Aisha (wife)"
+      },
+      {
+        "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+        "share": "20",
+        "label": "Yusuf (father)"
+      },
+      {
+        "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+        "share": "20",
+        "label": "Mariam (mother)"
+      },
+      {
+        "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+        "share": "26",
+        "label": "Omar (son)"
+      },
+      {
+        "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+        "share": "26",
+        "label": "Idris (son)"
+      },
+      {
+        "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+        "share": "13",
+        "label": "Layla (daughter)"
+      }
+    ]
+  },
+  {
+    "version": "pusaka-v2",
+    "protocolRevision": "assets-2",
+    "network": "mainnet",
+    "planCategoryHex": "f0a1c8b341a2657a7457bbb097c66feef459ca04df3214d17e9881299c8c32d6",
+    "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+    "planAddress": "bitcoincash:rw37xd36whjary83znqajtwyxy33a2qkh47tf0nkguaya2mhgxufsp2g5jfus",
+    "planLockHex": "aa20a3e3363a75e5d190f114c1d92dc431231ea816bd7cb4be76473a4eab7741b89887",
+    "anchorAddress": "bitcoincash:rvshn7uajucecsp9zemc06j46l0hjx7yadvlq69750kx6yjjkd6pjw5jqv2aq",
+    "anchorLockHex": "aa202179fb9d97319c4025167787ea55d7df791bc4eb59f068bea3ec6d1252b3741987",
+    "inboxAddress": "bitcoincash:pv5jfsa68u6pc8zs3e5zns4txc4qcrv2ualq34gjv47ld3flyf6lupng5k2gk",
+    "inboxLockHex": "aa202924c3ba3f341c1c508e6829c2ab362a0c0d8ae77e08d512657df6c53f2275fe87",
+    "perInputFeeCap": "600",
+    "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+    "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+    "createdAtLocktime": 1795240325,
+    "inactivityPeriodSeconds": 60,
+    "reviewSequence": 4194305,
+    "reviewUnits": 1,
+    "effectiveReviewSeconds": 512,
+    "feeBudget": "5000",
+    "contacts": [
+      "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+      "e3316fa457dfdb12f62a0d993f4d32be112408be",
+      "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+    ],
+    "totalShares": "120",
+    "heirs": [
+      {
+        "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+        "share": "15",
+        "label": "Aisha (wife)"
+      },
+      {
+        "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+        "share": "20",
+        "label": "Yusuf (father)"
+      },
+      {
+        "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+        "share": "20",
+        "label": "Mariam (mother)"
+      },
+      {
+        "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+        "share": "26",
+        "label": "Omar (son)"
+      },
+      {
+        "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+        "share": "26",
+        "label": "Idris (son)"
+      },
+      {
+        "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+        "share": "13",
+        "label": "Layla (daughter)"
+      }
+    ]
+  },
+  {
+    "version": "pusaka-v2",
+    "protocolRevision": "assets-2",
+    "network": "mainnet",
+    "planCategoryHex": "3cc58fad92cc95fa1ecbd473947e5ad1e8f60bf3ca8e24e549cd82bcae595144",
+    "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+    "planAddress": "bitcoincash:rdx8myxpw0eer94swemy9w4f3ymwef47tlpxrf75x8xha24rmn6lc88c6r9xe",
+    "planLockHex": "aa204c7d90c173f39196b0767642baa98936eca6be5fc261a7d431cd7eaaa3dcf5fc87",
+    "anchorAddress": "bitcoincash:r04vuqxwde5avsxu5x6zqdfc0g3tc0hn0qtywlvklv30af457nsvszcy3pweg",
+    "anchorLockHex": "aa20eace00ce6e69d640dca1b42035387a22bc3ef37816477d96fb22fea6b4f4e0c887",
+    "inboxAddress": "bitcoincash:pdrqvn0nzsqmkuywntpg53kx3ntvdlfvzvnvmwa8egl3pwmfnz5vxs8ffgt4x",
+    "inboxLockHex": "aa2046064df31401bb708e9ac28a46c68cd6c6fd2c1326cdbba7ca3f10bb6998a8c387",
+    "perInputFeeCap": "600",
+    "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+    "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+    "createdAtLocktime": 1795240325,
+    "inactivityPeriodSeconds": 60,
+    "reviewSequence": 4194305,
+    "reviewUnits": 1,
+    "effectiveReviewSeconds": 512,
+    "feeBudget": "5000",
+    "contacts": [
+      "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+      "e3316fa457dfdb12f62a0d993f4d32be112408be",
+      "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+    ],
+    "totalShares": "120",
+    "heirs": [
+      {
+        "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+        "share": "15",
+        "label": "Aisha (wife)"
+      },
+      {
+        "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+        "share": "20",
+        "label": "Yusuf (father)"
+      },
+      {
+        "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+        "share": "20",
+        "label": "Mariam (mother)"
+      },
+      {
+        "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+        "share": "26",
+        "label": "Omar (son)"
+      },
+      {
+        "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+        "share": "26",
+        "label": "Idris (son)"
+      },
+      {
+        "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+        "share": "13",
+        "label": "Layla (daughter)"
+      }
+    ]
+  },
+  {
+    "version": "pusaka-v2",
     "protocolRevision": "assets-1",
     "network": "mainnet",
     "planCategoryHex": "02741f10fe0e16a8efcba8531274eea1d942618ac27422af92a34d2034a0367a",

@@ -216,6 +216,231 @@
           "fee": "4181"
         }
       ]
+    },
+    {
+      "title": "demo plan 2",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-2",
+        "network": "mainnet",
+        "planCategoryHex": "3ba90a1ae9f35aa98e6c800c140ef22d01c1e4fdcce78b6d0afe79c27329795b",
+        "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+        "planAddress": "bitcoincash:rvxmrcdwccafvx4fz3ar0ym0gwwstqx53d4flfv2eyqt4pwt8y7673zwa8605",
+        "planLockHex": "aa200db1e1aec63a961aa9147a37936f439d0580d48b6a9fa58ac900ba85cb393daf87",
+        "anchorAddress": "bitcoincash:rd72dfauv252ydwck0sv98eg6uty4q7rtv8k0y2xrhc6jhgfu4xs5ttdr86ts",
+        "anchorLockHex": "aa207ca6a7bc62a8a235d8b3e0c29f28d7164a83c35b0f6791461df1a95d09e54d0a87",
+        "inboxAddress": "bitcoincash:pv8gy0s3k2tgm02krmxrh29vstyup90qfdrn778y93lpqc0cuz25cypl65u38",
+        "inboxLockHex": "aa200e823e11b2968dbd561ecc3ba8ac82c9c095e04b473f78e42c7e1061f8e0954c87",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+        "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+        "createdAtLocktime": 1795240325,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+          "e3316fa457dfdb12f62a0d993f4d32be112408be",
+          "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzYmE5MGExYWU5ZjM1YWE5OGU2YzgwMGMxNDBlZjIyZDAxYzFlNGZkY2NlNzhiNmQwYWZlNzljMjczMjk3OTViIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydnhtcmNkd2NjYWZ2eDRmejNhcjB5bTBnd3dzdHF4NTNkNGZsZnYyZXlxdDRwd3Q4eTc2NzN6d2E4NjA1IiwicGxhbkxvY2tIZXgiOiJhYTIwMGRiMWUxYWVjNjNhOTYxYWE5MTQ3YTM3OTM2ZjQzOWQwNTgwZDQ4YjZhOWZhNThhYzkwMGJhODVjYjM5M2RhZjg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJkNzJkZmF1djI1Mnlkd2NrMHN2OThlZzZ1dHk0cTdydHY4azB5MnhyaGM2amhnZnU0eHM1dHRkcjg2dHMiLCJhbmNob3JMb2NrSGV4IjoiYWEyMDdjYTZhN2JjNjJhOGEyMzVkOGIzZTBjMjlmMjhkNzE2NGE4M2MzNWIwZjY3OTE0NjFkZjFhOTVkMDllNTRkMGE4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB2OGd5MHMzazJ0Z20wMmtybXhyaDI5dnN0eXVwOTBxZmRybjc3OHk5M2xwcWMwY3V6MjVjeXBsNjV1MzgiLCJpbmJveExvY2tIZXgiOiJhYTIwMGU4MjNlMTFiMjk2OGRiZDU2MWVjYzNiYThhYzgyYzljMDk1ZTA0YjQ3M2Y3OGU0MmM3ZTEwNjFmOGUwOTU0Yzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MjQwMzI1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "created",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-21T06:56:37.516Z",
+          "txid": "b1a19de7ff4b2ace7ee87f1cebfac26bfabb43ee4ea1a85b20108c84ec45d109",
+          "bytes": 315,
+          "fee": "335"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 3",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-2",
+        "network": "mainnet",
+        "planCategoryHex": "f0a1c8b341a2657a7457bbb097c66feef459ca04df3214d17e9881299c8c32d6",
+        "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+        "planAddress": "bitcoincash:rw37xd36whjary83znqajtwyxy33a2qkh47tf0nkguaya2mhgxufsp2g5jfus",
+        "planLockHex": "aa20a3e3363a75e5d190f114c1d92dc431231ea816bd7cb4be76473a4eab7741b89887",
+        "anchorAddress": "bitcoincash:rvshn7uajucecsp9zemc06j46l0hjx7yadvlq69750kx6yjjkd6pjw5jqv2aq",
+        "anchorLockHex": "aa202179fb9d97319c4025167787ea55d7df791bc4eb59f068bea3ec6d1252b3741987",
+        "inboxAddress": "bitcoincash:pv5jfsa68u6pc8zs3e5zns4txc4qcrv2ualq34gjv47ld3flyf6lupng5k2gk",
+        "inboxLockHex": "aa202924c3ba3f341c1c508e6829c2ab362a0c0d8ae77e08d512657df6c53f2275fe87",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+        "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+        "createdAtLocktime": 1795240325,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+          "e3316fa457dfdb12f62a0d993f4d32be112408be",
+          "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJmMGExYzhiMzQxYTI2NTdhNzQ1N2JiYjA5N2M2NmZlZWY0NTljYTA0ZGYzMjE0ZDE3ZTk4ODEyOTljOGMzMmQ2Iiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydzM3eGQzNndoamFyeTgzem5xYWp0d3l4eTMzYTJxa2g0N3RmMG5rZ3VheWEybWhneHVmc3AyZzVqZnVzIiwicGxhbkxvY2tIZXgiOiJhYTIwYTNlMzM2M2E3NWU1ZDE5MGYxMTRjMWQ5MmRjNDMxMjMxZWE4MTZiZDdjYjRiZTc2NDczYTRlYWI3NzQxYjg5ODg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ2c2huN3VhanVjZWNzcDl6ZW1jMDZqNDZsMGhqeDd5YWR2bHE2OTc1MGt4NnlqamtkNnBqdzVqcXYyYXEiLCJhbmNob3JMb2NrSGV4IjoiYWEyMDIxNzlmYjlkOTczMTljNDAyNTE2Nzc4N2VhNTVkN2RmNzkxYmM0ZWI1OWYwNjhiZWEzZWM2ZDEyNTJiMzc0MTk4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB2NWpmc2E2OHU2cGM4enMzZTV6bnM0dHhjNHFjcnYydWFscTM0Z2p2NDdsZDNmbHlmNmx1cG5nNWsyZ2siLCJpbmJveExvY2tIZXgiOiJhYTIwMjkyNGMzYmEzZjM0MWMxYzUwOGU2ODI5YzJhYjM2MmEwYzBkOGFlNzdlMDhkNTEyNjU3ZGY2YzUzZjIyNzVmZTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MjQwMzI1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "created",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-21T06:56:55.409Z",
+          "txid": "ae4d0178bafad2ef3db2a35457fb893e3c12a29c595b5d7bc0855d6d12566f53",
+          "bytes": 315,
+          "fee": "335"
+        }
+      ]
+    },
+    {
+      "title": "demo plan 4",
+      "metadata": {
+        "version": "pusaka-v2",
+        "protocolRevision": "assets-2",
+        "network": "mainnet",
+        "planCategoryHex": "3cc58fad92cc95fa1ecbd473947e5ad1e8f60bf3ca8e24e549cd82bcae595144",
+        "ownerPkhHex": "ee592f412f2e925263458fb9e537b501abcaa20f",
+        "planAddress": "bitcoincash:rdx8myxpw0eer94swemy9w4f3ymwef47tlpxrf75x8xha24rmn6lc88c6r9xe",
+        "planLockHex": "aa204c7d90c173f39196b0767642baa98936eca6be5fc261a7d431cd7eaaa3dcf5fc87",
+        "anchorAddress": "bitcoincash:r04vuqxwde5avsxu5x6zqdfc0g3tc0hn0qtywlvklv30af457nsvszcy3pweg",
+        "anchorLockHex": "aa20eace00ce6e69d640dca1b42035387a22bc3ef37816477d96fb22fea6b4f4e0c887",
+        "inboxAddress": "bitcoincash:pdrqvn0nzsqmkuywntpg53kx3ntvdlfvzvnvmwa8egl3pwmfnz5vxs8ffgt4x",
+        "inboxLockHex": "aa2046064df31401bb708e9ac28a46c68cd6c6fd2c1326cdbba7ca3f10bb6998a8c387",
+        "perInputFeeCap": "600",
+        "policyBytesHex": "3c0000000100400088130000678f9703c83bc60bf3b3463f3e0955727fb7c77ae3316fa457dfdb12f62a0d993f4d32be112408bef9f5d1981ae5c43cb1672e50200eefe3f3f7d8b97800000006971db34cc0decb28a2dbbd441581b5a7347ce5730f000000cd5e98b3780b772a6d194a6b5edb02a5183a059314000000f8b54e8dbc89a8fbbd31e9c1f8c7eda780e915861400000077f43a36db9c2c5ac84681c3eb5fec9a659ec90c1a00000044edb187e2f6df3462d6314c67e48a89b70701aa1a0000000f2a014170312711a1bbdbc9bdd36d35e02c555b0d000000",
+        "policyHashHex": "6f8ecd8f3ccc4ffdbba765f3b4e3ddb6e48649a39d10ab7ebd2017ce7cee8f26",
+        "createdAtLocktime": 1795240325,
+        "inactivityPeriodSeconds": 60,
+        "reviewSequence": 4194305,
+        "reviewUnits": 1,
+        "effectiveReviewSeconds": 512,
+        "feeBudget": "5000",
+        "contacts": [
+          "678f9703c83bc60bf3b3463f3e0955727fb7c77a",
+          "e3316fa457dfdb12f62a0d993f4d32be112408be",
+          "f9f5d1981ae5c43cb1672e50200eefe3f3f7d8b9"
+        ],
+        "totalShares": "120",
+        "heirs": [
+          {
+            "pkhHex": "971db34cc0decb28a2dbbd441581b5a7347ce573",
+            "share": "15",
+            "label": "Aisha (wife)"
+          },
+          {
+            "pkhHex": "cd5e98b3780b772a6d194a6b5edb02a5183a0593",
+            "share": "20",
+            "label": "Yusuf (father)"
+          },
+          {
+            "pkhHex": "f8b54e8dbc89a8fbbd31e9c1f8c7eda780e91586",
+            "share": "20",
+            "label": "Mariam (mother)"
+          },
+          {
+            "pkhHex": "77f43a36db9c2c5ac84681c3eb5fec9a659ec90c",
+            "share": "26",
+            "label": "Omar (son)"
+          },
+          {
+            "pkhHex": "44edb187e2f6df3462d6314c67e48a89b70701aa",
+            "share": "26",
+            "label": "Idris (son)"
+          },
+          {
+            "pkhHex": "0f2a014170312711a1bbdbc9bdd36d35e02c555b",
+            "share": "13",
+            "label": "Layla (daughter)"
+          }
+        ]
+      },
+      "link": "https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzY2M1OGZhZDkyY2M5NWZhMWVjYmQ0NzM5NDdlNWFkMWU4ZjYwYmYzY2E4ZTI0ZTU0OWNkODJiY2FlNTk1MTQ0Iiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyZHg4bXl4cHcwZWVyOTRzd2VteTl3NGYzeW13ZWY0N3RscHhyZjc1eDh4aGEyNHJtbjZsYzg4YzZyOXhlIiwicGxhbkxvY2tIZXgiOiJhYTIwNGM3ZDkwYzE3M2YzOTE5NmIwNzY3NjQyYmFhOTg5MzZlY2E2YmU1ZmMyNjFhN2Q0MzFjZDdlYWFhM2RjZjVmYzg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnIwNHZ1cXh3ZGU1YXZzeHU1eDZ6cWRmYzBnM3RjMGhuMHF0eXdsdmtsdjMwYWY0NTduc3ZzemN5M3B3ZWciLCJhbmNob3JMb2NrSGV4IjoiYWEyMGVhY2UwMGNlNmU2OWQ2NDBkY2ExYjQyMDM1Mzg3YTIyYmMzZWYzNzgxNjQ3N2Q5NmZiMjJmZWE2YjRmNGUwYzg4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnBkcnF2bjBuenNxbWt1eXdudHBnNTNreDNudHZkbGZ2enZudm13YThlZ2wzcHdtZm56NXZ4czhmZmd0NHgiLCJpbmJveExvY2tIZXgiOiJhYTIwNDYwNjRkZjMxNDAxYmI3MDhlOWFjMjhhNDZjNjhjZDZjNmZkMmMxMzI2Y2RiYmE3Y2EzZjEwYmI2OTk4YThjMzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MjQwMzI1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19",
+      "reviewSeconds": 512,
+      "phase": "created",
+      "steps": [
+        {
+          "step": "create",
+          "at": "2026-11-21T06:57:12.136Z",
+          "txid": "3e19a15f5a46c596d987021f75c60d05efa323c0a02a7abfbc4cd5b1b623ff66",
+          "bytes": 315,
+          "fee": "335"
+        }
+      ]
     }
   ]
 }
