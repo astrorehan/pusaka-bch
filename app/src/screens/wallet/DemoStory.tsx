@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight, Check, ExternalLink, RefreshCw } from 'lucide
 import { Button } from '../../components/Button';
 import type * as api from '../../lib/chain/v2';
 import { demoCreatedTxid } from '../../lib/demo';
-import { explorerTxUrl, formatDate, formatDuration } from '../../lib/format';
+import { altExplorerTxUrl, explorerTxUrl, formatDate, formatDuration } from '../../lib/format';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import type { PrepareAction } from './PlanOverview';
 import { Card } from './WalletUi';
@@ -12,10 +12,21 @@ import { Card } from './WalletUi';
 type Step = { title: string; detail: ReactNode; state: 'done' | 'now' | 'later'; txid?: string; action?: ReactNode };
 
 function TxLink({ txid }: { txid: string }) {
+  const alt = altExplorerTxUrl(txid, NETWORK);
   return (
-    <a href={explorerTxUrl(txid, NETWORK)} target="_blank" rel="noreferrer">
-      View transaction <ExternalLink size={12} aria-hidden />
-    </a>
+    <>
+      <a href={explorerTxUrl(txid, NETWORK)} target="_blank" rel="noreferrer">
+        View transaction <ExternalLink size={12} aria-hidden />
+      </a>
+      {alt && (
+        <>
+          {' '}
+          <a className="pw-story-alt" href={alt} target="_blank" rel="noreferrer">
+            or here <ExternalLink size={12} aria-hidden />
+          </a>
+        </>
+      )}
+    </>
   );
 }
 
@@ -139,6 +150,15 @@ export function DemoStory({
           </li>
         ))}
       </ol>
+      {!paid && !ready && mainnet && OTHER_APP && (
+        <p className="pw-fine">
+          Every ready example was just used, and this one needs a few more minutes. Want to pay out right now
+          instead?{' '}
+          <a href={`${OTHER_APP}wallet/demo`}>
+            Try it on Chipnet <ArrowUpRight aria-hidden size={14} />
+          </a>
+        </p>
+      )}
       {paid && (
         <p className="pw-story-next">
           {!exhausted ? (

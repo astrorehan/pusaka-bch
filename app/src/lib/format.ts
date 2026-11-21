@@ -65,6 +65,11 @@ export function formatDate(unixSeconds: bigint): string {
   return new Date(Number(unixSeconds) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+/** A second mainnet explorer, offered beside the first in case it is slow or refuses the visit. */
+export function altExplorerTxUrl(txid: string, network: 'mainnet' | 'chipnet'): string | null {
+  return network === 'mainnet' ? `https://bch.loping.net/tx/${txid}` : null;
+}
+
 export function explorerTxUrl(txid: string, network: 'mainnet' | 'chipnet'): string {
   return network === 'mainnet' ? `https://explorer.bch.ninja/tx/${txid}` : `https://chipnet.chaingraph.cash/tx/${txid}`;
 }

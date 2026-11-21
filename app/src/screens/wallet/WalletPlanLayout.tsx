@@ -28,15 +28,33 @@ type DemoPick = Snapshot & { unread: number };
 async function pickDemo(): Promise<DemoPick> {
   if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '', unread: 0 };
   const { loadPlan } = await import('../../lib/chain/v2');
-  const loaded: Snapshot[] = await Promise.all(
-    DEMO_PLANS.map((plan) =>
-      loadPlan(plan, { fresh: true }).then(
-        (data) => ({ plan, data, error: '' }),
-        (error: unknown) => ({ plan, data: null, error: friendlyError(error) }),
-      ),
+  // Ask in a random order, so visitors arriving together get different examples, and take the first ready
+  // payout on the current revision as soon as it is read: one slow read must not hold the page.
+  const order = [...DEMO_PLANS].sort(() => Math.random() - 0.5);
+  let early: ((pick: DemoPick) => void) | null = null;
+  const first = new Promise<DemoPick>((resolve) => (early = resolve));
+  const reads = order.map((plan) =>
+    loadPlan(plan, { fresh: true }).then(
+      (data): Snapshot => {
+        const snapshot = { plan, data, error: '' };
+        if (rank(snapshot) === 0) early?.({ ...snapshot, unread: 0 });
+        return snapshot;
+      },
+      (error: unknown): Snapshot => ({ plan, data: null, error: friendlyError(error) }),
     ),
   );
-  const rank = ({ plan, data }: Snapshot) => {
+  const all = Promise.all(reads).then((loaded) => {
+    // Several examples are equally ready. Spread visitors over them, so two people opening the demo at the
+    // same time rarely reach the same plan, where the second payout would find its inputs already spent.
+    const best = Math.min(...loaded.map(rank));
+    const ties = loaded.filter((snapshot) => rank(snapshot) === best);
+    const unread = loaded.filter((snapshot) => !snapshot.data).length;
+    return { ...ties[Math.floor(Math.random() * ties.length)], unread };
+  });
+  return Promise.race([first, all]);
+}
+
+function rank({ plan, data }: Snapshot) {
     if (!data) return 9;
     const { state, review, now, funding } = data;
     const current = plan.protocolRevision === CURRENT_ASSET_REVISION;
@@ -47,13 +65,6 @@ async function pickDemo(): Promise<DemoPick> {
       if (state.status === 'REVIEW') return current ? 4 : 5;
     }
     return current ? 6 : 7;
-  };
-  // Several examples are equally ready. Spread visitors over them, so two people opening the demo at the same
-  // time rarely reach the same plan, where the second payout would find its inputs already spent.
-  const best = Math.min(...loaded.map(rank));
-  const ties = loaded.filter((snapshot) => rank(snapshot) === best);
-  const unread = loaded.filter((snapshot) => !snapshot.data).length;
-  return { ...ties[Math.floor(Math.random() * ties.length)], unread };
 }
 
 export function WalletPlanLayout() {
@@ -84,7 +95,9 @@ export function WalletPlanLayout() {
   // None of the examples could be read: the network servers did not answer.
   const demoUnreachable = Boolean(demoPick && !demoPick.data && DEMO_PLANS.length > 1);
   const nextDemo = useCallback(() => setDemoPick(null), []);
-  const selected = requestedDemo ? (demo ? demoPick?.plan ?? null : null) : shared ? fromLink?.plan ?? null : saved;
+  // A pick made while no example could be read is only a placeholder: show the network notice, not that plan.
+  const demoPlan = demoPick && (demoPick.data || DEMO_PLANS.length === 1) ? demoPick.plan : null;
+  const selected = requestedDemo ? (demo ? demoPlan : null) : shared ? fromLink?.plan ?? null : saved;
   const readEnabled = Boolean(selected && !activity && route !== '/new' && route !== '/wallet/new');
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
 
@@ -107,6 +120,20 @@ export function WalletPlanLayout() {
       live = false;
     };
   }, [demo, demoPick]);
+  // No example could be read: choose again when the browser is back online, and every 30 seconds.
+  useEffect(() => {
+    if (!demo || !demoPick || demoPick.data || DEMO_PLANS.length === 1) return;
+    const retry = () => {
+      if (navigator.onLine && !document.hidden) setDemoPick(null);
+    };
+    const timer = window.setInterval(retry, 30_000);
+    window.addEventListener('online', retry);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('online', retry);
+    };
+  }, [demo, demoPick]);
+
   const [reading, setReading] = useState<Metadata | null>(null);
   const pending = useRef<Promise<void> | null>(null);
   const savedLink = useRef<Metadata | null>(null);

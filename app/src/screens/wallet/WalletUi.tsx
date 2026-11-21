@@ -18,8 +18,8 @@ import {
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
-import { friendlyError, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from '../../lib/chain/errors';
-import { explorerTxUrl } from '../../lib/format';
+import { AlreadySent, friendlyError, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from '../../lib/chain/errors';
+import { altExplorerTxUrl, explorerTxUrl } from '../../lib/format';
 import type { Prepared } from '../../lib/chain/v2';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import type { PusakaV2PlanMetadata } from '../../lib/protocol/plan-metadata';
@@ -201,6 +201,14 @@ export function TransactionNotice({
         <a href={explorerTxUrl(txid, NETWORK)} target="_blank" rel="noreferrer">
           View transaction <ExternalLink size={12} aria-hidden />
         </a>
+        {altExplorerTxUrl(txid, NETWORK) && (
+          <>
+            {' '}
+            <a href={altExplorerTxUrl(txid, NETWORK)!} target="_blank" rel="noreferrer">
+              or here <ExternalLink size={12} aria-hidden />
+            </a>
+          </>
+        )}
       </div>
       {dismiss && (
         <button
@@ -348,7 +356,8 @@ export function TransactionReview({
       }
       if (err instanceof StaleReviewError) setStale(true);
       if (err instanceof UnconfirmedPlanSubmission) setRecovery(err.record);
-      setUncertain(err instanceof UncertainSubmission ? err.txid : '');
+      if (err instanceof AlreadySent) setEnded(true);
+      setUncertain(err instanceof UncertainSubmission || err instanceof AlreadySent ? err.txid : '');
       setError(friendlyError(err));
     } finally {
       setBusy(false);
@@ -397,7 +406,7 @@ export function TransactionReview({
         {uncertain && (
           <p className="pw-fine">
             <a href={explorerTxUrl(uncertain, NETWORK)} target="_blank" rel="noreferrer">
-              Check this transaction <ExternalLink size={12} aria-hidden />
+              View that transaction <ExternalLink size={12} aria-hidden />
             </a>
           </p>
         )}

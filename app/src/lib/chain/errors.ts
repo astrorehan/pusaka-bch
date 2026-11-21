@@ -14,6 +14,15 @@ export class StaleReviewError extends Error {
   }
 }
 
+/** Someone else already sent this exact transaction (a wallet-free step, built the same way): nothing more was sent. */
+export class AlreadySent extends Error {
+  readonly txid: string;
+  constructor(txid: string) {
+    super('Someone else sent this exact transaction a moment ago, so nothing more was sent.');
+    this.txid = txid;
+  }
+}
+
 /** The transaction was sent, but the network's reply was lost and a lookup could not find it yet. */
 export class UncertainSubmission extends Error {
   readonly txid: string;

@@ -26,7 +26,10 @@ import { NETWORK } from "../networkName";
 import { DEMO_CATEGORIES } from "../demo";
 import { shortAddress } from "../format";
 import { recordActivity, removePendingPlan, savePendingPlan, savePlan, type PendingPlanSubmission } from "../walletData";
-import { friendlyError, isInputConflict, isRejection, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from "./errors";
+import { AlreadySent, friendlyError, isInputConflict, isRejection, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from "./errors";
+
+/** Transactions this tab has broadcast, so an earlier attempt whose reply was lost is recognised as its own. */
+const broadcastHere = new Set<string>();
 import {
   chooseServer,
   deadline,
@@ -545,7 +548,7 @@ export async function prepareAction(
   }
   if ("planCarrierAfter" in result && "paidTotal" in result) {
     const stays = result.planCarrierAfter as bigint;
-    rows.push(["Stays in the plan (rounding and the 1,000-sat reserve)", bch(stays)]);
+    rows.push(["Stays in the plan (reserve, unused fee budget and rounding)", bch(stays)]);
     rows.push([
       "Total from the plan",
       bch((result.paidTotal as bigint) + stays + (sponsored ? 0n : result.fee)),
@@ -643,7 +646,11 @@ export async function submit(prepared: Prepared): Promise<string> {
   );
   if (available.includes(false)) {
     // An earlier attempt whose answer was lost may have gone through: then this very transaction spent them.
-    if (!prepared.metadata && await alreadyAccepted(expectedTxid)) return accepted();
+    // If this tab never sent it, someone else built and sent the same wallet-free transaction.
+    if (!prepared.metadata && await alreadyAccepted(expectedTxid)) {
+      if (broadcastHere.has(expectedTxid)) return accepted();
+      throw new AlreadySent(expectedTxid);
+    }
     throw new StaleReviewError();
   }
   if (prepared.validUntil && Date.now() > prepared.validUntil)
@@ -657,6 +664,7 @@ export async function submit(prepared: Prepared): Promise<string> {
   let response;
   try {
     // The reply to a broadcast can go missing while the connection stays open. Do not wait forever for it.
+    broadcastHere.add(expectedTxid);
     response = await deadline(provider.sendRawTransaction(hex), 30_000);
   } catch (e) {
     if (isInputConflict(e)) {

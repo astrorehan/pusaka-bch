@@ -164,7 +164,7 @@ function Balance({
           <p className="pw-balance-note">
             {state?.status === 'PAID_OUT'
               ? 'Paid out to the heirs. A small reserve stays behind.'
-              : 'This gets split between the heirs when you pay out.'}
+              : 'The heirs share this, less the network fee and a small reserve. The review shows each amount.'}
           </p>
         </div>
       </WalletFocus>
@@ -541,6 +541,7 @@ export function WalletScreen() {
 
 function WalletPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   // No example plans on this network: the live ones are in the other network's app, so go straight there.
   const forwardDemo = !HAS_DEMO && OTHER_APP && isDemoRoute(location.pathname, location.search)
     ? `${OTHER_APP}${location.pathname.replace(/^\//, '')}${location.search}`
@@ -591,6 +592,20 @@ function WalletPage() {
     connectedHash && metadata?.contacts.includes(connectedHash),
   );
 
+  // The browser's Back button left the review's history entry: close the review as its own Back would.
+  const reviewEntry = Boolean(location.state?.review);
+  useEffect(() => {
+    if (reviewEntry || !review) return;
+    setDialog(review.back);
+    setReview(null);
+    if (demo) void refresh(true);
+    // Only a change of history entry closes the review.
+  }, [reviewEntry]);
+
+  function leaveReviewEntry() {
+    if (location.state?.review) navigate(-1);
+  }
+
   function nextExample() {
     setTxid('');
     setIssue('');
@@ -610,6 +625,11 @@ function WalletPage() {
       const { prepareAction } = await import('../../lib/chain/v2');
       const prepared = await prepareAction(metadata, action, demo ? { ...options, selfFunded: true } : options);
       setReview({ prepared, back: dialog });
+      // Give the review its own history entry, so the browser's Back button closes it instead of leaving the page.
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        state: { ...(location.state ?? {}), review: true },
+        preventScrollReset: true,
+      });
       setDialog(null);
     } catch (err) {
       setIssue(friendlyError(err));
@@ -971,12 +991,14 @@ function WalletPage() {
           close={() => {
             setDialog(review.back);
             setReview(null);
+            leaveReviewEntry();
             // Someone else may have acted on this example while its review was open.
             if (demo) void refresh(true);
           }}
           done={(id) => {
             setTxid(id);
             setReview(null);
+            leaveReviewEntry();
             if (review.back === 'send') {
               setRecipient('');
               setAmount('');
