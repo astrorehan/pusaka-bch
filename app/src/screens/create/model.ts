@@ -156,7 +156,7 @@ export function validateHeirs(d: Draft, network: NetworkName, ownerAddress?: str
       const other = seen.get(a.address);
       if (other !== undefined) errors[`${h.id}.address`] = `${other} already uses this address. Each heir needs their own.`;
       else seen.set(a.address, h.name.trim() || h.label);
-      if (ownerAddress && a.address === ownerAddress.toLowerCase()) hints[`${h.id}.address`] = 'This is your own wallet address. Heirs usually have their own.';
+      if (ownerAddress && a.address === ownerAddress.toLowerCase()) hints[`${h.id}.address`] = 'This is the wallet you sign with, so a lost key loses it too. For a backup, add a second wallet of your own.';
     }
     if (d.mode === 'custom') {
       const p = parsePercent(d.heirs.find((x) => x.id === h.id)?.percent ?? '');

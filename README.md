@@ -30,6 +30,10 @@ everything today. Existing answers lock the coins away: a dead man's switch you 
 heir through a desktop plugin. Pusaka keeps the coins in a wallet you use every day, and every payment you make
 is proof you are still here.
 
+A lost key doesn't mean lost coins either. If you can no longer sign, two of your three contacts can open a claim,
+and after the review period the plan pays the people you named. Name a second wallet of your own among them, and
+that share comes back to you.
+
 ## How it works
 
 1. **Set up.** Heirs and shares, three trusted contacts, a waiting time and a review period. Your BCH moves into

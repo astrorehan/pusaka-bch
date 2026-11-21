@@ -201,6 +201,11 @@ export function HowItWorksScreen() {
               a little BCH to confirm. Any payment you send ends their claim.
             </li>
             <li>
+              <strong>A lost key doesn't mean lost coins.</strong> If you can no longer sign, two of your contacts can
+              open a claim, and after the review the plan pays the people you named. Add a second wallet of your own
+              among them, and that share comes back to you.
+            </li>
+            <li>
               <strong>Dates are right to about an hour.</strong> The Bitcoin Cash network's clock runs about an hour
               behind real time, and the plan follows the network's clock.
             </li>

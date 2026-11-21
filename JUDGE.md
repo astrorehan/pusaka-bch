@@ -32,6 +32,9 @@ Pusaka is a Bitcoin Cash wallet with the inheritance plan built in.
 4. **After the review,** anyone can press **Pay the heirs**. When the plan covers the network fee and every heir’s
    minimum payment, a visitor can submit the payout without a wallet.
 
+The same plan covers a lost key: if the owner can no longer sign, two contacts can open a claim, and the coins
+reach the people named instead of being lost. A second wallet of the owner's own can be one of them.
+
 No company holds the coins and no server stores the plan. Four [SolidCash](https://solidcash.org) contracts do the
 work: the plan ([`PusakaAssetPlan`](contract/contracts/PusakaAssetPlan.scash)) with its state in a CashTokens NFT,
 its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)), the review clock
