@@ -1,0 +1,1 @@
+import{n as e}from"./demo-CleJVeFN.js";function t(e,t){let n=e.toLowerCase().replace(/\/$/,``);return n===`/wallet/demo`||[`/wallet`,`/wallet/plan`,`/wallet/swap`,`/wallet/activity`].includes(n)&&new URLSearchParams(t).get(`demo`)===`1`}function n(n,r){return e&&t(n,r)}function r(e,t){return t?e===`/wallet`?`/wallet/demo`:`${e}?demo=1`:e}export{n,r,t};
