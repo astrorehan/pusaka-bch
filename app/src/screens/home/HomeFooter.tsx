@@ -79,7 +79,7 @@ function Columns() {
       </div>
       <div className="hfoot__col">
         <p className="hfoot__label">Resources</p>
-        <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
+        <a href={DOCS_URL}>Docs</a>
         <a href={CODE_URL} target="_blank" rel="noreferrer">GitHub</a>
         <a href={CONTRACT_URL} target="_blank" rel="noreferrer">Source code</a>
         <a href={TESTS_URL} target="_blank" rel="noreferrer">Test suite</a>

@@ -307,8 +307,8 @@ export function HowItWorksScreen() {
             <li><Ext href={PLAN_CONTRACT_URL}>Plan contract</Ext></li>
             <li><Ext href={CONTRACT_URL}>All contracts</Ext></li>
             <li><Ext href={TESTS_URL}>Tests</Ext></li>
-            <li><Ext href={PROOF_URL}>On-chain proof</Ext></li>
-            <li><Ext href={DX_LOG_URL}>What we learned building on SolidCash</Ext></li>
+            <li><a href={PROOF_URL}>On-chain proof</a></li>
+            <li><a href={DX_LOG_URL}>What we learned building on SolidCash</a></li>
             <li><Ext href={CODE_URL}>Repository</Ext></li>
           </ul>
         </section>

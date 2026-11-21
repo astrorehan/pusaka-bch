@@ -27,6 +27,11 @@ the generated `404.html` that opens shared plan links directly. Overlay `assets/
 `chipnet/assets/` onto the published directories so browsers with cached pages can still
 load the previous build's hashed chunks. [Release evidence](../docs/proofs/app-and-assets.md).
 
+The documentation website lives at `/docs/` in development and `/pusaka-bch/docs/` on GitHub Pages.
+The build renders the Markdown sources listed in `docs/catalog.ts` into standalone pages and
+generates their search index. Edit the original Markdown to update an article. Both hosted
+networks link to the same docs.
+
 ## Mainnet wallet testing
 
 ```bash

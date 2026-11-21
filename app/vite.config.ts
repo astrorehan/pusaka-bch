@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import react from '@vitejs/plugin-react'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { docsSite } from './docs/site.ts'
 
 // The published site holds two builds of the same app: mainnet at PAGES_BASE and the Chipnet (test network)
 // app at PAGES_BASE + 'chipnet/'. `npm run build:pages` builds both into dist-pages.
@@ -21,21 +22,22 @@ function productionHtml(pages: boolean, routes = pages): Plugin {
     apply: 'build',
     transformIndexHtml: {
       order: 'post',
-      handler(html) {
+      handler(html, { path }) {
+        const docs = path === '/docs/index.html'
         const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(([, code]) =>
           `'sha256-${createHash('sha256').update(code.replace(/\r\n?/g, '\n')).digest('base64')}'`,
         )
         const policy = [
           "default-src 'none'",
           "base-uri 'none'",
-          "form-action 'self'",
-          // Libauth compiles WebAssembly. The theme initializer is the only inline script.
-          ["script-src 'self' 'wasm-unsafe-eval'", ...hashes].join(' '),
+          docs ? "form-action 'none'" : "form-action 'self'",
+          // Libauth compiles WebAssembly in the wallet. Docs only load their own UI scripts.
+          [docs ? "script-src 'self'" : "script-src 'self' 'wasm-unsafe-eval'", ...hashes].join(' '),
           "style-src 'self' 'unsafe-inline'",
           "font-src 'self'",
           "img-src 'self' data: blob:",
           // CoinGecko, the Electrum servers (mainnet with its fallbacks, then Chipnet), and the default WizardConnect relays.
-          "connect-src 'self' https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://bch.loping.net:50004 wss://fulcrum.criptolayer.net:50004 wss://bch.soul-dev.com:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest",
+          docs ? "connect-src 'self'" : "connect-src 'self' https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://bch.loping.net:50004 wss://fulcrum.criptolayer.net:50004 wss://bch.soul-dev.com:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest",
         ].join('; ')
         return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: policy }, injectTo: 'head-prepend' }]
       },
@@ -76,23 +78,33 @@ const network = (name: 'mainnet' | 'chipnet', otherApp = '') => ({
 // Keep the mainnet wallet preview outside dist: a normal build empties that directory.
 export default defineConfig(({ mode }) => {
   const pages = mode === 'pages' || mode === 'pages-chipnet'
+  const mainnet = mode === 'mainnet' || mode === 'pages'
+  const includeDocs = mode !== 'pages-chipnet'
+  const base = pages ? (includeDocs ? PAGES_BASE : CHIPNET_BASE) : '/'
+  const sourceRef = loadEnv(mode, process.cwd()).VITE_RELEASE_REF || 'release/v2-readiness'
+  const otherApp = pages ? (includeDocs ? CHIPNET_BASE : PAGES_BASE) : ''
+  const outDir = pages ? (includeDocs ? 'dist-pages' : 'dist-pages/chipnet') : mainnet ? 'dist-mainnet' : 'dist'
+
   return {
-    plugins: [react(), chipnetPath(pages ? CHIPNET_BASE : ''), productionHtml(mode === 'pages', pages)],
+    base,
+    plugins: [
+      react(),
+      chipnetPath(pages ? CHIPNET_BASE : ''),
+      productionHtml(mode === 'pages', pages),
+      ...(includeDocs ? [docsSite(base, sourceRef)] : []),
+    ],
+    define: {
+      ...(pages || mainnet ? network(mainnet ? 'mainnet' : 'chipnet', otherApp) : {}),
+      'import.meta.env.VITE_RELEASE_REF': JSON.stringify(sourceRef),
+      'import.meta.env.VITE_DOCS_URL': JSON.stringify(`${pages ? PAGES_BASE : base}docs/`),
+    },
+    // The Chipnet Pages build runs second, into its own folder. Both networks link to the main docs site.
+    build: {
+      outDir,
+      rolldownOptions: { input: includeDocs ? ['index.html', 'docs/index.html'] : ['index.html'] },
+    },
     resolve: { dedupe: ['react', 'react-dom', '@solidcash/solidcash', '@solidcash/utils', '@bitauth/libauth', '@cashlab/common', '@cashlab/cauldron'] },
-    ...(mode === 'pages' ? {
-      base: PAGES_BASE,
-      define: network('mainnet', CHIPNET_BASE),
-      build: { outDir: 'dist-pages' },
-    } : {}),
-    // Built after `pages`, into its chipnet/ folder (a `pages` build empties dist-pages).
-    ...(mode === 'pages-chipnet' ? {
-      base: CHIPNET_BASE,
-      define: network('chipnet', PAGES_BASE),
-      build: { outDir: 'dist-pages/chipnet' },
-    } : {}),
     ...(mode === 'mainnet' ? {
-      define: network('mainnet'),
-      build: { outDir: 'dist-mainnet' },
       preview: { host: 'localhost', port: 4180, strictPort: true },
     } : {}),
   }

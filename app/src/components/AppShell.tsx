@@ -194,9 +194,7 @@ function PhoneMenu({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () =
           <ul className="menu-list">
             <li><NavLink to="/how-it-works" className="menu-item">How it works</NavLink></li>
             <li>
-              <a href={DOCS_URL} target="_blank" rel="noreferrer" className="menu-item">
-                Docs <ExternalLink aria-hidden className="menu-item__ext" />
-              </a>
+              <a href={DOCS_URL} className="menu-item">Docs</a>
             </li>
             <li>
               <a href={CODE_URL} target="_blank" rel="noreferrer" className="menu-item">

@@ -114,7 +114,7 @@ export function DockNav() {
   return (
     <nav ref={ref} className="header__links dock" aria-label="Main">
       <NavLink to="/how-it-works"><Letters text="How it works" /></NavLink>
-      {ext(DOCS_URL, <Letters text="Docs" />)}
+      <a href={DOCS_URL}><Letters text="Docs" /></a>
       {ext(REPO_URL, <Letters text="GitHub" />)}
     </nav>
   );

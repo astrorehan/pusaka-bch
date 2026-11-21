@@ -11,7 +11,7 @@ export const TELEGRAM_URL = 'https://t.me/astrorehan';
 /** The branch judges read: the BLAZE release, until it is merged into main. */
 export const SOURCE_REF = import.meta.env.VITE_RELEASE_REF || 'release/v2-readiness';
 const sourceRef = SOURCE_REF;
-export const DOCS_URL = `${REPO_URL}/tree/${sourceRef}/docs`;
+export const DOCS_URL: string = import.meta.env.VITE_DOCS_URL;
 /** The code judges should read: the repository at the release branch. */
 export const CODE_URL = `${REPO_URL}/tree/${sourceRef}`;
 
