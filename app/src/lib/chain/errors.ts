@@ -18,7 +18,7 @@ export class StaleReviewError extends Error {
 export class AlreadySent extends Error {
   readonly txid: string;
   constructor(txid: string) {
-    super('Someone else sent this exact transaction a moment ago, so nothing more was sent.');
+    super('This exact transaction is already on the network, probably sent by someone else a moment ago. Nothing more was sent.');
     this.txid = txid;
   }
 }

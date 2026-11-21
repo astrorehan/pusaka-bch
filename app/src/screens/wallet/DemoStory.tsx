@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Check, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '../../components/Button';
 import type * as api from '../../lib/chain/v2';
-import { demoCreatedTxid } from '../../lib/demo';
+import { demoTxids } from '../../lib/demo';
 import { altExplorerTxUrl, explorerTxUrl, formatDate, formatDuration } from '../../lib/format';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import type { PrepareAction } from './PlanOverview';
@@ -59,7 +59,7 @@ export function DemoStory({
   const canAct = funding.canSelfFund;
   const waiting = formatDuration(BigInt(metadata.inactivityPeriodSeconds));
   const reviewTime = formatDuration(BigInt(metadata.effectiveReviewSeconds));
-  const created = demoCreatedTxid(metadata.planCategoryHex);
+  const { created, claim } = demoTxids(metadata.planCategoryHex);
   const short = (
     <p className="pw-fine">
       This example doesn’t have enough BCH left to cover the fee.{' '}
@@ -91,7 +91,8 @@ export function DemoStory({
         ? 'Anyone can do this, no wallet needed. The owner can still stop it during the review.'
         : 'Once the wait was over, anyone could open a claim. Someone did.',
       state: paid || reviewing ? 'done' : overdue ? 'now' : 'later',
-      txid: reviewing ? state.anchorUtxo?.txid : undefined,
+      // While the claim is open, its anchor sits at the opening transaction; after the payout, the record has it.
+      txid: reviewing ? state.anchorUtxo?.txid ?? claim : paid ? claim : undefined,
       action: overdue && (canAct
         ? <Button type="button" disabled={busy} onClick={() => void prepare('open', { selfFunded: true })}>Open the claim</Button>
         : short),

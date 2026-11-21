@@ -27,10 +27,11 @@ export const TRY_IT: { to: string } | { href: string } | null = HAS_DEMO
     ? { href: `${OTHER_APP}wallet/demo` }
     : null;
 
-/** The transaction that created an example plan, when its record has one: the first step of the demo's story. */
-export function demoCreatedTxid(category: string): string | undefined {
+/** The transactions that created an example plan and opened its claim, when its record has them. */
+export function demoTxids(category: string): { created?: string; claim?: string } {
   const entry = DEMO_PLAN_DATA.find(
     (plan) => (plan as { planCategoryHex?: unknown } | null)?.planCategoryHex === category,
-  ) as { createdTxid?: unknown } | undefined;
-  return typeof entry?.createdTxid === 'string' && /^[a-f\d]{64}$/.test(entry.createdTxid) ? entry.createdTxid : undefined;
+  ) as { createdTxid?: unknown; claimTxid?: unknown } | undefined;
+  const txid = (value: unknown) => (typeof value === 'string' && /^[a-f\d]{64}$/.test(value) ? value : undefined);
+  return { created: txid(entry?.createdTxid), claim: txid(entry?.claimTxid) };
 }

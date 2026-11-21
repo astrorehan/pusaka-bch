@@ -58,7 +58,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "8232c93026f6f84a14d60e2a1fcd850bd68875bd48f952e2d6076c8efa86fef9"
+    "createdTxid": "8232c93026f6f84a14d60e2a1fcd850bd68875bd48f952e2d6076c8efa86fef9",
+    "claimTxid": "401cd17d920cd905efba521acc1c20585548131b98928d8b5dfa59c62c82d675"
   },
   {
     "version": "pusaka-v2",
@@ -119,7 +120,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "b1a19de7ff4b2ace7ee87f1cebfac26bfabb43ee4ea1a85b20108c84ec45d109"
+    "createdTxid": "b1a19de7ff4b2ace7ee87f1cebfac26bfabb43ee4ea1a85b20108c84ec45d109",
+    "claimTxid": "87aa4057cbd22394379e558bbdc4af53698c1712bda69cffeafc3d66f95338a0"
   },
   {
     "version": "pusaka-v2",
@@ -180,7 +182,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "ae4d0178bafad2ef3db2a35457fb893e3c12a29c595b5d7bc0855d6d12566f53"
+    "createdTxid": "ae4d0178bafad2ef3db2a35457fb893e3c12a29c595b5d7bc0855d6d12566f53",
+    "claimTxid": "3ec13063fda065c2e086c59c0d2fe536a2f590c3bf5efb5eb487847acc6cf8e9"
   },
   {
     "version": "pusaka-v2",
@@ -241,7 +244,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "3e19a15f5a46c596d987021f75c60d05efa323c0a02a7abfbc4cd5b1b623ff66"
+    "createdTxid": "3e19a15f5a46c596d987021f75c60d05efa323c0a02a7abfbc4cd5b1b623ff66",
+    "claimTxid": "eef5a09d13c7caa1e99badf74e222390f8b670cadff5fbc5088c768a49800465"
   },
   {
     "version": "pusaka-v2",
@@ -302,7 +306,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "dec89643904f14d9c6392fdadddc7765b8d05444942d8bc09920aefd27f30f44"
+    "createdTxid": "dec89643904f14d9c6392fdadddc7765b8d05444942d8bc09920aefd27f30f44",
+    "claimTxid": "0714e2fd87a8d51bf92e3f04690687072894d762fc1aa40ad0c53a66c2bdbc01"
   },
   {
     "version": "pusaka-v2",
@@ -363,7 +368,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "15dc2c3e47afc8ca119470dda520e0174577ea2de5533c6858d4b4622eec7a1b"
+    "createdTxid": "15dc2c3e47afc8ca119470dda520e0174577ea2de5533c6858d4b4622eec7a1b",
+    "claimTxid": "ca161bb4568fd6f76446de1925eb1d92bda40f8b1c842c2bcd7ad1b5954b931e"
   },
   {
     "version": "pusaka-v2",
@@ -424,7 +430,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "e5e55c4a06927072f308897d774b865273f18b2bdb6d6dbf9f4709db6fbd656b"
+    "createdTxid": "e5e55c4a06927072f308897d774b865273f18b2bdb6d6dbf9f4709db6fbd656b",
+    "claimTxid": "8f80ba1124b698ad44e9ed73c5e1c88eaf8bc28820f8061f2ad08b429f352edc"
   },
   {
     "version": "pusaka-v2",
@@ -485,7 +492,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "3ac80b2787ad62501001c05586215ef3981dba03cc59051de97d8eabc0a82a0a"
+    "createdTxid": "3ac80b2787ad62501001c05586215ef3981dba03cc59051de97d8eabc0a82a0a",
+    "claimTxid": "11b23530fa78f288a1ff1c1f763769cc4b3f986226dcbb2c8beccf1fd87f6d2e"
   },
   {
     "version": "pusaka-v2",
@@ -546,7 +554,8 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "bced64789e0015eddcd45b2e4d740d93b5b492be6d2279ae28b6eb49f1227eab"
+    "createdTxid": "bced64789e0015eddcd45b2e4d740d93b5b492be6d2279ae28b6eb49f1227eab",
+    "claimTxid": "39915644b40b64b645f11c66459b87ad94397cf4af188d82cc73c75af9588eca"
   },
   {
     "version": "pusaka-v2",
@@ -607,6 +616,7 @@
         "label": "Layla (daughter)"
       }
     ],
-    "createdTxid": "8b9432458fca44190c18cc120dec5b7e7613290d17ce5ae44fd533e2be94bcac"
+    "createdTxid": "8b9432458fca44190c18cc120dec5b7e7613290d17ce5ae44fd533e2be94bcac",
+    "claimTxid": "d2c1cac22db6059fe51cd322df4d6b7818d8885983c02849decc591ca1925543"
   }
 ]

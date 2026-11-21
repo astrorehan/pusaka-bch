@@ -14,11 +14,13 @@ const out = resolve(here, '../../../app/src/lib/protocol/demo-plans.mainnet.json
 const at = process.argv.indexOf('--drop');
 const drop = new Set(at > 0 ? (process.argv[at + 1] ?? '').split(',').filter(Boolean) : []);
 
-// Each entry is the plan's metadata, plus the transaction that created it, which the demo links as its first step.
+// Each entry is the plan's metadata, plus the transactions that created it and opened its claim, which the demo
+// links as proof of those steps.
 const plans = records.flatMap((file) =>
   JSON.parse(readFileSync(resolve(here, file), 'utf8')).demo.map((d) => {
     const created = d.steps?.find((step) => step.step === 'create')?.txid;
-    return created ? { ...d.metadata, createdTxid: created } : d.metadata;
+    const claim = d.steps?.find((step) => step.step.startsWith('open claim'))?.txid;
+    return { ...d.metadata, ...(created && { createdTxid: created }), ...(claim && { claimTxid: claim }) };
   }),
 );
 const kept = plans.filter((metadata) => !drop.has(metadata.planAddress));

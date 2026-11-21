@@ -669,7 +669,8 @@ export async function submit(prepared: Prepared): Promise<string> {
   } catch (e) {
     if (isInputConflict(e)) {
       if (pending) throw new UnconfirmedPlanSubmission(pending);
-      if (await alreadyAccepted(expectedTxid)) return accepted();
+      // The network refused this copy because the same transaction already spent the inputs: say so plainly.
+      if (await alreadyAccepted(expectedTxid)) throw new AlreadySent(expectedTxid);
       throw new StaleReviewError();
     }
     if (isRejection(e)) {

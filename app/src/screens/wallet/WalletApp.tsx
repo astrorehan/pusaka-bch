@@ -3,6 +3,7 @@ import {
   Suspense,
   useEffect,
   useId,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -152,6 +153,10 @@ function Balance({
   const found = state && state.status !== 'UNINITIALIZED';
   const canSend = owner && state && ['ACTIVE', 'REVIEW'].includes(state.status);
   if (demo) {
+    // Everything the payout spends: the plan's balance and, during a claim, its review anchor.
+    const held = state
+      ? state.planBalanceSats + (state.status === 'REVIEW' && state.anchorMatchesRound ? state.anchorBalanceSats : 0n)
+      : 0n;
     return (
       <WalletFocus loading={loading && !state}>
         <div className="pw-balance-caption">
@@ -159,7 +164,7 @@ function Balance({
         </div>
         <div className="pw-balance-value">
           <p className="pw-balance-number num">
-            {found ? formatBch(state.spendableBalanceSats) : '—'} <span>BCH</span>
+            {found ? formatBch(held) : '—'} <span>BCH</span>
           </p>
           <p className="pw-balance-note">
             {state?.status === 'PAID_OUT'
@@ -568,7 +573,16 @@ function WalletPage() {
   const [review, setReview] = useState<{
     prepared: api.Prepared;
     back: Dialog | null;
+    /** Its history entry (location.state.review), so browser Back and Forward act on this review only. */
+    id: number;
   } | null>(null);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
   const [issue, setIssue] = useState('');
   const [busy, setBusy] = useState(false);
   const [txid, setTxid] = useState<string>(() =>
@@ -592,18 +606,29 @@ function WalletPage() {
     connectedHash && metadata?.contacts.includes(connectedHash),
   );
 
-  // The browser's Back button left the review's history entry: close the review as its own Back would.
-  const reviewEntry = Boolean(location.state?.review);
+  // The review's history entry changed. Browser Back left it: close the review as its own Back would. Browser
+  // Forward reached an entry whose review is gone: drop the mark, so the entry is the plain page again.
+  const reviewEntry = typeof location.state?.review === 'number' ? location.state.review : null;
+  const currentEntry = useRef(reviewEntry);
+  currentEntry.current = reviewEntry;
   useEffect(() => {
-    if (reviewEntry || !review) return;
-    setDialog(review.back);
-    setReview(null);
-    if (demo) void refresh(true);
-    // Only a change of history entry closes the review.
+    if (review && reviewEntry !== review.id) {
+      setDialog(review.back);
+      setReview(null);
+      if (demo) void refresh(true);
+    } else if (reviewEntry !== null && !review) {
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        replace: true,
+        state: { ...(location.state ?? {}), review: undefined },
+        preventScrollReset: true,
+      });
+    }
+    // Only a change of history entry acts here.
   }, [reviewEntry]);
 
-  function leaveReviewEntry() {
-    if (location.state?.review) navigate(-1);
+  /** Leave this review's history entry, if the browser is still on it. */
+  function leaveReviewEntry(id: number) {
+    if (currentEntry.current === id) navigate(-1);
   }
 
   function nextExample() {
@@ -624,14 +649,18 @@ function WalletPage() {
     try {
       const { prepareAction } = await import('../../lib/chain/v2');
       const prepared = await prepareAction(metadata, action, demo ? { ...options, selfFunded: true } : options);
-      setReview({ prepared, back: dialog });
+      // The visitor left this page while the review was being prepared.
+      if (!alive.current) return;
+      const id = Date.now();
+      setReview({ prepared, back: dialog, id });
       // Give the review its own history entry, so the browser's Back button closes it instead of leaving the page.
       navigate(`${location.pathname}${location.search}${location.hash}`, {
-        state: { ...(location.state ?? {}), review: true },
+        state: { ...(location.state ?? {}), review: id },
         preventScrollReset: true,
       });
       setDialog(null);
     } catch (err) {
+      if (!alive.current) return;
       setIssue(friendlyError(err));
       // Usually another visitor acted on this example a moment ago: show what is there now.
       if (demo) void refresh(true);
@@ -991,14 +1020,14 @@ function WalletPage() {
           close={() => {
             setDialog(review.back);
             setReview(null);
-            leaveReviewEntry();
+            leaveReviewEntry(review.id);
             // Someone else may have acted on this example while its review was open.
             if (demo) void refresh(true);
           }}
           done={(id) => {
             setTxid(id);
             setReview(null);
-            leaveReviewEntry();
+            leaveReviewEntry(review.id);
             if (review.back === 'send') {
               setRecipient('');
               setAmount('');

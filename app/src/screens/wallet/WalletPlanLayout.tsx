@@ -33,11 +33,22 @@ async function pickDemo(): Promise<DemoPick> {
   const order = [...DEMO_PLANS].sort(() => Math.random() - 0.5);
   let early: ((pick: DemoPick) => void) | null = null;
   const first = new Promise<DemoPick>((resolve) => (early = resolve));
+  // A ready example on the earlier revision waits a moment for a current one, then is shown.
+  const older: Snapshot[] = [];
+  let grace: number | undefined;
   const reads = order.map((plan) =>
     loadPlan(plan, { fresh: true }).then(
       (data): Snapshot => {
         const snapshot = { plan, data, error: '' };
-        if (rank(snapshot) === 0) early?.({ ...snapshot, unread: 0 });
+        const value = rank(snapshot);
+        if (value === 0) early?.({ ...snapshot, unread: 0 });
+        if (value === 1) {
+          older.push(snapshot);
+          grace ??= window.setTimeout(
+            () => early?.({ ...older[Math.floor(Math.random() * older.length)], unread: 0 }),
+            1500,
+          );
+        }
         return snapshot;
       },
       (error: unknown): Snapshot => ({ plan, data: null, error: friendlyError(error) }),
@@ -51,7 +62,7 @@ async function pickDemo(): Promise<DemoPick> {
     const unread = loaded.filter((snapshot) => !snapshot.data).length;
     return { ...ties[Math.floor(Math.random() * ties.length)], unread };
   });
-  return Promise.race([first, all]);
+  return Promise.race([first, all]).finally(() => window.clearTimeout(grace));
 }
 
 function rank({ plan, data }: Snapshot) {
