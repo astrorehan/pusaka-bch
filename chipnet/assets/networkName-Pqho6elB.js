@@ -1,0 +1,1 @@
+var e=`chipnet`,t=`/pusaka-bch/`;function n(e,n){return e===`chipnet`||e!==`mainnet`&&e!==`chipnet`?null:t+n.replace(/^\//,``)}function r(e){let n=e.toLowerCase().replace(/\/+$/,``)||`/`;return n===`/v2/plan`||n===`/plan`||n===`/try`?`${t}wallet`:`${t}${n.replace(/^\//,``)}`}function i(e,t){let r=n(e,t);return r&&location.replace(r),!!r}export{r as a,n as i,t as n,i as r,e as t};
