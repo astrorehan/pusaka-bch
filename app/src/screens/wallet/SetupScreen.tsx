@@ -627,15 +627,14 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                             setError('');
                           }}
                         />{' '}
-                        Quick test: a 1-minute waiting time and the shortest review the network allows
+                        Quick test: wait 1 minute, then a review of about 9 minutes
                       </label>
                     </div>
                   )}
                   {quickTest ? (
                     <p className="pw-setup-hint" role="note">
-                      Chipnet only, for trying the whole cycle yourself. The network clock moves with each block, so
-                      the waiting time ends at the next block or two, and the review lasts 512 seconds of network
-                      time. Expect about 20 to 30 minutes from creating the plan to paying the heirs.
+                      Only on Chipnet, for trying every step yourself. Time here moves with each new block, so
+                      plan on 20 to 30 minutes from creating the plan to paying the heirs.
                     </p>
                   ) : (
                   <div className="pw-field-grid">

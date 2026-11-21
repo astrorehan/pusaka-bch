@@ -105,15 +105,15 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(page.locator("#splash")).toHaveCount(0);
   // The demo opens on the example's story: what already happened, each with its transaction, then the visitor's turn.
   const story = page.locator(".pw-story");
-  await expect(story.getByText("Live demo · Chipnet, the test network")).toBeVisible({ timeout: 30_000 });
-  await expect(story.getByText("The owner made a plan", { exact: true })).toBeVisible();
+  await expect(story.getByText("Live on Chipnet · test BCH")).toBeVisible({ timeout: 30_000 });
+  await expect(story.getByText("Plan created", { exact: true })).toBeVisible();
   await expect(story.getByRole("link", { name: "Create your own plan" })).toBeVisible();
   // The demo needs no wallet, so it offers none.
   await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toHaveCount(0);
   await expect(page.locator(".pw-balance-number")).toContainText(/\d/, {
     timeout: 30_000,
   });
-  await expect(page.getByText("This example plan holds", { exact: true })).toBeVisible();
+  await expect(page.getByText("In this plan", { exact: true })).toBeVisible();
   await expect(page.locator(".pw-error")).toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath("wallet-live-desktop.png"),

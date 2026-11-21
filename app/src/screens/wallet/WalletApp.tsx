@@ -155,7 +155,7 @@ function Balance({
     return (
       <WalletFocus loading={loading && !state}>
         <div className="pw-balance-caption">
-          <BchMark size={21} /> This example plan holds
+          <BchMark size={21} /> In this plan
         </div>
         <div className="pw-balance-value">
           <p className="pw-balance-number num">
@@ -163,8 +163,8 @@ function Balance({
           </p>
           <p className="pw-balance-note">
             {state?.status === 'PAID_OUT'
-              ? 'Paid to the heirs. A small reserve stays at the plan address.'
-              : 'The heirs share this by the plan’s rules when the payout is sent.'}
+              ? 'Paid out to the heirs. A small reserve stays behind.'
+              : 'This gets split between the heirs when you pay out.'}
           </p>
         </div>
       </WalletFocus>
@@ -369,7 +369,7 @@ function ClaimNotice({
       : 'The owner has been inactive past the deadline';
     detail = owner
       ? testPlan
-        ? 'Anyone can now open a claim. In this quick test you can open it yourself to try the rest, or press “I’m still here” to start the waiting time again.'
+        ? 'Your wait is over, so anyone can open a claim. Since this is a quick test, you can open it yourself and try the rest. Or press “I’m still here” to restart the wait.'
         : 'Anyone can now open a claim. Press “I’m still here”, or send a payment, to start the waiting time again.'
       : 'Anyone can open a claim now, with no wallet of their own. The owner still gets the full review period to stop it.';
     if (!funding.canSelfFund) detail = claimFundingMessage(data, 'open this claim');
@@ -661,8 +661,8 @@ function WalletPage() {
       <Card>
         <EmptyState
           icon={<RefreshCw size={21} />}
-          title="We couldn’t reach the Bitcoin Cash network"
-          description="The example plans are safe on the network, but the servers that read it did not answer. Try again in a moment."
+          title="Can’t reach the Bitcoin Cash network right now"
+          description="The example plans are fine. The servers we read them from just didn’t answer. Try again in a moment."
         >
           <Button type="button" icon={<RefreshCw />} onClick={nextExample}>
             Try again
@@ -815,7 +815,7 @@ function WalletPage() {
           title={title}
           description={
             story
-              ? 'A real inheritance plan near its end. One transaction is left, and you can send it.'
+              ? 'A real plan, near the end. The last step is yours.'
               : activity
               ? 'Review transactions submitted from this browser.'
               : inherited

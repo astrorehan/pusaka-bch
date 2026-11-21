@@ -54,10 +54,10 @@ export function DemoStory({
   const created = demoCreatedTxid(metadata.planCategoryHex);
   const short = (
     <p className="pw-fine">
-      This example no longer holds enough BCH to pay its own network fee.{' '}
+      This example doesn’t have enough BCH left to cover the fee.{' '}
       {!exhausted && (
         <button type="button" className="pw-link-button" onClick={onNext}>
-          Open another example <ArrowRight aria-hidden size={14} />
+          Try another example <ArrowRight aria-hidden size={14} />
         </button>
       )}
     </p>
@@ -65,23 +65,23 @@ export function DemoStory({
 
   const steps: Step[] = [
     {
-      title: 'The owner made a plan',
-      detail: `On ${formatDate(BigInt(metadata.createdAtLocktime))}: ${heirs} heirs with their shares, three trusted contacts, a waiting time and a review period.`,
+      title: 'Plan created',
+      detail: `On ${formatDate(BigInt(metadata.createdAtLocktime))}, the owner picked ${heirs} heirs and 3 trusted contacts.`,
       state: 'done',
       txid: created,
     },
     {
-      title: 'The owner went quiet',
+      title: 'Owner went quiet',
       detail: paid || reviewing || overdue
-        ? `No payment or check-in for the whole waiting time. It is ${waiting} in this example so you can see the end; a real plan waits months.`
-        : `The waiting time runs until ${formatDate(BigInt(state.deadline))}.`,
+        ? `They didn’t send anything for ${waiting}. We kept it short for the demo. A real plan waits months.`
+        : `The wait ends on ${formatDate(BigInt(state.deadline))}.`,
       state: paid || reviewing || overdue ? 'done' : 'later',
     },
     {
-      title: overdue ? 'Your turn: open the claim' : 'A claim was opened',
+      title: overdue ? 'Your turn: open the claim' : 'Claim opened',
       detail: overdue
-        ? 'Anyone may open it now, without a wallet. It starts the review; the owner can still stop it.'
-        : 'Once the waiting time ran out, anyone could open it. That started the review.',
+        ? 'Anyone can do this, no wallet needed. The owner can still stop it during the review.'
+        : 'Once the wait was over, anyone could open a claim. Someone did.',
       state: paid || reviewing ? 'done' : overdue ? 'now' : 'later',
       txid: reviewing ? state.anchorUtxo?.txid : undefined,
       action: overdue && (canAct
@@ -89,23 +89,23 @@ export function DemoStory({
         : short),
     },
     {
-      title: 'The review ended',
+      title: 'Review ended',
       detail: paid || ready
-        ? `The owner had ${reviewTime} to press Stop claim and did not. The network enforced that time.`
+        ? `The owner had ${reviewTime} to stop the claim, and didn’t.`
         : reviewing
           ? review?.confirmed
-            ? `About ${formatDuration(BigInt(Math.max(0, review.required - review.age)))} left. The network refuses a payout before then.`
-            : 'The review clock starts once the claim is confirmed in a block.'
-          : `The owner gets ${reviewTime} to stop the claim.`,
+            ? `About ${formatDuration(BigInt(Math.max(0, review.required - review.age)))} to go. Until then, the network won’t let anyone pay out.`
+            : 'The review starts once the claim makes it into a block.'
+          : `The owner will get ${reviewTime} to stop the claim.`,
       state: paid || ready ? 'done' : reviewing ? 'now' : 'later',
     },
     {
-      title: paid ? 'The heirs were paid' : ready ? 'Your turn: pay the heirs' : 'The heirs are paid',
+      title: paid ? 'Heirs paid' : ready ? 'Your turn: pay the heirs' : 'Heirs get paid',
       detail: paid
-        ? `One transaction paid each of the ${heirs} heirs their share.`
+        ? `All ${heirs} heirs got their share in one transaction.`
         : ready
-          ? `Press Pay the heirs to review each heir’s amount, then Send transaction. One real ${mainnet ? 'BCH' : 'test BCH'} transaction; the plan pays the fee.`
-          : 'In one transaction, by their shares.',
+          ? `You’ll see what each heir gets before anything is sent. It’s one real ${mainnet ? 'BCH' : 'test BCH'} transaction, and the plan pays the fee.`
+          : 'All in one transaction, split by their shares.',
       state: paid ? 'done' : ready ? 'now' : 'later',
       txid: paid ? txid || state.planUtxo?.txid : undefined,
       action: ready && !paid && (canAct
@@ -118,12 +118,12 @@ export function DemoStory({
     <Card className="pw-story" aria-labelledby="pw-story-title">
       <header className="pw-story-heading">
         <span className="pw-story-eyebrow">
-          {mainnet ? 'Live demo · Bitcoin Cash mainnet' : 'Live demo · Chipnet, the test network'}
+          {mainnet ? 'Live on Bitcoin Cash' : 'Live on Chipnet · test BCH'}
         </span>
-        <h2 id="pw-story-title">{paid ? `This plan paid its ${heirs} heirs` : `Pay ${heirs} heirs from a real inheritance plan`}</h2>
+        <h2 id="pw-story-title">{paid ? `All ${heirs} heirs have been paid` : 'Pay out a real inheritance'}</h2>
         <p>
-          A sample family’s plan, live on {mainnet ? 'Bitcoin Cash' : 'Chipnet'}. Its owner set it up, then went quiet.
-          You play the family. No wallet needed{mainnet ? ': the plan pays the network fee from its own BCH' : ''}.
+          The family is made up, but the {mainnet ? 'BCH is real' : 'plan is real'}. The owner stopped using this wallet,
+          so now the heirs can be paid. You don’t need a wallet, and the plan covers the fee.
         </p>
       </header>
       <ol className="pw-story-steps">
@@ -149,9 +149,9 @@ export function DemoStory({
             </Button>
           ) : (
             <>
-              <span>Every example here has paid its heirs.</span>
+              <span>All the examples have been paid out.</span>
               <Button type="button" variant="secondary" icon={<RefreshCw />} onClick={() => window.location.reload()}>
-                Check for new examples
+                Check for new ones
               </Button>
               {mainnet && OTHER_APP && (
                 <a href={`${OTHER_APP}wallet/demo`}>
@@ -164,7 +164,7 @@ export function DemoStory({
       )}
       <footer className="pw-story-footer">
         <span>
-          Want to start from the beginning?{' '}
+          Want to try it from the start?{' '}
           <Link to="/wallet/new">Create your own plan</Link> with Paytaca or Cashonize.
         </span>
         <Link to="/wallet">

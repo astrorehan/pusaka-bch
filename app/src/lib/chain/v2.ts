@@ -339,9 +339,9 @@ export async function prepareAction(
   if (!state.planUtxo)
     throw new Error("The plan state was not found on this network.");
   if ((action === "open" || action === "finalize") && state.status === "PAID_OUT")
-    throw new Error("This plan has already paid its heirs, so nothing was sent. Someone else may have sent the payout a moment ago.");
+    throw new Error("These heirs were already paid, probably by someone else a moment ago. Nothing was sent.");
   if (action === "open" && state.status === "REVIEW")
-    throw new Error("This claim is already open, so nothing was sent. Someone else may have opened it a moment ago.");
+    throw new Error("This claim is already open, probably by someone else a moment ago. Nothing was sent.");
   const titles: Record<Action, string> = {
     send: "Send BCH",
     checkIn: "I’m still here",

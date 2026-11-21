@@ -342,7 +342,7 @@ export function TransactionReview({
         // Nothing to sign: rebuild at once. Usually someone else just sent this step, and the rebuild says so.
         try {
           setRevised(await transaction.rebuild());
-          setError('The plan changed on the network a moment ago, so this review was refreshed. Check it again before sending.');
+          setError('This plan changed a moment ago, so we updated the details. Take another look before sending.');
         } catch (rebuildError) {
           setEnded(true);
           setError(friendlyError(rebuildError));

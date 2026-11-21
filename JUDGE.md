@@ -51,9 +51,9 @@ already happened on mainnet, and leaves the last one to you.
 
 | Do this | What you should see |
 |---|---|
-| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | **Pay 6 heirs from a real inheritance plan**: the plan's story as steps. *The owner made a plan*, *went quiet*, *a claim was opened*, *the review ended*, each done step with a link to its transaction, then **Your turn: pay the heirs** |
+| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | **Pay out a real inheritance**: what already happened, step by step. *Plan created*, *Owner went quiet*, *Claim opened*, *Review ended*, with links to their transactions, then **Your turn: pay the heirs** |
 | Press **Pay the heirs** | A review sheet listing each of the six heirs by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet |
-| Review the six payments, then press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The last step turns into **The heirs were paid** |
+| Review the six payments, then press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The last step turns into **Heirs paid** |
 | Open **View transaction** | One transaction, one output per heir: pot × share ÷ 120, rounded down |
 | Press **Open the next example** | Another example plan with its payout ready |
 
