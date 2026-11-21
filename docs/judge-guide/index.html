@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guide for judges · Pusaka docs</title>
+    <meta name="description" content="Guides and technical documentation for the Pusaka inheritance wallet on Bitcoin Cash." />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+  </head>
+  <body>
+    <a class="docs-skip" href="#docs-main">Skip to content</a>
+      <header class="docs-header">
+        <div class="docs-header__inner">
+          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
+          <div class="docs-header__links">
+            <button id="docs-theme" type="button" hidden>Dark theme</button>
+            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/" aria-current="page">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></aside>
+        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/" aria-current="page">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></details>
+        <main id="docs-main" tabindex="-1" class="docs-article">
+          <header class="docs-article__heading"><h1 id="pusaka-guide-for-judges">Pusaka: guide for judges</h1>
+</header>
+  <nav class="docs-toc docs-toc--desktop" aria-label="On this page"><p>On this page</p><ul><li class="docs-toc__h2"><a href="#pusaka-in-one-minute">Pusaka in one minute</a></li><li class="docs-toc__h2"><a href="#the-judge-path-one-minute-no-wallet">The judge path: one minute, no wallet</a></li><li class="docs-toc__h2"><a href="#the-owner-path-five-minutes-with-paytaca-or-cashonize">The owner path: five minutes, with Paytaca or Cashonize</a></li><li class="docs-toc__h2"><a href="#the-whole-cycle-yourself-about-30-minutes-on-chipnet">The whole cycle yourself: about 30 minutes, on Chipnet</a></li><li class="docs-toc__h2"><a href="#transactions-you-can-open">Transactions you can open</a></li><li class="docs-toc__h2"><a href="#what-the-network-refuses">What the network refuses</a></li><li class="docs-toc__h2"><a href="#current-limits">Current limits</a></li><li class="docs-toc__h2"><a href="#solidcash-implementation">SolidCash implementation</a></li><li class="docs-toc__h2"><a href="#before-and-after-blaze">Before and after BLAZE</a></li><li class="docs-toc__h2"><a href="#if-something-doesnt-work">If something doesn't work</a></li><li class="docs-toc__h2"><a href="#good-to-know">Good to know</a></li></ul></nav>
+    <details class="docs-toc docs-toc--mobile"><summary>On this page</summary><nav aria-label="On this page"><ul><li class="docs-toc__h2"><a href="#pusaka-in-one-minute">Pusaka in one minute</a></li><li class="docs-toc__h2"><a href="#the-judge-path-one-minute-no-wallet">The judge path: one minute, no wallet</a></li><li class="docs-toc__h2"><a href="#the-owner-path-five-minutes-with-paytaca-or-cashonize">The owner path: five minutes, with Paytaca or Cashonize</a></li><li class="docs-toc__h2"><a href="#the-whole-cycle-yourself-about-30-minutes-on-chipnet">The whole cycle yourself: about 30 minutes, on Chipnet</a></li><li class="docs-toc__h2"><a href="#transactions-you-can-open">Transactions you can open</a></li><li class="docs-toc__h2"><a href="#what-the-network-refuses">What the network refuses</a></li><li class="docs-toc__h2"><a href="#current-limits">Current limits</a></li><li class="docs-toc__h2"><a href="#solidcash-implementation">SolidCash implementation</a></li><li class="docs-toc__h2"><a href="#before-and-after-blaze">Before and after BLAZE</a></li><li class="docs-toc__h2"><a href="#if-something-doesnt-work">If something doesn't work</a></li><li class="docs-toc__h2"><a href="#good-to-know">Good to know</a></li></ul></nav></details>
+  <article class="docs-prose"><p>A three-minute read: what Pusaka is, the one-minute judge path, and where to check every claim. Everything else
+is in the <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/README.md">README</a>.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web app</strong> (Bitcoin Cash mainnet)</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/">https://astrorehan.github.io/pusaka-bch/</a></td>
+</tr>
+<tr>
+<td><strong>Judge path</strong> (one real mainnet transaction, about a minute, no wallet needed)</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/wallet/demo">https://astrorehan.github.io/pusaka-bch/wallet/demo</a></td>
+</tr>
+<tr>
+<td><strong>The same app on Chipnet</strong> (test network)</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/">https://astrorehan.github.io/pusaka-bch/chipnet/</a> · <a href="https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo">its demo</a></td>
+</tr>
+<tr>
+<td><strong>Presentation</strong></td>
+<td><a href="https://docs.google.com/presentation/d/1xBfLkjmP-jgbWSFdYGgpf9XMxtuWoqXeuoXi-L64PpE/edit?usp=sharing">Google Slides</a> (<a href="/pusaka-bch/docs/Pusaka-BCH-BLAZE-2026.pdf">PDF copy</a>), also linked from the banner at the top of every page of the app</td>
+</tr>
+<tr>
+<td><strong>Code now</strong></td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness">BLAZE release branch</a></td>
+</tr>
+<tr>
+<td><strong>Code before BLAZE</strong></td>
+<td>tag <a href="https://github.com/astrorehan/pusaka-bch/tree/blaze-start"><code>blaze-start</code></a> and <a href="https://github.com/astrorehan/pusaka">Pusaka on Monad</a></td>
+</tr>
+<tr>
+<td><strong>Demo before BLAZE</strong></td>
+<td><a href="https://pusaka-faraid.vercel.app">pusaka-faraid.vercel.app</a> (the Monad version)</td>
+</tr>
+<tr>
+<td><strong>Entered for</strong></td>
+<td>BCH BLAZE 2026 Mainnet Track and the Best SolidCash Application bounty</td>
+</tr>
+<tr>
+<td><strong>Prize and donation address</strong> (CashTokens)</td>
+<td><code>bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pusaka-in-one-minute">Pusaka in one minute</h2>
+<p><strong>What happens to your BCH when you die?</strong> If nobody has your keys, the coins are lost for good. If somebody has
+them, they can take everything today.</p>
+<p>Pusaka is a Bitcoin Cash wallet with the inheritance plan built in.</p>
+<ol>
+<li><strong>Set it up once.</strong> Name your heirs and their shares (equal, your own split, or Islamic inheritance, faraid),
+three trusted contacts, a waiting time and a review period.</li>
+<li><strong>Use it like any wallet.</strong> Send and receive, and swap on Chipnet (mainnet has no qualified pair yet). Every payment you send proves you are still here and
+restarts the waiting time. No reminders to press, unless you go a long time without paying anyone.</li>
+<li><strong>If you go quiet,</strong> anyone can open a claim once the waiting time has passed, or two of your three contacts
+can open one sooner. The revised plans enforce the review period even when the owner pays the payout fee.
+<strong>Stop claim</strong>, or a payment you send, ends the claim and returns the plan to active use.</li>
+<li><strong>After the review,</strong> anyone can press <strong>Pay the heirs</strong>. When the plan covers the network fee and every heir’s
+minimum payment, a visitor can submit the payout without a wallet.</li>
+</ol>
+<p>The same plan covers a lost key: if the owner can no longer sign, two contacts can open a claim, and the coins
+reach the people named instead of being lost. A second wallet of the owner's own can be one of them.</p>
+<p>No company holds the coins and no server stores the plan. Four <a href="https://solidcash.org">SolidCash</a> contracts do the
+work: the plan (<a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaAssetPlan.scash"><code>PusakaAssetPlan</code></a>) with its state in a CashTokens NFT,
+its receive address (<a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2Inbox.scash"><code>PusakaV2Inbox</code></a>), the review clock
+(<a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2ReviewAnchor.scash"><code>PusakaV2ReviewAnchor</code></a>, a BIP68 relative time lock) and a token vault
+(<a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaTokenVault.scash"><code>PusakaTokenVault</code></a>) that keeps swapped tokens under the same rules.</p>
+<h2 id="the-judge-path-one-minute-no-wallet">The judge path: one minute, no wallet</h2>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>What you should see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You play the family of an owner who went quiet. Inheritance takes time by design: a waiting time, then a review</td>
+<td></td>
+</tr>
+<tr>
+<td>the owner can use to stop the claim. So the demo starts near the end of a real plan, where those steps have</td>
+<td></td>
+</tr>
+<tr>
+<td>already happened on mainnet, and leaves the last one to you.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>What you should see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open the <a href="https://astrorehan.github.io/pusaka-bch/wallet/demo">demo</a></td>
+<td><strong>Pay out a real inheritance</strong>: what already happened, step by step. <em>Plan created</em> and <em>Claim opened</em> (each links to its transaction), <em>Owner went quiet</em> and <em>Review ended</em> (no transaction of their own, just time passing), then <strong>Your turn: pay the heirs</strong></td>
+</tr>
+<tr>
+<td>Press <strong>Pay the heirs</strong></td>
+<td>A review sheet listing each of the six heirs by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet</td>
+</tr>
+<tr>
+<td>Review the six payments, then press <strong>Send transaction</strong></td>
+<td>&quot;Transaction accepted by the network&quot; with a <strong>View transaction</strong> link. The last step turns into <strong>Heirs paid</strong></td>
+</tr>
+<tr>
+<td>Open <strong>View transaction</strong></td>
+<td>One transaction, one output per heir: pot × share ÷ 120, rounded down</td>
+</tr>
+<tr>
+<td>Press <strong>Open the next example</strong></td>
+<td>Another example plan, one with its payout ready whenever there is one</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each example pays out once, so the demo keeps a pool of identical ones (four <code>assets-2</code> examples, plus six
+earlier <code>assets-1</code> ones as fallbacks) and opens one that is ready. If two people pay the same example at the
+same moment, the network accepts only one payout; the other sees that it was just paid and is offered the next
+example. If the review sheet says the plan changed, check it again before sending; if the heirs were already
+paid, press <strong>Back</strong> and open the next example. If every example has been paid, the demo says so and links to
+the same steps on Chipnet.
+<a href="/pusaka-bch/docs/network-record/#mainnet">Mainnet example records</a></p>
+<h2 id="the-owner-path-five-minutes-with-paytaca-or-cashonize">The owner path: five minutes, with Paytaca or Cashonize</h2>
+<ol>
+<li>Open <a href="https://astrorehan.github.io/pusaka-bch/new">Create a plan</a> and connect your wallet with the QR code
+(WizardConnect).</li>
+<li>Add heirs and their shares, then three trusted contacts. Use ordinary receive addresses (<code>bitcoincash:q…</code>).
+Tip: use other receive addresses of your own wallet, and every payout comes back to you.</li>
+<li>Choose the waiting time and the review period (at least a day each), and a starting amount.</li>
+<li>Review and approve in your wallet. If your coins are spread over several addresses, press <strong>Prepare wallet</strong>
+first: a separate transaction that gathers them at your first receive address.</li>
+<li>Save the plan link when the app asks. Then try <strong>Send</strong> (the waiting time moves forward), <strong>Receive</strong> and
+<strong>Collect</strong>, <strong>I'm still here</strong>, <strong>Edit inheritance rules</strong>, and <strong>Take available BCH back</strong> from the
+<strong>⋯</strong> menu.</li>
+</ol>
+<p>Every review sheet shows each output and fee before your wallet is asked to sign. The wallet signs only; the app
+broadcasts the exact transaction you reviewed and checks its ID.</p>
+<h2 id="the-whole-cycle-yourself-about-30-minutes-on-chipnet">The whole cycle yourself: about 30 minutes, on Chipnet</h2>
+<p>A plan you create on mainnet needs at least a day for each of the waiting time and the review, so that a short
+absence never costs an owner their savings. (The demo's examples were made by our script with a 1-minute wait.)
+To run every step yourself, use the <a href="https://astrorehan.github.io/pusaka-bch/chipnet/wallet/new?quick=1">quick test plan on Chipnet</a>
+with test BCH from a Chipnet faucet:</p>
+<ol>
+<li>Create the plan as above, with <strong>Quick test</strong> ticked: a 1-minute waiting time and a 512-second review, the
+shortest the network can enforce.</li>
+<li>Wait for the waiting time to pass. The network clock moves with each block, so this takes a block or two.</li>
+<li>Press <strong>Open the claim</strong> on your plan. The review starts once the claim is confirmed in a block.</li>
+<li>When the review ends, press <strong>Pay the heirs</strong>. One transaction pays every heir.</li>
+</ol>
+<p>Expect about 20 to 30 minutes in all, depending on how quickly blocks arrive.</p>
+<h2 id="transactions-you-can-open">Transactions you can open</h2>
+<p><strong>Revised mainnet review anchor (<code>assets-2</code>), 20 November 2026.</strong> The node refused a payout sponsored and
+signed by the owner before the review matured. The same owner then stopped the claim and returned the plan
+to active use. When a second review matured, a wallet-free transaction paid 887, 4,141 and 2,070 sats to the three heirs.
+<a href="https://explorer.bch.ninja/tx/ce41df221e15a53e98bb9a2f3a827cc522a05d9b382533632a08065cde0660b6">New plan</a> · <a href="https://explorer.bch.ninja/tx/a723442a22bd6037dfba1f1ff7db4f466d522d3120f473df41e33843a7fa74fb">Stop claim</a> · <a href="https://explorer.bch.ninja/tx/af544d637c5e7d271a6334d53a9b82ae928ab1c0223cac6fd16632fd550bf011">Mature payout</a> · <a href="/pusaka-bch/docs/network-record/#revised-review-anchor-assets-2">Full record</a></p>
+<p><strong>Earlier mainnet release (<code>assets-1</code>), 20 November 2026.</strong> The lifecycle used the same transaction builders as the app. The network
+refused an early payout with <code>non-BIP68-final</code>. The owner stopped that claim. Contacts opened a second review,
+then a self-funded transaction paid all three heirs once the anchor matured.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>What happened</th>
+<th>Transaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Created the wallet with 20,000 sats</td>
+<td><a href="https://explorer.bch.ninja/tx/c6f33435902959af93d2e557b546a2a58ed8e9b193a418129342f9c23605eaad"><code>c6f33435…eaad</code></a></td>
+</tr>
+<tr>
+<td>Collected 7,600 sats without moving the inactivity deadline</td>
+<td><a href="https://explorer.bch.ninja/tx/091172af383a4f80ae7caaa9fa5b41be028be0d69d78ea0baca3ccdd0c19d07d"><code>091172af…d07d</code></a></td>
+</tr>
+<tr>
+<td>Sent 2,000 sats and renewed the inactivity deadline</td>
+<td><a href="https://explorer.bch.ninja/tx/b15d847046b0ea643e1fa72273b6166e6b53e6260ba195437a9b1eaf00a92c47"><code>b15d8470…2c47</code></a></td>
+</tr>
+<tr>
+<td>The owner stopped the first claim</td>
+<td><a href="https://explorer.bch.ninja/tx/55c065a1577a58ad50015f96e285875d239f3bc73e34ba1b6677ce8c5e6640de"><code>55c065a1…40de</code></a></td>
+</tr>
+<tr>
+<td>Contacts opened a second claim</td>
+<td><a href="https://explorer.bch.ninja/tx/3560d7d3ec564b201153836ee52e08d9a19ebc0637b85846f2df68b3a331bf19"><code>3560d7d3…bf19</code></a></td>
+</tr>
+<tr>
+<td>The mature payout paid wife 2,575, son 12,016 and daughter 6,008 sats</td>
+<td><a href="https://explorer.bch.ninja/tx/ad0e1a36ddf25e510ecb9901925953007a0d922d3253a220c4d36e1fc7634689"><code>ad0e1a36…4689</code></a></td>
+</tr>
+</tbody>
+</table></div>
+<p>The full sequence and six demo plans are in the <a href="/pusaka-bch/docs/network-record/#mainnet">mainnet record</a>.</p>
+<p><strong>Chipnet, 19 November 2026, 15:39 to 16:07 UTC: the whole v2 lifecycle on one plan.</strong> Built by
+<a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/scripts/v2/live.ts"><code>contract/scripts/v2/live.ts</code></a> with the same transaction builders the app uses.
+Heirs: wife 3, son 14, daughter 7 (of 24). Review period: 512 seconds.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>What happened</th>
+<th>Transaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wallet created (315 bytes)</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/719ac210800e80ce27d0f7557d37165f29857bbc7489ef96eb47fe94eba6615f"><code>719ac210…615f</code></a></td>
+</tr>
+<tr>
+<td>Someone paid 3,100 sats to its receive address</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/1b67d2e56e05240fb1e7ff324908bfa2e926979859cd265e3700e1f5e8235abb"><code>1b67d2e5…5abb</code></a></td>
+</tr>
+<tr>
+<td>Collected into the plan; the deadline did not move (a receipt is not proof of life)</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/a16c8567566be68be3c5c13625bf853f5986357fbef6b5165900971e7495c90b"><code>a16c8567…c90b</code></a></td>
+</tr>
+<tr>
+<td>The owner sent 1,000 sats; the deadline moved 30 days forward</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/fff02ca0aa5302dfce4657f647d87e6a9b815fa976b28df21da26db594818c9d"><code>fff02ca0…8c9d</code></a></td>
+</tr>
+<tr>
+<td>Contact 1 confirmed (no payout right yet)</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/c42d548c67ea6fb5169af9b71b78d52405c381003f5fc7f63e9f758ad46028b5"><code>c42d548c…28b5</code></a></td>
+</tr>
+<tr>
+<td>Contact 2 confirmed: the claim opened and the review began</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/09e2d8303236ffdf7474cf74d96dc62ed11c4fa5466d827c7c4b9892cb3f62e0"><code>09e2d830…62e0</code></a></td>
+</tr>
+<tr>
+<td>A payout sent at once was <strong>refused by the network</strong>: <code>non-BIP68-final (code 64)</code></td>
+<td>(rejected, never mined)</td>
+</tr>
+<tr>
+<td>The owner stopped the claim; the earlier confirmations no longer count</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/3b84434beae5db7f4d2acb653426502ce899586784a8e4c9ce773e8692b3df02"><code>3b84434b…df02</code></a></td>
+</tr>
+<tr>
+<td>Contacts 2 and 3 confirmed again: a second claim</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/aaa123ba3a6fc46f8f22a7666bbf51cc421628b410d442315d9a7791afe0b1af"><code>aaa123ba…b1af</code></a>, <a href="https://chipnet.chaingraph.cash/tx/b591bb97b3f488f65f7c0d67e5b93a61c6d17a77bc1d411d987503a12b8f3e0f"><code>b591bb97…3e0f</code></a></td>
+</tr>
+<tr>
+<td>After the review, the heirs were paid: wife 887, son 4,141, daughter 2,070 sats</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/c6076a16f29fe42fb7da5187bfab169a457c2110d9656f386a1c1560f6be65e4"><code>c6076a16…65e4</code></a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Every row, with sizes and fees, and the example plans: <a href="/pusaka-bch/docs/network-record/"><code>docs/proofs/v2-live.md</code></a>.</p>
+<p><strong>From the app itself, on a phone.</strong> On 18 November a Paytaca phone, connected over WizardConnect, created a
+wallet (<a href="https://chipnet.chaingraph.cash/tx/051af5d7d96f3777991795511c71fa2d93689a239e6ff879bf1c8af2af5dd9b9"><code>051af5d7…d9b9</code></a>),
+refused one send and approved the next (<a href="https://chipnet.chaingraph.cash/tx/b31fe96bbe819162b35e62b77e05366fbbedd19aa26a4991f8be7ffdbdc2bdb1"><code>b31fe96b…bdb1</code></a>).
+On 19 November an example plan was paid to its six heirs by pressing <strong>Pay the heirs</strong> in the app, with no wallet
+connected (<a href="https://chipnet.chaingraph.cash/tx/dd572f2a005347997d305dde002ddda7f6df465d451a70c029827e11419e6bd0"><code>dd572f2a…6bd0</code></a>).</p>
+<p><strong>Tokens.</strong> A swap on a real Cauldron pool put the tokens straight into the plan's token vault, and after a
+claim the tokens were paid to the heirs by share
+(<a href="/pusaka-bch/docs/app-and-assets/#live-chipnet-evidence">record</a>: swap
+<code>e2f4f53e…a32b</code>, token payout <code>edd44574…5f67</code>).</p>
+<p><strong>Earlier v1 mainnet proof.</strong> A v1 plan was created in the web app and signed in Paytaca on 17 November.
+<a href="https://explorer.bch.ninja/tx/4e5b2fd4cdb51a96d0ed00c423d8e0a9b5eeabb1c2dfadce4ce3ee8f70911c3d"><code>4e5b2fd4…1c3d</code></a></p>
+<h2 id="what-the-network-refuses">What the network refuses</h2>
+<p>Each row is checked by a test that builds the attacker's transaction and expects it to fail, under the BCH 2026
+limits and a strict BIP68 verifier (<a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/contract/test/v2/"><code>contract/test/v2/</code></a>).</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Someone tries to</th>
+<th>Result</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pay out one second before the review ends</td>
+<td>Refused: the anchor is not old enough</td>
+<td><code>rejects backdated openClaim locktime, unconfirmed anchor, insufficient MTP shift, and elapsed = delay - 1s</code></td>
+</tr>
+<tr>
+<td>Pay out early with the owner paying the fee on the revised anchor</td>
+<td>Refused until BIP68 review matures</td>
+<td><code>keeps owner cancellation available and applies the same review time to an owner-sponsored payout</code></td>
+</tr>
+<tr>
+<td>Use owner cancellation to produce a paid, stale, or still-approved plan</td>
+<td>Refused by the revised anchor</td>
+<td><code>accepts cancellation only into the next ACTIVE round with cleared approvals</code></td>
+</tr>
+<tr>
+<td>Open a claim with a backdated time, or skip the review with a wrong sequence</td>
+<td>Refused</td>
+<td><code>rejects non-version-2 tx, disabled/height-mode/too-short sequence, and open+finalize in same tx</code></td>
+</tr>
+<tr>
+<td>Swap an heir's address, or use a fake or stale claim marker</td>
+<td>Refused</td>
+<td><code>rejects substituted, plain-BCH, wrong-plan, wrong-round anchors, repeated openClaim, and hijacked payout</code></td>
+</tr>
+<tr>
+<td>Vote twice as the same contact, replay a vote, forge the policy, or skim the receive address</td>
+<td>Refused</td>
+<td><code>rejects all adversarial attack vectors (fee-reserve siphon, contact double-vote/replay, substitution, policy forgery, CLTV bypass, inbox skim)</code></td>
+</tr>
+<tr>
+<td>Stop a claim without being the owner</td>
+<td>Refused; the owner's stop works and restarts the clock</td>
+<td><code>enforces owner cancelClaim (rejects stranger, stops old finalize after delay, restarts fresh round 2 delay, allows ownerWithdraw)</code></td>
+</tr>
+<tr>
+<td>Take part of the fee reserve as change while paying out</td>
+<td>Refused</td>
+<td><code>rejects a caller taking part of the review fee reserve as a self-funded change output</code></td>
+</tr>
+<tr>
+<td>Redirect a payment, forge the state NFT or overcharge a collection</td>
+<td>Refused</td>
+<td><code>rejects adversarial attacks: recipient substitution, container dust violation, backdated locktime regression, forged NFTs, inbox skimming, excessive self-sweep fee, double container merge, and token junk</code></td>
+</tr>
+<tr>
+<td>Swap through a fake pool, or with an expired quote</td>
+<td>Refused</td>
+<td><code>rejects expired quotes, fake pool scripts, zero minimum, wrong network metadata and old BCH-only plans</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>And what must work: a review that both a contact quorum and inactivity must respect, ten heirs at once, money that
+arrives after a payout or after the owner left still reaching the heirs, and a fresh browser restoring a plan from
+its link. Run them yourself (Node 24):</p>
+<pre><code class="language-sh">cd contract &amp;&amp; npm install &amp;&amp; npm test     # all contract tests, v1 and v2
+cd app &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; npm run test:ui
+</code></pre>
+<h2 id="current-limits">Current limits</h2>
+<ul>
+<li><strong>Earlier plan addresses.</strong> The app still opens plans created with the earlier review anchor and labels them.
+Those contracts allow an early payout signed and sponsored by the owner to the registered heirs. The revised
+anchor enforces the delay for owner-sponsored payouts on newly created <code>assets-2</code> plans.</li>
+<li><strong>Token inheritance after taking BCH back.</strong> Token payouts follow a completed BCH payout. If the owner takes
+back the available BCH and leaves tokens in the vault, the plan needs a BCH top-up before the heirs can claim them.</li>
+</ul>
+<h2 id="solidcash-implementation">SolidCash implementation</h2>
+<p>The wallet integration led to an SDK signing report and a patch for funded split and merge. The upstream issue
+includes the stateful signing reproduction. The pull request covers the remaining split and merge paths with
+regression tests. <a href="https://github.com/solidcash/solidcash/issues/3">Issue #3</a> · <a href="https://github.com/solidcash/solidcash/pull/7">Pull request #7</a></p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Where it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stateful Solidity-style contract with structs, state variables, events and modifiers</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/Pusaka.scash">v1 plan</a></td>
+</tr>
+<tr>
+<td>Input and output introspection, NFT state transitions, policy hashing and a bounded payout loop</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaAssetPlan.scash">v2 asset plan</a></td>
+</tr>
+<tr>
+<td>Time-based BIP68 review and cancellation that advances the round and clears approvals</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2ReviewAnchor.scash">Review anchor</a></td>
+</tr>
+<tr>
+<td>Contract co-spends that bind receipts and token distributions to a plan</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2Inbox.scash">Receive inbox</a> and <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaTokenVault.scash">token vault</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="before-and-after-blaze">Before and after BLAZE</h2>
+<p>BLAZE hacking started on <strong>14 Nov 2026, 14:00 UTC</strong>.</p>
+<p><strong>Before</strong> (made earlier, declared here):</p>
+<ul>
+<li><strong>Pusaka on Monad</strong>, an earlier hackathon entry: <a href="https://github.com/astrorehan/pusaka">code</a> (last commit
+24 Oct 2026) and <a href="https://pusaka-faraid.vercel.app">demo</a>. Solidity contracts, a faraid calculator and the
+flower logo. The same idea on an EVM chain: an EIP-7702 wallet the owner keeps using, 2 of 3 witnesses or
+12 months of inactivity to trigger, a challenge window that any sign of life cancels, then a faraid payout.
+It ran on Monad testnet only.</li>
+<li><strong>This repository at tag <a href="https://github.com/astrorehan/pusaka-bch/tree/blaze-start"><code>blaze-start</code></a></strong> (commit
+<code>8b59ba5</code>, 14 Nov 02:30 UTC): a README, the licence and <code>prototype/</code>, a CashScript covenant with a 12-case test
+that ran only in a simulator.</li>
+<li><strong>Preparation notes</strong> in <a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/Preparation/"><code>Preparation/</code></a>, committed at 14:28 UTC on 14 Nov; no code.</li>
+</ul>
+<p><strong>Reused from before:</strong> the product design (a wallet you keep using, witnesses, a challenge window, a faraid
+payout), the faraid rules and the flower logo. None of its contracts run on Bitcoin Cash: BCH has no EIP-7702 and
+no accounts, so every part below was built again for UTXOs during BLAZE.</p>
+<p><strong>Built during BLAZE</strong> (every commit after <code>blaze-start</code>):</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The first SolidCash plan contract (v1: create, I'm still here, take back, send to heirs), its Chipnet lifecycle and a mainnet plan created in Paytaca</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/Pusaka.scash"><code>contract/contracts/Pusaka.scash</code></a></td>
+</tr>
+<tr>
+<td>The v2 wallet contracts: spendable balance, receive address, trusted contacts, the BIP68 review, token vault and Cauldron swaps</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/contract/contracts/"><code>contract/contracts/</code></a></td>
+</tr>
+<tr>
+<td>The tests for all of them</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/contract/test/"><code>contract/test/</code></a></td>
+</tr>
+<tr>
+<td>A fix to the SolidCash SDK so a wallet can sign stateful calls</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/contract/patches/"><code>contract/patches/</code></a></td>
+</tr>
+<tr>
+<td>The web app: landing, How it works, wallet, setup, inheritance, swap, WizardConnect</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/app/"><code>app/</code></a></td>
+</tr>
+<tr>
+<td>The live runner and its records</td>
+<td><a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/contract/scripts/v2/"><code>contract/scripts/v2/</code></a></td>
+</tr>
+<tr>
+<td>Design rules, UX notes, the SolidCash developer log and feedback</td>
+<td><a href="/pusaka-bch/docs/"><code>docs/</code></a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Check it: <code>git diff --stat blaze-start HEAD</code>.</p>
+<h2 id="if-something-doesnt-work">If something doesn't work</h2>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An input was spent during review</td>
+<td>Press <strong>Refresh transaction review</strong> to prepare from the current state. In the demo, you can also open the next example</td>
+</tr>
+<tr>
+<td>The broadcast reply was lost during setup or a rules edit</td>
+<td>Open <strong>Recover a plan</strong> in the wallet and press <strong>Check submission</strong>. The app keeps the recovery file while the network status is uncertain</td>
+</tr>
+<tr>
+<td>&quot;The network clock has not reached this step yet.&quot;</td>
+<td>The network's clock runs behind real time. Wait a few minutes and press <strong>Refresh</strong></td>
+</tr>
+<tr>
+<td>&quot;Could not reach the Bitcoin Cash network.&quot;</td>
+<td>The app could not reach a public BCH server. Press <strong>Refresh</strong></td>
+</tr>
+<tr>
+<td>A <strong>Testnet</strong> badge at the top</td>
+<td>You are in the Chipnet app. The mainnet app is at the site root</td>
+</tr>
+<tr>
+<td>The wallet does not connect</td>
+<td>Use Paytaca, or Cashonize 0.9.0 or later, on the same network as the app, and scan the QR code</td>
+</tr>
+<tr>
+<td>&quot;Cancelled in your wallet. Nothing was sent.&quot;</td>
+<td>You declined in the wallet. Press the button again</td>
+</tr>
+<tr>
+<td><strong>Collect</strong> asks your wallet to approve</td>
+<td>A single small payment cannot pay its own fee under the contract's cap, so your wallet pays it and the plan keeps every satoshi received</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="good-to-know">Good to know</h2>
+<ul>
+<li><strong>Keep the plan link.</strong> Every claim and payout needs the plan's rules, which travel in the link after the <code>#</code>
+and never reach a server. Pusaka keeps no copy. The BCH stays safe in the contracts without the link, but
+nobody can act on it.</li>
+<li><strong>Fees.</strong> Opening a claim and paying the heirs each cost about 4,000 to 5,000 satoshis, taken from the plan.
+Owner actions cost a similar fee from the owner's wallet or the plan. Pusaka takes no fee of its own today.</li>
+<li><strong>The network clock runs about an hour behind.</strong> Plans follow the median time of the last 11 blocks, so every
+date in the app says &quot;about&quot;.</li>
+<li><strong>Up to 10 heirs</strong>, each with an ordinary BCH address, and each share at least 546 satoshis when paid.</li>
+<li><strong>Faraid is worked out in the browser.</strong> The contracts enforce the resulting numbers, not the rules of faraid.</li>
+<li><strong>It is not a legal will.</strong> It moves only the BCH and tokens held by the plan.</li>
+<li>More: <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/README.md">README</a>, the <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/DESIGN.md">design rules</a>, the
+<a href="/pusaka-bch/docs/solidcash-log/">SolidCash developer log</a> and the <a href="/pusaka-bch/docs/solidcash-feedback/">feedback for SolidCash</a>.</li>
+</ul>
+
+    <p class="docs-source"><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/JUDGE.md">View source on GitHub</a></p>
+  </article>
+        </main>
+      </div>
+  </body>
+</html>

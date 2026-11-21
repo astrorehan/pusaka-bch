@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inheritance wallet · Pusaka docs</title>
+    <meta name="description" content="Guides and technical documentation for the Pusaka inheritance wallet on Bitcoin Cash." />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+  </head>
+  <body>
+    <a class="docs-skip" href="#docs-main">Skip to content</a>
+      <header class="docs-header">
+        <div class="docs-header__inner">
+          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
+          <div class="docs-header__links">
+            <button id="docs-theme" type="button" hidden>Dark theme</button>
+            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/" aria-current="page">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></aside>
+        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/" aria-current="page">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></details>
+        <main id="docs-main" tabindex="-1" class="docs-article">
+          <header class="docs-article__heading"><h1 id="bch-inheritance-wallet-architecture">BCH inheritance wallet architecture</h1>
+</header>
+  <nav class="docs-toc docs-toc--desktop" aria-label="On this page"><p>On this page</p><ul><li class="docs-toc__h2"><a href="#constraints-and-existing-evidence">Constraints and existing evidence</a></li><li class="docs-toc__h2"><a href="#candidate-construction">Candidate construction</a></li><li class="docs-toc__h2"><a href="#two-immediate-engineering-gates">Two immediate engineering gates</a></li><li class="docs-toc__h3"><a href="#a-prove-the-wallet-benefit-before-changing-the-screens">A. Prove the wallet benefit before changing the screens</a></li><li class="docs-toc__h3"><a href="#b-anchor-the-review-delay-to-the-actual-claim-transition">B. Anchor the review delay to the actual claim transition</a></li><li class="docs-toc__h2"><a href="#authorization-and-convenience-options">Authorization and convenience options</a></li><li class="docs-toc__h2"><a href="#assets-and-trading">Assets and trading</a></li><li class="docs-toc__h2"><a href="#required-adversarial-checks">Required adversarial checks</a></li><li class="docs-toc__h2"><a href="#sources">Sources</a></li></ul></nav>
+    <details class="docs-toc docs-toc--mobile"><summary>On this page</summary><nav aria-label="On this page"><ul><li class="docs-toc__h2"><a href="#constraints-and-existing-evidence">Constraints and existing evidence</a></li><li class="docs-toc__h2"><a href="#candidate-construction">Candidate construction</a></li><li class="docs-toc__h2"><a href="#two-immediate-engineering-gates">Two immediate engineering gates</a></li><li class="docs-toc__h3"><a href="#a-prove-the-wallet-benefit-before-changing-the-screens">A. Prove the wallet benefit before changing the screens</a></li><li class="docs-toc__h3"><a href="#b-anchor-the-review-delay-to-the-actual-claim-transition">B. Anchor the review delay to the actual claim transition</a></li><li class="docs-toc__h2"><a href="#authorization-and-convenience-options">Authorization and convenience options</a></li><li class="docs-toc__h2"><a href="#assets-and-trading">Assets and trading</a></li><li class="docs-toc__h2"><a href="#required-adversarial-checks">Required adversarial checks</a></li><li class="docs-toc__h2"><a href="#sources">Sources</a></li></ul></nav></details>
+  <article class="docs-prose"><p>17 November 2026. Original architecture selection and proof requirements.
+The resulting v2 implementation is described in <a href="/pusaka-bch/docs/plan-format/">the plan format</a>
+and <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/proofs/pusaka-v2-corrections.md">the verification record</a>. The candidate
+constructions below preserve the reasoning and do not replace that current evidence.
+Product requirements are in <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/PRODUCT.md">PRODUCT.md</a>. The current app and asset
+release are recorded <a href="/pusaka-bch/docs/app-and-assets/">here</a>; the constructions below
+retain the original design investigation.</p>
+<h2 id="constraints-and-existing-evidence">Constraints and existing evidence</h2>
+<ul>
+<li>The existing SolidCash contract has a shared deadline, fixed multi-heir payout
+and owner authorization through a co-spent ordinary P2PKH coin.</li>
+<li>Paytaca mobile approved a mainnet plan creation through the current WizardConnect
+bridge. The offline relay serialization tests pass. A complete new wallet flow
+has not been tested in Paytaca; creation is not proof of every signing capability.</li>
+<li><code>@wizardconnect/dapp</code> in this app exposes transaction signing, not a portable
+arbitrary-message signing method. The protocol's optional extension mechanism
+does not imply Paytaca implements a proposed check-in or contact-signature API.</li>
+<li>The SDK uses state NFTs and separate balance containers. Its deployed target
+address and logical BCH balance are not interchangeable. A &quot;Receive&quot; button
+cannot simply expose <code>getAddress()</code> and assume arbitrary deposits become balance.</li>
+<li>Normal Paytaca coins have fixed P2PKH spending conditions. No monitor, pre-signed
+timer or xpub access changes their authorization rules. Avoid stale pre-signed
+transaction schemes that fail when the owner spends their inputs.</li>
+</ul>
+<h2 id="candidate-construction">Candidate construction</h2>
+<p>Use an inheritance-aware BCH balance controlled by a single authenticated plan
+state. Keep Paytaca as the owner key holder; Pusaka builds the transactions and
+never requests a mnemonic or stores an owner spending key.</p>
+<ol>
+<li>A unique plan identity authenticates the current policy and state. Balance
+containers and any receive/inbox covenant must require that identity, the
+correct successor state and conservation of value. A matching token category
+alone is insufficient if unrelated NFTs or extra minting authority can forge
+the expected state role.</li>
+<li><code>send(destination, amount)</code> requires fresh owner authorization. It reduces the
+logical balance by the approved payment and fees, preserves protected change
+and updates owner activity in the same transaction. It must work repeatedly.</li>
+<li><code>checkIn()</code> is the small standalone owner transaction. Both it and <code>send</code>
+clear a pending claim and advance a round identifier. Require timestamp-based
+locktime, a non-final sequence and a non-decreasing deadline when using the
+existing absolute-deadline design; the caller-supplied locktime is not a trusted
+wall clock. The client uses fresh network time; stale authorization must not
+become a reusable future cancellation.</li>
+<li>A receive covenant or inbox accepts ordinary payments and binds them to this
+plan. The selection must prove independent incoming UTXOs, protected change,
+multiple deposits, dust, fresh-session discovery and post-claim receipts. If
+sweeping is necessary, it must not depend on a dead owner's signature. Do not
+assume an SDK method named deposit solves arbitrary incoming payments.</li>
+<li>Each contact has a configured identity. A transaction authorized by a contact
+records one approval for this plan, policy version and activity round. Distinct
+contacts count once. The quorum creates a Review state. An expired inactivity
+condition may also create Review without contact cooperation.</li>
+<li>Only after the complete review delay may an unrestricted submitter request the
+predetermined payout. Owner cancellation spends the same authenticated claim
+state, so its invalidation is enforced by consensus rather than an app flag.</li>
+</ol>
+<p>Keep the current <code>Pusaka.scash</code> and existing plan links readable as v1. Build v2 as
+a separate artifact and explicit plan version. Do not reuse the old artifact for
+a new policy or imply funded contracts are upgradeable.</p>
+<h2 id="two-immediate-engineering-gates">Two immediate engineering gates</h2>
+<h3 id="a-prove-the-wallet-benefit-before-changing-the-screens">A. Prove the wallet benefit before changing the screens</h3>
+<p>Start with a minimal partial-payment contract, the real SDK and the current
+external signer. Exercise: fund, pay part, retain change, receive again, pay again,
+and recover the plan from a new session.</p>
+<p>The present owner-co-spend pattern is a candidate authorization path because it
+uses ordinary wallet signing. Prove the required owner input and its change,
+including the case where nearly all owner funds are in Pusaka. Do not require a
+surprising second top-up before each payment. A small persistent owner coin or a
+different supported authorization route must have explicit fee accounting.</p>
+<p>Gate A passes only when funds remain covered after partial spending, new receipts
+have an enforceable claim path, and the real Paytaca request is understandable.
+A simulator-only send is useful evidence but does not pass the wallet gate.</p>
+<h3 id="b-anchor-the-review-delay-to-the-actual-claim-transition">B. Anchor the review delay to the actual claim transition</h3>
+<p>Do not implement <code>reviewEndsAt = tx.locktime + reviewPeriod</code> as the only protection.
+A hostile claimant can choose an old locktime, allowing a newly opened review to
+appear already finished. <code>tx.time</code> constrains the spending transaction's locktime;
+it does not supply an incorruptible &quot;now&quot; to store in state.</p>
+<p>Preferred candidate: create a dedicated authenticated claim UTXO on entry to
+Review. Finalization must consume it with a consensus-enforced relative time lock
+(<code>OP_CHECKSEQUENCEVERIFY</code>, transaction version 2, time-based BIP68 encoding). The
+delay starts from that newly created output's chain age. Round the configured
+duration upward to 512-second units and explain network-time approximation.</p>
+<p>Require the specific claim anchor and reject substitutes. Owner cancellation
+consumes or invalidates it. Unauthenticated deposits and repeated votes must not
+recreate it, restart its age or advance the round. If the normal SDK state update
+always recreates the relevant UTXO, a separate claim covenant is necessary. Incoming
+funds during Review must either join without changing the anchor or remain in a
+safe inbox claimable by the same heirs; they must not need owner consent to join.</p>
+<p>The compiler, SDK input sequence handling, output identity and full transaction
+limits need an executable proof. The CashScript documentation currently notes a
+time-based sequence limitation in its transaction builder. Do not assume that
+language support alone proves the installed SolidCash path can build it. If it
+cannot, investigate a small dedicated covenant and lower-level builder; do not
+replace a seconds-based duration with a block count without revisiting semantics.</p>
+<h2 id="authorization-and-convenience-options">Authorization and convenience options</h2>
+<p>Contact co-spend transactions can use ordinary wallet approvals, like the current
+owner path, subject to proving the contact is the authorized input in the relevant
+method. There is no need to invent a portable message API for the first version.</p>
+<p><code>checkDataSig</code> makes signed statements a possible later construction on BCH. It
+does not make EIP-712 or WebAuthn signatures drop-in replacements. Prove the exact
+digest, signature format and wallet capability. Bind any signed message to the
+network, unique plan, policy version, action, activity round or claim identity and
+freshness condition. Reject a pre-claim message used to cancel a later claim.</p>
+<p>Relayers can pay fees and submit authorized actions. They must have no authority
+to redirect funds, fabricate life proofs or be required for the owner to stop a
+claim. Notifications and indexing may use a service, with direct chain access and
+portable plan data as fallback. &quot;No server&quot; is not a reason to remove useful UX.</p>
+<p>Passkey support needs a separate signature-verification and key-recovery design.
+Browser biometrics alone are not a BCH-verifiable owner authorization. Keep it
+outside the initial wallet proof rather than presenting a server decision as
+equivalent to the earlier on-chain passkey verification.</p>
+<h2 id="assets-and-trading">Assets and trading</h2>
+<p>The first wallet proof is BCH. A trading demonstration additionally needs one
+named adapter and fungible CashToken containers whose balances can be distributed
+under the same family policy. Token category, returned amount, protected change,
+slippage limits, fee payer and recipient must be bound into the approved transaction.</p>
+<p>An asset sitting in a pool, an order, a lending position or a custodial exchange is
+not automatically in the inheritable balance. Supporting positions requires a
+proved redemption/claim adapter, not just displaying their market value. Nonfungible
+assets require an explicit recipient rule; a percentage split cannot divide an NFT.</p>
+<h2 id="required-adversarial-checks">Required adversarial checks</h2>
+<ul>
+<li>Stranger cannot send, check in, change the policy or cancel a claim.</li>
+<li>Wrong or fabricated plan NFT cannot authorize balance spending or a receive sweep.</li>
+<li>Payee substitution, excessive fees and unprotected change are rejected.</li>
+<li>Incoming funds, repeated votes and self-transfers without owner authorization
+cannot renew life or indefinitely delay a valid claim.</li>
+<li>Same contact twice, another plan's approval and a previous round's approval do
+not satisfy the quorum.</li>
+<li>Backdated opening locktime, same-transaction opening/finalization, wrong anchor,
+disabled/wrong-unit sequence and early finalization cannot bypass the review delay.</li>
+<li>An owner action invalidates the old anchor and all old approvals; an old message
+cannot stop a later claim.</li>
+<li>Concurrent owner and payout submissions resolve through the authenticated state;
+neither UI assumes success before chain confirmation.</li>
+<li>Every heir gets the configured share of the latest covered balance; rounding,
+token amounts, carrier values, dust and fee reserves are accounted for.</li>
+<li>Empty balances, deposits during Review and deposits after a payout have defined,
+recoverable spending paths. No old receive address strands future funds.</li>
+<li>Lost relay session and a fresh browser can recover the same plan using public
+metadata and the owner's wallet, without storing a private spending key.</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><a href="https://eips.ethereum.org/EIPS/eip-7702">EIP-7702</a>: delegation changes account code
+on supporting EVM chains; it is not a BCH wallet feature.</li>
+<li><a href="https://cashscript.org/docs/basics/about-bch">BCH model</a> and
+<a href="https://cashscript.org/docs/design/covenants">covenants</a>: spending conditions,
+introspection and constrained change outputs.</li>
+<li><a href="https://cashscript.org/docs/language/globals">Time locks</a>: <code>tx.time</code>,
+<code>tx.locktime</code>, <code>this.age</code>, sequence encoding and builder limitations.</li>
+<li><a href="https://cashscript.org/docs/language/functions">Signature checks</a>: transaction
+signatures and <code>checkDataSig</code> are separate verification mechanisms.</li>
+<li><a href="https://docs.riftenlabs.com/wizardconnect/protocol/">WizardConnect protocol</a> and
+<a href="https://docs.riftenlabs.com/wizardconnect/extensions/">extensions</a>: transaction
+signing is the base interaction; extra capabilities require wallet support.</li>
+</ul>
+
+    <p class="docs-source"><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/architecture/inheritance-wallet.md">View source on GitHub</a></p>
+  </article>
+        </main>
+      </div>
+  </body>
+</html>

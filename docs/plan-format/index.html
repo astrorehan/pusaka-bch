@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plan format · Pusaka docs</title>
+    <meta name="description" content="Guides and technical documentation for the Pusaka inheritance wallet on Bitcoin Cash." />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+  </head>
+  <body>
+    <a class="docs-skip" href="#docs-main">Skip to content</a>
+      <header class="docs-header">
+        <div class="docs-header__inner">
+          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
+          <div class="docs-header__links">
+            <button id="docs-theme" type="button" hidden>Dark theme</button>
+            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/" aria-current="page">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></aside>
+        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/" aria-current="page">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></details>
+        <main id="docs-main" tabindex="-1" class="docs-article">
+          <header class="docs-article__heading"><h1 id="pusaka-v2-plan-format--on-chain-state-layout-pusaka-v2">Pusaka v2 Plan Format &amp; On-Chain State Layout (<code>pusaka-v2</code>)</h1>
+</header>
+  <nav class="docs-toc docs-toc--desktop" aria-label="On this page"><p>On this page</p><ul><li class="docs-toc__h2"><a href="#1-design-principles">1. Design Principles</a></li><li class="docs-toc__h2"><a href="#2-on-chain-binary-layouts">2. On-Chain Binary Layouts</a></li><li class="docs-toc__h3"><a href="#21-plan-minting-nft-commitment-51-bytes">2.1 Plan minting NFT Commitment (51 bytes)</a></li><li class="docs-toc__h3"><a href="#22-canonical-policybytes-preimage-101317-bytes">2.2 Canonical policyBytes Preimage (101..317 bytes)</a></li><li class="docs-toc__h3"><a href="#23-anchor-none-nft-commitment-8-bytes">2.3 Anchor none NFT Commitment (8 bytes)</a></li><li class="docs-toc__h2"><a href="#3-versioned-public-metadata-json-version-pusaka-v2">3. Versioned Public Metadata JSON (version: &quot;pusaka-v2&quot;)</a></li><li class="docs-toc__h2"><a href="#asset-enabled-revision">Asset-enabled revision</a></li></ul></nav>
+    <details class="docs-toc docs-toc--mobile"><summary>On this page</summary><nav aria-label="On this page"><ul><li class="docs-toc__h2"><a href="#1-design-principles">1. Design Principles</a></li><li class="docs-toc__h2"><a href="#2-on-chain-binary-layouts">2. On-Chain Binary Layouts</a></li><li class="docs-toc__h3"><a href="#21-plan-minting-nft-commitment-51-bytes">2.1 Plan minting NFT Commitment (51 bytes)</a></li><li class="docs-toc__h3"><a href="#22-canonical-policybytes-preimage-101317-bytes">2.2 Canonical policyBytes Preimage (101..317 bytes)</a></li><li class="docs-toc__h3"><a href="#23-anchor-none-nft-commitment-8-bytes">2.3 Anchor none NFT Commitment (8 bytes)</a></li><li class="docs-toc__h2"><a href="#3-versioned-public-metadata-json-version-pusaka-v2">3. Versioned Public Metadata JSON (version: &quot;pusaka-v2&quot;)</a></li><li class="docs-toc__h2"><a href="#asset-enabled-revision">Asset-enabled revision</a></li></ul></nav></details>
+  <article class="docs-prose"><p>Date: 17 November 2026
+Status: Stage 3 Specification &amp; SDK Schema (<code>contract/scripts/v2/pusaka-v2.ts</code>)</p>
+<p>This document defines the versioned off-chain metadata schema (<code>pusaka-v2</code>) and on-chain binary layouts for Pusaka v2. Legacy <code>version: 1</code> (<code>pusaka-v1</code> / <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/Pusaka.scash"><code>Pusaka.scash</code></a>) links and deployed plans remain completely separate and unmodified.</p>
+<hr>
+<h2 id="1-design-principles">1. Design Principles</h2>
+<ol>
+<li><strong>Cycle-Free Covenant DAG</strong>:
+<ul>
+<li><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2Anchor.scash"><code>PusakaV2Anchor.scash</code></a>: constructor <code>(planCategory, ownerPkh)</code> -&gt; reads <code>reviewSequence</code> dynamically from its 8-byte <code>none</code>-NFT commitment (<code>bytes4(round) || bytes4(reviewSequence)</code>) and authenticates input 0 via <code>planCategory + 0x02</code>.</li>
+<li><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2Plan.scash"><code>PusakaV2Plan.scash</code></a>: constructor <code>(planCategory, ownerPkh, anchorLockingBytecode)</code> -&gt; holds the unique <code>minting</code> NFT (<code>planCategory + 0x02</code>) and all protected BCH directly. Mutable policy (<code>heirs</code>, <code>contacts</code>, <code>inactivityPeriod</code>, <code>reviewSequence</code>, <code>feeBudget</code>) is committed by <code>policyHash = hash256(policyBytes)</code> inside the 51-byte NFT commitment rather than baked into constructor args.</li>
+<li><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2Inbox.scash"><code>PusakaV2Inbox.scash</code></a>: constructor <code>(planCategory, planLockingBytecode, perInputFeeCap)</code> -&gt; derives a single long-lived ordinary P2SH32 receive address (<code>inboxAddress</code>) that <strong>never changes</strong> across owner policy edits, partial spends, claim reviews, exits, or payouts.</li>
+</ul>
+</li>
+<li><strong>No Stranded Funds &amp; Post-Exit Protection (<code>CLOSED</code>)</strong>:
+<ul>
+<li>Owner full spendable drains, <code>ownerExit()</code> (<code>CLOSED</code>), and <code>finalizeClaim()</code>/<code>distributeLate()</code> (<code>PAID_OUT</code>) always preserve a <code>&gt;= 1,000</code>-satoshi Plan <code>minting</code>-NFT carrier so <code>inboxAddress</code> remains continuously sweepable and recoverable.</li>
+<li><code>CLOSED</code> (<code>0x03</code>) represents a withdrawn/retired balance with the long-lived <code>inboxAddress</code> still active. <code>ownerExit()</code> is timestamp-authenticated (<code>tx.time &gt;= 500000000</code>) and renews <code>deadline = max(curDeadline, tx.locktime + period)</code> (bounded <code>&lt;= 4294967295</code>).</li>
+<li>Any post-exit receipts swept into <code>CLOSED</code> remain owner-recoverable (<code>ownerExit()</code> / <code>checkIn()</code>) AND retain both inheritance paths (<code>openClaimByInactivity()</code> after <code>deadline</code> and 2-of-3 <code>contactApprove()</code> quorum) whenever spendable funds exist (<code>tx.inputs[0].value &gt; 1000</code>). A 1st contact vote preserves <code>CLOSED</code> without silently reactivating the plan; only 2-contact quorum or expired inactivity enters <code>REVIEW</code> and mints a fresh <code>PusakaV2Anchor</code> for a full <code>reviewSequence</code> delay. Sweeps into <code>CLOSED</code> never renew <code>deadline</code> or reset votes. (Reaching zero balance via <code>ownerExit()</code> retires the current balance, not a promise to disable future receipts at the old <code>inboxAddress</code> from following the family plan.)</li>
+</ul>
+</li>
+<li><strong>Bounded Owner Fee Funding</strong>:
+<ul>
+<li>Owner actions (<code>send</code>, <code>checkIn</code>, <code>cancelClaim</code>, <code>updatePolicy</code>) require an authenticated <code>ownerPkh</code> co-spend (<code>inputs[1]</code> or <code>inputs[2]</code> during <code>REVIEW</code>) committing to the transaction, and allow up to <code>10,000</code> sats (<code>MAX_OWNER_TX_FEE</code>) of network fee to be drawn from protected BCH above the <code>1,000</code>-sat carrier (<code>outputs[0].value &gt;= max(1000, nextPlanSats - 10000)</code>).</li>
+<li>Non-plan change outputs cannot draw on protected funds (<code>change &lt;= extraIn</code>) and, whenever any fee is taken from protected funds, change must return to <code>ownerLock</code>. A small persistent ordinary authorization coin (e.g. <code>600</code> sats) can therefore be returned intact across repeated owner actions without repeated ordinary-wallet top-ups.</li>
+<li>SDK builders accept <code>ownerUtxos?: Utxo[]</code> (and <code>ownerUtxo?: Utxo</code>) with <code>feeFunding?: 'auto' | 'owner' | 'protected'</code>, preserving legacy owner-funded behavior in <code>'auto'</code> when ordinary coins leave <code>&gt;= 546</code> sats change and otherwise using protected/hybrid fees so the owner auth coin is not silently burned.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="2-on-chain-binary-layouts">2. On-Chain Binary Layouts</h2>
+<h3 id="21-plan-minting-nft-commitment-51-bytes">2.1 Plan <code>minting</code> NFT Commitment (51 bytes)</h3>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th style="text-align:right">Offset</th>
+<th style="text-align:right">Length</th>
+<th>Field</th>
+<th>Encoding / Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"><code>0</code></td>
+<td style="text-align:right"><code>1</code></td>
+<td><code>version</code></td>
+<td><code>0x02</code></td>
+</tr>
+<tr>
+<td style="text-align:right"><code>1</code></td>
+<td style="text-align:right"><code>1</code></td>
+<td><code>status</code></td>
+<td><code>0x00</code> = <code>ACTIVE</code>, <code>0x01</code> = <code>REVIEW</code>, <code>0x02</code> = <code>PAID_OUT</code>, <code>0x03</code> = <code>CLOSED</code></td>
+</tr>
+<tr>
+<td style="text-align:right"><code>2..5</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>round</code></td>
+<td>uint32 LE (<code>0..2147483646</code>); incremented on <code>send</code>, <code>checkIn</code>, <code>cancelClaim</code>, <code>updatePolicy</code>, <code>ownerExit</code>, and <code>REVIEW</code> entry</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>6</code></td>
+<td style="text-align:right"><code>1</code></td>
+<td><code>approvalsMask</code></td>
+<td>Bitmask <code>0x00..0x07</code> (<code>1 &lt;&lt; contactIndex</code>); wiped to <code>0x00</code> on owner action (<code>send</code>, <code>checkIn</code>, <code>cancelClaim</code>, <code>updatePolicy</code>, <code>ownerExit</code>) or <code>REVIEW</code> entry</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>7..14</code></td>
+<td style="text-align:right"><code>8</code></td>
+<td><code>deadline</code></td>
+<td>uint64 LE UNIX seconds (<code>&lt;= 0xffffffff = 4294967295</code> on genesis/renewal)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>15..18</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>inactivityPeriod</code></td>
+<td>uint32 LE seconds (<code>&gt; 0</code>, <code>&lt; 2^31</code>)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>19..50</code></td>
+<td style="text-align:right"><code>32</code></td>
+<td><code>policyHash</code></td>
+<td><code>hash256(policyBytes)</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="22-canonical-policybytes-preimage-101317-bytes">2.2 Canonical <code>policyBytes</code> Preimage (<code>101..317</code> bytes)</h3>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th style="text-align:right">Offset</th>
+<th style="text-align:right">Length</th>
+<th>Field</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"><code>0..3</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>inactivityPeriod</code></td>
+<td>uint32 LE (<code>&gt; 0</code>, <code>&lt; 2^31</code>)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>4..7</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>reviewSequence</code></td>
+<td>uint32 LE time-based BIP68 (<code>4194305..4259839</code>, i.e. <code>0x00400001..0x0040ffff</code>, 512s upward quanta)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>8..11</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>feeBudget</code></td>
+<td>uint32 LE (<code>500..100000</code>, default <code>5000</code> sats)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>12..31</code></td>
+<td style="text-align:right"><code>20</code></td>
+<td><code>contact0</code></td>
+<td>P2PKH PKH (distinct from <code>contact1</code>, <code>contact2</code>, <code>ownerPkh</code>)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>32..51</code></td>
+<td style="text-align:right"><code>20</code></td>
+<td><code>contact1</code></td>
+<td>P2PKH PKH</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>52..71</code></td>
+<td style="text-align:right"><code>20</code></td>
+<td><code>contact2</code></td>
+<td>P2PKH PKH</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>72..75</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>totalShares</code></td>
+<td>uint32 LE (<code>== sum(heirShares) &gt; 0</code>)</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>76</code></td>
+<td style="text-align:right"><code>1</code></td>
+<td><code>heirCount</code></td>
+<td><code>1..10</code></td>
+</tr>
+<tr>
+<td style="text-align:right"><code>77..</code></td>
+<td style="text-align:right"><code>24 * N</code></td>
+<td><code>heirs[0..N-1]</code></td>
+<td><code>[bytes20 heirPkh, uint32LE heirShare]</code> (<code>heirShare &gt; 0</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Off-chain equal, custom percentage, or Faraid calculators produce the integer <code>heirShares</code> / <code>totalShares</code> tuple off-chain; <code>PusakaV2Plan</code> enforces the committed integer division <code>floor(pot * heirShare / totalShares)</code> on-chain without asserting on-chain Faraid jurisprudence rules.</p>
+<h3 id="23-anchor-none-nft-commitment-8-bytes">2.3 Anchor <code>none</code> NFT Commitment (8 bytes)</h3>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th style="text-align:right">Offset</th>
+<th style="text-align:right">Length</th>
+<th>Field</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"><code>0..3</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>round</code></td>
+<td>uint32 LE matching Plan's <code>REVIEW</code> <code>round</code></td>
+</tr>
+<tr>
+<td style="text-align:right"><code>4..7</code></td>
+<td style="text-align:right"><code>4</code></td>
+<td><code>reviewSequence</code></td>
+<td>uint32 LE matching <code>policyBytes[4..7]</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="3-versioned-public-metadata-json-version-pusaka-v2">3. Versioned Public Metadata JSON (<code>version: &quot;pusaka-v2&quot;</code>)</h2>
+<p>Links use base64url-encoded UTF-8 JSON fragments (<code>https://pusaka.cash/v2/plan#&lt;base64url(JSON)&gt;</code>):</p>
+<pre><code class="language-json">{
+  &quot;version&quot;: &quot;pusaka-v2&quot;,
+  &quot;network&quot;: &quot;chipnet&quot;,
+  &quot;planCategoryHex&quot;: &quot;&lt;64-hex&gt;&quot;,
+  &quot;ownerPkhHex&quot;: &quot;&lt;40-hex&gt;&quot;,
+  &quot;planAddress&quot;: &quot;bchtest:p...&quot;,
+  &quot;planLockHex&quot;: &quot;&lt;70-hex P2SH32&gt;&quot;,
+  &quot;anchorAddress&quot;: &quot;bchtest:p...&quot;,
+  &quot;anchorLockHex&quot;: &quot;&lt;70-hex P2SH32&gt;&quot;,
+  &quot;inboxAddress&quot;: &quot;bchtest:p...&quot;,
+  &quot;inboxLockHex&quot;: &quot;&lt;70-hex P2SH32&gt;&quot;,
+  &quot;perInputFeeCap&quot;: &quot;600&quot;,
+  &quot;policyBytesHex&quot;: &quot;&lt;202..634 hex&gt;&quot;,
+  &quot;policyHashHex&quot;: &quot;&lt;64-hex&gt;&quot;,
+  &quot;createdAtLocktime&quot;: 1794922748,
+  &quot;inactivityPeriodSeconds&quot;: 2592000,
+  &quot;reviewSequence&quot;: 4194811,
+  &quot;reviewUnits&quot;: 507,
+  &quot;effectiveReviewSeconds&quot;: 259584,
+  &quot;feeBudget&quot;: &quot;5000&quot;,
+  &quot;contacts&quot;: [&quot;&lt;40-hex&gt;&quot;, &quot;&lt;40-hex&gt;&quot;, &quot;&lt;40-hex&gt;&quot;],
+  &quot;totalShares&quot;: &quot;120&quot;,
+  &quot;heirs&quot;: [
+    { &quot;pkhHex&quot;: &quot;&lt;40-hex&gt;&quot;, &quot;share&quot;: &quot;15&quot;, &quot;label&quot;: &quot;Spouse&quot; }
+  ]
+}
+</code></pre>
+<p><code>attachPusakaV2Plan()</code> checks <code>metadata.network === provider.network</code>, re-computes <code>hash256(policyBytes)</code>, checks all decoded policy fields (including <code>reviewUnits</code> and <code>effectiveReviewSeconds</code>) against metadata, re-derives <code>anchorLock</code>, <code>planLock</code>, and <code>inboxLock</code> from immutable identity arguments, and (when <code>verifyOnChain !== false</code>) compares <code>policyHashHex</code> against the live Plan NFT commitment, failing closed with <code>PolicyHashMismatchError</code> on stale metadata links after a policy update.</p>
+<h2 id="asset-enabled-revision">Asset-enabled revision</h2>
+<p>New plans record <code>protocolRevision: assets-2</code>. This revision uses <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/contracts/PusakaV2ReviewAnchor.scash"><code>PusakaV2ReviewAnchor.scash</code></a>.
+The owner can cancel a review only by returning the plan to <code>ACTIVE</code> at the next round with all approvals cleared.
+Every inheritance payout therefore spends the anchor through the BIP68 branch, including payouts whose fee the owner pays.</p>
+<p>Both asset revisions use <code>PusakaAssetPlan</code>, and the separate fungible vault binds that exact plan locking script.
+The anchor revision determines the plan, inbox, and token vault addresses. Metadata with <code>assets-1</code> reconstructs
+the earlier asset plan. Metadata with no revision reconstructs the original BCH-only plan. The app checks the
+derived locks and the live policy when reading either format. <a href="/pusaka-bch/docs/app-and-assets/">Asset proof</a></p>
+
+    <p class="docs-source"><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/architecture/pusaka-v2-plan-format.md">View source on GitHub</a></p>
+  </article>
+        </main>
+      </div>
+  </body>
+</html>

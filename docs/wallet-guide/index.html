@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wallet guide · Pusaka docs</title>
+    <meta name="description" content="Guides and technical documentation for the Pusaka inheritance wallet on Bitcoin Cash." />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+  </head>
+  <body>
+    <a class="docs-skip" href="#docs-main">Skip to content</a>
+      <header class="docs-header">
+        <div class="docs-header__inner">
+          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
+          <div class="docs-header__links">
+            <button id="docs-theme" type="button" hidden>Dark theme</button>
+            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/" aria-current="page">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></aside>
+        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/" aria-current="page">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></details>
+        <main id="docs-main" tabindex="-1" class="docs-article">
+          <header class="docs-article__heading"><h1 id="pusaka-wallet-guide">Pusaka wallet guide</h1>
+</header>
+  <nav class="docs-toc docs-toc--desktop" aria-label="On this page"><p>On this page</p><ul><li class="docs-toc__h2"><a href="#owner">Owner</a></li><li class="docs-toc__h2"><a href="#family">Family</a></li><li class="docs-toc__h2"><a href="#swap">Swap</a></li><li class="docs-toc__h2"><a href="#after-reconnecting">After reconnecting</a></li><li class="docs-toc__h2"><a href="#demo-narration">Demo narration</a></li></ul></nav>
+    <details class="docs-toc docs-toc--mobile"><summary>On this page</summary><nav aria-label="On this page"><ul><li class="docs-toc__h2"><a href="#owner">Owner</a></li><li class="docs-toc__h2"><a href="#family">Family</a></li><li class="docs-toc__h2"><a href="#swap">Swap</a></li><li class="docs-toc__h2"><a href="#after-reconnecting">After reconnecting</a></li><li class="docs-toc__h2"><a href="#demo-narration">Demo narration</a></li></ul></nav></details>
+  <article class="docs-prose"><p>Live app: <a href="https://astrorehan.github.io/pusaka-bch/">https://astrorehan.github.io/pusaka-bch/</a> (mainnet) and
+<a href="https://astrorehan.github.io/pusaka-bch/chipnet/">https://astrorehan.github.io/pusaka-bch/chipnet/</a> (Chipnet, the test network).</p>
+<p>The demo at <code>/wallet/demo</code> opens a live example plan whose owner has gone quiet. Any
+visitor can open its claim or pay its heirs, with no wallet of their own: the plan
+pays the network fee. Create your own wallet to try the owner's actions.</p>
+<h2 id="owner">Owner</h2>
+<ol>
+<li>Open <strong>Wallet</strong>, choose <strong>Set up wallet</strong>, and connect Paytaca.</li>
+<li>Add heirs and choose equal shares, integer custom shares or the existing faraid
+family calculator. Verify addresses and the calculation before approving.</li>
+<li>Add three distinct trusted contacts. Choose inactivity and review periods.</li>
+<li>Enter an initial usable BCH balance. This creates a new Pusaka receive address.
+Keep at least 600 sats at the first ordinary wallet receive address for authorization.</li>
+<li>If necessary, use <strong>Prepare wallet</strong>, review that separate transaction, then
+review wallet creation. Approve each in Paytaca. Save the resulting plan JSON/link.</li>
+<li>Use <strong>Send</strong> for partial BCH payments. Protected change remains in Pusaka and
+the same transaction renews activity. <strong>I'm still here</strong> is the fallback.</li>
+<li><strong>Receive</strong> shows the permanent BCH inbox. Incoming funds are protected without
+owner approval. <strong>Collect</strong> makes batched receipts spendable and charges the
+reviewed network fee. Incoming receipts never renew activity.</li>
+<li>During review, <strong>Stop claim</strong> or an ordinary BCH payment cancels the claim.
+An owner token send and Swap currently ask you to stop a pending claim first.</li>
+<li><strong>Take funds back</strong> retires the current BCH balance. The old receive address
+still protects later receipts. Token holdings stay under the plan's family rules.</li>
+</ol>
+<h2 id="family">Family</h2>
+<p>Open the shared plan link or import its JSON. A contact connects their own wallet
+and chooses <strong>Confirm a claim</strong>. The first approval has no spending authority.
+The second distinct contact opens the full review period. Alternatively, anyone
+can open an inactivity claim after the network deadline.</p>
+<p>Wait for the anchor to confirm and its chain age to mature. The network clock can
+lag behind a phone. <strong>Pay the heirs</strong> submits the fixed BCH distribution.
+Afterward, <strong>Pay late receipts</strong> handles new BCH. Under <strong>Protected tokens</strong>,
+<strong>Pay heirs</strong> distributes one fungible receipt per transaction; the submitter
+provides BCH for token carriers and fees. All indivisible units go to the final heir.</p>
+<h2 id="swap">Swap</h2>
+<p>On Chipnet, open <strong>Swap</strong> for BCH / PSK. PSK is a test token, not an investment.
+Get a quote, inspect minimum return and fees, then review the complete transaction.
+The token output goes directly into your Pusaka token vault. Use that token
+address only for supported fungible tokens. The BCH inbox is a different address.</p>
+<h2 id="after-reconnecting">After reconnecting</h2>
+<p>Open the saved plan link or choose <strong>Open a plan</strong> and paste JSON. Public rules
+rebuild the same addresses, and the app discovers current state from the chain.
+Reconnect the correct wallet for owner or contact actions. Save an updated link
+after policy edits; old policy data fails closed instead of redirecting payouts.</p>
+<p>An accepted transaction still needs block confirmation. If submission times out,
+check its transaction ID and refresh before trying again. The local activity list
+records submissions from that browser, not a complete recovered chain history.</p>
+<h2 id="demo-narration">Demo narration</h2>
+<p>Show the usable BCH balance, a partial payment renewing activity and a new receipt.
+Show two contacts opening review and the owner stopping a false claim. Then show
+a valid mature claim and the fixed multi-heir payout. Finish with the Cauldron
+swap and the token payout receipts in the verification record.</p>
+<p>The 512-second Chipnet review is a test configuration. New UI plans default to
+90 days of inactivity and at least 7 days of review. Explain the initial move to
+a new address. Do not promise inheritance for untouched Paytaca or exchange funds.</p>
+<p>The real phone/mainnet checks still pending are listed in
+<a href="/pusaka-bch/docs/app-and-assets/">the release evidence</a>.</p>
+
+    <p class="docs-source"><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/demo-guide.md">View source on GitHub</a></p>
+  </article>
+        </main>
+      </div>
+  </body>
+</html>
