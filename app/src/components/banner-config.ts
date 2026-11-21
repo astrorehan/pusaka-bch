@@ -5,7 +5,9 @@
 // Leave a value as '' to hide its entry. A group with nothing left in it is hidden too.
 
 export const REPO_URL = 'https://github.com/astrorehan/pusaka-bch';
-const sourceRef = import.meta.env.VITE_RELEASE_REF || 'main';
+/** The branch judges read: the BLAZE release, until it is merged into main. */
+export const SOURCE_REF = import.meta.env.VITE_RELEASE_REF || 'release/v2-readiness';
+const sourceRef = SOURCE_REF;
 export const DOCS_URL = `${REPO_URL}/tree/${sourceRef}/docs`;
 
 export const BANNER = {
