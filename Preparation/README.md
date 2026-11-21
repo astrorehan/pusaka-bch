@@ -4,7 +4,7 @@ BCH BLAZE 2026 asks entrants to publish their preparation documents. These are t
 
 - [`IDEA.md`](IDEA.md): product, scope, prize targets, build order, open questions.
 - [`FINDINGS.md`](FINDINGS.md): checked facts about the event, judges, bounties, SolidCash and technical tests, with sources.
-- [`dorahacks-build.md`](dorahacks-build.md): draft text for the DoraHacks Build page.
+- [`dorahacks-build.md`](dorahacks-build.md): draft text for the DoraHacks Build page, written before hacking began. The final text is on the DoraHacks BUIDL page.
 - [`README-notes.md`](README-notes.md): the index and checklist for the notes above.
 
 The code that existed before hacking is in [`../prototype/`](../prototype/) (see the `blaze-start` tag) and in the earlier Pusaka on Monad (https://github.com/astrorehan/pusaka).

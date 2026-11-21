@@ -43,15 +43,18 @@ export function PlanStatus({
   state,
   loading,
   reviewEnded = false,
+  payable = true,
 }: {
   state?: PlanState;
   loading: boolean;
-  /** The review delay has passed: the heirs can be paid now. */
+  /** The review delay has passed. */
   reviewEnded?: boolean;
+  /** The plan can pay the payout's network fee itself, so anyone can pay the heirs now. */
+  payable?: boolean;
 }) {
   const status =
     state?.status === 'REVIEW' && reviewEnded
-      ? { label: 'Ready to pay heirs', tone: 'warning' as const }
+      ? { label: payable ? 'Ready to pay heirs' : 'Review ended', tone: 'warning' as const }
       : state && STATUS[state.status];
   return (
     <Badge tone={status?.tone} dot>
@@ -138,7 +141,7 @@ export function PlanRules({
   return (
     <Card>
       <CardHeading title={planPath ? 'Inheritance plan' : 'Inheritance rules'}>
-        <PlanStatus state={state} loading={loading} reviewEnded={Boolean(data?.review?.ready)} />
+        <PlanStatus state={state} loading={loading} reviewEnded={Boolean(data?.review?.ready)} payable={Boolean(data?.funding.canSelfFund)} />
       </CardHeading>
       {planPath && <PlanMap metadata={metadata} />}
       <dl className="pw-rules">

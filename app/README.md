@@ -23,7 +23,9 @@ Compile contracts before `npm run sync:artifacts`; `npm run check:artifacts` det
 `npm run test:ui` runs isolated headless browser checks with Microsoft Edge. Set
 `PUSAKA_TEST_URL=https://astrorehan.github.io/pusaka-bch/` to test the published base path.
 `npm run build:pages` builds that hosted path. Publish all of `dist-pages`, including
-the generated `404.html` that opens shared plan links directly. [Release evidence](../docs/proofs/app-and-assets.md).
+the generated `404.html` that opens shared plan links directly. Overlay `assets/` and
+`chipnet/assets/` onto the published directories so browsers with cached pages can still
+load the previous build's hashed chunks. [Release evidence](../docs/proofs/app-and-assets.md).
 
 ## Mainnet wallet testing
 

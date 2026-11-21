@@ -426,3 +426,66 @@
 @media (prefers-reduced-motion: reduce) {
   .pw-loading span, .pw-spin { animation: none; }
 }
+
+/* The demo's story: what already happened to the example plan, and the one step left for the visitor. */
+.pw-story { gap: 18px; }
+.pw-story-heading { display: grid; gap: 6px; }
+.pw-story-eyebrow { color: var(--accent-text); font-size: 13px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; }
+.pw-story-heading p { color: var(--text-muted); font-size: 16px; }
+.pw-story-steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.pw-story-step { position: relative; display: flex; gap: 12px; padding-bottom: 16px; }
+.pw-story-step:last-child { padding-bottom: 0; }
+.pw-story-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 26px;
+  bottom: 2px;
+  left: 11px;
+  width: 2px;
+  background: var(--border);
+}
+.pw-story-step--done:not(:last-child)::before { background: var(--accent-text); opacity: 0.45; }
+.pw-story-mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.pw-story-step--done .pw-story-mark { border-color: var(--accent-text); background: var(--accent-text); color: var(--surface); }
+.pw-story-step--now .pw-story-mark { border-color: var(--warning); box-shadow: 0 0 0 4px var(--warning-soft); }
+.pw-story-step > div { min-width: 0; flex: 1; }
+.pw-story-step strong { display: block; font-size: 16px; }
+.pw-story-step--later strong { color: var(--text-muted); font-weight: 600; }
+.pw-story-step p { margin-top: 3px; color: var(--text-muted); font-size: 15px; line-height: 1.5; }
+.pw-story-step p a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-text); font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
+.pw-story-step--now {
+  margin: 0 -10px 16px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  background: var(--warning-soft);
+}
+.pw-story-step--now:last-child { margin-bottom: 0; }
+.pw-story-step--now::before { display: none; }
+.pw-story-action { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pw-story-next { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pw-story-next a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-text); font-weight: 600; }
+.pw-story-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.pw-story-footer a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-text); font-weight: 600; text-underline-offset: 3px; }
+@media (max-width: 560px) {
+  .pw-story-action .btn { flex: 1 1 auto; }
+}

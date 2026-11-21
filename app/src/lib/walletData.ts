@@ -96,6 +96,8 @@ type Activity = {
   at: number;
   plan: string;
   status: 'accepted';
+  /** Sent on a public example plan from the demo: shown only beside that example, never as the visitor's own. */
+  demo?: boolean;
 };
 
 function readList(key: string): unknown[] {

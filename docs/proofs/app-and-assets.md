@@ -158,7 +158,7 @@ execution. A phone-sized browser viewport does not prove Paytaca mobile signing.
 The lifecycle ran on mainnet with the same builders as the app. The network accepted creation, collection,
 owner spending, contact approvals, owner cancellation and the payout from a mature claim. The revised anchor
 also passed a mainnet check where the owner signed and sponsored an early payout and the network refused it.
-The wallet-free demo prioritizes one funded `assets-2` example, with six earlier plans as fallbacks.
+The wallet-free demo opens a ready `assets-2` example from a pool of four, with six earlier plans as fallbacks.
 [Mainnet transaction record](v2-live.md#mainnet)
 
 ## Not yet shown

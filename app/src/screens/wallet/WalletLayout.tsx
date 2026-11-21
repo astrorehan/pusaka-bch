@@ -398,7 +398,8 @@ export function WalletLayout() {
                 <span className="sr-only">, no real money</span>
               </span>
             )}
-            <WalletButton pill={false} />
+            {/* The demo needs no wallet: the example plan pays its own fee. */}
+            {!demo && <WalletButton pill={false} />}
           </header>
           <main id="wallet-main" tabIndex={-1} ref={main}>
             <Outlet />

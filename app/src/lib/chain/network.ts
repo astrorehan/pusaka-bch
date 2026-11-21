@@ -54,7 +54,10 @@ function answers(host: string, ms = 5000): Promise<boolean> {
 export function chooseServer(network: NetworkName): Promise<void> {
   if (network !== 'mainnet' || typeof WebSocket === 'undefined') return Promise.resolve();
   chosen ??= (async () => {
-    for (const host of MAINNET_SERVERS) {
+    // Start with the server in use, so a new choice after a failure tries the others before coming back to it.
+    const start = MAINNET_SERVERS.indexOf(mainnetServer);
+    const order = [...MAINNET_SERVERS.slice(start), ...MAINNET_SERVERS.slice(0, start)];
+    for (const host of order) {
       if (!(await answers(host))) continue;
       if (host !== mainnetServer) {
         mainnetServer = host;
@@ -65,6 +68,34 @@ export function chooseServer(network: NetworkName): Promise<void> {
     }
   })();
   return chosen;
+}
+
+/**
+ * Run a network read, and when it fails because the server stopped answering, move to the next server that
+ * answers and run it once more. A failure the server answered (a missing plan, a rejected transaction) is
+ * returned as it is.
+ */
+export async function withFailover<T>(network: NetworkName, read: () => Promise<T>, ms = 25_000): Promise<T> {
+  await chooseServer(network);
+  // A server that goes quiet can leave a request waiting forever. Count that as a failure too.
+  const timed = () =>
+    new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('The Bitcoin Cash network server did not answer in time.')), ms);
+      read().then(resolve, reject).finally(() => clearTimeout(timer));
+    });
+  try {
+    return await timed();
+  } catch (error) {
+    if (network !== 'mainnet' || typeof WebSocket === 'undefined' || (await answers(mainnetServer))) throw error;
+    const failed = mainnetServer;
+    mainnetServer = MAINNET_SERVERS[(MAINNET_SERVERS.indexOf(failed) + 1) % MAINNET_SERVERS.length];
+    provider = null;
+    freshProvider = null;
+    chosen = null;
+    await chooseServer(network);
+    if (mainnetServer === failed) throw error;
+    return timed();
+  }
 }
 
 export function getProvider(network: NetworkName): ElectrumNetworkProvider {

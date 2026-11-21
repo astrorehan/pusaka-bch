@@ -7,8 +7,8 @@ import { defineConfig, type Plugin } from 'vite'
 const PAGES_BASE = '/pusaka-bch/'
 const CHIPNET_BASE = `${PAGES_BASE}chipnet/`
 
-// The app's routes. GitHub Pages serves `wallet/demo.html` for `/wallet/demo`, so a copy of the page at each
-// route answers a direct visit with 200 instead of the 404 fallback.
+// The app's routes. GitHub Pages serves `wallet/demo.html` for `/wallet/demo` and `wallet/demo/index.html` for
+// `/wallet/demo/`, so a copy of the page at both answers a direct visit with 200 instead of the 404 fallback.
 const ROUTES = [
   'wallet', 'wallet/plan', 'wallet/activity', 'wallet/demo', 'wallet/swap', 'wallet/edit', 'wallet/new',
   'v2/plan', 'new', 'legacy/new', 'plan', 'try', 'how-it-works',
@@ -48,7 +48,10 @@ function productionHtml(pages: boolean, routes = pages): Plugin {
           this.emitFile({ type: 'asset', fileName: '404.html', source: index.source })
         }
         if (routes && index?.type === 'asset') {
-          for (const route of ROUTES) this.emitFile({ type: 'asset', fileName: `${route}.html`, source: index.source })
+          for (const route of ROUTES) {
+            this.emitFile({ type: 'asset', fileName: `${route}.html`, source: index.source })
+            this.emitFile({ type: 'asset', fileName: `${route}/index.html`, source: index.source })
+          }
         }
       },
     },

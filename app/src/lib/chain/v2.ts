@@ -23,12 +23,14 @@ import {
   type PusakaV2PlanHandle,
 } from "../protocol/pusaka-v2";
 import { NETWORK } from "../networkName";
+import { DEMO_CATEGORIES } from "../demo";
 import { shortAddress } from "../format";
 import { recordActivity, removePendingPlan, savePendingPlan, savePlan, type PendingPlanSubmission } from "../walletData";
 import { friendlyError, isInputConflict, isRejection, StaleReviewError, UnconfirmedPlanSubmission } from "./errors";
 import {
   chooseServer,
   getFreshProvider,
+  withFailover,
   getProvider,
   medianTimePast,
   pkhOfAddress,
@@ -48,9 +50,16 @@ import testPair from "../protocol/test-pair.json";
 
 export type { PusakaV2PlanMetadata, PusakaV2PolicyInput, Quote };
 
-export async function loadPlan(plan: PusakaV2PlanMetadata) {
-  await chooseServer(NETWORK);
-  const provider = getProvider(NETWORK);
+/**
+ * Read a plan's state from the network. `fresh` skips the provider's short listing cache: use it right after a
+ * transaction, and before building one, so a payout someone else just sent is seen at once.
+ */
+export function loadPlan(plan: PusakaV2PlanMetadata, { fresh = false }: { fresh?: boolean } = {}) {
+  return withFailover(NETWORK, () => readPlan(plan, fresh));
+}
+
+async function readPlan(plan: PusakaV2PlanMetadata, fresh: boolean) {
+  const provider = fresh ? getFreshProvider(NETWORK) : getProvider(NETWORK);
   // Use the same state read to verify the policy and display the balance.
   const handle = await attachPusakaV2Plan(plan, provider, { verifyOnChain: false });
   const [state, now] = await Promise.all([
@@ -126,7 +135,7 @@ function payoutFunding(
   };
 }
 
-export type LoadedPlan = Awaited<ReturnType<typeof loadPlan>>;
+export type LoadedPlan = Awaited<ReturnType<typeof readPlan>>;
 export interface Prepared {
   title: string;
   builder: TransactionBuilder;
@@ -318,14 +327,21 @@ export async function prepareAction(
     address?: string;
     amount?: bigint;
     policy?: PusakaV2PolicyInput;
+    /** Never ask a connected wallet to pay the network fee (the demo: the example plan pays its own). */
+    selfFunded?: boolean;
   } = {},
 ): Promise<Prepared> {
   await chooseServer(NETWORK);
   const recipient = action === "send" && options.address ? paymentAddress(options.address, NETWORK) : null;
-  const loaded = await loadPlan(metadata);
+  // Read without the listing cache, so a payout or claim someone else sent a moment ago is seen.
+  const loaded = await loadPlan(metadata, { fresh: true });
   const { handle, state, now } = loaded;
   if (!state.planUtxo)
     throw new Error("The plan state was not found on this network.");
+  if ((action === "open" || action === "finalize") && state.status === "PAID_OUT")
+    throw new Error("This plan has already paid its heirs, so nothing was sent. Someone else may have sent the payout a moment ago.");
+  if (action === "open" && state.status === "REVIEW")
+    throw new Error("This claim is already open, so nothing was sent. Someone else may have opened it a moment ago.");
   const titles: Record<Action, string> = {
     send: "Send BCH",
     checkIn: "I’m still here",
@@ -377,7 +393,7 @@ export async function prepareAction(
       );
     const { funding } = loaded;
     const wallet = getWizardWallet();
-    const canSponsor = wallet?.network === NETWORK && funding.canSponsor;
+    const canSponsor = !options.selfFunded && wallet?.network === NETWORK && funding.canSponsor;
     if (!funding.canSelfFund && !canSponsor) {
       requirePayoutFunds(funding.self.shortfall, state.inboxBalanceSats);
       if (action === "open") throw new Error("Connect a funded wallet to pay the cost of opening this claim.");
@@ -587,33 +603,62 @@ export async function checkPlanSubmission(record: PendingPlanSubmission) {
   return record.txid;
 }
 
+/** Whether the network already has this exact transaction, in the mempool or a block. */
+async function alreadyAccepted(txid: string) {
+  try {
+    const raw = await withFailover(NETWORK, () =>
+      getFreshProvider(NETWORK).performRequest("blockchain.transaction.get", txid),
+    );
+    return typeof raw === "string" && /^(?:[a-f\d]{2})+$/i.test(raw) && transactionId(raw) === txid;
+  } catch {
+    return false;
+  }
+}
+
 export async function submit(prepared: Prepared): Promise<string> {
   await chooseServer(NETWORK);
   if (prepared.validUntil && Date.now() > prepared.validUntil)
     throw new Error("Quote expired. Close this review and get a fresh quote.");
   const hex = await finalizeBuilderTxHex(prepared.builder);
-  const provider = getProvider(NETWORK);
-  // The inputs may have changed while the owner was approving on a phone.
-  const fresh = getFreshProvider(NETWORK);
-  const available = await Promise.all(prepared.builder.inputs.map(async (input) => {
-    const coins = await fresh.getUtxosForLockingBytecode(input.unlocker.generateLockingBytecode());
-    return coins.some((coin) => coin.txid === input.txid && coin.vout === input.vout);
-  }));
-  if (available.includes(false)) throw new StaleReviewError();
+  const expectedTxid = transactionId(hex);
+  const accepted = () => {
+    recordActivity({
+      txid: expectedTxid,
+      title: prepared.title,
+      at: Date.now(),
+      plan: prepared.planCategory || "",
+      status: "accepted",
+      ...(DEMO_CATEGORIES.has((prepared.planCategory || "").toLowerCase()) && { demo: true }),
+    });
+    return expectedTxid;
+  };
+  // The inputs may have changed while the owner was approving on a phone, or another visitor spent them.
+  const available = await withFailover(NETWORK, () =>
+    Promise.all(prepared.builder.inputs.map(async (input) => {
+      const coins = await getFreshProvider(NETWORK).getUtxosForLockingBytecode(input.unlocker.generateLockingBytecode());
+      return coins.some((coin) => coin.txid === input.txid && coin.vout === input.vout);
+    })),
+  );
+  if (available.includes(false)) {
+    // An earlier attempt whose answer was lost may have gone through: then this very transaction spent them.
+    if (!prepared.metadata && await alreadyAccepted(expectedTxid)) return accepted();
+    throw new StaleReviewError();
+  }
   if (prepared.validUntil && Date.now() > prepared.validUntil)
     throw new Error(
       "Quote expired while awaiting approval. Nothing was broadcast. Get a fresh quote.",
     );
-  const expectedTxid = transactionId(hex);
   const pending = prepared.metadata && { txid: expectedTxid, title: prepared.title, metadata: prepared.metadata };
   if (pending) savePendingPlan(pending);
   // The wallet approves without broadcasting; the app broadcasts the exact reviewed transaction once.
+  const provider = getProvider(NETWORK);
   let response;
   try {
     response = await provider.sendRawTransaction(hex);
   } catch (e) {
     if (isInputConflict(e)) {
       if (pending) throw new UnconfirmedPlanSubmission(pending);
+      if (await alreadyAccepted(expectedTxid)) return accepted();
       throw new StaleReviewError();
     }
     if (isRejection(e)) {
@@ -621,6 +666,7 @@ export async function submit(prepared: Prepared): Promise<string> {
       throw new Error(`The network did not accept this transaction, so nothing was sent. ${friendlyError(e)}`);
     }
     if (pending) throw new UnconfirmedPlanSubmission(pending);
+    if (await alreadyAccepted(expectedTxid)) return accepted();
     throw new Error(
       `Submission could not be confirmed. Refresh the plan and check transaction ${expectedTxid} before trying again. ${friendlyError(e)}`,
     );
@@ -631,20 +677,14 @@ export async function submit(prepared: Prepared): Promise<string> {
       : (response as { txid?: string } | null)?.txid;
   if (typeof txid !== "string" || txid.toLowerCase() !== expectedTxid) {
     if (pending) throw new UnconfirmedPlanSubmission(pending);
+    if (await alreadyAccepted(expectedTxid)) return accepted();
     throw new Error(`Submission could not be confirmed. Check transaction ${expectedTxid} before trying again.`);
   }
   if (pending) {
     // An accepted transaction can take a moment to appear in listings. Keep both copies until it does.
     await verifyAndSavePlan(pending).catch(() => {});
   }
-  recordActivity({
-    txid: expectedTxid,
-    title: prepared.title,
-    at: Date.now(),
-    plan: prepared.planCategory || "",
-    status: "accepted",
-  });
-  return expectedTxid;
+  return accepted();
 }
 export async function getSwapQuote(amount: bigint, slippageBps: number) {
   await chooseServer(NETWORK);

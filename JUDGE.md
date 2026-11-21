@@ -6,7 +6,7 @@ is in the [README](README.md).
 | | |
 |---|---|
 | **Web app** (Bitcoin Cash mainnet) | https://astrorehan.github.io/pusaka-bch/ |
-| **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
+| **Judge path** (one real mainnet transaction, about a minute, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
 | **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ · [its demo](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) |
 | **Presentation** | [Google Slides](https://docs.google.com/presentation/d/1xBfLkjmP-jgbWSFdYGgpf9XMxtuWoqXeuoXi-L64PpE/edit?usp=sharing) ([PDF copy](docs/Pusaka-BCH-BLAZE-2026.pdf)), also linked from the banner at the top of every page of the app |
 | **Code now** | [BLAZE release branch](https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness) |
@@ -45,24 +45,30 @@ its receive address ([`PusakaV2Inbox`](contract/contracts/PusakaV2Inbox.scash)),
 
 | Do this | What you should see |
 |---|---|
-| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | A live example plan whose owner has gone quiet: six named heirs (a faraid family), three contacts, and a banner saying what anyone can do next |
-| The banner says **The review period has ended**: press **Pay the heirs** | A review sheet listing each heir by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet |
-| Press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The plan now shows **Paid to heirs** |
-| Open **View transaction** | One transaction, one output per heir: pot × share ÷ 120, rounded down |
-| If the banner says **The owner has been inactive past the deadline**, press **Open the claim**, then **Send transaction** | After the claim confirms and the network review expires, the banner offers **Pay the heirs** |
-| Open the demo again | The next example plan with something left to do |
+You play the family of an owner who went quiet. Inheritance takes time by design: a waiting time, then a review
+the owner can use to stop the claim. So the demo starts near the end of a real plan, where those steps have
+already happened on mainnet, and leaves the last one to you.
 
-The demo starts with the revised `assets-2` plan when a payout or claim is ready. Six earlier funded examples
-are available as fallbacks and are labeled in the app. The demo links to Chipnet once the mainnet examples
-have paid their heirs.
+| Do this | What you should see |
+|---|---|
+| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | **Pay 6 heirs from a real inheritance plan**: the plan's story as steps. *The owner made a plan*, *went quiet*, *a claim was opened*, *the review ended*, each done step with a link to its transaction, then **Your turn: pay the heirs** |
+| Press **Pay the heirs** | A review sheet listing each of the six heirs by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet |
+| Review the six payments, then press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The last step turns into **The heirs were paid** |
+| Open **View transaction** | One transaction, one output per heir: pot × share ÷ 120, rounded down |
+| Press **Open the next example** | Another example plan with its payout ready |
+
+Each example pays out once, so the demo keeps a pool of identical ones (four `assets-2` examples, plus six
+earlier `assets-1` ones as fallbacks) and opens one that is ready. If two people pay the same example at the
+same moment, the network accepts only one payout; the other sees that it was just paid and is offered the next
+example. If every example has been paid, the demo says so and links to the same steps on Chipnet.
 [Mainnet example records](docs/proofs/v2-live.md#mainnet)
 
 ## The owner path: five minutes, with Paytaca or Cashonize
 
 1. Open [Create a plan](https://astrorehan.github.io/pusaka-bch/new) and connect your wallet with the QR code
    (WizardConnect).
-2. Add heirs and their shares, then three trusted contacts. Any BCH addresses work. Tip: use other receive
-   addresses of your own wallet, and every payout comes back to you.
+2. Add heirs and their shares, then three trusted contacts. Use ordinary receive addresses (`bitcoincash:q…`).
+   Tip: use other receive addresses of your own wallet, and every payout comes back to you.
 3. Choose the waiting time and the review period (at least a day each), and a starting amount.
 4. Review and approve in your wallet. If your coins are spread over several addresses, press **Prepare wallet**
    first: a separate transaction that gathers them at your first receive address.
@@ -72,6 +78,20 @@ have paid their heirs.
 
 Every review sheet shows each output and fee before your wallet is asked to sign. The wallet signs only; the app
 broadcasts the exact transaction you reviewed and checks its ID.
+
+## The whole cycle yourself: about 30 minutes, on Chipnet
+
+On mainnet the waiting time and the review are at least a day each, so that a short absence never costs an owner
+their savings. To run every step yourself, use the [quick test plan on Chipnet](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/new?quick=1)
+with test BCH from a Chipnet faucet:
+
+1. Create the plan as above, with **Quick test** ticked: a 1-minute waiting time and a 512-second review, the
+   shortest the network can enforce.
+2. Wait for the waiting time to pass. The network clock moves with each block, so this takes a block or two.
+3. Press **Open the claim** on your plan. The review starts once the claim is confirmed in a block.
+4. When the review ends, press **Pay the heirs**. One transaction pays every heir.
+
+Expect about 20 to 30 minutes in all, depending on how quickly blocks arrive.
 
 ## Transactions you can open
 

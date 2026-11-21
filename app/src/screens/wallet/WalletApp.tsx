@@ -33,7 +33,7 @@ import {
   formatDuration,
   parseBch,
 } from '../../lib/format';
-import { HAS_DEMO } from '../../lib/demo';
+import { DEMO_CATEGORIES, HAS_DEMO } from '../../lib/demo';
 import { friendlyError } from '../../lib/chain/errors';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
 import { useWallet } from '../../lib/wallet';
@@ -54,6 +54,7 @@ import {
   type PrepareAction,
 } from './PlanOverview';
 import { PlanImport } from './PlanImport';
+import { DemoStory } from './DemoStory';
 import { isDemoRoute, walletPath } from './paths';
 import {
   Address,
@@ -136,6 +137,7 @@ function Balance({
   busy,
   swapPath,
   open,
+  demo = false,
 }: {
   data: api.LoadedPlan | null;
   loading: boolean;
@@ -143,10 +145,31 @@ function Balance({
   busy: boolean;
   swapPath: string;
   open: (dialog: Dialog) => void;
+  /** The demo's example plan: only its balance, since the visitor is not its owner. */
+  demo?: boolean;
 }) {
   const state = data?.state;
   const found = state && state.status !== 'UNINITIALIZED';
   const canSend = owner && state && ['ACTIVE', 'REVIEW'].includes(state.status);
+  if (demo) {
+    return (
+      <WalletFocus loading={loading && !state}>
+        <div className="pw-balance-caption">
+          <BchMark size={21} /> This example plan holds
+        </div>
+        <div className="pw-balance-value">
+          <p className="pw-balance-number num">
+            {found ? formatBch(state.spendableBalanceSats) : '—'} <span>BCH</span>
+          </p>
+          <p className="pw-balance-note">
+            {state?.status === 'PAID_OUT'
+              ? 'Paid to the heirs. A small reserve stays at the plan address.'
+              : 'The heirs share this by the plan’s rules when the payout is sent.'}
+          </p>
+        </div>
+      </WalletFocus>
+    );
+  }
   return (
     <WalletFocus loading={loading && !state}>
       <div className="pw-balance-caption">
@@ -206,8 +229,9 @@ function ActivityList({
   allPath?: string;
 }) {
   const [all, setAll] = useState(false);
+  // Payouts sent on a public example appear beside that example only, never among the visitor's own plans.
   const entries = history().filter(
-    (entry) => all || !plan || entry.plan === plan,
+    (entry) => (all || !plan || entry.plan === plan) && (!(entry.demo || DEMO_CATEGORIES.has(entry.plan)) || entry.plan === plan),
   );
   const visible = preview ? entries.slice(0, 3) : entries;
   return (
@@ -318,12 +342,15 @@ function ClaimNotice({
   connected,
   busy,
   prepare,
+  demo = false,
 }: {
   data: api.LoadedPlan | null;
   owner: boolean;
   connected: boolean;
   busy: boolean;
   prepare: PrepareAction;
+  /** On an example plan, the plan pays its own fee: a visitor's wallet is never asked to. */
+  demo?: boolean;
 }) {
   const state = data?.state;
   if (!data || !state) return null;
@@ -331,7 +358,9 @@ function ClaimNotice({
   if (state.status !== 'REVIEW' && !overdue) return null;
   const { review, funding } = data;
   const ready = Boolean(review?.ready);
-  const canPay = funding.canSelfFund || (connected && funding.canSponsor);
+  const canPay = funding.canSelfFund || (!demo && connected && funding.canSponsor);
+  // A quick test plan (waiting time under a day, Chipnet): its owner may open the claim to try the whole cycle.
+  const testPlan = data.handle.metadata.inactivityPeriodSeconds < 86_400;
   let heading: string;
   let detail: string;
   if (overdue) {
@@ -339,7 +368,9 @@ function ClaimNotice({
       ? 'Your waiting time has run out'
       : 'The owner has been inactive past the deadline';
     detail = owner
-      ? 'Anyone can now open a claim. Press “I’m still here”, or send a payment, to start the waiting time again.'
+      ? testPlan
+        ? 'Anyone can now open a claim. In this quick test you can open it yourself to try the rest, or press “I’m still here” to start the waiting time again.'
+        : 'Anyone can now open a claim. Press “I’m still here”, or send a payment, to start the waiting time again.'
       : 'Anyone can open a claim now, with no wallet of their own. The owner still gets the full review period to stop it.';
     if (!funding.canSelfFund) detail = claimFundingMessage(data, 'open this claim');
   } else if (ready) {
@@ -367,7 +398,7 @@ function ClaimNotice({
             I’m still here
           </Button>
         )}
-        {overdue && !owner && canPay && (
+        {overdue && (!owner || testPlan) && canPay && (
           <Button type="button" disabled={busy} onClick={() => void prepare('open')}>
             Open the claim
           </Button>
@@ -525,6 +556,7 @@ function WalletPage() {
     error,
     demo,
     demoExhausted,
+    demoUnreachable,
     nextDemo,
     canRefresh,
     refresh,
@@ -547,8 +579,10 @@ function WalletPage() {
   const route = location.pathname.toLowerCase().replace(/\/$/, '');
   const inherited = route.endsWith('/plan');
   const activity = route === '/wallet/activity';
+  // The demo's first screen tells the example's story; its other screens keep the plain notice.
+  const story = demo && route === '/wallet/demo';
   const recoveries = route === '/wallet' && !demo ? pendingPlanSubmissions() : [];
-  const title = activity ? 'Activity' : inherited ? 'Inheritance' : 'Wallet';
+  const title = story ? 'Live demo' : activity ? 'Activity' : inherited ? 'Inheritance' : 'Wallet';
   const state = data?.state;
   const connectedHash =
     wallet && metadata ? planAddressHash(wallet.address) : null;
@@ -556,6 +590,12 @@ function WalletPage() {
   const contact = Boolean(
     connectedHash && metadata?.contacts.includes(connectedHash),
   );
+
+  function nextExample() {
+    setTxid('');
+    setIssue('');
+    nextDemo();
+  }
 
   function open(next: Dialog) {
     setIssue('');
@@ -568,7 +608,7 @@ function WalletPage() {
     setBusy(true);
     try {
       const { prepareAction } = await import('../../lib/chain/v2');
-      const prepared = await prepareAction(metadata, action, options);
+      const prepared = await prepareAction(metadata, action, demo ? { ...options, selfFunded: true } : options);
       setReview({ prepared, back: dialog });
       setDialog(null);
     } catch (err) {
@@ -616,6 +656,25 @@ function WalletPage() {
     body = <ActivityList plan={metadata?.planCategoryHex} />;
   } else if (!metadata && loading) {
     body = <PlanLoading />;
+  } else if (demo && !metadata && (error || demoUnreachable)) {
+    body = (
+      <Card>
+        <EmptyState
+          icon={<RefreshCw size={21} />}
+          title="We couldn’t reach the Bitcoin Cash network"
+          description="The example plans are safe on the network, but the servers that read it did not answer. Try again in a moment."
+        >
+          <Button type="button" icon={<RefreshCw />} onClick={nextExample}>
+            Try again
+          </Button>
+          {NETWORK === 'mainnet' && OTHER_APP && (
+            <ButtonLink href={`${OTHER_APP}wallet/demo`} variant="secondary" icon={<ArrowUpRight />}>
+              Open the Chipnet demo
+            </ButtonLink>
+          )}
+        </EmptyState>
+      </Card>
+    );
   } else if (!metadata && error) {
     body = (
       <Card>
@@ -644,7 +703,19 @@ function WalletPage() {
             <p>This plan uses the earlier review contract. A payout signed and sponsored by its owner can complete before the review ends.</p>
           </div>
         )}
-        <ClaimNotice data={data} owner={owner} connected={Boolean(wallet)} busy={busy} prepare={prepare} />
+        {story && data ? (
+          <DemoStory
+            metadata={metadata}
+            data={data}
+            busy={busy}
+            prepare={prepare}
+            txid={txid}
+            exhausted={demoExhausted}
+            onNext={nextExample}
+          />
+        ) : (
+          <ClaimNotice data={data} owner={owner} connected={Boolean(wallet)} busy={busy} prepare={prepare} demo={demo} />
+        )}
         {!inherited && (
           <Balance
             data={data}
@@ -653,6 +724,7 @@ function WalletPage() {
             busy={busy}
             swapPath={walletPath('/wallet/swap', demo)}
             open={open}
+            demo={demo}
           />
         )}
         <Incoming state={state} busy={busy} prepare={prepare} />
@@ -742,34 +814,38 @@ function WalletPage() {
         <PageHeading
           title={title}
           description={
-            activity
+            story
+              ? 'A real inheritance plan near its end. One transaction is left, and you can send it.'
+              : activity
               ? 'Review transactions submitted from this browser.'
               : inherited
                 ? 'Manage who inherits and how claims are reviewed.'
                 : 'Manage your BCH and the inheritance plan that protects it.'
           }
         >
-          <Button
-            type="button"
-            variant="secondary"
-            icon={<FileUp />}
-            onClick={() => open('import')}
-          >
-            Open a plan
-          </Button>
+          {!demo && (
+            <Button
+              type="button"
+              variant="secondary"
+              icon={<FileUp />}
+              onClick={() => open('import')}
+            >
+              Open a plan
+            </Button>
+          )}
           {canRefresh && !activity && (
             <Button
               type="button"
               variant="secondary"
               loading={loading}
               icon={<RefreshCw className={loading ? 'pw-spin' : undefined} />}
-              onClick={() => void refresh()}
+              onClick={() => void refresh(true)}
             >
               Refresh
             </Button>
           )}
         </PageHeading>
-        {demo && <DemoNotice paidOut={data?.state?.status === 'PAID_OUT'} exhausted={demoExhausted} onNext={nextDemo} />}
+        {demo && !story && <DemoNotice paidOut={data?.state?.status === 'PAID_OUT'} exhausted={demoExhausted} onNext={nextExample} />}
         {error && <ErrorNotice>{error}</ErrorNotice>}
         {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
         {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}
@@ -894,6 +970,8 @@ function WalletPage() {
           close={() => {
             setDialog(review.back);
             setReview(null);
+            // Someone else may have acted on this example while its review was open.
+            if (demo) void refresh(true);
           }}
           done={(id) => {
             setTxid(id);
@@ -902,7 +980,7 @@ function WalletPage() {
               setRecipient('');
               setAmount('');
             }
-            void refresh();
+            void refresh(true);
           }}
         />
       )}

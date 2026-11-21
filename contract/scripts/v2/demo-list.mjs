@@ -14,7 +14,13 @@ const out = resolve(here, '../../../app/src/lib/protocol/demo-plans.mainnet.json
 const at = process.argv.indexOf('--drop');
 const drop = new Set(at > 0 ? (process.argv[at + 1] ?? '').split(',').filter(Boolean) : []);
 
-const plans = records.flatMap((file) => JSON.parse(readFileSync(resolve(here, file), 'utf8')).demo.map((d) => d.metadata));
+// Each entry is the plan's metadata, plus the transaction that created it, which the demo links as its first step.
+const plans = records.flatMap((file) =>
+  JSON.parse(readFileSync(resolve(here, file), 'utf8')).demo.map((d) => {
+    const created = d.steps?.find((step) => step.step === 'create')?.txid;
+    return created ? { ...d.metadata, createdTxid: created } : d.metadata;
+  }),
+);
 const kept = plans.filter((metadata) => !drop.has(metadata.planAddress));
 if (kept.length === 0) throw new Error('Keep at least one example plan.');
 writeFileSync(out, JSON.stringify(kept, null, 2) + '\n');

@@ -20,6 +20,7 @@ import { formatBch, parseBch } from '../../lib/format';
 import { NETWORK } from '../../lib/networkName';
 import { MAX_HEIR_NAME_LENGTH } from '../../lib/planPayload';
 import { claimFunding, DEFAULT_FEE_BUDGET } from '../../lib/protocol/claim-funding';
+import { MIN_REVIEW_SECONDS } from '../../lib/protocol/claim-primitives';
 import { encodePusakaV2PlanLink, MAX_HEIRS, MAX_INT32, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import type { SplitMode } from '../../lib/types';
 import { useWallet } from '../../lib/wallet';
@@ -75,6 +76,11 @@ function initialHeir(id: number): Heir {
 function shareUnits(value: string) {
   return /^\d+$/.test(value) && value.length < 11 ? BigInt(value) : 0n;
 }
+
+// Chipnet only: a plan whose whole cycle fits in one sitting. The network clock moves with each block, so
+// "1 minute" ends at the next block or two, and 512 seconds is the shortest review the network can enforce.
+const QUICK_TEST = NETWORK === 'chipnet';
+const QUICK_WAIT_SECONDS = 60;
 
 function daySeconds(value: string, max: number, previous?: number) {
   const days = Number(value);
@@ -162,6 +168,9 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
   const [reviewDays, setReviewDays] = useState(
     existing ? String(existing.effectiveReviewSeconds / DAY) : '7',
   );
+  const [quick, setQuick] = useState(
+    () => QUICK_TEST && !existing && new URLSearchParams(search).get('quick') === '1',
+  );
   const [amount, setAmount] = useState('0.001');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -192,16 +201,13 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     ? claimFunding(balance, shares, feeBudget, feeBudget)
     : null;
   const activeSplit = SPLITS.find((split) => split.id === mode);
-  const waitingSeconds = daySeconds(
-    days,
-    3650,
-    existing?.inactivityPeriodSeconds,
-  );
-  const reviewSeconds = daySeconds(
-    reviewDays,
-    365,
-    existing?.effectiveReviewSeconds,
-  );
+  const quickTest = quick && QUICK_TEST && !existing;
+  const waitingSeconds = quickTest
+    ? QUICK_WAIT_SECONDS
+    : daySeconds(days, 3650, existing?.inactivityPeriodSeconds);
+  const reviewSeconds = quickTest
+    ? MIN_REVIEW_SECONDS
+    : daySeconds(reviewDays, 365, existing?.effectiveReviewSeconds);
   const walletHash = wallet.wallet
     ? planAddressHash(wallet.wallet.address)
     : null;
@@ -610,6 +616,28 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                     title="Waiting and review periods"
                     description="The review period gives you time to stop a claim after it opens."
                   />
+                  {QUICK_TEST && !existing && (
+                    <div className="pw-family-parents">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={quick}
+                          onChange={(event) => {
+                            setQuick(event.target.checked);
+                            setError('');
+                          }}
+                        />{' '}
+                        Quick test: a 1-minute waiting time and the shortest review the network allows
+                      </label>
+                    </div>
+                  )}
+                  {quickTest ? (
+                    <p className="pw-setup-hint" role="note">
+                      Chipnet only, for trying the whole cycle yourself. The network clock moves with each block, so
+                      the waiting time ends at the next block or two, and the review lasts 512 seconds of network
+                      time. Expect about 20 to 30 minutes from creating the plan to paying the heirs.
+                    </p>
+                  ) : (
                   <div className="pw-field-grid">
                     <label>
                       Waiting time (days)
@@ -638,6 +666,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                       />
                     </label>
                   </div>
+                  )}
                   <p className="pw-fine">
                     Sending a payment or pressing “I’m still here” starts the
                     waiting time again. Receiving BCH leaves the clock
@@ -744,13 +773,17 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                     'Waiting time',
                     waitingSeconds === null
                       ? 'Choose a duration'
-                      : `${Number(days).toLocaleString('en-US', { maximumFractionDigits: 3 })} days`,
+                      : quickTest
+                        ? '1 minute (quick test)'
+                        : `${Number(days).toLocaleString('en-US', { maximumFractionDigits: 3 })} days`,
                   ],
                   [
                     'Claim review',
                     reviewSeconds === null
                       ? 'Choose a duration'
-                      : `${Number(reviewDays).toLocaleString('en-US', { maximumFractionDigits: 3 })} days`,
+                      : quickTest
+                        ? '512 seconds (quick test)'
+                        : `${Number(reviewDays).toLocaleString('en-US', { maximumFractionDigits: 3 })} days`,
                   ],
                 ]}
               />

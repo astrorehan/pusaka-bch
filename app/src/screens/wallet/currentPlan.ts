@@ -25,12 +25,15 @@ export interface CurrentPlan {
   demo: boolean;
   /** Every demo example has paid its heirs. */
   demoExhausted: boolean;
+  /** No demo example could be read from the network. */
+  demoUnreachable: boolean;
   /** Pick the demo example with the most left to do. */
   nextDemo(): void;
   loading: boolean;
   canRefresh: boolean;
   error: string;
-  refresh(): Promise<void>;
+  /** `fresh` reads past the network listing cache: after a transaction, or when the visitor asks. */
+  refresh(fresh?: boolean): Promise<void>;
 }
 
 export function useCurrentPlan() {

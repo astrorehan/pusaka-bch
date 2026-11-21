@@ -103,13 +103,17 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("wallet/demo");
   await expect(page.locator("#splash")).toHaveCount(0);
-  await expect(
-    page.getByRole("note").filter({ hasText: "Live example plan on Chipnet" }),
-  ).toBeVisible();
+  // The demo opens on the example's story: what already happened, each with its transaction, then the visitor's turn.
+  const story = page.locator(".pw-story");
+  await expect(story.getByText("Live demo · Chipnet, the test network")).toBeVisible({ timeout: 30_000 });
+  await expect(story.getByText("The owner made a plan", { exact: true })).toBeVisible();
+  await expect(story.getByRole("link", { name: "Create your own plan" })).toBeVisible();
+  // The demo needs no wallet, so it offers none.
+  await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toHaveCount(0);
   await expect(page.locator(".pw-balance-number")).toContainText(/\d/, {
     timeout: 30_000,
   });
-  await expect(page.getByText("Protected BCH balance", { exact: true })).toBeVisible();
+  await expect(page.getByText("This example plan holds", { exact: true })).toBeVisible();
   await expect(page.locator(".pw-error")).toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath("wallet-live-desktop.png"),
@@ -122,15 +126,8 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await copy.click();
   await expect(copy.getByText("Copied", { exact: true }).first()).toBeVisible();
   expect(inboxAddresses).toContain(await page.locator("body").getAttribute("data-copied-address"));
-  const receive = page.getByRole("button", { name: "Receive", exact: true });
-  await receive.click();
-  const receiveSheet = page.getByRole("dialog", { name: "Receive BCH" });
-  await expect(
-    receiveSheet.getByRole("button", { name: "Copy receive address" }),
-  ).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(receiveSheet).toHaveCount(0);
-  await expect(receive).toBeFocused();
+  // Only the owner spends from a plan: the demo shows the example's balance without wallet actions.
+  await expect(page.getByRole("button", { name: "Receive", exact: true })).toHaveCount(0);
   await page.getByRole("link", { name: "Inheritance", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Heirs", exact: true }),

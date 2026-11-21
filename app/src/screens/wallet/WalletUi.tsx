@@ -312,8 +312,10 @@ export function TransactionReview({
   const [revised, setRevised] = useState<Prepared | null>(null);
   const [stale, setStale] = useState(false);
   const [recovery, setRecovery] = useState<PendingPlanSubmission | null>(null);
+  // The refreshed review could not be built (the step was already done by someone else): only Back is left.
+  const [ended, setEnded] = useState(false);
   const transaction = revised ?? prepared;
-  const rebuild = stale ? transaction.rebuild : undefined;
+  const rebuild = stale && !ended ? transaction.rebuild : undefined;
   const walletApproval = transaction.walletApproval ?? true;
   const actionLabel = walletApproval ? 'Approve in wallet' : 'Send transaction';
 
@@ -323,7 +325,12 @@ export function TransactionReview({
     setError('');
     try {
       if (rebuild) {
-        setRevised(await rebuild());
+        try {
+          setRevised(await rebuild());
+        } catch (err) {
+          setEnded(true);
+          throw err;
+        }
         setStale(false);
       } else {
         const api = await import('../../lib/chain/v2');
@@ -331,6 +338,17 @@ export function TransactionReview({
         done(txid, transaction);
       }
     } catch (err) {
+      if (err instanceof StaleReviewError && !walletApproval && transaction.rebuild) {
+        // Nothing to sign: rebuild at once. Usually someone else just sent this step, and the rebuild says so.
+        try {
+          setRevised(await transaction.rebuild());
+          setError('The plan changed on the network a moment ago, so this review was refreshed. Check it again before sending.');
+        } catch (rebuildError) {
+          setEnded(true);
+          setError(friendlyError(rebuildError));
+        }
+        return;
+      }
       if (err instanceof StaleReviewError) setStale(true);
       if (err instanceof UnconfirmedPlanSubmission) setRecovery(err.record);
       setError(friendlyError(err));
@@ -363,7 +381,7 @@ export function TransactionReview({
           <Button
             type="button"
             loading={busy}
-            disabled={stale && !rebuild}
+            disabled={(stale && !rebuild) || ended}
             icon={<ArrowUpRight />}
             onClick={() => void approve()}
           >

@@ -2,7 +2,7 @@ import { friendlyError } from '../../lib/chain/errors';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import type { LoadedPlan } from '../../lib/chain/v2';
-import { DEMO_PLAN_DATA, HAS_DEMO } from '../../lib/demo';
+import { DEMO_CATEGORIES, DEMO_PLAN_DATA, HAS_DEMO } from '../../lib/demo';
 import { CURRENT_ASSET_REVISION, readV2Metadata, type PusakaV2PlanMetadata as Metadata } from '../../lib/protocol/plan-metadata';
 import { importPlan, savePlan, savedPlans } from '../../lib/walletData';
 import type { CurrentPlan } from './currentPlan';
@@ -18,15 +18,19 @@ const DEMO_PLANS: Metadata[] = DEMO_PLAN_DATA.flatMap((value) => {
   }
 });
 
+type DemoPick = Snapshot & { unread: number };
+
 /**
- * Prefer actionable plans on the current revision, with earlier funded examples as fallbacks.
+ * Pick the example with the most a visitor can do at once: a payout ready to send (current revision first),
+ * then a claim ready to open, then one under review. Paid examples come last, and `unread` counts the examples
+ * the network could not be asked about, so "all paid" is said only when every example was checked.
  */
-async function pickDemo(): Promise<Snapshot> {
-  if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '' };
+async function pickDemo(): Promise<DemoPick> {
+  if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '', unread: 0 };
   const { loadPlan } = await import('../../lib/chain/v2');
   const loaded: Snapshot[] = await Promise.all(
     DEMO_PLANS.map((plan) =>
-      loadPlan(plan).then(
+      loadPlan(plan, { fresh: true }).then(
         (data) => ({ plan, data, error: '' }),
         (error: unknown) => ({ plan, data: null, error: friendlyError(error) }),
       ),
@@ -38,8 +42,8 @@ async function pickDemo(): Promise<Snapshot> {
     const current = plan.protocolRevision === CURRENT_ASSET_REVISION;
     if (state.status === 'PAID_OUT') return 8;
     if (funding.canSelfFund) {
-      if (state.status === 'REVIEW' && review?.ready) return current ? 0 : 2;
-      if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline && funding.canSelfFund) return current ? 1 : 3;
+      if (state.status === 'REVIEW' && review?.ready) return current ? 0 : 1;
+      if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline) return current ? 2 : 3;
       if (state.status === 'REVIEW') return current ? 4 : 5;
     }
     return current ? 6 : 7;
@@ -48,7 +52,8 @@ async function pickDemo(): Promise<Snapshot> {
   // time rarely reach the same plan, where the second payout would find its inputs already spent.
   const best = Math.min(...loaded.map(rank));
   const ties = loaded.filter((snapshot) => rank(snapshot) === best);
-  return ties[Math.floor(Math.random() * ties.length)];
+  const unread = loaded.filter((snapshot) => !snapshot.data).length;
+  return { ...ties[Math.floor(Math.random() * ties.length)], unread };
 }
 
 export function WalletPlanLayout() {
@@ -71,10 +76,13 @@ export function WalletPlanLayout() {
       };
     }
   }, [hash, shared]);
-  const [demoPick, setDemoPick] = useState<Snapshot | null>(null);
-  // The pick itself had paid out: every example here has paid its heirs (or none could be read).
+  const [demoPick, setDemoPick] = useState<DemoPick | null>(null);
+  // The best pick had already paid out, and every example was read: all of them have paid their heirs.
   const demoExhausted =
-    DEMO_PLANS.length === 1 || (demoPick?.data ? demoPick.data.state.status === 'PAID_OUT' : false);
+    DEMO_PLANS.length === 1 ||
+    (demoPick?.data ? demoPick.data.state.status === 'PAID_OUT' && demoPick.unread === 0 : false);
+  // None of the examples could be read: the network servers did not answer.
+  const demoUnreachable = Boolean(demoPick && !demoPick.data && DEMO_PLANS.length > 1);
   const nextDemo = useCallback(() => setDemoPick(null), []);
   const selected = requestedDemo ? (demo ? demoPick?.plan ?? null : null) : shared ? fromLink?.plan ?? null : saved;
   const readEnabled = Boolean(selected && !activity && route !== '/new' && route !== '/wallet/new');
@@ -84,10 +92,11 @@ export function WalletPlanLayout() {
     if (!demo || demoPick) return;
     let live = true;
     pickDemo()
-      .catch((error: unknown): Snapshot => ({
+      .catch((error: unknown): DemoPick => ({
         plan: DEMO_PLANS[0],
         data: null,
         error: friendlyError(error),
+        unread: DEMO_PLANS.length,
       }))
       .then((pick) => {
         if (!live) return;
@@ -108,15 +117,16 @@ export function WalletPlanLayout() {
     setSaved(plan);
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (fresh = false) => {
     if (!selected || !readEnabled) return;
     setReading(selected);
     const request = import('../../lib/chain/v2')
-      .then(({ loadPlan }) => loadPlan(selected))
+      .then(({ loadPlan }) => loadPlan(selected, { fresh }))
       .then((data) => {
         if (pending.current !== request) return;
         setSnapshot({ plan: selected, data, error: '' });
-        if (fromLink && savedLink.current !== selected) {
+        // A link to a public example plan only shows it. It never becomes this browser's own wallet.
+        if (fromLink && savedLink.current !== selected && !DEMO_CATEGORIES.has(selected.planCategoryHex.toLowerCase())) {
           savedLink.current = selected;
           selectPlan(selected);
         }
@@ -169,6 +179,7 @@ export function WalletPlanLayout() {
     data: current?.data ?? null,
     demo,
     demoExhausted,
+    demoUnreachable,
     nextDemo,
     loading: Boolean(readEnabled && (!current || reading === selected)) || (demo && !demoPick),
     canRefresh: readEnabled,
