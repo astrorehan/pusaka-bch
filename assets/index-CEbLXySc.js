@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-P2Xu9kJm.js";import{n as e,r as t,t as n}from"./theme-_WsZoVJg.js";var r=document.querySelector(`#docs-theme`);if(r){let i=e(),a=()=>{r.textContent=t(i)?`Light theme`:`Dark theme`};r.addEventListener(`click`,()=>{i=t(i)?`light`:`dark`,n(i),a()}),window.matchMedia(`(prefers-color-scheme: dark)`).addEventListener(`change`,a),a(),r.hidden=!1}

@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>On-chain record · Pusaka docs</title>
+    <meta name="description" content="Guides and technical documentation for the Pusaka inheritance wallet on Bitcoin Cash." />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/favicon.svg" />
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+  </head>
+  <body>
+    <a class="docs-skip" href="#docs-main">Skip to content</a>
+      <header class="docs-header">
+        <div class="docs-header__inner">
+          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
+          <div class="docs-header__links">
+            <button id="docs-theme" type="button" hidden>Dark theme</button>
+            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/" aria-current="page">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></aside>
+        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
+    <a href="/pusaka-bch/docs/">Overview</a>
+    <div class="docs-nav__group">
+      <p>Guides</p>
+      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Architecture</p>
+      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>Verification</p>
+      <ul><li><a href="/pusaka-bch/docs/network-record/" aria-current="page">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+    </div><div class="docs-nav__group">
+      <p>SolidCash</p>
+      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+    </div>
+  </nav></details>
+        <main id="docs-main" tabindex="-1" class="docs-article">
+          <header class="docs-article__heading"><h1 id="pusaka-v2-on-the-network">Pusaka v2 on the network</h1>
+</header>
+  <nav class="docs-toc docs-toc--desktop" aria-label="On this page"><p>On this page</p><ul><li class="docs-toc__h2"><a href="#mainnet">Mainnet</a></li><li class="docs-toc__h3"><a href="#revised-review-anchor-assets-2">Revised review anchor (assets-2)</a></li><li class="docs-toc__h3"><a href="#earlier-release-assets-1">Earlier release (assets-1)</a></li><li class="docs-toc__h2"><a href="#chipnet-test-network">Chipnet (test network)</a></li><li class="docs-toc__h3"><a href="#the-whole-lifecycle-one-plan-2">The whole lifecycle, one plan</a></li><li class="docs-toc__h3"><a href="#example-plans-for-visitors-2">Example plans for visitors</a></li></ul></nav>
+    <details class="docs-toc docs-toc--mobile"><summary>On this page</summary><nav aria-label="On this page"><ul><li class="docs-toc__h2"><a href="#mainnet">Mainnet</a></li><li class="docs-toc__h3"><a href="#revised-review-anchor-assets-2">Revised review anchor (assets-2)</a></li><li class="docs-toc__h3"><a href="#earlier-release-assets-1">Earlier release (assets-1)</a></li><li class="docs-toc__h2"><a href="#chipnet-test-network">Chipnet (test network)</a></li><li class="docs-toc__h3"><a href="#the-whole-lifecycle-one-plan-2">The whole lifecycle, one plan</a></li><li class="docs-toc__h3"><a href="#example-plans-for-visitors-2">Example plans for visitors</a></li></ul></nav></details>
+  <article class="docs-prose"><p>Generated from the public records of <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/scripts/v2/live.ts"><code>contract/scripts/v2/live.ts</code></a> (<code>scripts/v2/.live-&lt;network&gt;[-assets-2].json</code>, transaction IDs and plan rules) by <a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/contract/scripts/v2/live-report.py"><code>live-report.py</code></a>. The script builds every transaction with the same builders the app uses (<a href="https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness/app/src/lib/protocol/"><code>app/src/lib/protocol/</code></a>).</p>
+<h2 id="mainnet">Mainnet</h2>
+<h3 id="revised-review-anchor-assets-2">Revised review anchor (<code>assets-2</code>)</h3>
+<h4 id="the-whole-lifecycle-one-plan">The whole lifecycle, one plan</h4>
+<p>Heirs and shares (of 24): Wife 3, Son 14, Daughter 7. Three trusted contacts. Waiting time 30 days; review 512 seconds; fee budget 5,000 sats. Revision <code>assets-2</code>.</p>
+<p>Plan link: <a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI0ZGM3NGMzNTZhNWM5YzM4OTNjMjgzNmMwMjZhMTM5YWFkYjc5MmZmYmIwMDZiNmNiM2YwZWJhMTNhOGE2OWI5Iiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydm1xd25zNnJ1bGVmeGQybHQzeHV1d3hzNHE2cW5rdXNncW5jMG1xMmM5eWd5aGNkNTIzN3NzMHU5enV1IiwicGxhbkxvY2tIZXgiOiJhYTIwMzYwNzRlMWExZjNmOTQ5OWFhZmFlMjZlNzFjNjg1NDFhMDRlZGM4MjAxM2MzZjYwNTYwYTQ0MTJmODZkMTUxZjg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnIwZ3VyeTgzMmg2cWU3YXp4NDd6dnM0bW5nbjc1MHp2MDBnZWR1eGd4NHVoOXpndnR2cHJrbWZydHdxNzQiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGQxYzE5MGYxNTVmNDBjZmJhMjM1N2MyNjQyYmI5YTI3ZWEzYzRjN2JkMTk2ZjBjODM1Nzk3Mjg5MGM1YjAyM2I4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB3cHF1YTd6dmVlbWQwam53M3h6ajJwcmYybHc0Zng2eGsyemRoYzB3ZnFzbTJzNHU0eDc1ZnU0bDZnbmsiLCJpbmJveExvY2tIZXgiOiJhYTIwODIwZTc3YzI2NjczYjZiZTUzNzQ0YzI5MjgyMzRhYmVlYWE0ZGEzNTk0MjZkZjBmNzI0MTBkYWExNWU1NGRlYTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjAwOGQyNzAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTE4MDAwMDAwMDM5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMDMwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMGUwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MDcwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiYjhmMmI5MDgzZmEwZTYwN2FiMGU0MjU4NjJiYzNjMjkyZTVlOGQ3ZmY1NGI1ODYwMTI3NjA1NmMzYjcwMmY0ZiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY2NTA1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6MjU5MjAwMCwicmV2aWV3U2VxdWVuY2UiOjQxOTQzMDUsInJldmlld1VuaXRzIjoxLCJlZmZlY3RpdmVSZXZpZXdTZWNvbmRzIjo1MTIsImZlZUJ1ZGdldCI6IjUwMDAiLCJjb250YWN0cyI6WyI2NzhmOTcwM2M4M2JjNjBiZjNiMzQ2M2YzZTA5NTU3MjdmYjdjNzdhIiwiZTMzMTZmYTQ1N2RmZGIxMmY2MmEwZDk5M2Y0ZDMyYmUxMTI0MDhiZSIsImY5ZjVkMTk4MWFlNWM0M2NiMTY3MmU1MDIwMGVlZmUzZjNmN2Q4YjkiXSwidG90YWxTaGFyZXMiOiIyNCIsImhlaXJzIjpbeyJwa2hIZXgiOiI5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczIiwic2hhcmUiOiIzIiwibGFiZWwiOiJXaWZlIn0seyJwa2hIZXgiOiJjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzIiwic2hhcmUiOiIxNCIsImxhYmVsIjoiU29uIn0seyJwa2hIZXgiOiJmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2Iiwic2hhcmUiOiI3IiwibGFiZWwiOiJEYXVnaHRlciJ9XX0">open it in the app</a>. State now: <strong>paid</strong>.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Time</th>
+<th>Transaction</th>
+<th>Size</th>
+<th>Fee</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>20 Nov, 10:07:29 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/ce41df221e15a53e98bb9a2f3a827cc522a05d9b382533632a08065cde0660b6"><code>ce41df22…60b6</code></a></td>
+<td>315 bytes</td>
+<td>335 sats</td>
+<td></td>
+</tr>
+<tr>
+<td>receive</td>
+<td>20 Nov, 10:07:55 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/6ca113f671ea728f252c9d64af4e9169bae696b3699aa8d395d5e55e90c8fee1"><code>6ca113f6…fee1</code></a></td>
+<td>195 bytes</td>
+<td></td>
+<td>3100 sats to the receive address</td>
+</tr>
+<tr>
+<td>collect</td>
+<td>20 Nov, 10:08:15 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/6933d723d813ed1db5990404fe9a42501c250dd3c493efdf1507fe3aecca8e39"><code>6933d723…8e39</code></a></td>
+<td>4,405 bytes</td>
+<td>4,425 sats</td>
+<td>fee paid by the owner's wallet; deadline unchanged: a receipt is not proof of life</td>
+</tr>
+<tr>
+<td>send</td>
+<td>20 Nov, 10:08:33 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/b6d358769ea9715686d3d42c872092924413f205a56bd3032f13883478ad76d0"><code>b6d35876…76d0</code></a></td>
+<td>4,089 bytes</td>
+<td>4,109 sats</td>
+<td>paid 1000 sats; deadline moved to 2026-12-20T09:21:45.000Z</td>
+</tr>
+<tr>
+<td>contact 1 confirms</td>
+<td>20 Nov, 10:08:54 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/1bf1290660538e28b3c3370f614fe44bed75f6cc802b872907e952d3624f00b0"><code>1bf12906…00b0</code></a></td>
+<td>4,178 bytes</td>
+<td>4,198 sats</td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 2 confirms</td>
+<td>20 Nov, 10:09:15 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/d67385bf569de43505549743b0e4fefad225d979fd6eba8498a5e1623aba59b4"><code>d67385bf…59b4</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>owner-sponsored early payout refused</td>
+<td>20 Nov, 10:09:29 UTC</td>
+<td>refused by the network</td>
+<td></td>
+<td></td>
+<td>the transaction was rejected by network rules. non-BIP68-final (code 64)</td>
+</tr>
+<tr>
+<td>stop claim</td>
+<td>20 Nov, 10:09:44 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/a723442a22bd6037dfba1f1ff7db4f466d522d3120f473df41e33843a7fa74fb"><code>a723442a…74fb</code></a></td>
+<td>4,341 bytes</td>
+<td>4,361 sats</td>
+<td>claim cancelled; earlier confirmations no longer count</td>
+</tr>
+<tr>
+<td>contact 2 confirms again</td>
+<td>20 Nov, 10:10:06 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/3fb4f7a6f6ef1400f8743b6b6e1da6669117f8517fb696430839fd499cc7342c"><code>3fb4f7a6…342c</code></a></td>
+<td>4,178 bytes</td>
+<td>4,198 sats</td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 3 confirms</td>
+<td>20 Nov, 10:10:28 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/7cd4fdf8af4c3582476a42b8c53db3a622de30ad4a25643d9eec429299a947e8"><code>7cd4fdf8…47e8</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>pay the heirs</td>
+<td>20 Nov, 10:52:27 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/af544d637c5e7d271a6334d53a9b82ae928ab1c0223cac6fd16632fd550bf011"><code>af544d63…f011</code></a></td>
+<td>4,419 bytes</td>
+<td>4,439 sats</td>
+<td>Wife 887, Son 4141, Daughter 2070</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="example-plans-for-visitors">Example plans for visitors</h4>
+<p><a href="https://astrorehan.github.io/pusaka-bch/wallet/demo">Open the live demo</a> to try a claim or a payout without a wallet. Each plan has the same six-heir faraid family and a one-minute waiting time.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Review</th>
+<th>Created</th>
+<th>Claim opened</th>
+<th>Heirs paid</th>
+<th>Plan link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>demo plan 1</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/8232c93026f6f84a14d60e2a1fcd850bd68875bd48f952e2d6076c8efa86fef9"><code>8232c930…fef9</code></a></td>
+<td><a href="https://explorer.bch.ninja/tx/401cd17d920cd905efba521acc1c20585548131b98928d8b5dfa59c62c82d675"><code>401cd17d…d675</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0yIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJiZTBiZGYwYTJjZGY2ZDk5NWY3MzA2ODc1M2I0MGI2NjYzNmIyY2Y1YzBlODkyZjg4YzM0MjY3ZDg3ZTkyYWFjIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyMG4ybDI2czVjN3NraGZmbmw5NzIzYTRhNjA1MzA1NzM4MzRyMmZ3bnpwdmphMnJrbWQ0cXR1ZjlqMng0IiwicGxhbkxvY2tIZXgiOiJhYTIwZTZhZmFiNTBhNjNkMGI1ZDI5OWZjYmU1NDdiNWVlOWY0OGJlOWU4OWUzNTFhOTJlOTg4MmM5NzU0M2I2ZGI1MDg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ2cHhhNXlja3Nsc211dGxsYXN5cGRqaGhwem54aHZjczhlNzBucWRoZzJsYThqY2s2ajN5enAzZXl1OHUiLCJhbmNob3JMb2NrSGV4IjoiYWEyMDAyNmVkMDk4YjQzZjBkZjE3ZmZmNjA0MGI2NTdiODQ1MzM1ZDk4ODFmM2U3Y2MwZGJhMTVmZTllNThiNmE1MTI4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB2ZG42dnE1emYwd24wd3h1NmpoMnd5amp1NTR6OXU5d2NsOWNhcmh1ZmFhNWF6YzM1dDBqcnZqN3dua2oiLCJpbmJveExvY2tIZXgiOiJhYTIwMWIzZDMwMTQxMjVlZTliZGM2ZTZhNTc1Mzg5Mjk3Mjk1MTE3ODU3NjNlNWM3NDc3ZTI3YmRhNzQ1ODhkMTZmOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY2NTA1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Payouts made by visitors appear in each plan's history on the explorer.</p>
+<h3 id="earlier-release-assets-1">Earlier release (<code>assets-1</code>)</h3>
+<h4 id="the-whole-lifecycle-one-plan-1">The whole lifecycle, one plan</h4>
+<p>Heirs and shares (of 24): Wife 3, Son 14, Daughter 7. Three trusted contacts. Waiting time 30 days; review 512 seconds; fee budget 5,000 sats. Revision <code>assets-1</code>.</p>
+<p>Plan link: <a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJkMjdiM2JkMWRkNmI1ZjM1ZDg1MmRlNjEwMjdmODU3YmNiY2Y5ZjYxMmJjYzE2OWE4N2QzMGVkOTYzZjY3YjEwIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyZDkzM2szMGV6MnN5aGoydnA2Z2NrNmdoMGp5eXk3ZW45bWVobHZodTZoc3h5czdkOHF5amQ1MDZ0dDVlIiwicGxhbkxvY2tIZXgiOiJhYTIwNGIxOGRhMmZjODk1MDI1ZTRhNjA3NDhjNWI0OGJiZTQ0MjEzZDk5OTc3OWJmZDk3ZTZhZjAzMTIxZTY5YzA0OTg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ3ZWo0cXdleGFwMm15eGV2aGF5djk4Zjh3ZmV4bHR6Zzdudm44aHh2cmM4NXhzYWYzZzZ2ODRnc3o1ZDQiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGIzMmE4MWQ5Mzc0MmFkOTBkOTY1ZmE0NjE0ZTkzYjkzOTM3ZDYyNDdhNmM5OWVlNjYwZjA3YTFhMWQ0YzUxYTY4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB2OXh1YWF0NW1oejY3NGZma3k4dXduNTZwdnFrbXdjcTdoMm4zNHY0NnFjaHFxM3BubWF3NnJ5djQ3MzgiLCJpbmJveExvY2tIZXgiOiJhYTIwMGE2ZTc3YWJhNmVlMmQ3YWE5NGQ4ODdlM2E3NGQwNTgwYjZkZDgwN2FlYTljNmFjYWU4MThiODAxMTBjZjdkNzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjAwOGQyNzAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTE4MDAwMDAwMDM5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMDMwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMGUwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MDcwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiYjhmMmI5MDgzZmEwZTYwN2FiMGU0MjU4NjJiYzNjMjkyZTVlOGQ3ZmY1NGI1ODYwMTI3NjA1NmMzYjcwMmY0ZiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MTU1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6MjU5MjAwMCwicmV2aWV3U2VxdWVuY2UiOjQxOTQzMDUsInJldmlld1VuaXRzIjoxLCJlZmZlY3RpdmVSZXZpZXdTZWNvbmRzIjo1MTIsImZlZUJ1ZGdldCI6IjUwMDAiLCJjb250YWN0cyI6WyI2NzhmOTcwM2M4M2JjNjBiZjNiMzQ2M2YzZTA5NTU3MjdmYjdjNzdhIiwiZTMzMTZmYTQ1N2RmZGIxMmY2MmEwZDk5M2Y0ZDMyYmUxMTI0MDhiZSIsImY5ZjVkMTk4MWFlNWM0M2NiMTY3MmU1MDIwMGVlZmUzZjNmN2Q4YjkiXSwidG90YWxTaGFyZXMiOiIyNCIsImhlaXJzIjpbeyJwa2hIZXgiOiI5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczIiwic2hhcmUiOiIzIiwibGFiZWwiOiJXaWZlIn0seyJwa2hIZXgiOiJjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzIiwic2hhcmUiOiIxNCIsImxhYmVsIjoiU29uIn0seyJwa2hIZXgiOiJmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2Iiwic2hhcmUiOiI3IiwibGFiZWwiOiJEYXVnaHRlciJ9XX0">open it in the app</a>. State now: <strong>paid</strong>.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Time</th>
+<th>Transaction</th>
+<th>Size</th>
+<th>Fee</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>20 Nov, 09:18:31 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/c6f33435902959af93d2e557b546a2a58ed8e9b193a418129342f9c23605eaad"><code>c6f33435…eaad</code></a></td>
+<td>315 bytes</td>
+<td>335 sats</td>
+<td></td>
+</tr>
+<tr>
+<td>receive</td>
+<td>20 Nov, 09:18:50 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/a65cb70f9a19e8d908312886b772e0634248cf4cb317a1d5fab7dcaa317d03fd"><code>a65cb70f…03fd</code></a></td>
+<td>195 bytes</td>
+<td></td>
+<td>7600 sats to the receive address</td>
+</tr>
+<tr>
+<td>collect</td>
+<td>20 Nov, 09:19:05 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/091172af383a4f80ae7caaa9fa5b41be028be0d69d78ea0baca3ccdd0c19d07d"><code>091172af…d07d</code></a></td>
+<td>4,405 bytes</td>
+<td>4,425 sats</td>
+<td>fee paid by the owner's wallet; deadline unchanged: a receipt is not proof of life</td>
+</tr>
+<tr>
+<td>send</td>
+<td>20 Nov, 09:19:34 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/b15d847046b0ea643e1fa72273b6166e6b53e6260ba195437a9b1eaf00a92c47"><code>b15d8470…2c47</code></a></td>
+<td>4,089 bytes</td>
+<td>4,109 sats</td>
+<td>paid 2000 sats; deadline moved to 2026-12-20T08:42:35.000Z</td>
+</tr>
+<tr>
+<td>contact 1 confirms</td>
+<td>20 Nov, 09:19:53 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/10f3f8d63946677884907638e11532dd72e931d908d71d26953c141f04773c9b"><code>10f3f8d6…3c9b</code></a></td>
+<td>4,178 bytes</td>
+<td>4,198 sats</td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 2 confirms</td>
+<td>20 Nov, 09:20:13 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/c314e08c29d775b891cd6f58ad40e995ff9367311e7661b15fc9c5aa8911794c"><code>c314e08c…794c</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>early payout refused</td>
+<td>20 Nov, 09:20:17 UTC</td>
+<td>refused by the network</td>
+<td></td>
+<td></td>
+<td>the transaction was rejected by network rules. non-BIP68-final (code 64)</td>
+</tr>
+<tr>
+<td>stop claim</td>
+<td>20 Nov, 09:20:49 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/55c065a1577a58ad50015f96e285875d239f3bc73e34ba1b6677ce8c5e6640de"><code>55c065a1…40de</code></a></td>
+<td>4,257 bytes</td>
+<td>4,277 sats</td>
+<td>claim cancelled; earlier confirmations no longer count</td>
+</tr>
+<tr>
+<td>contact 2 confirms again</td>
+<td>20 Nov, 09:21:09 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/5f8ffd9ef04497643ec6ddbd90bc058e4c6ebaeeeb647b20b0784739066cca79"><code>5f8ffd9e…ca79</code></a></td>
+<td>4,178 bytes</td>
+<td>4,198 sats</td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 3 confirms</td>
+<td>20 Nov, 09:21:29 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/3560d7d3ec564b201153836ee52e08d9a19ebc0637b85846f2df68b3a331bf19"><code>3560d7d3…bf19</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>pay the heirs</td>
+<td>20 Nov, 09:26:37 UTC</td>
+<td><a href="https://explorer.bch.ninja/tx/ad0e1a36ddf25e510ecb9901925953007a0d922d3253a220c4d36e1fc7634689"><code>ad0e1a36…4689</code></a></td>
+<td>4,335 bytes</td>
+<td>4,355 sats</td>
+<td>Wife 2575, Son 12016, Daughter 6008</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="example-plans-for-visitors-1">Example plans for visitors</h4>
+<p>These earlier examples are available as fallbacks when the current revision has no action ready. Each plan has the same six-heir faraid family and a one-minute waiting time.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Review</th>
+<th>Created</th>
+<th>Claim opened</th>
+<th>Heirs paid</th>
+<th>Plan link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>demo plan 1</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/dec89643904f14d9c6392fdadddc7765b8d05444942d8bc09920aefd27f30f44"><code>dec89643…0f44</code></a></td>
+<td><a href="https://explorer.bch.ninja/tx/0714e2fd87a8d51bf92e3f04690687072894d762fc1aa40ad0c53a66c2bdbc01"><code>0714e2fd…bc01</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIwMjc0MWYxMGZlMGUxNmE4ZWZjYmE4NTMxMjc0ZWVhMWQ5NDI2MThhYzI3NDIyYWY5MmEzNGQyMDM0YTAzNjdhIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyMG42ejU4bTMzajhjc2EzNzlrZnZyeHM3a3hjOTVqNDI4d2ZrNHp3ZDdrczc3M2V6dnZtejVheG5ja2Y0IiwicGxhbkxvY2tIZXgiOiJhYTIwZTdhMTUwZmI4YzY0N2M0M2IxZjE2Yzk2MGNkMGY1OGQ4MmQyNTU1MWRjOWI1NDRlNmZhZDBmN2EzOTEzMTliMTg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ3c2xqbW03MzJ1cndod2M3bjA1bTB5d2wzbWFqc3ZhcjB2cnpud3p5NzR5NXJoYTAwMjJ6eDBzOTg1cWMiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGExZjk2ZjdlOGFiODM3NWRkOGY0ZGY0ZGJjOGVmYzc3ZDk0MTlkMWJkODMxNGRjMjI3YWE0YTBlZmQ3YmQ0YTE4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB3OXloZ2ZmNzZ3YXlodjZzYThuODBkcjJ0NWFra2w0bGhobmRubjdxZGhwcTRqY2tweXQyOGNuanZhdWQiLCJpbmJveExvY2tIZXgiOiJhYTIwOGE0YmExMjlmNjlkZDI1ZDlhODc0ZjMzYmRhMzUyZTlkYjViZjVmZGVmMzZjZTdlMDM2ZTEwNTY1OGIwNDhiNTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 2</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/15dc2c3e47afc8ca119470dda520e0174577ea2de5533c6858d4b4622eec7a1b"><code>15dc2c3e…7a1b</code></a></td>
+<td><a href="https://explorer.bch.ninja/tx/ca161bb4568fd6f76446de1925eb1d92bda40f8b1c842c2bcd7ad1b5954b931e"><code>ca161bb4…931e</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI3ZTEwNGI5NjdhYWFjMDdlYzAyN2UwOGFmNzllODUxMWMwMDU1MmQ4N2M3OTkwMTZkZjhiNzZjZGM0MWRhNDdlIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyZGY0Mzc4Z2F5ZWdxOTVnZDVta3l1dmcyazVxZHY4cTNqOTBma3lyZmhuOXdnOXlkem1xcTM5dXd2azlsIiwicGxhbkxvY2tIZXgiOiJhYTIwNTM1OGY4ZThlOTMyODAxNjg4NmQzNzYyNzE4ODU1YTgwNmIwZTA4YzhhZjRkODgzNGRlNjU3MjBhNDY4YjYwMDg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnIwZDNmc3FhZ2xrNHVzcjk0cmV2Njl0NWpyNmo0MzVsdmFuOGpqNDJseXF1ZXV5d3FkeWt2bG54czRhbjYiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGRiMTRjMDFkNDdlZDVlNDA2NWE4ZjJjZDE1NzQ5MGY1MmFjNjlmNjc2Njc5NGFhYWY5MDFjY2YwOGUwMzQ5NjY4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnB3ODY4NHZremRuNHJyZ2c3bXhsc2duZTh1dTludThzdDdobHl3c3MwNjM0YXJ5aGt4cmUydHBhcWdnMDgiLCJpbmJveExvY2tIZXgiOiJhYTIwOGZhM2Q1OTYxMzY3NTE4ZDA4ZjZjZGY4MjI3OTNmMzg1OWYwZjA1ZmFmZjIzYTEwN2VhMzVlOGM5N2IxODc5NTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 3</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/e5e55c4a06927072f308897d774b865273f18b2bdb6d6dbf9f4709db6fbd656b"><code>e5e55c4a…656b</code></a></td>
+<td><a href="https://explorer.bch.ninja/tx/8f80ba1124b698ad44e9ed73c5e1c88eaf8bc28820f8061f2ad08b429f352edc"><code>8f80ba11…2edc</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI4ZGFjMTBmMjE0NjYyYzJiMjBiZGRjYzJlNWEwODkzMTU0NTY5OTc5Yjk5ZTMxZThlMDNhZGI5MGQ0NDI4ZmFlIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydzk3bjJnajR2eTh6ano5MnZ1dmtnbnk3bHd6a21hZXo1bDduZ3k3bGRsNmZ1MHNkcG5razR2ZWFrNWNlIiwicGxhbkxvY2tIZXgiOiJhYTIwOGJlOWE5MTJhYjA4NzE0ODQ1NTMzOGNiMjI2NGY3ZGMyYjZmYjkxNTNmZTlhMDllZmI3ZmE0ZjFmMDY4Njc2Yjg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ3YWxjOHJmNGd4OWhxbmh3YWNxd3FzNDlqanZ1MjBwbTR2bm1rcXRmcDk5MGxwZnVzamVqc2VqbGdxMDAiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGJiZmMxYzY5YWEwYzViODI3Nzc3NzAwNzAyMTUyY2E0Y2UyOWUxZGQ1OTNkZDgwYjQ4NGE1N2ZjMjllNDI1OTk4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnAwbnEwbjJmdDY4czVmdDZwMmdua2Y5dW40bjJtdWdseXVtZG5hbTUwenZjZ3NwcjQ4cmFndGNuc215bTAiLCJpbmJveExvY2tIZXgiOiJhYTIwZTYwN2NkNDk1ZThmMGEyNTdhMGE5MTNiMjRiYzlkNjZhZGYxMWYyNzM2ZDlmNzc0Nzg5OTg0NDAyM2E5YzdkNDg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 4</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/3ac80b2787ad62501001c05586215ef3981dba03cc59051de97d8eabc0a82a0a"><code>3ac80b27…2a0a</code></a></td>
+<td><a href="https://explorer.bch.ninja/tx/11b23530fa78f288a1ff1c1f763769cc4b3f986226dcbb2c8beccf1fd87f6d2e"><code>11b23530…6d2e</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI3OTJmMzcxZTJlNDFhMTFjY2VhNzlmMGVlOTA5NzhiOGIxNjE5YTE4ZWU4NzM2ODNjOWRmYzU0MzJlYjc5ZTFlIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydmd5azVjcm5mbDN5aHZoeDBtZ3ZzcXR0NjI4bmR0YWg0eDdtM3I0eWFncXB0ZmV6YWFxeGFxY3R5d2pxIiwicGxhbkxvY2tIZXgiOiJhYTIwMTA0YjUzMDM5YTdmMTI1ZDk3MzNmNjg2NDAwYjVlOTQ3OWI1N2RiZDRkZWRjNDc1Mjc1MDAwYWQzOTE3N2EwMzg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ2a3E1cHBhZHE3dmE5dGcwZjhtd3h3OHh3eGF3ZmR1NTh2a2phbnN1dzRoanFqaHA2Z2d6d3hxYXJsYzciLCJhbmNob3JMb2NrSGV4IjoiYWEyMDJjMGEwNDNkNjgzY2NlOTU2ODdhNGZiNzE5YzczMzhkZDcyNWJjYTFkOTY5NzY3MGUzYWI3OTAyNTcwZTkwODE4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnAwMHNuY2R2NmFmZHpyem1uNmNna2ttYW50dGwyNGp3c2MyNGh0bmtucTA2d2hqeHRqMGV1MjY3MHd4M3oiLCJpbmJveExvY2tIZXgiOiJhYTIwZGYwOWUxYWNkNzUyZDEwYzViOWViMDhiNWI3ZDlhZDdmNTU2NGU4NjE1NWJhZTc2OTgxZmE3NWU0NjVjOWY5ZTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 5</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/bced64789e0015eddcd45b2e4d740d93b5b492be6d2279ae28b6eb49f1227eab"><code>bced6478…7eab</code></a></td>
+<td>left for a visitor</td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJlN2UyYzdjOTc1NjY0ZjI1YTk2ZjYyYzY5NmE3YWRkZTkwZjZhZDYzZGZkZDFmZDI3MjlmMzBhNmM5MmRlNGUzIiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpydm5saHptc3g1NXcycGVwa3ljcHh3OWt0aDY4ZnhkdnRjZDZ4MmRhanV3dWNkcXE3bjlsd3V0bGRyM25zIiwicGxhbkxvY2tIZXgiOiJhYTIwMjdmYjhiNzAzNTI4ZTUwNzIxYjEzMDEzMzhiNjVkZjQ3NDk5YWM1ZTFiYTMyOWJkOTcxZGNjMzQwMGY0Y2JmNzg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnJ2eWYyZzMyZ2Zhd2o2a254aHJjcnZsamdwNnY1dHV3emxwdTlqZjVmOXplMnR3bm4yNjlxczNlcHRuYWEiLCJhbmNob3JMb2NrSGV4IjoiYWEyMDA4OTUyMjJhNDI3YWU5NmFkMzM1Yzc4MWIzZjI0MDc0Y2EyZjhlMTdjM2MyYzkzNDQ5NDU5NTJkZDM5YWI0NTA4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnBkMDJobGZhbjg0cjBydjNoZ3dmanlscGVnZWY0bjlmZnUzbnE1OG40OGg4bXhxZDYzODV2azJkbXc4bHMiLCJpbmJveExvY2tIZXgiOiJhYTIwNWVhYmZkM2Q5OWVhMzc4ZDkxYmExYzk5MTNlMWNhMzI5YWNjYTk0ZjIzMzA1MGYzYTllZTdkOTgwZGQ0NGY0Njg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 6</td>
+<td>512 s</td>
+<td><a href="https://explorer.bch.ninja/tx/8b9432458fca44190c18cc120dec5b7e7613290d17ce5ae44fd533e2be94bcac"><code>8b943245…bcac</code></a></td>
+<td>left for a visitor</td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6Im1haW5uZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJhYTU4ZmJlZDZiOWU2MzdhY2VmOGU0ZTNjNjQzZjMyMTNlM2JlOTM3NmE2NGVkZWRhYTQ1Yzg3MTU1OGEwNzI4Iiwib3duZXJQa2hIZXgiOiJlZTU5MmY0MTJmMmU5MjUyNjM0NThmYjllNTM3YjUwMWFiY2FhMjBmIiwicGxhbkFkZHJlc3MiOiJiaXRjb2luY2FzaDpyZGd6ajNxcWNxNnM0ODJjdXo3N213MGRlcm4wcXNyaHM3azI1Yzh5a3VhdHF2eXY3am5hN25scHNudnd6IiwicGxhbkxvY2tIZXgiOiJhYTIwNTAyOTQ0MDBjMDM1MGE5ZDU4ZTBiZGVkYjllZGM4ZTZmMDQwNzc4N2FjYWE2MGU0YjczYWIwMzA4Y2Y0YTdkZjg3IiwiYW5jaG9yQWRkcmVzcyI6ImJpdGNvaW5jYXNoOnIwNnBoczJmZzN5cHo3eWxlODVjcGxlczA1cTdzNzA2aDh3bnU4bHA3M2VucWo3YTdsbXE1bDUwd3lqbHkiLCJhbmNob3JMb2NrSGV4IjoiYWEyMGY0MWJjMTQ5NDQ0ODExNzg5ZmM5ZTk4MGZmMzA3ZDAxZTg3OWZhYjlkZDNlMWZlMWY0NzMzMDRiZGRmN2Y2MGE4NyIsImluYm94QWRkcmVzcyI6ImJpdGNvaW5jYXNoOnAwcDBtazJyNnR6c2t2OW45aG41bHYzbmZ0Njg1cThydHJ3N3R2ejVzajN3N2tkbWE0c2d3Y204bHE3MzgiLCJpbmJveExvY2tIZXgiOiJhYTIwYzJmZGQ5NDNkMmM1MGIzMGIzMmRlNzRmYjIzMzRhZjQ3YTAwZTM1OGRkZTViMDU0ODRhMmVmNTliYmVkNjA4Nzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMDY3OGY5NzAzYzgzYmM2MGJmM2IzNDYzZjNlMDk1NTcyN2ZiN2M3N2FlMzMxNmZhNDU3ZGZkYjEyZjYyYTBkOTkzZjRkMzJiZTExMjQwOGJlZjlmNWQxOTgxYWU1YzQzY2IxNjcyZTUwMjAwZWVmZTNmM2Y3ZDhiOTc4MDAwMDAwMDY5NzFkYjM0Y2MwZGVjYjI4YTJkYmJkNDQxNTgxYjVhNzM0N2NlNTczMGYwMDAwMDBjZDVlOThiMzc4MGI3NzJhNmQxOTRhNmI1ZWRiMDJhNTE4M2EwNTkzMTQwMDAwMDBmOGI1NGU4ZGJjODlhOGZiYmQzMWU5YzFmOGM3ZWRhNzgwZTkxNTg2MTQwMDAwMDA3N2Y0M2EzNmRiOWMyYzVhYzg0NjgxYzNlYjVmZWM5YTY1OWVjOTBjMWEwMDAwMDA0NGVkYjE4N2UyZjZkZjM0NjJkNjMxNGM2N2U0OGE4OWI3MDcwMWFhMWEwMDAwMDAwZjJhMDE0MTcwMzEyNzExYTFiYmRiYzliZGQzNmQzNWUwMmM1NTViMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiNmY4ZWNkOGYzY2NjNGZmZGJiYTc2NWYzYjRlM2RkYjZlNDg2NDlhMzlkMTBhYjdlYmQyMDE3Y2U3Y2VlOGYyNiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTY0MDc5LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiNjc4Zjk3MDNjODNiYzYwYmYzYjM0NjNmM2UwOTU1NzI3ZmI3Yzc3YSIsImUzMzE2ZmE0NTdkZmRiMTJmNjJhMGQ5OTNmNGQzMmJlMTEyNDA4YmUiLCJmOWY1ZDE5ODFhZTVjNDNjYjE2NzJlNTAyMDBlZWZlM2YzZjdkOGI5Il0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6Ijk3MWRiMzRjYzBkZWNiMjhhMmRiYmQ0NDE1ODFiNWE3MzQ3Y2U1NzMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6ImNkNWU5OGIzNzgwYjc3MmE2ZDE5NGE2YjVlZGIwMmE1MTgzYTA1OTMiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiZjhiNTRlOGRiYzg5YThmYmJkMzFlOWMxZjhjN2VkYTc4MGU5MTU4NiIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiNzdmNDNhMzZkYjljMmM1YWM4NDY4MWMzZWI1ZmVjOWE2NTllYzkwYyIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6IjQ0ZWRiMTg3ZTJmNmRmMzQ2MmQ2MzE0YzY3ZTQ4YTg5YjcwNzAxYWEiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiMGYyYTAxNDE3MDMxMjcxMWExYmJkYmM5YmRkMzZkMzVlMDJjNTU1YiIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Payouts made by visitors appear in each plan's history on the explorer.</p>
+<h2 id="chipnet-test-network">Chipnet (test network)</h2>
+<h3 id="the-whole-lifecycle-one-plan-2">The whole lifecycle, one plan</h3>
+<p>Heirs and shares (of 24): Wife 3, Son 14, Daughter 7. Three trusted contacts. Waiting time 30 days; review 512 seconds; fee budget 5,000 sats. Revision <code>assets-1</code>.</p>
+<p>Plan link: <a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIwMTRmZmMwMWJkODgyZGMwOTNmYjcxMzVkYWQ1MTQ5N2NmNjVhMDM2M2VkYWYwN2VjODAyNzBkYzk0NDljN2Q2Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJkZ2NhN3J0cWprcnVoZWNrMGp0dTY3dWdtY2RxcXlwaDdtd2g2dmRkM2dnMmFsMndkeGN5ZHVrMngyYzkiLCJwbGFuTG9ja0hleCI6ImFhMjA1MThlZjg2YjA0YWMzZTVmMzhiM2U0YmU2YmRjNDZmMGQwMDA4MWJmYjZlYmU5OGQ2YzUwODU3N2VhNzM0ZDgyODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZHNndmt5d2s1bTI4cjR0MnZ1Y2YyanE2Z2Nlejh6cXR1eDR1Nzl0YW42N2U5YTZ4Y3Q3eHc2bGpsOHJ1IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA2MDg2NTg4ZWI1MzZhMzhlYWI1MzM5ODRhYTQwZDIzMTkxMWM0MDVmMGQ1ZTc4YWJlY2Y1ZWM5N2JhMzYxN2UzODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB3eDZ0cno3cnVxbmxlazh5YWE5cWt2NTRuZ2Z5Z2M2cmxnZXA1NGhodmpxMnhlYWVkdmpxNXVoZHB0ZngiLCJpbmJveExvY2tIZXgiOiJhYTIwOGRhNThjNWUxZjAxM2ZlNmM3Mjc3YTUwNTk5NGFjZDA5MjIzMWExZmQxOTBkMmI3YmIyNDA1MWIzZGNiNTkyMDg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjAwOGQyNzAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTE4MDAwMDAwMDMyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMDMwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMGUwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMDcwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiMjNkYjdlOGVkYmQ0MWZkOTRjZDYwMDdkZmU5Y2JlNmFmOWFhMzVkNTk1MDMzYzljMzcxODIwNGU1OTU4ZGI3MCIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyNDc1LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6MjU5MjAwMCwicmV2aWV3U2VxdWVuY2UiOjQxOTQzMDUsInJldmlld1VuaXRzIjoxLCJlZmZlY3RpdmVSZXZpZXdTZWNvbmRzIjo1MTIsImZlZUJ1ZGdldCI6IjUwMDAiLCJjb250YWN0cyI6WyJmM2NhMWMyZTFlOTdmNmJkYTQwNWM1MzE3Y2IzMmJkYTIxZGJlYjljIiwiYjdmZWIyZTY0ODU4NjczZTZmNjViNGIxNjViNDk5MGNkMWQ2ZWVlNiIsIjU5MzkzODg3YmEyN2FjYjhjZjFjYTc4ZjNjNGU1NTQxZTEzMmY5ZWEiXSwidG90YWxTaGFyZXMiOiIyNCIsImhlaXJzIjpbeyJwa2hIZXgiOiIyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzIiwic2hhcmUiOiIzIiwibGFiZWwiOiJXaWZlIn0seyJwa2hIZXgiOiIxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmIiwic2hhcmUiOiIxNCIsImxhYmVsIjoiU29uIn0seyJwa2hIZXgiOiJhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwIiwic2hhcmUiOiI3IiwibGFiZWwiOiJEYXVnaHRlciJ9XX0">open it in the app</a>. State now: <strong>paid</strong>.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Time</th>
+<th>Transaction</th>
+<th>Size</th>
+<th>Fee</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>19 Nov, 15:39:19 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/719ac210800e80ce27d0f7557d37165f29857bbc7489ef96eb47fe94eba6615f"><code>719ac210…615f</code></a></td>
+<td>315 bytes</td>
+<td>335 sats</td>
+<td></td>
+</tr>
+<tr>
+<td>receive</td>
+<td>19 Nov, 15:40:38 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/1b67d2e56e05240fb1e7ff324908bfa2e926979859cd265e3700e1f5e8235abb"><code>1b67d2e5…5abb</code></a></td>
+<td>195 bytes</td>
+<td></td>
+<td>3100 sats to the receive address</td>
+</tr>
+<tr>
+<td>collect</td>
+<td>19 Nov, 15:40:50 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/a16c8567566be68be3c5c13625bf853f5986357fbef6b5165900971e7495c90b"><code>a16c8567…c90b</code></a></td>
+<td>4,405 bytes</td>
+<td>4,425 sats</td>
+<td>fee paid by the owner's wallet; deadline unchanged: a receipt is not proof of life</td>
+</tr>
+<tr>
+<td>send</td>
+<td>19 Nov, 15:41:17 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/fff02ca0aa5302dfce4657f647d87e6a9b815fa976b28df21da26db594818c9d"><code>fff02ca0…8c9d</code></a></td>
+<td>4,089 bytes</td>
+<td>4,109 sats</td>
+<td>paid 1000 sats; deadline moved to 2026-12-19T15:39:35.000Z</td>
+</tr>
+<tr>
+<td>contact 1 confirms</td>
+<td>19 Nov, 15:41:33 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/c42d548c67ea6fb5169af9b71b78d52405c381003f5fc7f63e9f758ad46028b5"><code>c42d548c…28b5</code></a></td>
+<td>4,178 bytes</td>
+<td></td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 2 confirms</td>
+<td>19 Nov, 15:42:43 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/09e2d8303236ffdf7474cf74d96dc62ed11c4fa5466d827c7c4b9892cb3f62e0"><code>09e2d830…62e0</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>early payout refused</td>
+<td>19 Nov, 15:42:46 UTC</td>
+<td>refused by the network</td>
+<td></td>
+<td></td>
+<td>the transaction was rejected by network rules. non-BIP68-final (code 64)</td>
+</tr>
+<tr>
+<td>stop claim</td>
+<td>19 Nov, 15:43:16 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/3b84434beae5db7f4d2acb653426502ce899586784a8e4c9ce773e8692b3df02"><code>3b84434b…df02</code></a></td>
+<td>4,257 bytes</td>
+<td>4,277 sats</td>
+<td>claim cancelled; earlier confirmations no longer count</td>
+</tr>
+<tr>
+<td>contact 2 confirms again</td>
+<td>19 Nov, 15:43:35 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/aaa123ba3a6fc46f8f22a7666bbf51cc421628b410d442315d9a7791afe0b1af"><code>aaa123ba…b1af</code></a></td>
+<td>4,178 bytes</td>
+<td>4,198 sats</td>
+<td>first confirmation, no payout right</td>
+</tr>
+<tr>
+<td>contact 3 confirms</td>
+<td>19 Nov, 15:44:09 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/b591bb97b3f488f65f7c0d67e5b93a61c6d17a77bc1d411d987503a12b8f3e0f"><code>b591bb97…3e0f</code></a></td>
+<td>4,265 bytes</td>
+<td>4,285 sats</td>
+<td>quorum reached: review started</td>
+</tr>
+<tr>
+<td>pay the heirs</td>
+<td>19 Nov, 16:07:02 UTC</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/c6076a16f29fe42fb7da5187bfab169a457c2110d9656f386a1c1560f6be65e4"><code>c6076a16…65e4</code></a></td>
+<td>4,335 bytes</td>
+<td>4,355 sats</td>
+<td>Wife 887, Son 4141, Daughter 2070</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="example-plans-for-visitors-2">Example plans for visitors</h3>
+<p><a href="https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo">Open the live demo</a> to try a claim or a payout without a wallet. Each plan has the same six-heir faraid family and a one-minute waiting time.</p>
+<div class="docs-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Review</th>
+<th>Created</th>
+<th>Claim opened</th>
+<th>Heirs paid</th>
+<th>Plan link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>demo plan 1</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/998ab2daf4df4a896f2659b0debf9e9a5091d2891dad3df6b5572e5425ea9b61"><code>998ab2da…9b61</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/33b36a469b1bc68a7b6079822a42dd18cb3318e5ee747a86ea69787d61314938"><code>33b36a46…4938</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/dd572f2a005347997d305dde002ddda7f6df465d451a70c029827e11419e6bd0"><code>dd572f2a…6bd0</code></a></td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI3ZmI0YjA0MzUyODdiNTQwZmNhMmY1MjMwNTZjNGVlMDYwMGQ4NzVhY2FiOWU2ZDg4ODQxYjhmNjViYzIzMWUwIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3OHQ4amw3MGhlbXp4NTUyeG50Z2V0Zm5tcTI1amhtcHk0aGw4bTd4a2htMHk2Znc5cGNrNGVhMnI1bHMiLCJwbGFuTG9ja0hleCI6ImFhMjA4ZWIzY2JmZTdkZjNiMTFhOTQ1MWE2YjQ2NTY5OWVjMGFhNGFmYjA5MmI3ZjlmN2UzNWFmYjc5MzQ5NzE0MzhiODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZDM1cmF0ZmMzaDlldDBjZWRhY3F5YTI5bDIzbGEzaHh6NTV5Y24wcGV5eDk3eGZ1ZnBxZ3hxbWUwbGU2IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA2MzQxZjU2OWM0NmU1Y2FkZjhjYjdiODAxM2FhMmZkNTFmZjYzNzMwYTk0MjYyNmYwZTQ4NjJmOGM5ZTI0MjA0ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB2MjMwa2VkdXprOHc0c2tuZGY2bm1ybHV4bG0waHRjbXh1Z2RrZ2NlaGY2YTBjMGM3N255bHE4YWh3d3kiLCJpbmJveExvY2tIZXgiOiJhYTIwMTUxN2RiMmRlMGFjNzc1NjE2OWI1M2E5ZWM3ZmUxYmZiN2RkNzhkOWI4ODZkOTE4Y2RkM2FlYmYwZmM3YmQzMjg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyOTU0LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 2</td>
+<td>1024 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/53c893e8602b95b93bc4c37dc5c0c41bf13c8c137d457e4b2c34f726a59a09a0"><code>53c893e8…09a0</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/25cc1a693521a466f78d6c7736643ffb34e342d221f8237d3c1ea1e7fae09109"><code>25cc1a69…9109</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJlNjkyZjg3ZTI3YTQzMmExYThlMTY3NmJiZjc1NzEyZWU4NTc0Yzg1MDZjNzdhMDVmNWYzZGZkNTYzMWQ4YWE4Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnIwZTk1NnF1bTlhMDhoeTljZ2pjOXc4dWVjdGczbXFqZjc4bjc3MzlsdjZmdzgwYTR4cDJ4dXBscWdnY3AiLCJwbGFuTG9ja0hleCI6ImFhMjBmMjVhNjgxY2Q5N2FmM2RjODVjMjI1ODJiOGZjY2UxNjg4ZWMxMjRmOGYzZjdhMjVmYjM0OTcxZGZkYTk4MmEzODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydjU5YWRxNnlwczl1c21uc2Y3bHRuamdqNXBqcHAzYXAzN3BreGNxNnVneXE2eTgyNmV5N3FsdTMzbWUzIiwiYW5jaG9yTG9ja0hleCI6ImFhMjAyODVlYjQxYTIwNjA1ZTQzNzM4MjdkZjVjZTQ4OTUwMzIwODYzZDBjN2MxYjFiMDBkNzEwNDA2ODg3NTZiMjRmODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwbjJ1dHB5dnFyNDQ1dWMwY2h4ZGh2cXJxYTJuajQwMHE0ajQyNzI1Z2hsN2N3OWprdzhrNHp6bnI1OWQiLCJpbmJveExvY2tIZXgiOiJhYTIwZTZhZTJjMjQ2MDA3NWFkMzk4N2UyZTY2ZGQ4MDE4M2FhOWNhYWY3ODJiMmFhYmNhYTIyZmZmNjFjNTk1OWM3Yjg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDIwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiYWY3ZTVkYWRjN2EwMGYxZjBlNTQwNWU0Y2QyMDRkYzE3ZmVjZDc4MjdmZTBkZjZhN2E3YThhZGY4OTYwZWE3NSIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTAyOTU0LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA2LCJyZXZpZXdVbml0cyI6MiwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6MTAyNCwiZmVlQnVkZ2V0IjoiNTAwMCIsImNvbnRhY3RzIjpbImYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWMiLCJiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2IiwiNTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYSJdLCJ0b3RhbFNoYXJlcyI6IjEyMCIsImhlaXJzIjpbeyJwa2hIZXgiOiIyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzIiwic2hhcmUiOiIxNSIsImxhYmVsIjoiQWlzaGEgKHdpZmUpIn0seyJwa2hIZXgiOiIxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmIiwic2hhcmUiOiIyMCIsImxhYmVsIjoiWXVzdWYgKGZhdGhlcikifSx7InBraEhleCI6ImEwMjkwYTI1NzU0ZTQxZDZlZTk0MDY4YmJlNDlkZmJjOTlhOTRmMDAiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJNYXJpYW0gKG1vdGhlcikifSx7InBraEhleCI6ImFmMTdkNjZhMDYxZjRjZWJkNzcwOTdiOTVjNjI2YzFlNGYwOTE0ZTAiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJPbWFyIChzb24pIn0seyJwa2hIZXgiOiJhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4Iiwic2hhcmUiOiIyNiIsImxhYmVsIjoiSWRyaXMgKHNvbikifSx7InBraEhleCI6IjY1YjAxYzVlY2NhMmY0YmM4Nzc2OTA0NWQ2NWRmYjgyMjgwMGMxZmQiLCJzaGFyZSI6IjEzIiwibGFiZWwiOiJMYXlsYSAoZGF1Z2h0ZXIpIn1dfQ">link</a></td>
+</tr>
+<tr>
+<td>demo plan 3</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/2712cd692ff14cf6e170beab1e6e07f6941cf332eac58c3179b2c23796a37a7a"><code>2712cd69…7a7a</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/44fdc0f002f4e5acd024cd2f7a0ae6781351fce9ceb74ef5876e53fd102ba2e9"><code>44fdc0f0…a2e9</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzYjI3NDZmNmQ5YmI2Njk0YWNjNGJjMjBjMzI4OGE3NDU1YjlkZDdiNzQxODdiZGY0MGExOWRhNDJjODJjZWVjIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3ZnZwdTlnMjczZGU4am5tbGN3bm15dWwza3Bzdzk1N2RnbnEzNTQycWFwY2UwcnZ3a2V5cjVwdWFreHMiLCJwbGFuTG9ja0hleCI6ImFhMjA5MmMwZjBhODU3YTJkYzllNTNkZmYwZTllYzljZmM2YzE4MzhiNGYzNTEzMDQ2OTU1MDNhMWM2NWUzNjNhZDkyODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZHFodW5laDkyYTA4bW53M3F0M3M5cGRkdWd3eXJwemdkbDZrdjBoMnk2NHJmc3R2NGs0amdlMzl2emgwIiwiYW5jaG9yTG9ja0hleCI6ImFhMjA0MTdlNGYzNzJhYmFmM2VlNmU4ODE3MTgxNDJkNmYxMGUyMGMyMjQzN2ZhYjMxZjc1MTM1NTFhNjBiNjU2ZDU5ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwdWhseTQ0YzR3dTBqM3RqcGxuOThzc2Vtemd5eDk3OXFjOWQyZHI0MDd6c3QzMzd3dGc1ejBqM2FjdXYiLCJpbmJveExvY2tIZXgiOiJhYTIwZjk3ZjkyYjVjNTVkYzdjYTJiOTA3ZjMyOWUxMGNlYzQ4MjE4YmUyODMwNTZhOWEzYWJmYzI4MmUzMWYzOTY4YTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 4</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/8f76debef27b945be9c8e378265cb0488babf6616e63f07756ac7674bc9a41fa"><code>8f76debe…41fa</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/0c610dff11d65a6c772263643f92c17176d96826a722302489347f05ef6653a2"><code>0c610dff…53a2</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIyZTg4N2VkMTg4ZjA0MDFkZDBkNzEwMmRhZTA0ODRjZDk5NDE5Y2U5ZDQyMDFiZGM4NWVhMDlkZjcxMTE5MzY2Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ2ZG5rdHFqOHFjMGpxM2h6M3hxdnNxcTNhNWRqa3htbHRkcDkwZnR6bjZheTVubWVzbnl6a2U3OW04NTciLCJwbGFuTG9ja0hleCI6ImFhMjAxYjNiMmMxMjM4MzBmOTAyMzcxNDRjMDY0MDAwOGY2OGQ5NThkYmZhZGExMmJkMmIxNGY1ZDI1MjdiY2MyNjQxODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydzA0aDVoaGNtZGZ2bTZ3YTl6dmo0anRlbXBya3d1eGgzbndqOXJzNWMyZDQwNXY5MzNmMjcya3N5dWV3IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA5ZjViZDJmN2M2ZGE5NjZmNGVlOTQ0Yzk1NjRiY2VjMjNiM2I4NmJjNjZlOTE0NzBhNjE0ZGFiZThjMmM2Mjk1ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwcHpucHY4bnN0eTk4dHlkZnplN3l1c2dhOXlzcGNwYWp4ZjRqZTR1dXQwZ25yYXJqaG13MjZ5NTB1cDAiLCJpbmJveExvY2tIZXgiOiJhYTIwYzIyOTg1ODc5YzE2NDI5ZDY0NmE0NTlmMTM5MDQ3NGE0ODA3MDFlYzhjOWFjYjM1ZTcxNmY0NGM3ZDFjYWZiNzg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 5</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/2477a7013e720c47278f5c5b8520662621a4734b8b659b905e11c3b893942607"><code>2477a701…2607</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/769edfcc76ce0b1e11a1c07dcaa33894d9a47c308ece46ebfc2fa81b86639a84"><code>769edfcc…9a84</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiJlNjEyZDM5YzI4ZTI0OTNkM2EyNjg4MGMwNTE4M2QyNDhhZTZjNWMzYjVhYTdhNDc4MWU4MDY2MmEwNDU2MGM5Iiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJkNG5kdjhxN3MzaDBxMHVmbTBtajlrNXM1d2xycGh2aHl5ZGxlbnZkdWN3dzZrank5bGMyNTJta3o2em0iLCJwbGFuTG9ja0hleCI6ImFhMjA2YjM2YjBlMGY0MjM3NzgxZmM0ZWRmYjkxNmQ0ODUxZGYxODZlY2I5MDhkZmU2NmM2ZjMwZTc2YWQyMjE3Zjg1ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydzZod2QyNjR3eHQwYWVsYTJhbHZkcnJ3Znh1eXY4ODl4YXFuMDJ3N2U0ZzZwOXhrM3Q1andtcmEycnFoIiwiYW5jaG9yTG9ja0hleCI6ImFhMjBiNTc3MzU1YWFiOGNiN2Y3M2ZlYWJiZjYzNDYzNzI0ZGMyMzBlNzI5YmEwOWJkNGVmNjZhOGQwNGE2YjQ1NzQ5ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwdjllZWRmdmVhZTI4ZjV0bXp5c3k2OTNwanljOTV6aHc0azBxNHhzbGZxYWgwZnpsYXFqcW02bXZycXQiLCJpbmJveExvY2tIZXgiOiJhYTIwZDg1Y2U1YTk2NjdiOTUxZDM0NWVjNDQ4MTM0NTg4NjQ0YzE2ODJiYmFiNjc4MmE2ODdkMjBlZGRlOTE3ZmEwOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODEzLCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 6</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/f5d8ea340f00b192bdd5f0f1696fddb975b9ef51c25c051084685c0c3c0babe0"><code>f5d8ea34…abe0</code></a></td>
+<td><a href="https://chipnet.chaingraph.cash/tx/7bffadc151d6401b096176c2a882f1a3d4f7128d995bc862ea33205b8c54ff3e"><code>7bffadc1…ff3e</code></a></td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiI4NjE3MzBjNzAzNjIxZTgyYmFmM2NmMGExYWNlMjI4NjAzMjg2OGRmOTU2NjEwZjQ0OTllNDBmMTdmMWZlNTllIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnIwazUzYXg3Z3ZtZzN3N2VtanJyM3E4NzBoNTlkaHp1cHozYTc1eXEyNG41aHI0NWVkbjV3ZDU4azlham4iLCJwbGFuTG9ja0hleCI6ImFhMjBlZDQ4ZjRkZTQzMzY4OGJiZDlkYzg2Mzg4MGZlN2RlODU2ZGM1YzA4YTNkZjUwODA1NTY3NGI4ZWI0Y2I2NzQ3ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpydm53dDZzNHprYWF6a24yamhxZmcyeXplazd6a3ZkNGV6ZW12MHlmanZwMjQ0emV3YzVrdnlkODhldThzIiwiYW5jaG9yTG9ja0hleCI6ImFhMjAyNmU1ZWExNTE1YmJkMTVhNmE5NWMwOTQyODgyY2RiYzJiMzFiNWM4YjNiNjNjODk5MzAyYWFkNDU5NzYyOTY2ODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnAwbmxwcHAyejdqam5rMmxzNTd4bG1lZTVucHRueTVhZmFscmE1NjZmd2hqZjZ6endqMzJqODlrdG14bmsiLCJpbmJveExvY2tIZXgiOiJhYTIwZTdmMDg0MmExN2E1MjlkOTVmODUzYzZmZWYzOWE0YzJiOTkyOWQ0ZjdlM2VkMzVhNGJhZjI0ZTg0Mjc0YTJhOTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 7</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/7ddb141db3dc1cc46574fec639c318a433d1beab1e946e7de1fd978cac9c07d3"><code>7ddb141d…07d3</code></a></td>
+<td>left for a visitor</td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIzNDFhZWE1MjQzZTQzYTE1MzkyYjk1NjgzZDMxNGUxN2QyZmI1ZTcwZTk2NWYwZDhmMjAzM2IwOGQ4ZjI2MzAxIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3a2ZtdHRzdDl1NjVodGN4ejNueHF1Y3BteTdkbWQ1dWo5bXF3cjN3dHgwM2d4MGVtMnhncmRxa2tzcjQiLCJwbGFuTG9ja0hleCI6ImFhMjBhYzlkYWQ3MDU5NzlhYTVkNzgzMGEzMzMwMzk4MGVjOWU2ZWRiNGU0OGJiMDM4NzE3MmNjZjhhMGNmY2VkNDY0ODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyZGV6Z2d1ZTl2dTVsZ2s4dm01MHZtZHZ0ejR0ajN0bWd1ZzY3dGRxbnY0dzN4N24zY2ZqY2Vrd2gwNWg2IiwiYW5jaG9yTG9ja0hleCI6ImFhMjA3MjI0MjM5OTJiMzk0ZmEyYzc2NmU4ZjY2ZGFjNThhYWI5NDU3YjQ3MTFhZjJkYTA5YjJhZTg5YmQzOGUxMzJjODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnBkenFwcThhOTN0NHZ5dXdmMHk4bHg0d2R2dXI4eDZndGplYXNhbnZ0dTMyNzJtcHY1anoyN3JmeWV6djUiLCJpbmJveExvY2tIZXgiOiJhYTIwNDQwMDgwZmQyYzU3NTYxMzhlNGJjODdmOWFhZTZiMzgzMzliNDg1Y2IzZDg3NjZjNWYyMmFmMmI2MTY1MjQyNTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+<tr>
+<td>demo plan 8</td>
+<td>512 s</td>
+<td><a href="https://chipnet.chaingraph.cash/tx/306ad3c5ee40f1fb2e48d2885f11b1612fa8d3fe7dd6553bff31f886c43d5ce3"><code>306ad3c5…5ce3</code></a></td>
+<td>left for a visitor</td>
+<td>—</td>
+<td><a href="https://astrorehan.github.io/pusaka-bch/chipnet/v2/plan#eyJ2ZXJzaW9uIjoicHVzYWthLXYyIiwicHJvdG9jb2xSZXZpc2lvbiI6ImFzc2V0cy0xIiwibmV0d29yayI6ImNoaXBuZXQiLCJwbGFuQ2F0ZWdvcnlIZXgiOiIwOTQwZDNhNjJiYTc5NTcxNWVkODQxMWZjZDhiMGZmMTZhZDc5MTgyYTdjMmQxZjhlZGYxNzM5YTdhMjEyMWNlIiwib3duZXJQa2hIZXgiOiJhMzFmMGM0NWI0YzQ5NmU4YWE5NWViMTNiY2NjYzc1YTllNDRkMTQ0IiwicGxhbkFkZHJlc3MiOiJiY2h0ZXN0OnJ3eDJqMmR2bnc2cGhheWhocjh3NzBmc202NWVueWp1ejQwemd2OXNkdG14MmFtYzJ2Z3E2NWhydHRnaGYiLCJwbGFuTG9ja0hleCI6ImFhMjA4Y2E5MjlhYzliYjQxYmY0OTdiOGNlZWYzZDMwZGVhOTk5OTI1YzE1NWUyNDMwYjA2YWY2NjU3Nzc4NTMxMDBkODciLCJhbmNob3JBZGRyZXNzIjoiYmNodGVzdDpyMHlsbHlzNmZ4NmdtOGd6OHp6ZzB6Mm1oM3NtNmh5OXo0ZzR2MDR3eXV6MGVscTYyNWtremVwNGpld2tjIiwiYW5jaG9yTG9ja0hleCI6ImFhMjBjOWZmOTIxYTQ5YjQ4ZDlkMDIzODg0ODc4OTViYmM2MWJkNWM4NTE1NTE1NjNlYWUyNzA0ZmNmYzFhNTUyZDYxODciLCJpbmJveEFkZHJlc3MiOiJiY2h0ZXN0OnB2M2tlajNld3VocndmNnE0OHU5OWM5ODBhNnVxaHZwNXpuNGo5dWNjdDNyNHdjZXA0bnR1MGg5OW50cGciLCJpbmJveExvY2tIZXgiOiJhYTIwMjM2Y2NhMzk3NzJlMzcyNzQwYTlmODUyZTBhNzdmNzVjMDVkODFhMGE3NTkxNzk4YzJlMjNhYmIxOTBkNjZiZTg3IiwicGVySW5wdXRGZWVDYXAiOiI2MDAiLCJwb2xpY3lCeXRlc0hleCI6IjNjMDAwMDAwMDEwMDQwMDA4ODEzMDAwMGYzY2ExYzJlMWU5N2Y2YmRhNDA1YzUzMTdjYjMyYmRhMjFkYmViOWNiN2ZlYjJlNjQ4NTg2NzNlNmY2NWI0YjE2NWI0OTkwY2QxZDZlZWU2NTkzOTM4ODdiYTI3YWNiOGNmMWNhNzhmM2M0ZTU1NDFlMTMyZjllYTc4MDAwMDAwMDYyMTkxNzhhMTJhYzE5MTRhY2MxZjllNGYyYTExMWQ1NzQ2ODdlYmIzMGYwMDAwMDAxZThjZGM5N2RmYWI5NjQxZWMzZjQ5MzlkOGVlNmRlOTZiYzQ3OTFmMTQwMDAwMDBhMDI5MGEyNTc1NGU0MWQ2ZWU5NDA2OGJiZTQ5ZGZiYzk5YTk0ZjAwMTQwMDAwMDBhZjE3ZDY2YTA2MWY0Y2ViZDc3MDk3Yjk1YzYyNmMxZTRmMDkxNGUwMWEwMDAwMDBhMDIzNGUxZTgzN2Y3Y2VhM2Y1NjNmMDBlODA0YWNlM2ZhN2E2OGM4MWEwMDAwMDA2NWIwMWM1ZWNjYTJmNGJjODc3NjkwNDVkNjVkZmI4MjI4MDBjMWZkMGQwMDAwMDAiLCJwb2xpY3lIYXNoSGV4IjoiZGM1ZjQxYTg4ZTUwMzZjNDNlOTRhYWJiODkyY2M2Y2MyM2M3ZmJkNGZiZWRhNDAzM2VlM2IxZTVlOWRhMDg2YiIsImNyZWF0ZWRBdExvY2t0aW1lIjoxNzk1MTA1ODQ2LCJpbmFjdGl2aXR5UGVyaW9kU2Vjb25kcyI6NjAsInJldmlld1NlcXVlbmNlIjo0MTk0MzA1LCJyZXZpZXdVbml0cyI6MSwiZWZmZWN0aXZlUmV2aWV3U2Vjb25kcyI6NTEyLCJmZWVCdWRnZXQiOiI1MDAwIiwiY29udGFjdHMiOlsiZjNjYTFjMmUxZTk3ZjZiZGE0MDVjNTMxN2NiMzJiZGEyMWRiZWI5YyIsImI3ZmViMmU2NDg1ODY3M2U2ZjY1YjRiMTY1YjQ5OTBjZDFkNmVlZTYiLCI1OTM5Mzg4N2JhMjdhY2I4Y2YxY2E3OGYzYzRlNTU0MWUxMzJmOWVhIl0sInRvdGFsU2hhcmVzIjoiMTIwIiwiaGVpcnMiOlt7InBraEhleCI6IjIxOTE3OGExMmFjMTkxNGFjYzFmOWU0ZjJhMTExZDU3NDY4N2ViYjMiLCJzaGFyZSI6IjE1IiwibGFiZWwiOiJBaXNoYSAod2lmZSkifSx7InBraEhleCI6IjFlOGNkYzk3ZGZhYjk2NDFlYzNmNDkzOWQ4ZWU2ZGU5NmJjNDc5MWYiLCJzaGFyZSI6IjIwIiwibGFiZWwiOiJZdXN1ZiAoZmF0aGVyKSJ9LHsicGtoSGV4IjoiYTAyOTBhMjU3NTRlNDFkNmVlOTQwNjhiYmU0OWRmYmM5OWE5NGYwMCIsInNoYXJlIjoiMjAiLCJsYWJlbCI6Ik1hcmlhbSAobW90aGVyKSJ9LHsicGtoSGV4IjoiYWYxN2Q2NmEwNjFmNGNlYmQ3NzA5N2I5NWM2MjZjMWU0ZjA5MTRlMCIsInNoYXJlIjoiMjYiLCJsYWJlbCI6Ik9tYXIgKHNvbikifSx7InBraEhleCI6ImEwMjM0ZTFlODM3ZjdjZWEzZjU2M2YwMGU4MDRhY2UzZmE3YTY4YzgiLCJzaGFyZSI6IjI2IiwibGFiZWwiOiJJZHJpcyAoc29uKSJ9LHsicGtoSGV4IjoiNjViMDFjNWVjY2EyZjRiYzg3NzY5MDQ1ZDY1ZGZiODIyODAwYzFmZCIsInNoYXJlIjoiMTMiLCJsYWJlbCI6IkxheWxhIChkYXVnaHRlcikifV19">link</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Payouts made by visitors appear in each plan's history on the explorer.</p>
+
+    <p class="docs-source"><a href="https://github.com/astrorehan/pusaka-bch/blob/release/v2-readiness/docs/proofs/v2-live.md">View source on GitHub</a></p>
+  </article>
+        </main>
+      </div>
+  </body>
+</html>
