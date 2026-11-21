@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;self&#39;; script-src &#39;self&#39; &#39;wasm-unsafe-eval&#39; &#39;sha256-dJBuT2FRSfHnkrVX7MiuYgyzkScwR0Je9r+bv8QSBfk=&#39; &#39;sha256-zyCl1POrUAXkd3/R0rjlaNKKZVQgECjB36tB5TjMsHk=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:; connect-src &#39;self&#39; https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://bch.loping.net:50004 wss://fulcrum.criptolayer.net:50004 wss://bch.soul-dev.com:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest">
+
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pusaka-bch/chipnet/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="A Bitcoin Cash wallet you spend from every day, with your inheritance plan built in. If you go quiet, your family receives their shares." />
+    <meta name="theme-color" content="#FAF7F2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E1222" media="(prefers-color-scheme: dark)" />
+    <title>Pusaka: Your BCH. Their future.</title>
+    <meta name="referrer" content="no-referrer" />
+    <script>
+      // GitHub Pages answers every unknown path with the main app's 404 page. A deep link into the test-network
+      // app (a separate build in its own folder) is sent there, and that app puts the full address back.
+      (function () {
+        var app = '/pusaka-bch/chipnet/', chipnet = '/pusaka-bch/chipnet/', key = 'pusaka-redirect';
+        if (!chipnet) return;
+        try {
+          if (app !== chipnet && location.pathname.indexOf(chipnet) === 0) {
+            sessionStorage.setItem(key, location.pathname + location.search + location.hash);
+            location.replace(chipnet);
+          } else if (app === chipnet) {
+            var to = sessionStorage.getItem(key);
+            sessionStorage.removeItem(key);
+            if (to && to.indexOf(chipnet) === 0) history.replaceState(null, '', to);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      try {
+        const theme = localStorage.getItem('pusaka-theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {}
+      const base = '/pusaka-bch/chipnet/';
+      if (location.pathname.replace(/\/$/, '') === base.slice(0, -1)) {
+        const frame = matchMedia('(min-width: 900px)').matches ? 'wide' : 'tall';
+        const theme = document.documentElement.dataset.theme;
+        const dark = theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches);
+        const poster = document.createElement('link');
+        poster.rel = 'preload';
+        poster.as = 'image';
+        poster.fetchPriority = 'high';
+        poster.href = base + 'hero/pusaka-sawah-v3-' + frame + (dark ? '-dark' : '') + '.webp';
+        document.head.append(poster);
+      }
+    </script>
+    <style>#splash{--s-bg:#faf7f2;--s-ink:#131b33;--s-gold:#93633a;z-index:100;color:var(--s-ink);background:var(--s-bg);place-items:center;animation:.16s .18s both loading-in;display:grid;position:fixed;inset:0}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e}}:root[data-theme=dark] #splash{--s-bg:#0e1222;--s-ink:#fff8ec;--s-gold:#e3ca8e}#splash svg{fill:currentColor;width:72px;height:72px}#splash circle{fill:var(--s-gold)}@keyframes loading-in{0%{opacity:0}to{opacity:1}}</style>
+    <script type="module" crossorigin src="/pusaka-bch/chipnet/assets/index-FZR34dTg.js"></script>
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/rolldown-runtime-XKyaHtl9.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/jsx-runtime-5Hkpnz6L.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/react-dom-DxZp6J3S.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/preload-helper-Ac31MRMy.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/planService-Bja-pWUz.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/networkName-BdWkuhh9.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/wallet-BTa2h73t.js">
+    <link rel="modulepreload" crossorigin href="/pusaka-bch/chipnet/assets/theme-DLkEYoXP.js">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/chipnet/assets/index-D3QdHKyv.css">
+  </head>
+  <body>
+    <div id="splash" role="status" aria-label="Loading Pusaka">
+      <svg aria-hidden="true" viewBox="6.6 6.6 18.8 18.8">
+        <path d="M24.415 7.585A5.2 3.4 -45 0 0 17.061 14.939A5.2 3.4 -45 0 0 24.415 7.585Z" />
+        <path d="M24.415 24.415A5.2 3.4 45 0 1 17.061 17.061A5.2 3.4 45 0 1 24.415 24.415Z" />
+        <path d="M7.585 24.415A5.2 3.4 -45 0 0 14.939 17.061A5.2 3.4 -45 0 0 7.585 24.415Z" />
+        <path d="M7.585 7.585A5.2 3.4 45 0 1 14.939 14.939A5.2 3.4 45 0 1 7.585 7.585Z" />
+        <circle cx="16" cy="16" r="1.2" />
+      </svg>
+    </div>
+    <noscript>
+      <style>#splash{display:none}</style>
+      <p>Enable JavaScript to use Pusaka.</p>
+    </noscript>
+    <div id="root"></div>
+  </body>
+</html>
