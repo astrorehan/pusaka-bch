@@ -520,6 +520,14 @@ export async function prepareAction(
       return [name ? `${name} · ${shortAddress(payout.address, 6, 6)}` : payout.address, bch(payout.amount)];
     }));
   }
+  if ("planCarrierAfter" in result && "paidTotal" in result) {
+    const stays = result.planCarrierAfter as bigint;
+    rows.push(["Stays in the plan (rounding and the 1,000-sat reserve)", bch(stays)]);
+    rows.push([
+      "Total from the plan",
+      bch((result.paidTotal as bigint) + stays + (sponsored ? 0n : result.fee)),
+    ]);
+  }
   if ("nextDeadline" in result)
     rows.push([
       "Next inactivity deadline",

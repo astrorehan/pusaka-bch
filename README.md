@@ -38,7 +38,7 @@ that share comes back to you.
 
 1. **Set up.** Heirs and shares, three trusted contacts, a waiting time and a review period. Your BCH moves into
    your Pusaka wallet, and you get a plan link to share with your family.
-2. **Use it.** Send, receive and swap. Each payment you send restarts the waiting time.
+2. **Use it.** Send and receive (swaps run on Chipnet; mainnet has no qualified pair yet). Each payment you send restarts the waiting time.
 3. **A claim opens** once the waiting time passes in silence (anyone can open it), or sooner when two of your
    three contacts confirm.
 4. **The review period** on newly created plans uses a BIP68 relative time lock for every inheritance payout,
@@ -92,10 +92,11 @@ node --env-file=.env node_modules/@solidcash/solidhat/dist/cli.js run scripts/v2
 
 ## Before and after BLAZE
 
-Pusaka began as a Solidity vault on Monad ([code](https://github.com/astrorehan/pusaka),
-[demo](https://pusaka-faraid.vercel.app)). This repository at tag
-[`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) held only a README, the licence and a
-CashScript prototype. Reused: the idea, the faraid rules and the logo. Everything after `blaze-start` (the
+Pusaka began on Monad testnet ([code](https://github.com/astrorehan/pusaka),
+[demo](https://pusaka-faraid.vercel.app)): an EIP-7702 wallet with witnesses, a challenge window and a faraid
+payout. This repository at tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) held only
+a README, the licence and a CashScript prototype. Reused: that product design, the faraid rules and the logo; none
+of the Monad contracts run on BCH. Everything after `blaze-start` (the
 SolidCash contracts, the wallet, the review period, the token vault, the web app and the live runs) was built
 during BLAZE. Details: [JUDGE.md](JUDGE.md#before-and-after-blaze).
 

@@ -23,6 +23,10 @@ export interface CurrentPlan {
   metadata: PusakaV2PlanMetadata | null;
   data: LoadedPlan | null;
   demo: boolean;
+  /** Every demo example has paid its heirs. */
+  demoExhausted: boolean;
+  /** Pick the demo example with the most left to do. */
+  nextDemo(): void;
   loading: boolean;
   canRefresh: boolean;
   error: string;

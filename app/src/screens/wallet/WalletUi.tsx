@@ -33,9 +33,13 @@ export function Card({
   return <section className={`pw-card ${className}`} {...props} />;
 }
 
-/** `paidOut`: the demo picked a plan with nothing left to do, so every example here has paid its heirs. */
-export function DemoNotice({ paidOut = false }: { paidOut?: boolean }) {
-  const elsewhere = paidOut && NETWORK === 'mainnet' && OTHER_APP;
+/**
+ * `paidOut`: the example on screen has paid its heirs. `exhausted`: so has every other example, so the
+ * mainnet notice points to Chipnet. Otherwise `onNext` opens the example with the most left to do.
+ */
+export function DemoNotice({ paidOut = false, exhausted = true, onNext }: { paidOut?: boolean; exhausted?: boolean; onNext?: () => void }) {
+  const elsewhere = paidOut && exhausted && NETWORK === 'mainnet' && OTHER_APP;
+  const next = paidOut && !exhausted && onNext;
   return (
     <div className="pw-info" role="note">
       <FlaskConical size={17} aria-hidden />
@@ -43,6 +47,14 @@ export function DemoNotice({ paidOut = false }: { paidOut?: boolean }) {
         {NETWORK === 'mainnet'
           ? 'Live example plan on Bitcoin Cash. Anyone can open its claim or pay its heirs, with no wallet of your own. The plan pays the network fee from its real BCH.'
           : 'Live example plan on Chipnet, the Bitcoin Cash test network. Anyone can open its claim or pay its heirs, with no wallet of your own.'}
+        {next && (
+          <>
+            {' '}This example has paid its heirs.{' '}
+            <button type="button" className="pw-link-button" onClick={onNext}>
+              Open the next example <ArrowRight aria-hidden size={14} />
+            </button>
+          </>
+        )}
         {elsewhere && (
           <>
             {' '}All the mainnet examples have paid their heirs.{' '}
@@ -66,17 +78,20 @@ export function WalletSheet({
   useLayoutEffect(() => {
     if (!open) return;
     const trigger = document.activeElement;
+    const label = trigger instanceof HTMLButtonElement ? trigger.textContent : null;
     return () => {
-      // Some actions unmount the sheet immediately. Native focus restoration needs a fallback then.
-      queueMicrotask(() => {
-        if (
-          trigger instanceof HTMLElement &&
-          trigger.isConnected &&
-          document.activeElement === document.body
-        ) {
-          trigger.focus({ preventScroll: true });
-        }
-      });
+      // Some actions unmount the sheet immediately, and a re-render can replace the button that opened it.
+      // Native focus restoration needs a fallback then: the same button, or one with the same label.
+      window.setTimeout(() => {
+        if (document.activeElement && document.activeElement !== document.body) return;
+        const target =
+          trigger instanceof HTMLElement && trigger.isConnected
+            ? trigger
+            : label
+              ? Array.from(document.querySelectorAll('button')).find((button) => button.textContent === label)
+              : undefined;
+        target?.focus({ preventScroll: true });
+      }, 0);
     };
   }, [open]);
   return <Sheet {...props} open={open} className="pw-sheet" />;

@@ -38,7 +38,7 @@ test("new wallet flow validates heirs and contacts before review", async ({
     "Wife",
   );
   await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("BCH address for Wife");
+  await expect(page.getByRole("alert")).toContainText("address (bchtest:q…) for Wife");
   const heirs = page.getByRole("textbox", { name: "BCH address", exact: true });
   await heirs.nth(0).fill(address(1));
   await heirs.nth(1).fill(address(2));

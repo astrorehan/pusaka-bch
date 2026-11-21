@@ -24,7 +24,7 @@ Pusaka is a Bitcoin Cash wallet with the inheritance plan built in.
 
 1. **Set it up once.** Name your heirs and their shares (equal, your own split, or Islamic inheritance, faraid),
    three trusted contacts, a waiting time and a review period.
-2. **Use it like any wallet.** Send, receive and swap. Every payment you send proves you are still here and
+2. **Use it like any wallet.** Send and receive, and swap on Chipnet (mainnet has no qualified pair yet). Every payment you send proves you are still here and
    restarts the waiting time. No reminders to press, unless you go a long time without paying anyone.
 3. **If you go quiet,** anyone can open a claim once the waiting time has passed, or two of your three contacts
    can open one sooner. The revised plans enforce the review period even when the owner pays the payout fee.
@@ -184,13 +184,17 @@ BLAZE hacking started on **14 Nov 2026, 14:00 UTC**.
 
 - **Pusaka on Monad**, an earlier hackathon entry: [code](https://github.com/astrorehan/pusaka) (last commit
   24 Oct 2026) and [demo](https://pusaka-faraid.vercel.app). Solidity contracts, a faraid calculator and the
-  flower logo. It was a time-locked vault on an EVM chain: no spending, no contacts, no review period.
+  flower logo. The same idea on an EVM chain: an EIP-7702 wallet the owner keeps using, 2 of 3 witnesses or
+  12 months of inactivity to trigger, a challenge window that any sign of life cancels, then a faraid payout.
+  It ran on Monad testnet only.
 - **This repository at tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start)** (commit
   `8b59ba5`, 14 Nov 02:30 UTC): a README, the licence and `prototype/`, a CashScript covenant with a 12-case test
   that ran only in a simulator.
 - **Preparation notes** in [`Preparation/`](Preparation/), committed at 14:28 UTC on 14 Nov; no code.
 
-**Reused from before:** the product idea, the faraid rules, and the flower logo.
+**Reused from before:** the product design (a wallet you keep using, witnesses, a challenge window, a faraid
+payout), the faraid rules and the flower logo. None of its contracts run on Bitcoin Cash: BCH has no EIP-7702 and
+no accounts, so every part below was built again for UTXOs during BLAZE.
 
 **Built during BLAZE** (every commit after `blaze-start`):
 

@@ -13,7 +13,7 @@ import { Scrollbar } from './Scrollbar';
 import { useMedia } from './useMedia';
 import { DockNav } from './DockNav';
 import { usePillFx } from './pillFx';
-import { DOCS_URL, REPO_URL } from './banner-config';
+import { CODE_URL, DOCS_URL } from './banner-config';
 import { useWallet } from '../lib/wallet';
 import { planService } from '../lib/planService';
 import { formatBch, formatUsd, shortAddress } from '../lib/format';
@@ -196,7 +196,7 @@ function PhoneMenu({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () =
               </a>
             </li>
             <li>
-              <a href={REPO_URL} target="_blank" rel="noreferrer" className="menu-item">
+              <a href={CODE_URL} target="_blank" rel="noreferrer" className="menu-item">
                 GitHub <ExternalLink aria-hidden className="menu-item__ext" />
               </a>
             </li>

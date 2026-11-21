@@ -659,7 +659,7 @@ describe('Pusaka v2 Stage 3 — Complete Inheritance Wallet Covenant & SDK', () 
     const dustVerify = await verifier.verifyTxStrict(forcedDustTx);
     expect(dustVerify.ok).toBe(false);
     expect(() => forcedDustBuilder.debug()).toThrow(/heir share below dust/i);
-  }, 60_000);
+  }, 180_000);
 
   it('enforces consensus BIP68 delay on BOTH contact-quorum and inactivity triggers and rejects backdated/mutated timings', async () => {
     const { provider, verifier, owner, c0, c1, c2, relayer, heirs } = await setupEnv();

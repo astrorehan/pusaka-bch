@@ -524,6 +524,8 @@ function WalletPage() {
     loading,
     error,
     demo,
+    demoExhausted,
+    nextDemo,
     canRefresh,
     refresh,
   } = useCurrentPlan();
@@ -767,7 +769,7 @@ function WalletPage() {
             </Button>
           )}
         </PageHeading>
-        {demo && <DemoNotice paidOut={data?.state?.status === 'PAID_OUT'} />}
+        {demo && <DemoNotice paidOut={data?.state?.status === 'PAID_OUT'} exhausted={demoExhausted} onNext={nextDemo} />}
         {error && <ErrorNotice>{error}</ErrorNotice>}
         {issue && !dialog && <ErrorNotice>{issue}</ErrorNotice>}
         {txid && <TransactionNotice txid={txid} dismiss={() => setTxid('')} />}

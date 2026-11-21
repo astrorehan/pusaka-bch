@@ -259,7 +259,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
       return `Use heir names with at most ${MAX_HEIR_NAME_LENGTH} characters.`;
     const invalid = heirs.findIndex((heir) => !planAddressHash(heir.address));
     if (invalid !== -1)
-      return `Enter a valid ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for ${heirs[invalid].name.trim() || `heir ${invalid + 1}`}.`;
+      return `Enter an ordinary ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH receive address (${planAddressPrefix}q…) for ${heirs[invalid].name.trim() || `heir ${invalid + 1}`}. Script addresses starting with p can't receive a share.`;
     if (
       shares.some((share) => share <= 0n) ||
       totalShares >= BigInt(MAX_INT32)
@@ -272,7 +272,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
     const hashes = contacts.map(planAddressHash);
     const invalid = hashes.indexOf(null);
     if (invalid !== -1)
-      return `Enter a valid ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH address for trusted contact ${invalid + 1}.`;
+      return `Enter an ordinary ${NETWORK === 'chipnet' ? 'testnet ' : ''}BCH receive address (${planAddressPrefix}q…) for trusted contact ${invalid + 1}.`;
     if (
       new Set(hashes).size !== 3 ||
       (walletHash && hashes.includes(walletHash))
@@ -470,7 +470,7 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                   <Card>
                     <CardHeading
                       title="Heir details"
-                      description="Use a BCH receive address for each person."
+                      description="Use an ordinary BCH receive address for each person. For a lost-key backup, add a second wallet of your own that you keep somewhere else."
                     />
                     <div className="pw-heir-fields">
                       {heirs.map((heir, i) => (
@@ -576,7 +576,9 @@ function SetupForm({ existing }: { existing: Metadata | null }) {
                       </h2>
                       <p>
                         Choose three trusted contacts. Any two can start a claim
-                        review. Only the owner can spend the BCH.
+                        review. Only the owner can spend the BCH. To confirm, a
+                        contact opens the plan link in their own wallet and needs
+                        about 7,000 sats at its first receive address.
                       </p>
                     </div>
                   </div>

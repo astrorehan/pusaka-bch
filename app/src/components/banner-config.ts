@@ -9,6 +9,8 @@ export const REPO_URL = 'https://github.com/astrorehan/pusaka-bch';
 export const SOURCE_REF = import.meta.env.VITE_RELEASE_REF || 'release/v2-readiness';
 const sourceRef = SOURCE_REF;
 export const DOCS_URL = `${REPO_URL}/tree/${sourceRef}/docs`;
+/** The code judges should read: the repository at the release branch. */
+export const CODE_URL = `${REPO_URL}/tree/${sourceRef}`;
 
 export const BANNER = {
   event: 'BCH BLAZE 2026',

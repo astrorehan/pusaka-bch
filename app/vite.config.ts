@@ -7,8 +7,15 @@ import { defineConfig, type Plugin } from 'vite'
 const PAGES_BASE = '/pusaka-bch/'
 const CHIPNET_BASE = `${PAGES_BASE}chipnet/`
 
+// The app's routes. GitHub Pages serves `wallet/demo.html` for `/wallet/demo`, so a copy of the page at each
+// route answers a direct visit with 200 instead of the 404 fallback.
+const ROUTES = [
+  'wallet', 'wallet/plan', 'wallet/activity', 'wallet/demo', 'wallet/swap', 'wallet/edit', 'wallet/new',
+  'v2/plan', 'new', 'legacy/new', 'plan', 'try', 'how-it-works',
+]
+
 // GitHub Pages serves static HTML. Put the policy in the page so deep links get the same protection.
-function productionHtml(pages: boolean): Plugin {
+function productionHtml(pages: boolean, routes = pages): Plugin {
   return {
     name: 'pusaka-production-html',
     apply: 'build',
@@ -40,6 +47,9 @@ function productionHtml(pages: boolean): Plugin {
         if (pages && index?.type === 'asset') {
           this.emitFile({ type: 'asset', fileName: '404.html', source: index.source })
         }
+        if (routes && index?.type === 'asset') {
+          for (const route of ROUTES) this.emitFile({ type: 'asset', fileName: `${route}.html`, source: index.source })
+        }
       },
     },
   }
@@ -64,7 +74,7 @@ const network = (name: 'mainnet' | 'chipnet', otherApp = '') => ({
 export default defineConfig(({ mode }) => {
   const pages = mode === 'pages' || mode === 'pages-chipnet'
   return {
-    plugins: [react(), chipnetPath(pages ? CHIPNET_BASE : ''), productionHtml(mode === 'pages')],
+    plugins: [react(), chipnetPath(pages ? CHIPNET_BASE : ''), productionHtml(mode === 'pages', pages)],
     resolve: { dedupe: ['react', 'react-dom', '@solidcash/solidcash', '@solidcash/utils', '@bitauth/libauth', '@cashlab/common', '@cashlab/cauldron'] },
     ...(mode === 'pages' ? {
       base: PAGES_BASE,

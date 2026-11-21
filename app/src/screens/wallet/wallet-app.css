@@ -110,6 +110,7 @@
 .pw-info p, .pw-success > div, .pw-claim-banner > div:not(.pw-claim-banner-actions) { flex: 1; min-width: 0; }
 .pw-info a, .pw-success a { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; text-underline-offset: 3px; }
 .pw-info a { flex: none; color: var(--accent-text); }
+.pw-link-button { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; color: var(--accent-text); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .pw-error { background: var(--danger-soft); color: var(--danger); }
 .pw-success { align-items: center; background: var(--accent-soft); color: var(--accent-text); }
 .pw-success .pw-icon { margin: -10px -8px -10px 0; color: inherit; }

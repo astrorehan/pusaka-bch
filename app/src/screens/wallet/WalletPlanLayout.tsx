@@ -36,6 +36,7 @@ async function pickDemo(): Promise<Snapshot> {
     if (!data) return 9;
     const { state, review, now, funding } = data;
     const current = plan.protocolRevision === CURRENT_ASSET_REVISION;
+    if (state.status === 'PAID_OUT') return 8;
     if (funding.canSelfFund) {
       if (state.status === 'REVIEW' && review?.ready) return current ? 0 : 2;
       if ((state.status === 'ACTIVE' || state.status === 'CLOSED') && now > state.deadline && funding.canSelfFund) return current ? 1 : 3;
@@ -67,6 +68,10 @@ export function WalletPlanLayout() {
     }
   }, [hash, shared]);
   const [demoPick, setDemoPick] = useState<Snapshot | null>(null);
+  // The pick itself had paid out: every example here has paid its heirs (or none could be read).
+  const demoExhausted =
+    DEMO_PLANS.length === 1 || (demoPick?.data ? demoPick.data.state.status === 'PAID_OUT' : false);
+  const nextDemo = useCallback(() => setDemoPick(null), []);
   const selected = requestedDemo ? (demo ? demoPick?.plan ?? null : null) : shared ? fromLink?.plan ?? null : saved;
   const readEnabled = Boolean(selected && !activity && route !== '/new' && route !== '/wallet/new');
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -159,6 +164,8 @@ export function WalletPlanLayout() {
     metadata: activity || current?.data ? selected : null,
     data: current?.data ?? null,
     demo,
+    demoExhausted,
+    nextDemo,
     loading: Boolean(readEnabled && (!current || reading === selected)) || (demo && !demoPick),
     canRefresh: readEnabled,
     error: (demo ? '' : fromLink?.error) || current?.error || '',

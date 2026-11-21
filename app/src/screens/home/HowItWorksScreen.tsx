@@ -8,7 +8,7 @@ import { planService } from '../../lib/planService';
 import { formatUsd } from '../../lib/format';
 import { MAX_HEIRS } from '../../lib/shares';
 import { HomeFooter } from './HomeFooter';
-import { CONTRACT_URL, DX_LOG_URL, PLAN_CONTRACT_URL, PROOF_URL, REPO_URL, SOLIDCASH_URL, TESTS_URL } from './links';
+import { CONTRACT_URL, DX_LOG_URL, PLAN_CONTRACT_URL, PROOF_URL, CODE_URL, SOLIDCASH_URL, TESTS_URL } from './links';
 import { ButtonLink } from '../../components/Button';
 import './how-it-works.css';
 
@@ -121,8 +121,8 @@ export function HowItWorksScreen() {
               <div>
                 <h3>4. The review period</h3>
                 <p>
-                  The claim then waits through a review period, a week for example. The network itself enforces it: a
-                  payout sent early is refused. If you are still here, <strong>Stop claim</strong>, or any payment you
+                  The claim then waits through a review period, a week for example. On plans made since 20 November the
+                  network itself enforces it: a payout sent early is refused. If you are still here, <strong>Stop claim</strong>, or any payment you
                   send, ends the claim.
                 </p>
               </div>
@@ -291,7 +291,7 @@ export function HowItWorksScreen() {
             <div>
               <dt>Tested</dt>
               <dd>
-                58 tests in SolidHat run under the 2026 network limits. On 19 November 2026 the whole lifecycle ran on
+                72 tests in SolidHat run under the 2026 network limits. On 19 November 2026 the whole lifecycle ran on
                 Chipnet: create, receive, collect, send, two contacts open a claim, an early payout refused, the owner
                 stops it, a second claim, and the payout to three heirs.
               </dd>
@@ -309,7 +309,7 @@ export function HowItWorksScreen() {
             <li><Ext href={TESTS_URL}>Tests</Ext></li>
             <li><Ext href={PROOF_URL}>On-chain proof</Ext></li>
             <li><Ext href={DX_LOG_URL}>What we learned building on SolidCash</Ext></li>
-            <li><Ext href={REPO_URL}>Repository</Ext></li>
+            <li><Ext href={CODE_URL}>Repository</Ext></li>
           </ul>
         </section>
 

@@ -14,7 +14,7 @@ import {
   LICENSE_URL,
   OLD_DEMO_URL,
   OLD_REPO_URL,
-  REPO_URL,
+  CODE_URL,
   SOLIDCASH_URL,
   TESTS_URL,
 } from './links';
@@ -78,7 +78,7 @@ function Columns() {
       <div className="hfoot__col">
         <p className="hfoot__label">Resources</p>
         <a href={DOCS_URL} target="_blank" rel="noreferrer">Docs</a>
-        <a href={REPO_URL} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={CODE_URL} target="_blank" rel="noreferrer">GitHub</a>
         <a href={CONTRACT_URL} target="_blank" rel="noreferrer">Source code</a>
         <a href={TESTS_URL} target="_blank" rel="noreferrer">Test suite</a>
       </div>
