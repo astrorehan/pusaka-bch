@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:">
+    <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;; script-src &#39;self&#39; &#39;sha256-P9Rc/ftWXatAI7RkPjqoyLMc6AxmdcHhOeBqzeV+/Ss=&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; font-src &#39;self&#39;; img-src &#39;self&#39; data: blob:; connect-src &#39;self&#39;">
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,99 +14,142 @@
         if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
       } catch {}
     </script>
-    <script type="module" crossorigin src="/pusaka-bch/assets/index-CEbLXySc.js"></script>
+    <script type="module" crossorigin src="/pusaka-bch/assets/index-CmEVXGOo.js"></script>
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/modulepreload-polyfill-P2Xu9kJm.js">
     <link rel="modulepreload" crossorigin href="/pusaka-bch/assets/theme-_WsZoVJg.js">
-    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-VqOjOq4G.css">
+    <link rel="stylesheet" crossorigin href="/pusaka-bch/assets/index-Cobf79m-.css">
   </head>
   <body>
     <a class="docs-skip" href="#docs-main">Skip to content</a>
       <header class="docs-header">
-        <div class="docs-header__inner">
-          <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">Pusaka <span>Docs</span></a>
-          <div class="docs-header__links">
-            <button id="docs-theme" type="button" hidden>Dark theme</button>
-            <a href="/pusaka-bch/">Open app <span aria-hidden="true">→</span></a>
-          </div>
-        </div>
-      </header>
+    <div class="docs-header__inner">
+      <a class="docs-brand" href="/pusaka-bch/docs/" aria-label="Pusaka docs home">
+        <span class="docs-brand__mark" aria-hidden="true"></span>Pusaka <span class="docs-brand__label">Docs</span>
+      </a>
+      <button class="docs-search-button" type="button" aria-label="Search docs" aria-haspopup="dialog" aria-controls="docs-search" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg> <span>Search docs</span> <kbd aria-hidden="true">Ctrl K</kbd>
+      </button>
+      <div class="docs-header__links">
+        <a class="docs-github" href="https://github.com/astrorehan/pusaka-bch">GitHub</a>
+        <button id="docs-theme" class="docs-icon-button" type="button" aria-label="Dark theme" hidden>
+          <span class="docs-theme__dark"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg></span><span class="docs-theme__light"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></span>
+        </button>
+        <a class="docs-open-app" href="/pusaka-bch/">Open app <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
+      </div>
+    </div>
+  </header>
       <div class="docs-layout">
         <aside class="docs-sidebar"><nav class="docs-nav" aria-label="Documentation">
-    <a href="/pusaka-bch/docs/" aria-current="page">Overview</a>
     <div class="docs-nav__group">
-      <p>Guides</p>
-      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+      <h2>Get started</h2>
+      <ul>
+        <li><a href="/pusaka-bch/docs/" aria-current="page">Introduction</a></li>
+        <li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>Architecture</p>
-      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+      <h2>Architecture</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>Verification</p>
-      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+      <h2>Verification</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>SolidCash</p>
-      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+      <h2>SolidCash</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li>
+      </ul>
     </div>
   </nav></aside>
-        <details class="docs-menu"><summary>Browse docs</summary><nav class="docs-nav" aria-label="Documentation">
-    <a href="/pusaka-bch/docs/" aria-current="page">Overview</a>
+        <details class="docs-menu">
+          <summary><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left lucide-sidebar" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg> <span>Browse docs</span><span class="docs-menu__current">Introduction</span> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary>
+          <nav class="docs-nav" aria-label="Documentation">
     <div class="docs-nav__group">
-      <p>Guides</p>
-      <ul><li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li></ul>
+      <h2>Get started</h2>
+      <ul>
+        <li><a href="/pusaka-bch/docs/" aria-current="page">Introduction</a></li>
+        <li><a href="/pusaka-bch/docs/wallet-guide/">Wallet guide</a></li><li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>Architecture</p>
-      <ul><li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li></ul>
+      <h2>Architecture</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/inheritance-wallet/">Inheritance wallet</a></li><li><a href="/pusaka-bch/docs/plan-format/">Plan format</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>Verification</p>
-      <ul><li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li></ul>
+      <h2>Verification</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/network-record/">On-chain record</a></li><li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a></li>
+      </ul>
     </div><div class="docs-nav__group">
-      <p>SolidCash</p>
-      <ul><li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li></ul>
+      <h2>SolidCash</h2>
+      <ul>
+
+        <li><a href="/pusaka-bch/docs/solidcash-feedback/">SolidCash feedback</a></li><li><a href="/pusaka-bch/docs/solidcash-log/">Developer log</a></li>
+      </ul>
     </div>
-  </nav></details>
-        <main id="docs-main" tabindex="-1">
-          <div class="docs-intro">
-    <h1>Pusaka docs</h1>
-    <p>Learn to use your Bitcoin Cash inheritance wallet, understand how it works, and verify what happened on-chain.</p>
-  </div>
-  <section class="docs-group">
-    <h2>Guides</h2>
-    <div class="docs-cards"><a class="docs-card" href="/pusaka-bch/docs/wallet-guide/">
-      <h3>Wallet guide<span aria-hidden="true">→</span></h3>
-      <p>Set up a wallet, manage your funds, and follow a family claim.</p>
-    </a><a class="docs-card" href="/pusaka-bch/docs/judge-guide/">
-      <h3>Guide for judges<span aria-hidden="true">→</span></h3>
-      <p>Try the live demo and see what was built during BCH BLAZE.</p>
-    </a></div>
-  </section><section class="docs-group">
-    <h2>Architecture</h2>
-    <div class="docs-cards"><a class="docs-card" href="/pusaka-bch/docs/inheritance-wallet/">
-      <h3>Inheritance wallet<span aria-hidden="true">→</span></h3>
-      <p>How the wallet protects funds, receives payments, and handles claims.</p>
-    </a><a class="docs-card" href="/pusaka-bch/docs/plan-format/">
-      <h3>Plan format<span aria-hidden="true">→</span></h3>
-      <p>Plan links, policy commitments, and on-chain state.</p>
-    </a></div>
-  </section><section class="docs-group">
-    <h2>Verification</h2>
-    <div class="docs-cards"><a class="docs-card" href="/pusaka-bch/docs/network-record/">
-      <h3>On-chain record<span aria-hidden="true">→</span></h3>
-      <p>Follow the Mainnet and Chipnet transactions through each stage of a plan.</p>
-    </a><a class="docs-card" href="/pusaka-bch/docs/app-and-assets/">
-      <h3>App and assets<span aria-hidden="true">→</span></h3>
-      <p>Evidence for token receipts, swaps, and phone signing.</p>
-    </a></div>
-  </section><section class="docs-group">
-    <h2>SolidCash</h2>
-    <div class="docs-cards"><a class="docs-card" href="/pusaka-bch/docs/solidcash-feedback/">
-      <h3>SolidCash feedback<span aria-hidden="true">→</span></h3>
-      <p>What worked and where the tooling could improve.</p>
-    </a><a class="docs-card" href="/pusaka-bch/docs/solidcash-log/">
-      <h3>Developer log<span aria-hidden="true">→</span></h3>
-      <p>The dated development record behind the feedback.</p>
-    </a></div>
-  </section>
-  <p class="docs-source"><a href="/pusaka-bch/docs/Pusaka-BCH-BLAZE-2026.pdf">BCH BLAZE presentation (PDF)</a></p>
+  </nav>
+        </details>
+        <main id="docs-main" class="docs-reading" tabindex="-1">
+          <nav class="docs-outline docs-outline--desktop" aria-label="On this page">
+      <p><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list" aria-hidden="true"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg> On this page</p><ul><li class="docs-outline__h2"><a href="#get-started">Get started</a></li><li class="docs-outline__h2"><a href="#plan-lifecycle">Plan lifecycle</a></li><li class="docs-outline__h2"><a href="#verify-the-release">Verify the release</a></li></ul>
+    </nav>
+          <article class="docs-document">
+            <header class="docs-document__header">
+
+              <h1>Pusaka docs</h1>
+              <p class="docs-document__summary">A Bitcoin Cash wallet with an inheritance plan built in. Learn to set up a plan and verify its transactions.</p>
+            </header>
+            <details class="docs-outline docs-outline--mobile">
+      <summary><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list" aria-hidden="true"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg> On this page <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary>
+      <nav aria-label="On this page"><ul><li class="docs-outline__h2"><a href="#get-started">Get started</a></li><li class="docs-outline__h2"><a href="#plan-lifecycle">Plan lifecycle</a></li><li class="docs-outline__h2"><a href="#verify-the-release">Verify the release</a></li></ul></nav>
+    </details>
+            <div class="docs-prose"><h2 id="get-started">Get started</h2>
+    <div class="docs-start">
+      <a class="docs-start__link" href="/pusaka-bch/docs/wallet-guide/">
+        <span class="docs-start__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open" aria-hidden="true"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg></span>
+        <span><strong>Wallet guide</strong><span>Set up your plan and use your wallet.</span></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+      </a>
+      <a class="docs-start__link" href="/pusaka-bch/wallet/demo">
+        <span class="docs-start__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play lucide-play-circle" aria-hidden="true"><path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"></path><circle cx="12" cy="12" r="10"></circle></svg></span>
+        <span><strong>Try the live demo</strong><span>Follow a real plan and its transactions.</span></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+      </a>
+    </div>
+    <h2 id="plan-lifecycle">Plan lifecycle</h2>
+    <ol>
+      <li><strong>Use your wallet.</strong> Set your heirs, shares, and three trusted contacts. Each payment you send restarts the waiting time.</li>
+      <li><strong>Open and review a claim.</strong> Anyone can open a claim after the waiting time. Two trusted contacts can open one sooner. During review, you can stop the claim.</li>
+      <li><strong>Pay the heirs.</strong> Once review ends, anyone can submit the payout when the plan covers the fee and every heir’s minimum payment.</li>
+    </ol>
+    <p>Read the <a href="/pusaka-bch/docs/inheritance-wallet/">wallet architecture</a> and <a href="/pusaka-bch/docs/plan-format/">plan format</a> for the contract rules and on-chain state.</p>
+    <h2 id="verify-the-release">Verify the release</h2>
+    <ul>
+      <li><a href="/pusaka-bch/docs/network-record/">On-chain record</a> for Mainnet and Chipnet transaction links.</li>
+      <li><a href="/pusaka-bch/docs/app-and-assets/">App and assets</a> for token receipts, swaps, and phone signing.</li>
+      <li><a href="/pusaka-bch/docs/judge-guide/">Guide for judges</a> for the demo and <a href="/pusaka-bch/docs/Pusaka-BCH-BLAZE-2026.pdf">BCH BLAZE presentation (PDF)</a>.</li>
+    </ul></div>
+
+          </article>
         </main>
       </div>
+      <dialog id="docs-search" class="docs-search" aria-label="Search documentation" data-index="/pusaka-bch/docs/search-index.json">
+    <div class="docs-search__panel">
+      <div class="docs-search__input">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+        <input type="search" aria-label="Search documentation" placeholder="Search documentation" autocomplete="off" autofocus />
+        <button type="button" class="docs-icon-button" aria-label="Close search"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+      </div>
+      <p class="docs-search__status" role="status"></p>
+      <ul class="docs-search__results" aria-label="Search results"></ul>
+    </div>
+  </dialog>
   </body>
 </html>
