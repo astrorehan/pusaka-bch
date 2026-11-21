@@ -26,9 +26,10 @@ import { NETWORK } from "../networkName";
 import { DEMO_CATEGORIES } from "../demo";
 import { shortAddress } from "../format";
 import { recordActivity, removePendingPlan, savePendingPlan, savePlan, type PendingPlanSubmission } from "../walletData";
-import { friendlyError, isInputConflict, isRejection, StaleReviewError, UnconfirmedPlanSubmission } from "./errors";
+import { friendlyError, isInputConflict, isRejection, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from "./errors";
 import {
   chooseServer,
+  deadline,
   getFreshProvider,
   withFailover,
   getProvider,
@@ -371,6 +372,7 @@ export async function prepareAction(
     } catch {
       // The covenant caps the fee a receipt may pay for itself, and one or two receipts usually cost more.
       // A connected wallet pays the network fee instead, and the plan keeps every satoshi received.
+      if (options.selfFunded) throw new Error("This payment is too small to collect without a wallet to pay the fee.");
       const fee = await sponsor("Pusaka: pay the fee to collect incoming BCH", "Collecting this payment");
       result = buildSweepInboxTx({
         handle,
@@ -654,7 +656,8 @@ export async function submit(prepared: Prepared): Promise<string> {
   const provider = getProvider(NETWORK);
   let response;
   try {
-    response = await provider.sendRawTransaction(hex);
+    // The reply to a broadcast can go missing while the connection stays open. Do not wait forever for it.
+    response = await deadline(provider.sendRawTransaction(hex), 30_000);
   } catch (e) {
     if (isInputConflict(e)) {
       if (pending) throw new UnconfirmedPlanSubmission(pending);
@@ -667,9 +670,7 @@ export async function submit(prepared: Prepared): Promise<string> {
     }
     if (pending) throw new UnconfirmedPlanSubmission(pending);
     if (await alreadyAccepted(expectedTxid)) return accepted();
-    throw new Error(
-      `Submission could not be confirmed. Refresh the plan and check transaction ${expectedTxid} before trying again. ${friendlyError(e)}`,
-    );
+    throw new UncertainSubmission(expectedTxid);
   }
   const txid =
     typeof response === "string"
@@ -678,7 +679,7 @@ export async function submit(prepared: Prepared): Promise<string> {
   if (typeof txid !== "string" || txid.toLowerCase() !== expectedTxid) {
     if (pending) throw new UnconfirmedPlanSubmission(pending);
     if (await alreadyAccepted(expectedTxid)) return accepted();
-    throw new Error(`Submission could not be confirmed. Check transaction ${expectedTxid} before trying again.`);
+    throw new UncertainSubmission(expectedTxid);
   }
   if (pending) {
     // An accepted transaction can take a moment to appear in listings. Keep both copies until it does.

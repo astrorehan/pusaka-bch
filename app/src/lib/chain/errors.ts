@@ -14,6 +14,15 @@ export class StaleReviewError extends Error {
   }
 }
 
+/** The transaction was sent, but the network's reply was lost and a lookup could not find it yet. */
+export class UncertainSubmission extends Error {
+  readonly txid: string;
+  constructor(txid: string) {
+    super('We sent this transaction but did not hear back from the network. Check it with the link below before trying again.');
+    this.txid = txid;
+  }
+}
+
 export class UnconfirmedPlanSubmission extends Error {
   readonly record: PendingPlanSubmission;
 

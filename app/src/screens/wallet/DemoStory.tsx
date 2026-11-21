@@ -28,7 +28,6 @@ export function DemoStory({
   data,
   busy,
   prepare,
-  txid,
   exhausted,
   onNext,
 }: {
@@ -36,8 +35,6 @@ export function DemoStory({
   data: api.LoadedPlan;
   busy: boolean;
   prepare: PrepareAction;
-  /** A payout this visitor sent from this page. */
-  txid: string;
   exhausted: boolean;
   onNext: () => void;
 }) {
@@ -107,7 +104,8 @@ export function DemoStory({
           ? `You’ll see what each heir gets before anything is sent. It’s one real ${mainnet ? 'BCH' : 'test BCH'} transaction, and the plan pays the fee.`
           : 'All in one transaction, split by their shares.',
       state: paid ? 'done' : ready ? 'now' : 'later',
-      txid: paid ? txid || state.planUtxo?.txid : undefined,
+      // The payout moved the plan's state on: its current location is the payout transaction.
+      txid: paid ? state.planUtxo?.txid : undefined,
       action: ready && !paid && (canAct
         ? <Button type="button" disabled={busy} icon={<ArrowUpRight />} onClick={() => void prepare('finalize', { selfFunded: true })}>Pay the heirs</Button>
         : short),

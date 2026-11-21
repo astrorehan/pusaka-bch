@@ -23,7 +23,10 @@ export const MAINNET_SERVERS = ['bch.imaginary.cash', 'bch.loping.net', 'fulcrum
 let mainnetServer = MAINNET_SERVERS[0];
 let chosen: Promise<void> | null = null;
 
-/** Whether an Electrum server answers a ping over a secure WebSocket within `ms`. */
+/**
+ * Whether an Electrum server serves the chain over a secure WebSocket within `ms`. It must answer a real chain
+ * request (the current tip), not only a ping: a server can stay connected while its chain reads stall.
+ */
 function answers(host: string, ms = 5000): Promise<boolean> {
   return new Promise((resolve) => {
     let socket: WebSocket | undefined;
@@ -43,8 +46,16 @@ function answers(host: string, ms = 5000): Promise<boolean> {
       done(false);
       return;
     }
-    socket.onopen = () => socket?.send(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'server.ping', params: [] }));
-    socket.onmessage = () => done(true);
+    socket.onopen = () =>
+      socket?.send(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'blockchain.headers.subscribe', params: [] }));
+    socket.onmessage = (event) => {
+      try {
+        const height = JSON.parse(String(event.data))?.result?.height;
+        done(Number.isSafeInteger(height) && height > 0);
+      } catch {
+        done(false);
+      }
+    };
     socket.onerror = () => done(false);
     socket.onclose = () => done(false);
   });
@@ -70,31 +81,69 @@ export function chooseServer(network: NetworkName): Promise<void> {
   return chosen;
 }
 
+export class ServerTimeout extends Error {
+  constructor() {
+    super('The Bitcoin Cash network server did not answer in time.');
+  }
+}
+
+/** Reject with ServerTimeout when `promise` has not settled within `ms`. */
+export function deadline<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new ServerTimeout()), ms);
+    promise.then(resolve, reject).finally(() => clearTimeout(timer));
+  });
+}
+
+let moving: { from: string; done: Promise<void> } | null = null;
+
 /**
- * Run a network read, and when it fails because the server stopped answering, move to the next server that
- * answers and run it once more. A failure the server answered (a missing plan, a rejected transaction) is
- * returned as it is.
+ * Leave `failed` for the next mainnet server that serves the chain. Many reads can fail together (the demo reads
+ * every example at once): they share one move, and a read that failed on an older server never moves the app away
+ * from the newer choice.
+ */
+function moveFrom(failed: string): Promise<void> {
+  if (mainnetServer !== failed) return Promise.resolve();
+  if (moving?.from === failed) return moving.done;
+  const done = (async () => {
+    const start = MAINNET_SERVERS.indexOf(failed);
+    for (let step = 1; step < MAINNET_SERVERS.length; step++) {
+      const host = MAINNET_SERVERS[(start + step) % MAINNET_SERVERS.length];
+      if (!(await answers(host))) continue;
+      if (mainnetServer === failed) {
+        mainnetServer = host;
+        provider = null;
+        freshProvider = null;
+        chosen = Promise.resolve();
+      }
+      return;
+    }
+  })().finally(() => {
+    if (moving?.done === done) moving = null;
+  });
+  moving = { from: failed, done };
+  return done;
+}
+
+/**
+ * Run a network read, and when it fails because its server stopped serving the chain, move to the next server
+ * that does and run it once more. A failure the server answered (a missing plan, a rejected transaction) is
+ * returned as it is. `read` must ask getProvider / getFreshProvider for its provider on each call.
  */
 export async function withFailover<T>(network: NetworkName, read: () => Promise<T>, ms = 25_000): Promise<T> {
   await chooseServer(network);
-  // A server that goes quiet can leave a request waiting forever. Count that as a failure too.
-  const timed = () =>
-    new Promise<T>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('The Bitcoin Cash network server did not answer in time.')), ms);
-      read().then(resolve, reject).finally(() => clearTimeout(timer));
-    });
+  if (network !== 'mainnet' || typeof WebSocket === 'undefined') return deadline(read(), ms);
+  const host = mainnetServer;
   try {
-    return await timed();
+    return await deadline(read(), ms);
   } catch (error) {
-    if (network !== 'mainnet' || typeof WebSocket === 'undefined' || (await answers(mainnetServer))) throw error;
-    const failed = mainnetServer;
-    mainnetServer = MAINNET_SERVERS[(MAINNET_SERVERS.indexOf(failed) + 1) % MAINNET_SERVERS.length];
-    provider = null;
-    freshProvider = null;
-    chosen = null;
-    await chooseServer(network);
-    if (mainnetServer === failed) throw error;
-    return timed();
+    if (mainnetServer === host) {
+      // A request left waiting counts as a failure. Otherwise ask the server for the chain tip.
+      if (!(error instanceof ServerTimeout) && (await answers(host))) throw error;
+      await moveFrom(host);
+      if (mainnetServer === host) throw error;
+    }
+    return deadline(read(), ms);
   }
 }
 

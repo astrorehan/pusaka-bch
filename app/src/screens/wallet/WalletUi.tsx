@@ -18,7 +18,7 @@ import {
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Sheet } from '../../components/Sheet';
-import { friendlyError, StaleReviewError, UnconfirmedPlanSubmission } from '../../lib/chain/errors';
+import { friendlyError, StaleReviewError, UncertainSubmission, UnconfirmedPlanSubmission } from '../../lib/chain/errors';
 import { explorerTxUrl } from '../../lib/format';
 import type { Prepared } from '../../lib/chain/v2';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
@@ -314,6 +314,8 @@ export function TransactionReview({
   const [recovery, setRecovery] = useState<PendingPlanSubmission | null>(null);
   // The refreshed review could not be built (the step was already done by someone else): only Back is left.
   const [ended, setEnded] = useState(false);
+  // Sent, but the reply was lost: the transaction to check before sending again.
+  const [uncertain, setUncertain] = useState('');
   const transaction = revised ?? prepared;
   const rebuild = stale && !ended ? transaction.rebuild : undefined;
   const walletApproval = transaction.walletApproval ?? true;
@@ -325,12 +327,7 @@ export function TransactionReview({
     setError('');
     try {
       if (rebuild) {
-        try {
-          setRevised(await rebuild());
-        } catch (err) {
-          setEnded(true);
-          throw err;
-        }
+        setRevised(await rebuild());
         setStale(false);
       } else {
         const api = await import('../../lib/chain/v2');
@@ -351,6 +348,7 @@ export function TransactionReview({
       }
       if (err instanceof StaleReviewError) setStale(true);
       if (err instanceof UnconfirmedPlanSubmission) setRecovery(err.record);
+      setUncertain(err instanceof UncertainSubmission ? err.txid : '');
       setError(friendlyError(err));
     } finally {
       setBusy(false);
@@ -396,6 +394,13 @@ export function TransactionReview({
         <Details rows={transaction.rows} />
         {transaction.warning && <p className="pw-fine" role="note">{transaction.warning}</p>}
         {error && <ErrorNotice>{error}</ErrorNotice>}
+        {uncertain && (
+          <p className="pw-fine">
+            <a href={explorerTxUrl(uncertain, NETWORK)} target="_blank" rel="noreferrer">
+              Check this transaction <ExternalLink size={12} aria-hidden />
+            </a>
+          </p>
+        )}
         {recovery && <PlanSubmissionDetails record={recovery} />}
         <p className="pw-fine">
           {NETWORK === 'chipnet'

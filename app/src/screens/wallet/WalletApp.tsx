@@ -360,7 +360,7 @@ function ClaimNotice({
   const ready = Boolean(review?.ready);
   const canPay = funding.canSelfFund || (!demo && connected && funding.canSponsor);
   // A quick test plan (waiting time under a day, Chipnet): its owner may open the claim to try the whole cycle.
-  const testPlan = data.handle.metadata.inactivityPeriodSeconds < 86_400;
+  const testPlan = NETWORK === 'chipnet' && data.handle.metadata.inactivityPeriodSeconds < 86_400;
   let heading: string;
   let detail: string;
   if (overdue) {
@@ -613,6 +613,8 @@ function WalletPage() {
       setDialog(null);
     } catch (err) {
       setIssue(friendlyError(err));
+      // Usually another visitor acted on this example a moment ago: show what is there now.
+      if (demo) void refresh(true);
     } finally {
       setBusy(false);
     }
@@ -709,7 +711,6 @@ function WalletPage() {
             data={data}
             busy={busy}
             prepare={prepare}
-            txid={txid}
             exhausted={demoExhausted}
             onNext={nextExample}
           />
@@ -727,7 +728,7 @@ function WalletPage() {
             demo={demo}
           />
         )}
-        <Incoming state={state} busy={busy} prepare={prepare} />
+        {!demo && <Incoming state={state} busy={busy} prepare={prepare} />}
         {inherited && (
           <>
             <PlanPeople

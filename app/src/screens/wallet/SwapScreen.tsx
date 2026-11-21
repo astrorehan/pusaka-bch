@@ -347,6 +347,7 @@ export function TokenAssets({
   refresh: () => Promise<void>;
 }) {
   const { wallet } = useWallet();
+  const { demo } = useCurrentPlan();
   const formId = useId();
   const [prepared, setPrepared] = useState<api.Prepared | null>(null);
   const [receipt, setReceipt] = useState<Utxo | null>(null);
@@ -422,7 +423,8 @@ export function TokenAssets({
                   Send
                 </Button>
               )}
-              {data.state.status === 'PAID_OUT' && (
+              {/* Paying out tokens needs a wallet for the fee, which the demo never asks for. */}
+              {data.state.status === 'PAID_OUT' && !demo && (
                 <Button
                   type="button"
                   variant="secondary"

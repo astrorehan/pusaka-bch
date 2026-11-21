@@ -51,16 +51,18 @@ already happened on mainnet, and leaves the last one to you.
 
 | Do this | What you should see |
 |---|---|
-| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | **Pay out a real inheritance**: what already happened, step by step. *Plan created*, *Owner went quiet*, *Claim opened*, *Review ended*, with links to their transactions, then **Your turn: pay the heirs** |
+| Open the [demo](https://astrorehan.github.io/pusaka-bch/wallet/demo) | **Pay out a real inheritance**: what already happened, step by step. *Plan created* and *Claim opened* (each links to its transaction), *Owner went quiet* and *Review ended* (no transaction of their own, just time passing), then **Your turn: pay the heirs** |
 | Press **Pay the heirs** | A review sheet listing each of the six heirs by name with their exact amount, then the network fee, paid from the plan. Nothing is sent yet |
 | Review the six payments, then press **Send transaction** | "Transaction accepted by the network" with a **View transaction** link. The last step turns into **Heirs paid** |
 | Open **View transaction** | One transaction, one output per heir: pot × share ÷ 120, rounded down |
-| Press **Open the next example** | Another example plan with its payout ready |
+| Press **Open the next example** | Another example plan, one with its payout ready whenever there is one |
 
 Each example pays out once, so the demo keeps a pool of identical ones (four `assets-2` examples, plus six
 earlier `assets-1` ones as fallbacks) and opens one that is ready. If two people pay the same example at the
 same moment, the network accepts only one payout; the other sees that it was just paid and is offered the next
-example. If every example has been paid, the demo says so and links to the same steps on Chipnet.
+example. If the review sheet says the plan changed, check it again before sending; if the heirs were already
+paid, press **Back** and open the next example. If every example has been paid, the demo says so and links to
+the same steps on Chipnet.
 [Mainnet example records](docs/proofs/v2-live.md#mainnet)
 
 ## The owner path: five minutes, with Paytaca or Cashonize
@@ -81,8 +83,9 @@ broadcasts the exact transaction you reviewed and checks its ID.
 
 ## The whole cycle yourself: about 30 minutes, on Chipnet
 
-On mainnet the waiting time and the review are at least a day each, so that a short absence never costs an owner
-their savings. To run every step yourself, use the [quick test plan on Chipnet](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/new?quick=1)
+A plan you create on mainnet needs at least a day for each of the waiting time and the review, so that a short
+absence never costs an owner their savings. (The demo's examples were made by our script with a 1-minute wait.)
+To run every step yourself, use the [quick test plan on Chipnet](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/new?quick=1)
 with test BCH from a Chipnet faucet:
 
 1. Create the plan as above, with **Quick test** ticked: a 1-minute waiting time and a 512-second review, the
