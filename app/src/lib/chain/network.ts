@@ -15,6 +15,9 @@ import { addressPrefix } from '../cashAddress.ts';
 let provider: ElectrumNetworkProvider | null = null;
 let providerNetwork: NetworkName | null = null;
 let freshProvider: ElectrumNetworkProvider | null = null;
+const historicalMtp = new Map<string, Promise<bigint>>();
+const tipMtp = new Map<string, { promise: Promise<bigint>; expires: number }>();
+const TIP_MTP_TTL_MS = 15_000;
 
 // Public mainnet Electrum servers, in order of preference. If the first does not answer when the app starts
 // reading, the next one is used, so one server's outage does not take the wallet or the demo down. Every
@@ -74,6 +77,7 @@ export function chooseServer(network: NetworkName): Promise<void> {
         mainnetServer = host;
         provider = null;
         freshProvider = null;
+        tipMtp.clear();
       }
       return;
     }
@@ -114,6 +118,7 @@ function moveFrom(failed: string): Promise<void> {
         mainnetServer = host;
         provider = null;
         freshProvider = null;
+        tipMtp.clear();
         chosen = Promise.resolve();
       }
       return;
@@ -209,11 +214,7 @@ export async function plainBalance(network: NetworkName, address: string): Promi
   return utxos.filter((u) => !u.token).reduce((t, u) => t + u.satoshis, 0n);
 }
 
-/**
- * The network clock: median time past of the last 11 blocks. A timestamp locktime is final only below it,
- * so every time check in the contract is measured against this, not the wall clock (about an hour behind on Chipnet).
- */
-export async function medianTimePast(network: NetworkName, atHeight?: number): Promise<bigint> {
+async function fetchMedianTimePast(network: NetworkName, atHeight?: number): Promise<bigint> {
   const provider = getProvider(network);
   const height = atHeight ?? Number(await provider.getBlockHeight());
   if (!Number.isSafeInteger(height) || height < 0) throw new Error('The network returned an invalid block height.');
@@ -237,6 +238,35 @@ export async function medianTimePast(network: NetworkName, atHeight?: number): P
   });
   times.sort((a, b) => a - b);
   return BigInt(times[Math.floor(times.length / 2)]);
+}
+
+/**
+ * The network clock: median time past of the last 11 blocks. A timestamp locktime is final only below it,
+ * so every time check in the contract is measured against this, not the wall clock (about an hour behind on Chipnet).
+ * Historical block MTPs are immutable and cached; the tip MTP is shared across concurrent reads for 15 s.
+ */
+export function medianTimePast(network: NetworkName, atHeight?: number): Promise<bigint> {
+  if (atHeight !== undefined) {
+    const key = `${network}:${atHeight}`;
+    const cached = historicalMtp.get(key);
+    if (cached) return cached;
+    const req = fetchMedianTimePast(network, atHeight).catch((err) => {
+      historicalMtp.delete(key);
+      throw err;
+    });
+    historicalMtp.set(key, req);
+    return req;
+  }
+  const key = `${network}:${network === 'mainnet' ? mainnetServer : 'default'}`;
+  const now = Date.now();
+  const cached = tipMtp.get(key);
+  if (cached && now < cached.expires) return cached.promise;
+  const req = fetchMedianTimePast(network).catch((err) => {
+    if (tipMtp.get(key)?.promise === req) tipMtp.delete(key);
+    throw err;
+  });
+  tipMtp.set(key, { promise: req, expires: now + TIP_MTP_TTL_MS });
+  return req;
 }
 
 export { addressPrefix, binToHex, hexToBin };

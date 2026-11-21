@@ -108,8 +108,8 @@ test("real public Chipnet plan follows the demo between screens without replacin
   await expect(story.getByText("Live on Chipnet · test BCH")).toBeVisible({ timeout: 30_000 });
   await expect(story.getByText("Plan created", { exact: true })).toBeVisible();
   await expect(story.getByRole("link", { name: "Create your own plan" })).toBeVisible();
-  // The demo needs no wallet, so it offers none.
-  await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toHaveCount(0);
+  // Connect wallet stays visible at the top right everywhere, even though the demo itself needs no wallet.
+  await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toBeVisible();
   await expect(page.locator(".pw-balance-number")).toContainText(/\d/, {
     timeout: 30_000,
   });
@@ -184,6 +184,9 @@ test("real public Chipnet plan follows the demo between screens without replacin
   ).toBeVisible({ timeout: 20000 });
   await expect(
     page.getByRole("heading", { name: "Share & recovery" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Family plan link QR code" }),
   ).toBeVisible();
   await expect(page.getByText(/This plan uses the earlier review contract/)).toBeVisible();
   expect(errors).toEqual([]);
@@ -286,20 +289,31 @@ test("invalid saved plan data and failed copies have recoverable messages", asyn
   await expect(page).toHaveURL(/\/wallet$/);
 });
 
-test("wallet pairing opens an accessible QR and wallet link under the production policy", async ({ page }) => {
+test("landing page wallet pairing can copy the connection link under the production policy", async ({ page }) => {
   const violations: string[] = [];
   page.on("console", (message) => {
     if (message.text().includes("Content Security Policy")) violations.push(message.text());
   });
   await page.setViewportSize({ width: 320, height: 750 });
-  await page.goto("wallet");
-  await page.getByRole("button", { name: "Connect wallet", exact: true }).click();
+  await page.goto("./");
+  await page.evaluate(() => {
+    navigator.clipboard.writeText = async (text) => { document.body.dataset.copiedWalletLink = text; };
+  });
+  const connect = page.getByRole("banner").getByRole("button", { name: "Connect wallet", exact: true });
+  await connect.click();
   const pairing = page.getByRole("dialog", { name: "Connect your wallet" });
   await expect(pairing.getByRole("img", { name: "Wallet connection QR code" })).toBeVisible();
-  await expect(pairing.getByRole("link", { name: "Open in wallet" })).toHaveAttribute("href", /^wiz:\/\//);
+  await pairing.getByRole("button", { name: "Copy connection link", exact: true }).click();
+  await expect(pairing.getByRole("status")).toHaveText("Copied connection link");
+  await expect(page.locator("body")).toHaveAttribute("data-copied-wallet-link", /^wiz:\/\//);
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.evaluate(() => { delete document.body.dataset.copiedWalletLink; });
+  await pairing.getByRole("button", { name: "Tap QR code to copy wallet connection link" }).click();
+  await expect(page.locator("body")).toHaveAttribute("data-copied-wallet-link", /^wiz:\/\//);
   await page.keyboard.press("Escape");
   await expect(pairing).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Connect wallet", exact: true })).toBeEnabled();
+  await expect(connect).toBeEnabled();
   expect(violations).toEqual([]);
 
   const inlineScriptRan = await page.evaluate(() => {

@@ -76,6 +76,10 @@
 .blaze__panel .blaze__addr .copy-btn--sm { width: 44px; height: 44px; }
 .blaze__panel .blaze__addr .copy-btn--sm::after { display: none; }
 
+@media (max-width: 359px) {
+  .blaze__toggle { padding: 0 10px; gap: 6px; font-size: 12px; }
+}
+
 @media (min-width: 1024px) {
   .blaze__wide { display: flex; }
   .blaze__narrow { display: none; }

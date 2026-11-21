@@ -13,6 +13,7 @@ is in the [README](README.md).
 | **Code before BLAZE** | tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) and [Pusaka on Monad](https://github.com/astrorehan/pusaka) |
 | **Demo before BLAZE** | [pusaka-faraid.vercel.app](https://pusaka-faraid.vercel.app) (the Monad version) |
 | **Entered for** | BCH BLAZE 2026 Mainnet Track and the Best SolidCash Application bounty |
+| **Support and feedback** | Telegram [`@astrorehan`](https://t.me/astrorehan) |
 | **Prize and donation address** (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |
 
 ## Pusaka in one minute
@@ -241,10 +242,11 @@ Check it: `git diff --stat blaze-start HEAD`.
 | The broadcast reply was lost during setup or a rules edit | Open **Recover a plan** in the wallet and press **Check submission**. The app keeps the recovery file while the network status is uncertain |
 | "The network clock has not reached this step yet." | The network's clock runs behind real time. Wait a few minutes and press **Refresh** |
 | "Could not reach the Bitcoin Cash network." | The app could not reach a public BCH server. Press **Refresh** |
-| A **Testnet** badge at the top | You are in the Chipnet app. The mainnet app is at the site root |
-| The wallet does not connect | Use Paytaca, or Cashonize 0.9.0 or later, on the same network as the app, and scan the QR code |
+| **Chipnet** selected at the top | You are in the test-network app. Press **Mainnet** in the network switcher to return to the mainnet app |
+| The wallet does not connect | Use Paytaca, or Cashonize 0.9.0 or later, on the same network as the app. Scan the QR code, or tap the QR code to copy the connection link |
 | "Cancelled in your wallet. Nothing was sent." | You declined in the wallet. Press the button again |
 | **Collect** asks your wallet to approve | A single small payment cannot pay its own fee under the contract's cap, so your wallet pays it and the plan keeps every satoshi received |
+| Still stuck or have a question | Message [`@astrorehan`](https://t.me/astrorehan) on Telegram |
 
 ## Good to know
 

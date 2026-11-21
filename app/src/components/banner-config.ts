@@ -5,6 +5,9 @@
 // Leave a value as '' to hide its entry. A group with nothing left in it is hidden too.
 
 export const REPO_URL = 'https://github.com/astrorehan/pusaka-bch';
+/** Direct support contact shown in the UI and judge guide. */
+export const TELEGRAM_HANDLE = '@astrorehan';
+export const TELEGRAM_URL = 'https://t.me/astrorehan';
 /** The branch judges read: the BLAZE release, until it is merged into main. */
 export const SOURCE_REF = import.meta.env.VITE_RELEASE_REF || 'release/v2-readiness';
 const sourceRef = SOURCE_REF;

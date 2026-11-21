@@ -6,6 +6,7 @@ import {
   Download,
   HeartPulse,
   Link2,
+  RefreshCw,
   ShieldCheck,
   Timer,
   Users,
@@ -13,6 +14,7 @@ import {
 import { Button, ButtonLink } from '../../components/Button';
 import { CopyButton } from '../../components/CopyButton';
 import { Logo } from '../../components/Logo';
+import { QrCode } from '../../components/QrCode';
 import { formatDuration, shortAddress } from '../../lib/format';
 import { p2pkhCashAddressFromPkh } from '../../lib/cashAddress';
 import type * as api from '../../lib/chain/v2';
@@ -366,6 +368,98 @@ export function PlanPeople({
   );
 }
 
+export function ReviewReadiness({
+  review,
+  loading = false,
+  onRefresh,
+}: {
+  review: NonNullable<api.LoadedPlan['review']>;
+  loading?: boolean;
+  onRefresh?: () => void;
+}) {
+  const remaining = Math.max(0, review.required - review.age);
+  const pct = review.confirmed && review.required > 0
+    ? Math.min(100, Math.round((review.age / review.required) * 100))
+    : 0;
+  return (
+    <div className="pw-review-meter" role="status" aria-live="polite">
+      <div className="pw-review-meter__top">
+        <span className="pw-review-meter__label num">
+          {review.confirmed
+            ? `${pct}% of review elapsed · about ${formatDuration(BigInt(remaining))} left`
+            : 'Waiting for first block confirmation'}
+        </span>
+        {onRefresh && (
+          <button
+            type="button"
+            className="pw-link-button pw-review-meter__refresh"
+            disabled={loading}
+            onClick={onRefresh}
+          >
+            <RefreshCw size={13} className={loading ? 'pw-spin' : undefined} aria-hidden />
+            {loading ? 'Checking…' : 'Check now'}
+          </button>
+        )}
+      </div>
+      <div
+        className={`pw-review-meter__track${!review.confirmed ? ' pw-review-meter__track--pending' : ''}`}
+        role="progressbar"
+        aria-label="Review period progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      >
+        <span className="pw-review-meter__fill" style={{ width: `${Math.max(review.confirmed ? 4 : 18, pct)}%` }} />
+      </div>
+      <p className="pw-review-meter__note">
+        Auto-checks the network every 30s. Bitcoin Cash follows median block time, so remaining time is approximate.
+      </p>
+    </div>
+  );
+}
+
+export function FamilyShareCard({
+  metadata,
+  compact = false,
+}: {
+  metadata: Metadata;
+  compact?: boolean;
+}) {
+  const link = planLink(metadata);
+  const heirs = metadata.heirs.length;
+  const networkLabel = metadata.network === 'mainnet' ? 'Bitcoin Cash Mainnet' : 'Chipnet testnet';
+  return (
+    <div className={`pw-share-card${compact ? ' pw-share-card--compact' : ''}`}>
+      <div className="pw-share-card__head">
+        <span className="pw-share-card__brand">
+          <Logo size={20} />
+          <strong>Pusaka family plan card</strong>
+        </span>
+        <Badge tone={metadata.network === 'mainnet' ? 'success' : 'warning'}>{networkLabel}</Badge>
+      </div>
+      <p className="pw-share-card__meta">
+        {heirs} {heirs === 1 ? 'heir' : 'heirs'} · {metadata.contacts.length} trusted contacts ·{' '}
+        {formatDuration(BigInt(metadata.inactivityPeriodSeconds))} wait · about{' '}
+        {formatDuration(BigInt(metadata.effectiveReviewSeconds))} review
+      </p>
+      <QrCode
+        value={link}
+        copyValue={link}
+        size={compact ? 176 : 196}
+        quietZone={10}
+        errorCorrection="L"
+        label="Family plan link QR code"
+        copyHint="Tap QR to copy plan link"
+        className="pw-share-card__qr"
+      />
+      <p className="pw-share-card__note">
+        Screenshot and send to your heirs or trusted contacts so they can scan and open this plan. Public rules and
+        addresses only, never a private key.
+      </p>
+    </div>
+  );
+}
+
 export function PlanShare({
   metadata,
   save,
@@ -377,8 +471,9 @@ export function PlanShare({
     <Card>
       <CardHeading
         title="Share & recovery"
-        description="Your heirs and contacts need these plan details to claim. Pusaka keeps no copy, so share the link and save the file."
+        description="Your heirs and contacts need these plan details to claim. Pusaka keeps no copy, so share the card or link and save the file."
       />
+      <FamilyShareCard metadata={metadata} />
       <div className="pw-share-link">
         <span className="pw-symbol" aria-hidden>
           <Link2 size={18} />
@@ -407,11 +502,15 @@ export function ClaimProgress({
   busy,
   prepare,
   connected,
+  loading = false,
+  onRefresh,
 }: {
   data: api.LoadedPlan;
   busy: boolean;
   prepare: PrepareAction;
   connected: boolean;
+  loading?: boolean;
+  onRefresh?: () => void;
 }) {
   const { state, review, now, funding } = data;
   const hasClaim = state.status === 'REVIEW' || state.status === 'PAID_OUT';
@@ -434,7 +533,9 @@ export function ClaimProgress({
             : 'Opened after the inactivity deadline passed.'
           : paid
             ? 'A claim was opened and reviewed.'
-            : `Anyone can open one after the inactivity deadline, or two trusted contacts can open one sooner. ${approvals} of 3 have confirmed.`,
+            : now > state.deadline
+              ? 'The waiting time has passed. Anyone can open a claim now.'
+              : `About ${formatDuration(BigInt(Math.max(0, state.deadline - now)))} until anyone can open a claim, or two trusted contacts can open one sooner. ${approvals} of 3 have confirmed.`,
       done: hasClaim,
     },
     {
@@ -473,6 +574,9 @@ export function ClaimProgress({
           </li>
         ))}
       </ol>
+      {state.status === 'REVIEW' && !ready && review && (
+        <ReviewReadiness review={review} loading={loading} onRefresh={onRefresh} />
+      )}
       {(state.status === 'ACTIVE' || state.status === 'CLOSED') && (
         <>
           {!funding.canSelfFund && (

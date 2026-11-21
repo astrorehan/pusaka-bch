@@ -163,14 +163,14 @@
 }
 
 @media (max-width: 767px) {
-  .shell--home .header { padding-top: 12px; padding-bottom: 12px; }
+  .shell--home .header { padding-top: 10px; padding-bottom: 10px; }
   .shell--home .wallet-btn { padding-inline: 16px; }
   .shell--home .brand__name { font-size: 21px; }
-  .home--studio .home-hero { padding-top: 32px; }
-  .home--studio .home-hero__title { margin-top: 20px; font-size: clamp(40px, 10vw, 54px); }
+  .home--studio .home-hero { padding-top: 18px; }
+  .home--studio .home-hero__title { margin-top: 12px; font-size: clamp(36px, 10vw, 52px); }
   .home--studio .home-hero__title span { display: block; }
-  .home--studio .home-hero__lead { font-size: 16px; max-width: 330px; margin-top: 18px; }
-  .home--studio .home-hero__ctas { gap: 8px; width: 100%; }
+  .home--studio .home-hero__lead { font-size: 15.5px; max-width: 340px; margin-top: 12px; }
+  .home--studio .home-hero__ctas { gap: 8px; width: 100%; margin-top: 18px; }
   .home--studio .home-hero__ctas .btn { padding-inline: 20px; font-size: 15px; min-height: 44px; }
   .home--studio .home-hero__ctas .btn--primary { padding: 0 8px 0 20px; }
   .home-cta__dot { width: 28px; height: 28px; }
@@ -179,6 +179,14 @@
   .home--studio .home-built--hero .home-built__list { column-gap: 12px; }
   .home-built__link { gap: 5px; font-size: 12px; }
   .home-built__mark { width: 18px; height: 18px; }
+  .home-hero__scene { height: clamp(320px, 74vw, 520px); }
+  .flower-stage__toggle { bottom: 20px; }
+}
+
+@media (max-width: 359px) {
+  .home--studio .home-hero__ctas { flex-direction: column; align-items: stretch; max-width: 280px; margin-inline: auto; }
+  .home--studio .home-hero__ctas .btn { width: 100%; justify-content: center; }
+  .home--studio .home-hero__ctas .btn--primary { justify-content: space-between; }
 }
 
 /* Phones under 440 px: the logo, the test-network badge, the menu and "Connect" share one row. Tighter gaps and a

@@ -20,49 +20,66 @@ const DEMO_PLANS: Metadata[] = DEMO_PLAN_DATA.flatMap((value) => {
 
 type DemoPick = Snapshot & { unread: number };
 
+function shuffle<T>(items: readonly T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 /**
  * Pick the example with the most a visitor can do at once: a payout ready to send (current revision first),
- * then a claim ready to open, then one under review. Paid examples come last, and `unread` counts the examples
- * the network could not be asked about, so "all paid" is said only when every example was checked.
+ * then a claim ready to open, then one under review. Probes small shuffled batches so a 27-plan pool never
+ * floods one Electrum socket, returning immediately once a ready current-revision payout answers.
  */
 async function pickDemo(): Promise<DemoPick> {
   if (DEMO_PLANS.length === 1) return { plan: DEMO_PLANS[0], data: null, error: '', unread: 0 };
   const { loadPlan } = await import('../../lib/chain/v2');
-  // Ask in a random order, so visitors arriving together get different examples, and take the first ready
-  // payout on the current revision as soon as it is read: one slow read must not hold the page.
-  const order = [...DEMO_PLANS].sort(() => Math.random() - 0.5);
-  let early: ((pick: DemoPick) => void) | null = null;
-  const first = new Promise<DemoPick>((resolve) => (early = resolve));
-  // A ready example on the earlier revision waits a moment for a current one, then is shown.
-  const older: Snapshot[] = [];
-  let grace: number | undefined;
-  const reads = order.map((plan) =>
-    loadPlan(plan, { fresh: true }).then(
-      (data): Snapshot => {
-        const snapshot = { plan, data, error: '' };
-        const value = rank(snapshot);
-        if (value === 0) early?.({ ...snapshot, unread: 0 });
-        if (value === 1) {
-          older.push(snapshot);
-          grace ??= window.setTimeout(
-            () => early?.({ ...older[Math.floor(Math.random() * older.length)], unread: 0 }),
-            1500,
-          );
-        }
-        return snapshot;
-      },
-      (error: unknown): Snapshot => ({ plan, data: null, error: friendlyError(error) }),
-    ),
-  );
-  const all = Promise.all(reads).then((loaded) => {
-    // Several examples are equally ready. Spread visitors over them, so two people opening the demo at the
-    // same time rarely reach the same plan, where the second payout would find its inputs already spent.
-    const best = Math.min(...loaded.map(rank));
-    const ties = loaded.filter((snapshot) => rank(snapshot) === best);
-    const unread = loaded.filter((snapshot) => !snapshot.data).length;
-    return { ...ties[Math.floor(Math.random() * ties.length)], unread };
-  });
-  return Promise.race([first, all]).finally(() => window.clearTimeout(grace));
+  const currentRev = shuffle(DEMO_PLANS.filter((p) => p.protocolRevision === CURRENT_ASSET_REVISION));
+  const olderRev = shuffle(DEMO_PLANS.filter((p) => p.protocolRevision !== CURRENT_ASSET_REVISION));
+  const queue = [...currentRev, ...olderRev];
+
+  const loaded: Snapshot[] = [];
+  let cursor = 0;
+  let batchSize = 2;
+
+  while (cursor < queue.length) {
+    const slice = queue.slice(cursor, cursor + batchSize);
+    cursor += slice.length;
+    batchSize = 4;
+
+    let early: ((pick: DemoPick) => void) | null = null;
+    const found = new Promise<DemoPick | null>((resolve) => (early = resolve));
+    const batchPromise = Promise.all(
+      slice.map((plan) =>
+        loadPlan(plan, { fresh: true }).then(
+          (data): Snapshot => {
+            const snapshot = { plan, data, error: '' };
+            const r = rank(snapshot);
+            // Return immediately on a ready current-revision payout, or on an older ready payout once all current plans were checked.
+            if (r === 0 || (r === 1 && cursor > currentRev.length)) {
+              early?.({ ...snapshot, unread: 0 });
+            }
+            return snapshot;
+          },
+          (error: unknown): Snapshot => ({ plan, data: null, error: friendlyError(error) }),
+        ),
+      ),
+    ).then((results) => {
+      loaded.push(...results);
+      return null;
+    });
+
+    const immediate = await Promise.race([found, batchPromise]);
+    if (immediate) return immediate;
+  }
+
+  const best = Math.min(...loaded.map(rank));
+  const ties = loaded.filter((snapshot) => rank(snapshot) === best);
+  const unread = loaded.filter((snapshot) => !snapshot.data).length;
+  return { ...ties[Math.floor(Math.random() * ties.length)], unread };
 }
 
 function rank({ plan, data }: Snapshot) {
@@ -111,6 +128,7 @@ export function WalletPlanLayout() {
   const selected = requestedDemo ? (demo ? demoPlan : null) : shared ? fromLink?.plan ?? null : saved;
   const readEnabled = Boolean(selected && !activity && route !== '/new' && route !== '/wallet/new');
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const skipInitialRefresh = useRef<Metadata | null>(null);
 
   useEffect(() => {
     if (!demo || demoPick) return;
@@ -124,8 +142,11 @@ export function WalletPlanLayout() {
       }))
       .then((pick) => {
         if (!live) return;
+        if (pick.data) {
+          skipInitialRefresh.current = pick.plan;
+          setSnapshot(pick);
+        }
         setDemoPick(pick);
-        if (pick.data) setSnapshot(pick);
       });
     return () => {
       live = false;
@@ -190,9 +211,13 @@ export function WalletPlanLayout() {
   useEffect(() => {
     if (!readEnabled) return;
     let disposed = false;
-    queueMicrotask(() => {
-      if (!disposed) void refresh();
-    });
+    if (selected && skipInitialRefresh.current === selected) {
+      skipInitialRefresh.current = null;
+    } else {
+      queueMicrotask(() => {
+        if (!disposed) void refresh();
+      });
+    }
     function poll() {
       if (!pending.current && !document.hidden && navigator.onLine) void refresh();
     }

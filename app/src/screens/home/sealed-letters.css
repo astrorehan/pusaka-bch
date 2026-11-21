@@ -24,7 +24,8 @@
     linear-gradient(to bottom, transparent calc(100% / 3 - 1px), var(--crease-a) calc(100% / 3 - 1px), var(--crease-a) calc(100% / 3), var(--crease-b) calc(100% / 3), var(--crease-b) calc(100% / 3 + 1px), transparent calc(100% / 3 + 1px)),
     linear-gradient(to bottom, transparent calc(200% / 3 - 1px), var(--crease-a) calc(200% / 3 - 1px), var(--crease-a) calc(200% / 3), var(--crease-b) calc(200% / 3), var(--crease-b) calc(200% / 3 + 1px), transparent calc(200% / 3 + 1px));
 }
-.sl--still .sl-card { visibility: visible; }
+.sl--still .sl-card,
+.sl--compact .sl-card { visibility: visible; }
 
 /* The folded letter: the middle third stays put, the top third folds down over it and the bottom third up. */
 .sl-fold { position: absolute; inset: 0; z-index: 2; perspective: 1800px; pointer-events: none; opacity: 0; }
@@ -86,6 +87,16 @@
 .sl.is-open .sl-card .fc-foot { animation: sl-ink 560ms ease-out calc(var(--d) + 1960ms) both; }
 .sl.is-open .sl-card .fc-foot { animation-delay: calc(var(--d) + 2080ms); }
 
+/* Phones and tablets: show the open cards immediately with a quick rise instead of hiding them for 2 seconds. */
+.sl--compact.is-open .sl-card { animation: sl-mobile-rise 280ms var(--ease-out) both; }
+.sl--compact.is-open .sl-card .fc-panel,
+.sl--compact.is-open .sl-card .fc-foot { animation: none; }
+
+@keyframes sl-mobile-rise {
+  from { transform: translateY(10px); }
+  to { transform: none; }
+}
+
 @keyframes sl-arrive {
   from { opacity: 0; transform: translateY(44px) rotate(var(--from-tilt)); }
   to { opacity: 1; transform: none; }
@@ -105,5 +116,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sl .sl-card { visibility: visible; }
+  .sl--compact.is-open .sl-card { animation: none; }
   .sl-fold { display: none; }
 }

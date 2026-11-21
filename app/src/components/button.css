@@ -58,8 +58,66 @@
   .btn--secondary.pill-fx:hover:not(:disabled) { background: var(--surface); border-color: var(--border); }
 }
 
+/* Heirloom gold sheen for the key action button: calm brushed-gold rim + periodic light sweep. */
+.btn--gold-shine {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--hero-gold, #E3CA8E) 78%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 247, 219, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--hero-gold, #E3CA8E) 34%, transparent),
+    0 10px 24px -12px rgba(147, 99, 58, 0.56);
+}
+.btn--gold-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    108deg,
+    transparent 20%,
+    rgba(227, 202, 142, 0.16) 39%,
+    rgba(255, 245, 209, 0.54) 50%,
+    rgba(227, 202, 142, 0.16) 61%,
+    transparent 80%
+  );
+  transform: translateX(-130%) skewX(-18deg);
+  animation: btn-gold-sweep 4.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.btn--gold-shine:disabled::after { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .btn--gold-shine::after {
+    background: linear-gradient(
+      108deg,
+      transparent 20%,
+      rgba(176, 128, 52, 0.16) 39%,
+      rgba(255, 249, 224, 0.62) 50%,
+      rgba(176, 128, 52, 0.16) 61%,
+      transparent 80%
+    );
+  }
+}
+:root[data-theme='dark'] .btn--gold-shine::after {
+  background: linear-gradient(
+    108deg,
+    transparent 20%,
+    rgba(176, 128, 52, 0.16) 39%,
+    rgba(255, 249, 224, 0.62) 50%,
+    rgba(176, 128, 52, 0.16) 61%,
+    transparent 80%
+  );
+}
+@keyframes btn-gold-sweep {
+  0%, 54% { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  60% { opacity: 1; }
+  88% { transform: translateX(135%) skewX(-18deg); opacity: 1; }
+  94%, 100% { transform: translateX(135%) skewX(-18deg); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn:active:not(:disabled) { transform: none; }
   .btn__label--swap { animation-name: btn-label-fade; }
+  .btn--gold-shine::after { animation: none; opacity: 0; }
   @keyframes btn-label-fade { from { opacity: 0; } to { opacity: 1; } }
 }

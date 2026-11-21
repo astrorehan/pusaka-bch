@@ -1,153 +1,385 @@
-// "One payment pays everyone.", drawn as subak: Bali's way of sharing water between rice terraces, where one
-// spring feeds every field through a divider whose openings are cut to each field's agreed share.
-// The plan is the spring. One payment opens its gate; the water runs down the canal to the divider and fills every
-// heir's terrace at once, each through a channel as wide as that heir's share. "I'm still here" closes the gate and
-// the water runs back into the spring. Amounts are fixed labels; only the water moves (money never animates).
-// Pick a terrace to see that heir's exact amount.
+// "One payment pays everyone.": the night payout flow, distilled to a borderless, minimalist beam diagram.
+// Clean floating medallions, razor-thin curved animated beams, a subtle rising blurred horizon circle at the
+// bottom edge, and minimal text.
 //
-// Desktop with motion: the title was already shown at the end of the scroll scene, so this section pulls up under
-// it and starts with the drawing. Elsewhere it carries its own title. Reduced motion: the water switches without
-// running and nothing shimmers.
-import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
-import { Check, Clock3, Hand, Send } from 'lucide-react';
-import { Logo } from '../../components/Logo';
+// Pick any heir to focus their beam and read their exact share. Switch between "Send to heirs" and
+// "I'm still here" to see the simultaneous split vs. the check-in return loop. Amounts never animate.
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { Hand, Send } from 'lucide-react';
 import { useMedia } from '../../components/useMedia';
+import { BASE } from '../../lib/asset';
 import { SplitWords, useInView } from './motion';
 import { Fireflies } from './NightPayout';
 import { HEIRS, POT } from './payoutHeirs';
 import { NIGHT_SUB, NIGHT_TITLE, PINNED_QUERY } from './landingCopy';
 import './subak.css';
 
-interface Pt { x: number; y: number }
-interface Label extends Pt { align: 'center' | 'start' }
-interface Terrace { x0: number; x1: number; y: number; h: number }
-interface Geo {
-  w: number; h: number; wide: boolean;
-  pool: Pt & { rx: number; ry: number };
-  /** where the gate stands; `across` is the direction the canal leaves it */
-  gate: Pt & { across: 'x' | 'y' };
-  canal: string;
-  canalW: number;
-  divider: Pt;
-  channels: string[];
-  terraces: Terrace[];
-  planLabel: Label; gateLabel: Label; dividerLabel: Label;
+type Mode = 'payout' | 'checkin';
+
+interface Box {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  cx: number;
+  cy: number;
 }
 
-const widths = (total: number) => HEIRS.map((h) => Math.max(1.6, (total * h.pct) / 100));
-
-/** Channels leave the divider downwards, side by side, and each turns into its terrace. The top terrace takes the
- *  rightmost channel, so no channel crosses another. */
-function channels(cx: number, top: number, canalW: number, gap: number, terraces: Terrace[]) {
-  const ws = widths(canalW);
-  const span = ws.reduce((a, b) => a + b, 0) + gap * (ws.length - 1);
-  let x = cx + span / 2;
-  return ws.map((w, i) => {
-    const c = x - w / 2;
-    x -= w + gap;
-    const t = terraces[i];
-    const cs = c.toFixed(1);
-    return `M ${cs} ${top} L ${cs} ${t.y - 24} Q ${cs} ${t.y}, ${(c + 24).toFixed(1)} ${t.y} L ${t.x0 + 14} ${t.y}`;
-  });
+interface BeamSegment {
+  d: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
 }
 
-/** Wide: the spring at the top left, the canal along the top to the divider, the terraces stepping down below. */
-function wideGeo(): Geo {
-  const canalW = 22;
-  const terraces = HEIRS.map((_, i) => ({ x0: 548 - i * 4, x1: [1132, 1154, 1170, 1184, 1196][i], y: 262 + i * 78, h: 64 }));
-  return {
-    w: 1200, h: terraces[terraces.length - 1].y + 44, wide: true,
-    pool: { x: 170, y: 104, rx: 118, ry: 46 },
-    gate: { x: 302, y: 106, across: 'x' },
-    canal: 'M 290 106 C 400 106, 484 116, 484 188',
-    canalW,
-    divider: { x: 484, y: 194 },
-    channels: channels(484, 200, canalW, 3.5, terraces),
-    terraces,
-    planLabel: { x: 170, y: 198, align: 'center' },
-    gateLabel: { x: 396, y: 50, align: 'center' },
-    dividerLabel: { x: 524, y: 194, align: 'start' },
-  };
+interface FlowGeo {
+  w: number;
+  h: number;
+  feed: BeamSegment;
+  out: BeamSegment[];
+  ret: BeamSegment;
 }
 
-/** Tall (phones): the same, narrower: the canal runs down the left and the terraces step down on the right. */
-function tallGeo(): Geo {
-  const canalW = 16;
-  const terraces = HEIRS.map((_, i) => ({ x0: 124, x1: [340, 346, 350, 354, 356][i], y: 292 + i * 74, h: 58 }));
-  return {
-    w: 360, h: terraces[terraces.length - 1].y + 46, wide: false,
-    pool: { x: 84, y: 70, rx: 66, ry: 30 },
-    gate: { x: 84, y: 114, across: 'y' },
-    canal: 'M 84 100 L 84 216',
-    canalW,
-    divider: { x: 84, y: 222 },
-    channels: channels(84, 228, canalW, 3, terraces),
-    terraces,
-    planLabel: { x: 168, y: 70, align: 'start' },
-    gateLabel: { x: 114, y: 152, align: 'start' },
-    dividerLabel: { x: 114, y: 222, align: 'start' },
-  };
-}
+const HEIR_HEX = ['#60a5fa', '#a78bfa', '#22d3ee', '#f472b6', '#a3e635'] as const;
+const BCH_ICON = `${BASE}brands/bitcoin-cash.svg`;
 
-const WIDE = wideGeo();
-const TALL = tallGeo();
-const pct = (v: number, of: number) => `${(v / of) * 100}%`;
-const at = (g: Geo, p: Pt): CSSProperties => ({ left: pct(p.x, g.w), top: pct(p.y, g.h) });
-/** each terrace bends a little differently, like contour lines */
-const BEND = [8, -5, 10, -3, 6];
-
-/** A terrace seen from the front: a long field whose ends taper into the hillside, its top edge (the bund)
- *  catching the moon. */
-function terracePath({ x0, x1, y, h }: Terrace, k: number) {
-  const t = y - h / 2, b = y + h / 2, w = x1 - x0;
-  return [
-    `M ${x0 + 26} ${t + 7}`,
-    `C ${x0 + w * 0.32} ${t - 5 + k}, ${x0 + w * 0.68} ${t + 5 - k}, ${x1 - 30} ${t + 2}`,
-    `C ${x1 - 6} ${t + 1}, ${x1 + 2} ${y - 4}, ${x1 - 4} ${y + 6}`,
-    `C ${x1 - 9} ${b - 2}, ${x1 - 22} ${b}, ${x1 - 40} ${b}`,
-    `C ${x0 + w * 0.68} ${b + 5 - k}, ${x0 + w * 0.32} ${b - 5 + k}, ${x0 + 30} ${b - 2}`,
-    `C ${x0 + 12} ${b - 3}, ${x0 - 2} ${y + 8}, ${x0 + 2} ${y - 2}`,
-    `C ${x0 + 5} ${t + 12}, ${x0 + 14} ${t + 7}, ${x0 + 26} ${t + 7} Z`,
-  ].join(' ');
-}
-function rimPath({ x0, x1, y, h }: Terrace, k: number) {
-  const t = y - h / 2, w = x1 - x0;
-  return `M ${x0 + 4} ${y - 8} C ${x0 + 6} ${t + 12}, ${x0 + 14} ${t + 7}, ${x0 + 26} ${t + 7} C ${x0 + w * 0.32} ${t - 5 + k}, ${x0 + w * 0.68} ${t + 5 - k}, ${x1 - 30} ${t + 2} C ${x1 - 8} ${t + 1}, ${x1 + 1} ${y - 6}, ${x1 - 1} ${y - 2}`;
-}
-/** the same top edge a little lower: the moon's reflection along the water's far edge */
-function shinePath({ x0, x1, y, h }: Terrace, k: number) {
-  const t = y - h / 2 + 7, w = x1 - x0;
-  return `M ${x0 + 30} ${t + 7} C ${x0 + w * 0.32} ${t - 5 + k}, ${x0 + w * 0.68} ${t + 5 - k}, ${x1 - 34} ${t + 2}`;
-}
-
-/** True while the element is on screen, so the water's shimmer only runs when someone can see it. */
+/** True while the element is on screen, so beam animations pause when scrolled away. */
 function useOnScreen<T extends Element>() {
   const ref = useRef<T>(null);
   const [on, setOn] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting));
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { rootMargin: '80px 0px' });
     io.observe(el);
     return () => io.disconnect();
   }, []);
   return [ref, on] as const;
 }
 
-function Gate({ g }: { g: Geo }) {
-  const { x, y } = g.gate;
-  const half = g.canalW / 2 + 5;
-  // Two posts either side of the canal, a beam over it, and the board that slides to close it.
-  return g.gate.across === 'x' ? (
-    <g className="sb__gate">
-      <path className="sb__gate-frame" d={`M ${x} ${y + half} L ${x} ${y - half - 14} M ${x - 6} ${y - half - 14} L ${x + 6} ${y - half - 14}`} />
-      <rect className="sb__gate-board" x={x - 4} y={y - half + 1} width={8} height={half * 2 - 2} rx={2} />
-    </g>
-  ) : (
-    <g className="sb__gate">
-      <path className="sb__gate-frame" d={`M ${x + half} ${y} L ${x - half - 14} ${y} M ${x - half - 14} ${y - 6} L ${x - half - 14} ${y + 6}`} />
-      <rect className="sb__gate-board" x={x - half + 1} y={y - 4} width={half * 2 - 2} height={8} rx={2} />
-    </g>
+function relBox(el: HTMLElement, root: DOMRect): Box {
+  const r = el.getBoundingClientRect();
+  const left = r.left - root.left;
+  const top = r.top - root.top;
+  return {
+    left,
+    right: left + r.width,
+    top,
+    bottom: top + r.height,
+    cx: left + r.width / 2,
+    cy: top + r.height / 2,
+  };
+}
+
+function measureFlow(
+  rootEl: HTMLElement,
+  planEl: HTMLElement,
+  hubEl: HTMLElement,
+  heirEls: (HTMLElement | null)[],
+  narrow: boolean,
+): FlowGeo | null {
+  const root = rootEl.getBoundingClientRect();
+  if (root.width < 10 || root.height < 10) return null;
+  const plan = relBox(planEl, root);
+  const hub = relBox(hubEl, root);
+  const heirs = heirEls.map((el) => (el ? relBox(el, root) : null));
+  if (heirs.some((b) => b === null)) return null;
+  const boxes = heirs as Box[];
+
+  if (!narrow) {
+    // Desktop: horizontal 1 -> Hub -> 3 beam diagram
+    const fx1 = plan.cx;
+    const fy1 = plan.cy;
+    const fx2 = hub.cx;
+    const fy2 = hub.cy;
+    const fmx = (fx1 + fx2) / 2;
+    const feed: BeamSegment = {
+      d: `M ${fx1.toFixed(1)} ${fy1.toFixed(1)} Q ${fmx.toFixed(1)} ${fy1.toFixed(1)} ${fx2.toFixed(1)} ${fy2.toFixed(1)}`,
+      x1: fx1,
+      y1: fy1,
+      x2: fx2,
+      y2: fy2,
+    };
+
+    const out: BeamSegment[] = boxes.map((b, i) => {
+      const x1 = hub.cx;
+      const y1 = hub.cy;
+      const x2 = b.cx;
+      const y2 = b.cy;
+      const dx = x2 - x1;
+      const spread = (i - (boxes.length - 1) / 2) * 14;
+      const cx1 = x1 + dx * 0.48;
+      const cx2 = x2 - dx * 0.42;
+      return {
+        d: `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${cx1.toFixed(1)} ${(y1 + spread).toFixed(1)}, ${cx2.toFixed(1)} ${y2.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`,
+        x1,
+        y1,
+        x2,
+        y2,
+      };
+    });
+
+    // Check-in return arc: smooth shallow curve arching over the top from Hub back to Plan
+    const rx1 = hub.cx;
+    const ry1 = hub.cy;
+    const rx2 = plan.cx;
+    const ry2 = plan.cy;
+    const archY = Math.min(ry1, ry2) - 82;
+    const ret: BeamSegment = {
+      d: `M ${rx1.toFixed(1)} ${ry1.toFixed(1)} Q ${((rx1 + rx2) / 2).toFixed(1)} ${archY.toFixed(1)} ${rx2.toFixed(1)} ${ry2.toFixed(1)}`,
+      x1: rx1,
+      y1: ry1,
+      x2: rx2,
+      y2: ry2,
+    };
+
+    return { w: root.width, h: root.height, feed, out, ret };
+  }
+
+  // Mobile (< 768px): clean symmetrical top -> center -> 3-column bottom fan
+  const feed: BeamSegment = {
+    d: `M ${plan.cx.toFixed(1)} ${plan.cy.toFixed(1)} L ${hub.cx.toFixed(1)} ${hub.cy.toFixed(1)}`,
+    x1: plan.cx,
+    y1: plan.cy,
+    x2: hub.cx,
+    y2: hub.cy,
+  };
+
+  const out: BeamSegment[] = boxes.map((b) => {
+    const x1 = hub.cx;
+    const y1 = hub.cy;
+    const x2 = b.cx;
+    const y2 = b.cy;
+    const my = y1 + (y2 - y1) * 0.54;
+    return {
+      d: `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${my.toFixed(1)}, ${x2.toFixed(1)} ${my.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`,
+      x1,
+      y1,
+      x2,
+      y2,
+    };
+  });
+
+  // Check-in return loop curving gracefully around the right side back up to the Plan tile
+  const archX = Math.max(plan.cx, hub.cx) + 74;
+  const ret: BeamSegment = {
+    d: `M ${hub.cx.toFixed(1)} ${hub.cy.toFixed(1)} Q ${archX.toFixed(1)} ${((hub.cy + plan.cy) / 2).toFixed(1)} ${plan.cx.toFixed(1)} ${plan.cy.toFixed(1)}`,
+    x1: hub.cx,
+    y1: hub.cy,
+    x2: plan.cx,
+    y2: plan.cy,
+  };
+
+  return { w: root.width, h: root.height, feed, out, ret };
+}
+
+/** Segmented control with a smoothly sliding measured pill indicator. */
+function ModeSegmented({
+  mode,
+  onChange,
+  seen,
+}: {
+  mode: Mode;
+  onChange: (next: Mode) => void;
+  seen: boolean;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const payoutRef = useRef<HTMLButtonElement>(null);
+  const checkinRef = useRef<HTMLButtonElement>(null);
+  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const update = () => {
+      const root = rootRef.current;
+      const active = mode === 'payout' ? payoutRef.current : checkinRef.current;
+      if (!root || !active) return;
+      setPill({ left: active.offsetLeft, width: active.offsetWidth });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    if (rootRef.current) ro.observe(rootRef.current);
+    return () => ro.disconnect();
+  }, [mode]);
+
+  return (
+    <div
+      ref={rootRef}
+      className={`pf-seg rise-in${seen ? ' is-seen' : ''}`}
+      role="tablist"
+      aria-label="What the plan does"
+      style={{ animationDelay: '120ms' }}
+    >
+      {pill && (
+        <span
+          className="pf-seg__indicator"
+          aria-hidden
+          style={{ transform: `translateX(${pill.left}px)`, width: `${pill.width}px` }}
+        />
+      )}
+      <button
+        ref={payoutRef}
+        type="button"
+        role="tab"
+        aria-selected={mode === 'payout'}
+        className="pf-seg__tab"
+        onClick={() => onChange('payout')}
+      >
+        <Send strokeWidth={1.75} aria-hidden />
+        <span>Send to heirs</span>
+      </button>
+      <button
+        ref={checkinRef}
+        type="button"
+        role="tab"
+        aria-selected={mode === 'checkin'}
+        className="pf-seg__tab"
+        onClick={() => onChange('checkin')}
+      >
+        <Hand strokeWidth={1.75} aria-hidden />
+        <span>I’m still here</span>
+      </button>
+    </div>
+  );
+}
+
+/** Razor-thin animated beam curves. */
+function FlowBeams({
+  id,
+  geo,
+  payout,
+  pick,
+  still,
+}: {
+  id: string;
+  geo: FlowGeo | null;
+  payout: boolean;
+  pick: number;
+  still: boolean;
+}) {
+  if (!geo) return null;
+  return (
+    <svg
+      className="pf-beams"
+      width={geo.w}
+      height={geo.h}
+      viewBox={`0 0 ${geo.w} ${geo.h}`}
+      fill="none"
+      aria-hidden
+    >
+      <defs>
+        <linearGradient
+          id={`${id}-feed`}
+          gradientUnits="userSpaceOnUse"
+          x1={geo.feed.x1}
+          y1={geo.feed.y1}
+          x2={geo.feed.x2}
+          y2={geo.feed.y2}
+        >
+          <stop offset="0%" stopColor={payout ? '#e3ca8e' : '#2fd9a6'} stopOpacity="0" />
+          <stop offset="55%" stopColor={payout ? '#f3dc9e' : '#2fd9a6'} stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#fff8ec" stopOpacity="1" />
+        </linearGradient>
+
+        <linearGradient
+          id={`${id}-ret`}
+          gradientUnits="userSpaceOnUse"
+          x1={geo.ret.x1}
+          y1={geo.ret.y1}
+          x2={geo.ret.x2}
+          y2={geo.ret.y2}
+        >
+          <stop offset="0%" stopColor="#2fd9a6" stopOpacity="0" />
+          <stop offset="55%" stopColor="#2fd9a6" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#e3ca8e" stopOpacity="1" />
+        </linearGradient>
+
+        {geo.out.map((seg, i) => {
+          const hex = HEIR_HEX[i % HEIR_HEX.length];
+          return (
+            <linearGradient
+              key={i}
+              id={`${id}-out-${i}`}
+              gradientUnits="userSpaceOnUse"
+              x1={seg.x1}
+              y1={seg.y1}
+              x2={seg.x2}
+              y2={seg.y2}
+            >
+              <stop offset="0%" stopColor="#e3ca8e" stopOpacity="0.25" />
+              <stop offset="50%" stopColor={hex} stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#fff8ec" stopOpacity="1" />
+            </linearGradient>
+          );
+        })}
+      </defs>
+
+      {/* Plan -> Hub hairline + light streak */}
+      <path className="pf-track" d={geo.feed.d} strokeWidth={1.4} />
+      {still ? (
+        <path className="pf-static" d={geo.feed.d} stroke={`url(#${id}-feed)`} strokeWidth={1.6} />
+      ) : (
+        <path
+          className="pf-pulse pf-pulse--s1"
+          d={geo.feed.d}
+          pathLength={100}
+          stroke={`url(#${id}-feed)`}
+          strokeWidth={1.9}
+        />
+      )}
+
+      {/* Hub -> Heirs: three delicate curves, pulsing together */}
+      {geo.out.map((seg, i) => {
+        const isPick = i === pick;
+        const hex = HEIR_HEX[i % HEIR_HEX.length];
+        return (
+          <g key={i} className={`pf-out-group${isPick ? ' is-pick' : ''}`}>
+            <path
+              className={`pf-track${payout ? '' : ' is-quiet'}`}
+              d={seg.d}
+              stroke={payout && isPick ? hex : undefined}
+              strokeWidth={isPick && payout ? 1.5 : 1.25}
+            />
+            {payout &&
+              (still ? (
+                <path
+                  className="pf-static"
+                  d={seg.d}
+                  stroke={`url(#${id}-out-${i})`}
+                  strokeWidth={isPick ? 1.9 : 1.4}
+                  strokeOpacity={isPick ? 0.95 : 0.55}
+                />
+              ) : (
+                <path
+                  className="pf-pulse pf-pulse--s2"
+                  d={seg.d}
+                  pathLength={100}
+                  stroke={`url(#${id}-out-${i})`}
+                  strokeWidth={isPick ? 2.1 : 1.6}
+                  strokeOpacity={isPick ? 1 : 0.72}
+                />
+              ))}
+          </g>
+        );
+      })}
+
+      {/* Check-in return arc: Hub -> Plan */}
+      <g className={`pf-ret-group${payout ? ' is-hidden' : ''}`}>
+        <path className="pf-track pf-track--ret" d={geo.ret.d} strokeWidth={1.4} />
+        {!payout &&
+          (still ? (
+            <path className="pf-static" d={geo.ret.d} stroke={`url(#${id}-ret)`} strokeWidth={1.7} />
+          ) : (
+            <path
+              className="pf-pulse pf-pulse--s2"
+              d={geo.ret.d}
+              pathLength={100}
+              stroke={`url(#${id}-ret)`}
+              strokeWidth={2}
+            />
+          ))}
+      </g>
+    </svg>
   );
 }
 
@@ -157,14 +389,48 @@ export function SubakPayout() {
   const narrow = useMedia('(max-width: 767px)');
   const still = useMedia('(prefers-reduced-motion: reduce)');
   const [ref, seen] = useInView<HTMLElement>(0.05);
-  const [mapRef, mapSeen] = useInView<HTMLDivElement>(0.45);
   const [liveRef, live] = useOnScreen<HTMLDivElement>();
-  const [mode, setMode] = useState<'payout' | 'checkin'>('payout');
+  const [mode, setMode] = useState<Mode>('payout');
   const [pick, setPick] = useState(0);
-  const g = narrow ? TALL : WIDE;
+
+  const flowRef = useRef<HTMLDivElement>(null);
+  const planTileRef = useRef<HTMLDivElement>(null);
+  const hubTileRef = useRef<HTMLButtonElement>(null);
+  const heirTileRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [geo, setGeo] = useState<FlowGeo | null>(null);
+
   const payout = mode === 'payout';
   const heir = HEIRS[pick];
-  const flow = mapSeen && payout ? 'on' : 'off';
+
+  const recompute = useCallback(() => {
+    const flowEl = flowRef.current;
+    const planEl = planTileRef.current;
+    const hubEl = hubTileRef.current;
+    if (!flowEl || !planEl || !hubEl) return;
+    const next = measureFlow(flowEl, planEl, hubEl, heirTileRefs.current, narrow);
+    if (next) setGeo(next);
+  }, [narrow]);
+
+  useLayoutEffect(() => {
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    if (flowRef.current) ro.observe(flowRef.current);
+    if (planTileRef.current) ro.observe(planTileRef.current);
+    if (hubTileRef.current) ro.observe(hubTileRef.current);
+    for (const el of heirTileRefs.current) {
+      if (el) ro.observe(el);
+    }
+    window.addEventListener('resize', recompute);
+    let alive = true;
+    document.fonts?.ready.then(() => {
+      if (alive) recompute();
+    });
+    return () => {
+      alive = false;
+      ro.disconnect();
+      window.removeEventListener('resize', recompute);
+    };
+  }, [recompute]);
 
   return (
     <section ref={ref} id="payout" className={`np np--subak${pinned ? ' np--pulled' : ''}`} aria-labelledby={`${id}-title`}>
@@ -181,169 +447,142 @@ export function SubakPayout() {
           </header>
         )}
 
-        <div className={`np__controls rise-in${seen ? ' is-seen' : ''}`} role="tablist" aria-label="What the plan does" style={{ animationDelay: '120ms' }}>
-          <button type="button" role="tab" aria-selected={payout} className="np__tab" onClick={() => setMode('payout')}>
-            <Send aria-hidden /> Send to heirs
-          </button>
-          <button type="button" role="tab" aria-selected={!payout} className="np__tab" onClick={() => setMode('checkin')}>
-            <Hand aria-hidden /> I’m still here
-          </button>
-        </div>
+        <ModeSegmented mode={mode} onChange={setMode} seen={seen} />
 
-        <div ref={mapRef} className="sb-wrap">
-          <div
-            ref={liveRef}
-            className={`sb rise-in${seen ? ' is-seen' : ''}`}
-            data-flow={flow}
-            data-live={live && !still ? '' : undefined}
-            data-layout={g.wide ? 'wide' : 'tall'}
-            style={{ aspectRatio: `${g.w} / ${g.h}`, animationDelay: '200ms' }}
-          >
-            <svg className="sb__svg" viewBox={`0 0 ${g.w} ${g.h}`} aria-hidden key={g.wide ? 'w' : 't'}>
-              <defs>
-                <radialGradient id={`${id}pool`} cx="50%" cy="50%" r="60%">
-                  <stop offset="0" stopColor="#f3dc9e" stopOpacity="0.62" />
-                  <stop offset="0.38" stopColor="#c4d4f6" stopOpacity="0.4" />
-                  <stop offset="1" stopColor="#a9c4f5" stopOpacity="0.12" />
-                </radialGradient>
-                {/* water: moonlit at the top edge, deeper below; its leading edge is soft as it runs in */}
-                <linearGradient id={`${id}field`} x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0" stopColor="#d4e0ff" stopOpacity="0.56" />
-                  <stop offset="0.38" stopColor="#9fb9ee" stopOpacity="0.26" />
-                  <stop offset="1" stopColor="#7d9be0" stopOpacity="0.08" />
-                </linearGradient>
-                <linearGradient id={`${id}edge`} x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0" stopColor="#fff" />
-                  <stop offset="0.84" stopColor="#fff" />
-                  <stop offset="1" stopColor="#fff" stopOpacity="0" />
-                </linearGradient>
-                <mask id={`${id}lead`} maskContentUnits="objectBoundingBox">
-                  <rect width="1" height="1" fill={`url(#${id}edge)`} />
-                </mask>
-                {/* rice seedlings in rows, standing in the field whether it is dry or flooded */}
-                <pattern id={`${id}rice`} width="66" height="21" patternUnits="userSpaceOnUse">
-                  <path d="M 6 17 l -1.4 -4.4 M 6 17 l 0.3 -5 M 6 17 l 2 -4 M 29 8 l -1.4 -4 M 29 8 l 0.3 -4.6 M 29 8 l 2 -3.6 M 50 19 l -1.2 -3.8 M 50 19 l 0.3 -4.4 M 50 19 l 1.8 -3.4" />
-                </pattern>
-                {g.terraces.map((t, i) => (
-                  <clipPath key={i} id={`${id}t${i}`}><path d={terracePath(t, BEND[i])} /></clipPath>
-                ))}
-              </defs>
+        {/* Borderless open stage with smooth crossfading rising blurred horizon circles */}
+        <div
+          ref={liveRef}
+          className={`pf-stage rise-in${seen ? ' is-seen' : ''}`}
+          data-mode={mode}
+          data-live={live && !still ? '' : undefined}
+          style={{ animationDelay: '180ms' }}
+        >
+          <div className="pf-horizon pf-horizon--payout" aria-hidden>
+            <div className="pf-stage__orb pf-stage__orb--payout" />
+            <div className="pf-stage__crest pf-stage__crest--payout" />
+          </div>
+          <div className="pf-horizon pf-horizon--checkin" aria-hidden>
+            <div className="pf-stage__orb pf-stage__orb--checkin" />
+            <div className="pf-stage__crest pf-stage__crest--checkin" />
+          </div>
 
-              {/* the spring */}
-              <ellipse className="sb__pool-bed" cx={g.pool.x} cy={g.pool.y} rx={g.pool.rx + 8} ry={g.pool.ry + 6} />
-              <ellipse className="sb__pool" cx={g.pool.x} cy={g.pool.y} rx={g.pool.rx} ry={g.pool.ry} fill={`url(#${id}pool)`} />
-              <ellipse className="sb__ripple" cx={g.pool.x} cy={g.pool.y} rx={g.pool.rx * 0.62} ry={g.pool.ry * 0.62} />
-
-              {/* the canal, then the channels: a dry bed, the water, and a shimmer that runs with the flow */}
-              <g className="sb__run sb__run--canal" style={{ ['--w' as string]: g.canalW }}>
-                <path className="sb__bed" d={g.canal} />
-                <path className="sb__water" d={g.canal} pathLength={1} />
-                <path className="sb__glint" d={g.canal} pathLength={1} />
-              </g>
-              {g.channels.map((d, i) => (
-                <g
-                  key={i}
-                  className={`sb__run sb__run--ch${i === pick ? ' is-pick' : ''}`}
-                  style={{ ['--w' as string]: widths(g.canalW)[i], ['--c' as string]: HEIRS[i].color }}
-                >
-                  <path className="sb__bed" d={d} />
-                  <path className="sb__water" d={d} pathLength={1} />
-                  <path className="sb__glint" d={d} pathLength={1} />
-                </g>
-              ))}
-
-              {/* the terraces, each filling from its inlet */}
-              {g.terraces.map((t, i) => {
-                const w = t.x1 - t.x0;
-                return (
-                  <g key={i} className={`sb__field${i === pick ? ' is-pick' : ''}`} style={{ ['--c' as string]: HEIRS[i].color }}>
-                    <path className="sb__lip" d={terracePath({ ...t, y: t.y + 8 }, BEND[i])} />
-                    <path className="sb__earth" d={terracePath(t, BEND[i])} />
-                    <g clipPath={`url(#${id}t${i})`}>
-                      <g className="sb__fill">
-                        <rect x={t.x0} y={t.y - t.h / 2 - 8} width={w * 1.19} height={t.h + 16} fill={`url(#${id}field)`} mask={`url(#${id}lead)`} />
-                        <path className="sb__shine" d={shinePath(t, BEND[i])} />
-                      </g>
-                    </g>
-                    <path className="sb__rice" d={terracePath(t, BEND[i])} fill={`url(#${id}rice)`} />
-                    <path className="sb__rim" d={rimPath(t, BEND[i])} />
-                  </g>
-                );
-              })}
-
-              {/* the divider: one stone, its openings cut to the shares */}
-              {g.wide ? (
-                <rect className="sb__divider" x={g.divider.x - 6} y={g.divider.y - 24} width={12} height={48} rx={4} />
+          <div className="pf-head">
+            <p key={`eyebrow-${mode}`} className="pf-eyebrow pf-fade mono">
+              {payout ? 'ONE PAYMENT, THREE HEIRS' : 'CHECK-IN, NOTHING LEAVES'}
+            </p>
+            <h3 key={`title-${mode}`} className="pf-title pf-fade">
+              {payout ? (
+                <>
+                  One payment splits <span className="num">{POT}</span>,
+                  <br />
+                  straight to every heir.
+                </>
               ) : (
-                <rect className="sb__divider" x={g.divider.x - 20} y={g.divider.y - 6} width={40} height={12} rx={4} />
+                <>
+                  Still here? All <span className="num">{POT}</span> stays,
+                  <br />
+                  and the wait starts again.
+                </>
               )}
-              <Gate g={g} />
-            </svg>
+            </h3>
+          </div>
 
-            <div className="sb__seed" style={at(g, g.pool)}><Logo size={g.wide ? 44 : 30} /></div>
-            <div className="sb__label sb__label--plan" data-align={g.planLabel.align} style={at(g, g.planLabel)}>
-              <span className="np__kicker">For your heirs</span>
-              <strong className="num">{POT}</strong>
-              <span className="np__state">
-                {payout ? <Clock3 aria-hidden /> : <Check aria-hidden />}
-                {payout ? 'Waiting time passed' : 'Waiting time restarted'}
+          <div ref={flowRef} className="pf-flow">
+            <FlowBeams id={id} geo={geo} payout={payout} pick={pick} still={still} />
+
+            {/* Left: Source medallion (no card border) */}
+            <div className="pf-source">
+              <div ref={planTileRef} className="pf-node pf-node--source">
+                <img className="pf-bch" src={BCH_ICON} alt="" width={30} height={30} />
+              </div>
+              <div className="pf-source__text">
+                <strong className="num">{POT}</strong>
+                <span key={`state-${mode}`} className="pf-fade">
+                  {payout ? 'Waiting time passed' : 'Waiting time restarted'}
+                </span>
+              </div>
+            </div>
+
+            {/* Center: Glossy squircle Hub with smooth gradient & icon crossfade */}
+            <div className="pf-hub-col">
+              <button
+                ref={hubTileRef}
+                type="button"
+                className="pf-hub"
+                onClick={() => setMode((m) => (m === 'payout' ? 'checkin' : 'payout'))}
+                aria-label={
+                  payout
+                    ? 'One payment pays every heir together. Press to switch to I’m still here.'
+                    : 'I’m still here keeps everything in the plan. Press to switch to Send to heirs.'
+                }
+              >
+                <span className="pf-hub__fill pf-tone--gold" aria-hidden />
+                <span className="pf-hub__fill pf-hub__fill--checkin pf-tone--green" aria-hidden />
+                <span className="pf-hub__icon pf-hub__icon--payout" aria-hidden>
+                  <Send strokeWidth={1.85} />
+                </span>
+                <span className="pf-hub__icon pf-hub__icon--checkin" aria-hidden>
+                  <Hand strokeWidth={1.85} />
+                </span>
+              </button>
+              <span key={`hub-${mode}`} className="pf-hub__label pf-fade mono">
+                {payout ? 'ONE PAYMENT' : 'STILL HERE'}
               </span>
             </div>
-            <div className="sb__label sb__label--gate" data-align={g.gateLabel.align} style={at(g, g.gateLabel)}>
-              <strong>{payout ? 'One payment opens the gate' : 'The gate stays closed'}</strong>
-              <span>{payout ? 'Every heir is paid together' : 'Nothing leaves the plan'}</span>
-            </div>
-            <p className="sb__label sb__label--divider" data-align={g.dividerLabel.align} style={at(g, g.dividerLabel)}>
-              Each channel is as wide{g.wide ? ' ' : <br />}as that heir’s share
-            </p>
 
-            <ul className="sb__heirs" aria-label="Heirs">
+            {/* Right: Three borderless heir nodes */}
+            <ul className="pf-heirs" aria-label="Heirs">
               {HEIRS.map((h, i) => {
-                const t = g.terraces[i];
+                const active = i === pick;
+                const hex = HEIR_HEX[i % HEIR_HEX.length];
                 return (
-                  <li
-                    key={h.name}
-                    style={{ left: pct(t.x0, g.w), top: pct(t.y - t.h / 2, g.h), width: pct(t.x1 - t.x0, g.w), height: pct(t.h, g.h) }}
-                  >
+                  <li key={h.name}>
                     <button
                       type="button"
-                      className="sb__heir"
-                      aria-pressed={i === pick}
-                      style={{ ['--c' as string]: h.color }}
+                      className={`pf-heir${active ? ' is-pick' : ''}`}
+                      aria-pressed={active}
+                      style={{ ['--c' as string]: hex } as CSSProperties}
                       onClick={() => setPick(i)}
                     >
-                      <span className="np__dot" aria-hidden />
-                      <span className="np__heir-name">{h.name}</span>
-                      <span className="np__heir-pct num">{h.pct}%</span>
-                      <span className="np__heir-amt num">{h.bch} BCH</span>
+                      <span
+                        ref={(el) => {
+                          heirTileRefs.current[i] = el;
+                        }}
+                        className="pf-node pf-node--heir"
+                        aria-hidden
+                      >
+                        <span className={`pf-avatar pf-avatar--${i + 1}`}>{h.name[0]}</span>
+                      </span>
+                      <span className="pf-heir__text">
+                        <span className="pf-heir__name">{h.name}</span>
+                        <span className="pf-heir__val num">
+                          {h.bch} BCH · {h.pct}%
+                        </span>
+                      </span>
                     </button>
                   </li>
                 );
               })}
             </ul>
           </div>
-          <div className={`np__inspector rise-in${seen ? ' is-seen' : ''}`} style={{ animationDelay: '280ms' }} aria-live="polite">
-            <p className="np__detail">
-              <span className="np__dot" style={{ ['--c' as string]: payout ? heir.color : 'var(--accent)' }} aria-hidden />
-              {payout ? (
-                <span>
-                  <b>{heir.name} receives <span className="num">{heir.bch} BCH</span></b>{' '}
-                  <span className="np__muted num">({heir.sats} satoshis, {heir.pct}% share), in the same payment as everyone else.</span>
-                </span>
-              ) : (
-                <span>
-                  <b>The waiting time starts again.</b>{' '}
-                  <span className="np__muted">All <span className="num">{POT}</span> stays in the plan, and the heirs wait for the new date.</span>
-                </span>
-              )}
-            </p>
-            <p className="np__fee">
-              The network fee, about 5,000 satoshis, comes out of the plan itself, so an heir with no BCH can press
-              the button, or ask anyone who has the plan link to: each share still goes only to its heir.
-            </p>
-          </div>
-        </div>
 
+          <p key={`foot-${mode}-${pick}`} className="pf-foot pf-fade" aria-live="polite">
+            {payout ? (
+              <>
+                <b>
+                  {heir.name} receives <span className="num">{heir.bch} BCH</span>
+                </b>{' '}
+                <span className="num">({heir.sats} satoshis)</span> in the same payment as everyone else. The
+                ~5,000 satoshis network fee comes out of the plan itself.
+              </>
+            ) : (
+              <>
+                <b>The waiting time starts again.</b> All <span className="num">{POT}</span> stays in the plan, and
+                your heirs wait for the new date.
+              </>
+            )}
+          </p>
+        </div>
       </div>
       <div className="np__tail" aria-hidden />
     </section>

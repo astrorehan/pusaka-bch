@@ -15,6 +15,7 @@ import {
   FlaskConical,
   History,
   Menu,
+  MessageCircle,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -26,10 +27,12 @@ import {
 } from 'lucide-react';
 import { WalletButton } from '../../components/AppShell';
 import { Banner } from '../../components/Banner';
+import { TELEGRAM_HANDLE, TELEGRAM_URL } from '../../components/banner-config';
 import { Logo } from '../../components/Logo';
+import { NetworkSwitch } from '../../components/NetworkSwitch';
 import { useMedia } from '../../components/useMedia';
 import { shortAddress } from '../../lib/format';
-import { NETWORK } from '../../lib/networkName';
+import { NETWORK, otherNetworkHref } from '../../lib/networkName';
 import { getTheme } from '../../lib/theme';
 import { useWallet } from '../../lib/wallet';
 import { isDemoWallet, walletPath } from './paths';
@@ -126,6 +129,7 @@ function Sidebar({
   const { status, wallet } = useWallet();
   const walletHome = walletPath('/wallet', demo);
   const section = sectionFor(pathname);
+  const switchHref = otherNetworkHref(pathname);
   return (
     <div className={`pw-sidebar-body${rail ? ' pw-sidebar-body--rail' : ''}`}>
       <div className="pw-sidebar-head">
@@ -222,6 +226,34 @@ function Sidebar({
             <CircleHelp aria-hidden />{' '}
             <span className="pw-nav-label">How it works</span>
           </NavLink>
+          <a
+            href={TELEGRAM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="pw-nav-link"
+            onClick={onNavigate}
+            title={`Need help? Message ${TELEGRAM_HANDLE} on Telegram`}
+          >
+            <MessageCircle aria-hidden />{' '}
+            <span className="pw-nav-label">Need help?</span>
+          </a>
+          {switchHref && (
+            <a
+              href={switchHref}
+              className="pw-nav-link"
+              onClick={onNavigate}
+              title={
+                NETWORK === 'chipnet'
+                  ? 'Switch to Bitcoin Cash Mainnet'
+                  : 'Switch to Chipnet (test network)'
+              }
+            >
+              <ArrowLeftRight aria-hidden />{' '}
+              <span className="pw-nav-label">
+                {NETWORK === 'chipnet' ? 'Switch to Mainnet' : 'Switch to Chipnet'}
+              </span>
+            </a>
+          )}
         </nav>
       </div>
 
@@ -266,20 +298,25 @@ export function WalletLayout() {
     const top = header.current;
     if (!container || !bar || !top) return;
     const measure = () => {
+      const mobile = window.innerWidth < 768;
       container.style.setProperty(
         '--pw-banner-height',
         `${bar.offsetHeight}px`,
       );
       container.style.setProperty(
         '--shell-top',
-        `${bar.offsetHeight + top.offsetHeight}px`,
+        `${(mobile ? 0 : bar.offsetHeight) + top.offsetHeight}px`,
       );
     };
     const observer = new ResizeObserver(measure);
     observer.observe(bar);
     observer.observe(top);
+    window.addEventListener('resize', measure, { passive: true });
     measure();
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -388,18 +425,8 @@ export function WalletLayout() {
               />
               <strong>{title}</strong>
             </div>
-            {NETWORK === 'chipnet' && (
-              <span
-                className="pw-testnet"
-                role="note"
-                title="Test network: no real money"
-              >
-                <i aria-hidden /> Testnet
-                <span className="sr-only">, no real money</span>
-              </span>
-            )}
-            {/* The demo needs no wallet: the example plan pays its own fee. */}
-            {!demo && <WalletButton pill={false} />}
+            <NetworkSwitch variant="workspace" />
+            <WalletButton pill={false} />
           </header>
           <main id="wallet-main" tabIndex={-1} ref={main}>
             <Outlet />

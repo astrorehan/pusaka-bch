@@ -32,11 +32,13 @@ import {
   explorerTxUrl,
   formatBch,
   formatDuration,
+  formatUsd,
   parseBch,
 } from '../../lib/format';
 import { DEMO_CATEGORIES, HAS_DEMO } from '../../lib/demo';
 import { friendlyError } from '../../lib/chain/errors';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
+import { planService } from '../../lib/planService';
 import { useWallet } from '../../lib/wallet';
 import { CURRENT_ASSET_REVISION, encodePusakaV2PlanLink } from '../../lib/protocol/plan-metadata';
 import { history, pendingPlanSubmissions, planLink, type PendingPlanSubmission } from '../../lib/walletData';
@@ -48,6 +50,7 @@ import {
 } from './currentPlan';
 import {
   ClaimProgress,
+  FamilyShareCard,
   PlanPeople,
   PlanRules,
   PlanShare,
@@ -138,6 +141,7 @@ function Balance({
   busy,
   swapPath,
   open,
+  usd,
   demo = false,
 }: {
   data: api.LoadedPlan | null;
@@ -146,6 +150,7 @@ function Balance({
   busy: boolean;
   swapPath: string;
   open: (dialog: Dialog) => void;
+  usd: number | null;
   /** The demo's example plan: only its balance, since the visitor is not its owner. */
   demo?: boolean;
 }) {
@@ -157,6 +162,7 @@ function Balance({
     const held = state
       ? state.planBalanceSats + (state.status === 'REVIEW' && state.anchorMatchesRound ? state.anchorBalanceSats : 0n)
       : 0n;
+    const dollars = found ? formatUsd(held, usd) : null;
     return (
       <WalletFocus loading={loading && !state}>
         <div className="pw-balance-caption">
@@ -166,6 +172,12 @@ function Balance({
           <p className="pw-balance-number num">
             {found ? formatBch(held) : '—'} <span>BCH</span>
           </p>
+          {dollars && (
+            <p className="pw-balance-usd num">
+              {dollars}
+              {NETWORK === 'chipnet' && <span> · test value</span>}
+            </p>
+          )}
           <p className="pw-balance-note">
             {state?.status === 'PAID_OUT'
               ? 'Paid out to the heirs. A small reserve stays behind.'
@@ -175,6 +187,7 @@ function Balance({
       </WalletFocus>
     );
   }
+  const dollars = found ? formatUsd(state.spendableBalanceSats, usd) : null;
   return (
     <WalletFocus loading={loading && !state}>
       <div className="pw-balance-caption">
@@ -184,6 +197,12 @@ function Balance({
         <p className="pw-balance-number num">
           {found ? formatBch(state.spendableBalanceSats) : '—'} <span>BCH</span>
         </p>
+        {dollars && (
+          <p className="pw-balance-usd num">
+            {dollars}
+            {NETWORK === 'chipnet' && <span> · test value</span>}
+          </p>
+        )}
         <p className="pw-balance-note">
           {state?.status === 'PAID_OUT' || state?.status === 'CLOSED'
             ? 'Your receive address still follows these inheritance rules.'
@@ -470,15 +489,15 @@ function SavePlan({
     <WalletSheet
       open
       onClose={close}
-      title="Save your plan"
-      description="Send this link to your heirs and trusted contacts, and keep the file somewhere safe."
+      title="Save & share your plan"
+      description="Screenshot the card or send the link to your heirs and trusted contacts, and keep the file somewhere safe."
     >
-      <p className="pw-fine">
-        Nobody can claim or pay out without these plan details, and Pusaka
-        keeps no copy. They hold public rules and addresses only, never a key.
-        Share them again after every change to the rules.
-      </p>
       <div className="pw-sheet-stack">
+        <FamilyShareCard metadata={metadata} compact />
+        <p className="pw-fine">
+          Nobody can claim or pay out without these plan details, and Pusaka
+          keeps no copy. Share them again after every change to the rules.
+        </p>
         <div className="pw-share-link">
           <strong>Family plan link</strong>
           <CopyButton value={planLink(metadata)} label="Copy family link" />
@@ -520,20 +539,38 @@ function PlanRecovery({ record }: { record: PendingPlanSubmission }) {
   );
 }
 
-function PlanLoading() {
+function PlanLoading({ demo = false }: { demo?: boolean }) {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSlow(true), 3500);
+    return () => window.clearTimeout(t);
+  }, []);
+  const networkName = NETWORK === 'mainnet' ? 'Bitcoin Cash Mainnet' : 'Chipnet · test BCH';
   return (
-    <div className="pw-columns" aria-busy="true" aria-label="Loading plan">
-      <Card className="pw-loading">
-        <span />
-        <span />
-        <span />
-      </Card>
-      <Card className="pw-loading">
-        <span />
-        <span />
-        <span />
-      </Card>
-    </div>
+    <section className="pw-balance pw-loading-screen" aria-busy="true" aria-label="Loading plan">
+      <img src={terraceEngraving} alt="" className="pw-balance-art" />
+      <div className="pw-balance-content">
+        <span className="pw-balance-seal">
+          <Logo size={42} bloom="loop" />
+        </span>
+        <div className="pw-balance-caption">
+          <BchMark size={19} /> {networkName}
+        </div>
+        <div className="pw-balance-intro">
+          <h2>{demo ? 'Preparing live demo' : 'Loading your wallet'}</h2>
+          <p role="status" aria-live="polite">
+            {slow
+              ? 'Checking public Bitcoin Cash servers for a live reply…'
+              : demo
+                ? 'Connecting to Bitcoin Cash and selecting a ready example plan.'
+                : 'Reading your plan state from the Bitcoin Cash network.'}
+          </p>
+        </div>
+        <div className="pw-loading-bar" aria-hidden>
+          <span />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -585,6 +622,12 @@ function WalletPage() {
   }, []);
   const [issue, setIssue] = useState('');
   const [busy, setBusy] = useState(false);
+  const [usd, setUsd] = useState<number | null>(null);
+  useEffect(() => {
+    let live = true;
+    planService.usdPerBch().then((v) => { if (live) setUsd(v); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
   const [txid, setTxid] = useState<string>(() =>
     typeof location.state?.txid === 'string' ? location.state.txid : '',
   );
@@ -706,7 +749,7 @@ function WalletPage() {
   } else if (activity) {
     body = <ActivityList plan={metadata?.planCategoryHex} />;
   } else if (!metadata && loading) {
-    body = <PlanLoading />;
+    body = <PlanLoading demo={demo} />;
   } else if (demo && !metadata && (error || demoUnreachable)) {
     body = (
       <Card>
@@ -759,7 +802,9 @@ function WalletPage() {
             metadata={metadata}
             data={data}
             busy={busy}
+            loading={loading}
             prepare={prepare}
+            onRefresh={() => void refresh(true)}
             exhausted={demoExhausted}
             onNext={nextExample}
           />
@@ -774,6 +819,7 @@ function WalletPage() {
             busy={busy}
             swapPath={walletPath('/wallet/swap', demo)}
             open={open}
+            usd={usd}
             demo={demo}
           />
         )}
@@ -846,7 +892,14 @@ function WalletPage() {
           planPath={inherited ? undefined : walletPath('/wallet/plan', demo)}
         />
         {inherited && data && state?.status !== 'UNINITIALIZED' && (
-          <ClaimProgress data={data} connected={Boolean(wallet)} busy={busy} prepare={prepare} />
+          <ClaimProgress
+            data={data}
+            connected={Boolean(wallet)}
+            busy={busy}
+            loading={loading}
+            prepare={prepare}
+            onRefresh={() => void refresh(true)}
+          />
         )}
         <div className="pw-footnote">
           <ShieldCheck size={17} aria-hidden />

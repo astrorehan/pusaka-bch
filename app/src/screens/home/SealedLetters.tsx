@@ -47,18 +47,19 @@ function Seal() {
   );
 }
 
-function Letter({ f, k, still }: { f: Family; k: number; still: boolean }) {
+function Letter({ f, k, still, compact }: { f: Family; k: number; still: boolean; compact: boolean }) {
   const [tilt, setTilt] = useState(0);
-  const [ref, open] = useInView<HTMLLIElement>(0.35);
+  const [ref, open] = useInView<HTMLLIElement>(compact ? 0.08 : 0.25);
+  const direct = still || compact;
   return (
     <li
       ref={ref}
-      className={`sl fc-hover${open ? ' is-open' : ''}${still ? ' sl--still' : ''}`}
+      className={`sl fc-hover${open ? ' is-open' : ''}${still ? ' sl--still' : ''}${compact && !still ? ' sl--compact' : ''}`}
       style={{ '--tilt': `${tilt}deg`, '--k': k, '--from-tilt': `${FROM_TILT[k]}deg`, '--tint': f.tint } as CSSProperties}
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setTilt((Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 1.8)); }}
     >
       <FamilyFace f={f} className="fc-front sl-card" />
-      {!still && (
+      {!direct && (
         <div className="sl-fold" aria-hidden>
           <div className="sl-mid" />
           <div className="sl-flap sl-flap--bottom">
@@ -81,7 +82,8 @@ function Letter({ f, k, still }: { f: Family; k: number; still: boolean }) {
 
 export function SealedLetters() {
   const still = useMedia('(prefers-reduced-motion: reduce)');
-  const [headRef, headSeen] = useInView<HTMLElement>(0.3);
+  const compact = useMedia('(max-width: 1023px)');
+  const [headRef, headSeen] = useInView<HTMLElement>(0.1);
   return (
     <section className="lp-section fc" aria-labelledby="fc-title">
       <header ref={headRef} className="lp-head">
@@ -94,7 +96,7 @@ export function SealedLetters() {
         </p>
       </header>
       <ul className="fc-grid">
-        {FAMILIES.map((f, k) => <Letter key={f.mode} f={f} k={k} still={still} />)}
+        {FAMILIES.map((f, k) => <Letter key={f.mode} f={f} k={k} still={still} compact={compact} />)}
       </ul>
     </section>
   );

@@ -99,7 +99,15 @@
 
 @media (max-width: 767px) {
   .pw-setup { padding-bottom: 0; }
-  .pw-setup-footer { margin-inline: calc(0px - var(--pw-gutter)); padding-inline: var(--pw-gutter); border-radius: 0; border-width: 1px 0 0; }
+  .pw-setup-footer {
+    margin-inline: calc(0px - var(--pw-gutter));
+    padding-inline: var(--pw-gutter);
+    border-radius: 0;
+    border-width: 1px 0 0;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
 }
 
 @media (max-width: 520px) {
@@ -115,6 +123,11 @@
   .pw-heir-input label { grid-column: 1 / -1; }
   .pw-heir-input:has(> button) label:last-of-type { grid-column: 1; }
   .pw-family { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 399px) {
+  .pw-stepper button { font-size: 12px; }
+  .pw-field-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 359px) {

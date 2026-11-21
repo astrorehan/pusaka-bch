@@ -27,7 +27,7 @@
 /* ------------------------------------------------ timeline */
 
 .timeline { list-style: none; margin: 0; padding: 0; display: grid; }
-.timeline__step { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); padding-bottom: var(--space-8); }
+.timeline__step { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-4); padding-bottom: var(--space-8); }
 .timeline__step:last-child { padding-bottom: 0; }
 /* the thread between steps */
 .timeline__step:not(:last-child)::before {
@@ -46,11 +46,15 @@
 
 .anytime {
   margin-top: var(--space-8);
-  display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4);
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-4);
   padding: var(--space-4); margin-left: calc(-1 * var(--space-4)); margin-right: calc(-1 * var(--space-4));
   border: 1px dashed var(--border-strong); border-radius: var(--radius-card);
 }
 .anytime h3 { padding-top: 10px; }
+@media (max-width: 639px) {
+  .anytime { margin-left: 0; margin-right: 0; gap: var(--space-3); }
+  .hiw-section { margin-top: var(--space-12); }
+}
 
 /* ------------------------------------------------ facts (if Pusaka disappears) */
 
@@ -77,25 +81,29 @@
 .hiw-ext svg { width: 13px; height: 13px; stroke-width: 1.5; align-self: center; flex: none; }
 
 .tech { margin: var(--space-6) 0 0; display: grid; gap: 0; border-top: 1px solid var(--border); }
-.tech > div { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); display: grid; gap: var(--space-1); }
+.tech > div { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
 .tech dt { font-weight: 600; font-size: var(--text-15); }
 .tech dd { margin: 0; color: var(--text-muted); }
 @media (min-width: 768px) {
-  .tech > div { grid-template-columns: 180px 1fr; gap: var(--space-6); }
+  .tech > div { grid-template-columns: 180px minmax(0, 1fr); gap: var(--space-6); }
 }
 
 .code { margin: var(--space-8) 0 0; }
 .code figcaption { font-size: var(--text-13); color: var(--text-muted); margin-bottom: var(--space-2); }
 .code figcaption code { font-size: 1em; padding: 0; background: none; border: 0; }
 .code pre {
-  margin: 0; padding: var(--space-4); overflow-x: auto;
+  margin: 0; padding: var(--space-4); overflow-x: auto; -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-button); background: var(--surface-2); border: 1px solid var(--border);
   font-size: var(--text-13); line-height: 1.6; color: var(--text);
   tab-size: 4;
 }
+@media (max-width: 479px) {
+  .code pre { font-size: 12px; padding: var(--space-3); }
+}
 
 .tech-links { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-6); }
 .tech-links li { display: flex; align-items: center; min-height: 44px; }
+.tech-links a { min-height: 44px; align-items: center; }
 
 /* ------------------------------------------------ closing CTA */
 

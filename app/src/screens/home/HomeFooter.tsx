@@ -16,6 +16,8 @@ import {
   OLD_REPO_URL,
   CODE_URL,
   SOLIDCASH_URL,
+  TELEGRAM_HANDLE,
+  TELEGRAM_URL,
   TESTS_URL,
 } from './links';
 import { BASE } from '../../lib/asset';
@@ -81,6 +83,9 @@ function Columns() {
         <a href={CODE_URL} target="_blank" rel="noreferrer">GitHub</a>
         <a href={CONTRACT_URL} target="_blank" rel="noreferrer">Source code</a>
         <a href={TESTS_URL} target="_blank" rel="noreferrer">Test suite</a>
+        <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" title={`Message ${TELEGRAM_HANDLE} on Telegram`}>
+          Need help? Telegram
+        </a>
       </div>
       <div className="hfoot__col">
         <p className="hfoot__label">Built on</p>

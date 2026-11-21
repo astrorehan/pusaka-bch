@@ -1,9 +1,10 @@
 // Connect and restore WizardConnect sessions without loading the transaction builders.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlphanumericQRCode, useWizardConnect } from '@wizardconnect/react';
-import { ButtonLink } from '../components/Button';
-import { CopyButton } from '../components/CopyButton';
+import { Check, Copy } from 'lucide-react';
+import { Button } from '../components/Button';
 import { Sheet } from '../components/Sheet';
+import { copyText } from './clipboard';
 import { plainBalance } from './chain/network';
 import { getWizardWallet, setWizardWallet, WizardWallet } from './chain/wizard';
 import { setChainWallet, type WalletInfo } from './planService';
@@ -32,6 +33,9 @@ export default function WizardBridge({ network, sessionKey, onReady, onState, on
   });
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [linkCopy, setLinkCopy] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const linkCopyTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(linkCopyTimer.current), []);
   const clearWallet = useCallback(() => {
     setWizardWallet(null);
     setChainWallet(null);
@@ -124,28 +128,51 @@ export default function WizardBridge({ network, sessionKey, onReady, onState, on
   }, [onReady, onSettle, clearWallet]);
 
   const uri = wiz.uri?.startsWith('wiz://') ? wiz.uri : null;
+  const copyLink = useCallback(async () => {
+    if (!uri) return;
+    setLinkCopy((await copyText(uri)) ? 'copied' : 'failed');
+    window.clearTimeout(linkCopyTimer.current);
+    linkCopyTimer.current = window.setTimeout(() => setLinkCopy('idle'), 2000);
+  }, [uri]);
+  const copyStatus = linkCopy === 'copied' ? 'Copied connection link' : linkCopy === 'failed' ? 'Could not copy' : '';
+
   return (
     <Sheet
       open={pairing}
       onClose={() => {
+        setLinkCopy('idle');
         clearWallet();
         void wiz.disconnect();
         settle(false);
       }}
       size="sm"
       title="Connect your wallet"
-      description="Scan the code with Paytaca or another WizardConnect wallet."
-      footer={uri && <ButtonLink href={uri} size="lg" block>Open in wallet</ButtonLink>}
+      description="Scan the QR code with Paytaca or Cashonize. On the same device, copy the link and paste it in Paytaca’s WizardConnect or Cashonize’s dApp connection screen."
+      footer={uri && (
+        <>
+          <Button type="button" size="lg" block icon={linkCopy === 'copied' ? <Check /> : <Copy />} onClick={copyLink}>
+            {copyStatus || 'Copy connection link'}
+          </Button>
+          <span role="status" className="sr-only">{copyStatus}</span>
+        </>
+      )}
     >
       {uri && wiz.qrUri ? (
         <div className="wallet-pair">
-          <div role="img" aria-label="Wallet connection QR code">
-            <AlphanumericQRCode value={wiz.qrUri} size={224} quietZone={12} />
-          </div>
-          <div className="wallet-pair__link">
-            <span>Wallet connection link</span>
-            <CopyButton value={uri} label="Copy wallet connection link" size="sm" />
-          </div>
+          <button
+            type="button"
+            className="wallet-pair__qr"
+            data-copy-state={linkCopy}
+            onClick={copyLink}
+            aria-label="Tap QR code to copy wallet connection link"
+          >
+            <span role="img" aria-label="Wallet connection QR code" className="wallet-pair__qr-img">
+              <AlphanumericQRCode value={wiz.qrUri} size={224} quietZone={12} />
+            </span>
+            <span className="wallet-pair__qr-hint">
+              <Copy size={13} aria-hidden /> Tap QR code to copy
+            </span>
+          </button>
         </div>
       ) : <p role="status">Preparing the connection…</p>}
     </Sheet>

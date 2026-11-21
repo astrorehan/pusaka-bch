@@ -83,6 +83,7 @@
 }
 .pw-icon svg { width: 19px; height: 19px; stroke-width: 1.65; }
 .pw-icon:hover { background: var(--surface-hover); color: var(--text); }
+.pw-icon:active:not(:disabled) { transform: scale(0.95); }
 .pw-icon:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .pw-profile {
@@ -132,10 +133,14 @@
   line-height: 1.25;
   text-align: left;
   text-decoration: none;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease, transform var(--dur-press) var(--ease-out);
 }
-.pw-nav-link svg { flex: none; width: 19px; height: 19px; stroke-width: 1.65; }
+.pw-nav-link svg { flex: none; width: 19px; height: 19px; stroke-width: 1.65; transition: transform 180ms var(--ease-out); }
 .pw-nav-link:hover { background: var(--surface-hover); color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .pw-nav-link:hover svg { transform: translateX(2px); }
+}
+.pw-nav-link:active { transform: scale(0.98); }
 .pw-nav-link[aria-current='page'] { background: var(--pw-active); color: var(--pw-active-text); font-weight: 650; }
 .pw-nav-link:focus-visible, .pw-sidebar-scroll :focus-visible { outline-offset: -2px; }
 .pw-sidebar-foot { display: grid; gap: 3px; padding-top: 10px; border-top: 1px solid var(--border); }
@@ -224,23 +229,36 @@ html:has(.pw-nav-drawer[open]) { overflow: hidden; }
 
 @media (max-width: 767px) {
   .pw-app { --pw-header-height: 58px; --pw-gutter: 16px; }
-  .pw-topbar { gap: 8px; padding: 6px 12px; }
+  .pw-banner { position: static; }
+  .pw-topbar { top: 0; gap: 8px; padding: 6px 12px; }
   .pw-location { display: none; }
-  .pw-mobile-brand { display: flex; flex: 1; align-items: center; gap: 7px; min-width: 0; color: var(--text); text-decoration: none; font-size: 17px; font-weight: 660; }
+  .pw-mobile-brand { display: flex; flex: 1; align-items: center; gap: 7px; min-width: 0; min-height: 44px; color: var(--text); text-decoration: none; font-size: 17px; font-weight: 660; }
   .pw-mobile-brand .logo { flex: none; }
   .pw-menu-trigger { margin-left: -4px; }
   .pw-testnet { padding-inline: 7px; font-size: 12px; }
   .pw-topbar .wallet-btn { padding-inline: 10px; font-size: 14px; }
 }
 
+@media (max-width: 520px) {
+  .net-switch--workspace .net-switch__opt:not(.net-switch__opt--active) { display: none; }
+}
+
+@media (max-width: 399px) {
+  .pw-topbar .wallet-btn:not([aria-busy]) .btn__icon { display: none; }
+  .pw-topbar .wallet-btn[aria-busy] .btn__label { display: none; }
+}
+
 @media (max-width: 359px) {
   .pw-topbar { gap: 5px; padding-inline: 8px; }
   .pw-mobile-brand { gap: 5px; font-size: 15px; }
-  .pw-testnet i { display: none; }
+  .pw-testnet i, .net-switch--workspace i { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pw-nav-drawer[open] { animation: none; }
+  .pw-nav-link:hover svg,
+  .pw-nav-link:active,
+  .pw-icon:active:not(:disabled) { transform: none; }
 }
 
 /* Older plan links keep their original actions inside the workspace. */

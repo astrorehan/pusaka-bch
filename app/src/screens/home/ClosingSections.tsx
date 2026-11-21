@@ -12,7 +12,7 @@ import { HEIRS } from './payoutHeirs';
 const CTA_TITLE = 'Your family shouldn’t have to guess.';
 
 export function HeirBand({ onOpenLink }: { onOpenLink: () => void }) {
-  const [ref, seen] = useInView<HTMLElement>(0.3);
+  const [ref, seen] = useInView<HTMLElement>(0.08);
   return (
     <section ref={ref} className="lp-section hb" aria-labelledby="hb-title">
       <div className={`hb-card fade-up${seen ? ' is-seen' : ''}`}>
@@ -37,7 +37,7 @@ export function HeirBand({ onOpenLink }: { onOpenLink: () => void }) {
 }
 
 export function ClosingCta() {
-  const [ref, seen] = useInView<HTMLElement>(0.25);
+  const [ref, seen] = useInView<HTMLElement>(0.08);
   return (
     <section ref={ref} className="cta" aria-labelledby="cta-title">
       <div className="cta__inner">
@@ -51,7 +51,7 @@ export function ClosingCta() {
               : 'Runs directly on Bitcoin Cash. Your coins never sit with us.'}
           </p>
           <div className={`cta__btns rise-in${seen ? ' is-seen' : ''}`} style={{ animationDelay: '480ms' }}>
-            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx">
+            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx btn--gold-shine">
               {TRY_IT ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
             <ButtonLink to={TRY_IT ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">

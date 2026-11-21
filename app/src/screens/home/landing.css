@@ -507,14 +507,14 @@
   background: #b89466;
 }
 @media (max-width: 640px) {
-  .sf-frame { aspect-ratio: 4 / 5; border-radius: 20px; }
-  /* keep the card clear of the "Step 1 of 3" tag in the corner */
-  .sf-frame .sf-frame__stack { padding: 16px 14px 58px; }
-}
-/* Too narrow for both: the step list right under the frame already shows which step is on. */
-@media (max-width: 479.98px) {
-  .sf-frame .sf-frame__stack { padding: 14px; }
+  .sf-frame { aspect-ratio: auto; min-height: 356px; border-radius: 20px; }
+  .sf-frame .sf-frame__stack { position: relative; min-height: 356px; padding: 16px 12px; }
   .sf-frame__tag { display: none; }
+}
+@media (max-width: 479.98px) {
+  .sf-frame__screen { padding: 16px; border-radius: 18px; }
+  .sf-ui__ring .ring { width: 144px; height: 144px; }
+  .sf-ui__ring .ring__value { font-size: 36px; }
 }
 .sf-frame__photo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
 .sf-frame__grain { position: absolute; inset: 0; }
@@ -667,6 +667,58 @@
 @media (min-width: 1024px) {
   .hfoot__page { grid-template-columns: 1fr 2fr auto; align-items: start; gap: 48px; padding-top: 48px; }
   .hfoot__img { min-height: 560px; }
+}
+
+/* ---------------------------------------------------------------- mobile polish */
+
+@media (max-width: 1023px) {
+  .fc-panel { height: auto; min-height: 316px; }
+  .fc-art { flex: 0 0 auto; height: 176px; padding: 10px 16px 8px; object-position: 50% 50%; }
+}
+
+@media (max-width: 767px) {
+  .pc__btn { min-height: 44px; }
+}
+
+@media (max-width: 639px) {
+  .lp-h2 { font-size: clamp(28px, 7.6vw, 36px); }
+  .lp-display { font-size: clamp(32px, 8.6vw, 42px); }
+  .lp-display-xl { font-size: clamp(32px, 8.8vw, 44px); }
+  .lp-sub, .np__sub { font-size: 15.5px; }
+  .lp-section { padding-top: clamp(52px, 12vw, 76px); }
+  .lp-head { margin-bottom: 28px; gap: 10px; }
+  .ps--stacked { padding-top: clamp(52px, 12vw, 76px); }
+  .np__inner { padding-top: clamp(56px, 12vw, 76px); gap: 22px; }
+}
+
+@media (max-width: 520px) {
+  .hb-card { border-radius: 24px; padding: 12px; }
+  .hb-copy { padding: 18px 14px; }
+  .hb-art { min-height: 220px; padding: 20px 14px; justify-items: center; border-radius: 18px; }
+  .hb-link { justify-self: center; transform: rotate(-1.5deg); max-width: 100%; }
+  .hb-share { min-width: 0; width: 100%; max-width: 300px; transform: rotate(1deg); }
+}
+
+@media (max-width: 479px) {
+  .fc-front { padding: 12px; gap: 12px; border-radius: 24px; }
+  .fc-panel__text { padding: 20px 16px 0; }
+  .fc-title { font-size: 22px; }
+  .fc-art { height: 156px; }
+  .fc-foot { padding: 0 4px 2px; gap: 8px; }
+  .ps-box { padding: 14px; border-radius: 20px; margin-top: 28px; }
+  .pc__meta { flex-wrap: wrap; }
+  .cb__row { flex-wrap: wrap; }
+  .cb--page .cb__grid { padding: 12px; border-radius: 20px; }
+  .cb--page .cb__pill { padding: 0 12px; font-size: 12.5px; }
+  .cta { padding-top: 56px; }
+  .cta__btns .btn { padding-inline: 20px; font-size: 15px; min-height: 44px; }
+  .cta__btns .btn--primary { padding: 0 8px 0 20px; }
+}
+
+@media (max-width: 359px) {
+  .cta__btns { width: 100%; max-width: 280px; flex-direction: column; align-items: stretch; }
+  .cta__btns .btn { width: 100%; justify-content: center; }
+  .cta__btns .btn--primary { justify-content: space-between; }
 }
 
 /* ---------------------------------------------------------------- reduced motion */

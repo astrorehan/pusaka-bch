@@ -1,108 +1,710 @@
-/* The night payout drawn as subak (SubakPayout.tsx): a spring, a gated canal, a divider and four terraces.
-   Water is moonlight; only the water moves. The section frame, tabs and inspector reuse the night payout's styles. */
+/* The night payout flow (SubakPayout.tsx): borderless, ultra-minimal payout flow layout
+   with mathematically locked node positions (0px shift across modes), razor-thin curved animated beams,
+   minimal text, and a single bold rising blurred circle cut short at the bottom horizon. */
 
-.np--subak { --water: #a9c4f5; }
-.sb-wrap { position: relative; display: grid; justify-items: center; gap: 28px; width: 100%; }
-/* Wide screens: the inspector sits in the open ground under the spring, beside the terraces. */
-@media (min-width: 1024px) {
-  .np--subak .sb-wrap .np__inspector {
-    position: absolute; left: max(0px, calc(50% - 600px)); bottom: 2%; width: min(37%, 440px);
-    flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 10px;
+.np--subak {
+  scroll-margin-top: 88px;
+  --heir-1: #60a5fa;
+  --heir-2: #a78bfa;
+  --heir-3: #22d3ee;
+  --pf-ink: #fff8ec;
+  --pf-muted: #9ea8bf;
+  --pf-gold: #e3ca8e;
+  --pf-green: #2fd9a6;
+  --pf-cycle: 3.1s;
+}
+
+/* ---------------------------------------------------------------- Borderless Sliding Segmented Control */
+
+.pf-seg {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  background: rgba(11, 15, 27, 0.72);
+  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.65);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.pf-seg__indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: var(--radius-full);
+  background: #ece2cf;
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 260ms var(--ease-expo),
+    width 260ms var(--ease-expo);
+  pointer-events: none;
+}
+
+.pf-seg__tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--pf-muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 180ms ease, transform var(--dur-press) var(--ease-out);
+}
+.pf-seg__tab svg { width: 15px; height: 15px; flex: none; }
+.pf-seg__tab:active { transform: scale(0.97); }
+.pf-seg__tab[aria-selected='true'] { color: #0e1322; }
+@media (hover: hover) and (pointer: fine) {
+  .pf-seg__tab[aria-selected='false']:hover { color: var(--pf-ink); }
+}
+
+/* ---------------------------------------------------------------- Borderless Open Dark Canvas */
+
+.pf-stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 1040px;
+  overflow: hidden;
+  border-radius: 38px;
+  padding: 56px 48px 44px;
+  background: #0d111e;
+  box-shadow: 0 36px 90px -28px rgba(0, 0, 0, 0.68);
+  color: var(--pf-ink);
+}
+
+/* Rising blurred horizon circles: two GPU-composited layers crossfading smoothly via opacity & gentle rise
+   (CSS cannot interpolate radial-gradient directly, so dual layers give a silky liquid transition). */
+.pf-horizon {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition:
+    opacity 560ms var(--ease-expo),
+    transform 640ms var(--ease-expo);
+  will-change: opacity, transform;
+}
+
+.pf-horizon--payout {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pf-horizon--checkin {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.pf-stage[data-mode='checkin'] .pf-horizon--payout {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.pf-stage[data-mode='checkin'] .pf-horizon--checkin {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pf-stage__orb {
+  position: absolute;
+  left: 50%;
+  bottom: -292px;
+  width: min(860px, 114%);
+  height: 430px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(52px);
+}
+
+.pf-stage__orb--payout {
+  background: radial-gradient(
+    circle at 50% 34%,
+    rgba(59, 130, 246, 0.68) 0%,
+    rgba(37, 99, 235, 0.42) 44%,
+    rgba(29, 78, 216, 0.14) 72%,
+    transparent 100%
+  );
+}
+
+.pf-stage__orb--checkin {
+  background: radial-gradient(
+    circle at 50% 34%,
+    rgba(10, 193, 142, 0.66) 0%,
+    rgba(5, 150, 105, 0.38) 46%,
+    rgba(6, 95, 70, 0.12) 74%,
+    transparent 100%
+  );
+}
+
+/* Crisp-yet-blurred bright crescent rim along the top curve of the rising circle */
+.pf-stage__crest {
+  position: absolute;
+  left: 50%;
+  bottom: -332px;
+  width: min(760px, 100%);
+  height: 410px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(22px);
+}
+
+.pf-stage__crest--payout {
+  background: radial-gradient(
+    closest-side,
+    rgba(96, 165, 250, 0.34) 0%,
+    rgba(37, 99, 235, 0.24) 68%,
+    rgba(147, 197, 253, 0.52) 97%,
+    transparent 100%
+  );
+}
+
+.pf-stage__crest--checkin {
+  background: radial-gradient(
+    closest-side,
+    rgba(47, 217, 166, 0.32) 0%,
+    rgba(10, 193, 142, 0.22) 68%,
+    rgba(110, 240, 200, 0.48) 97%,
+    transparent 100%
+  );
+}
+
+/* Pure opacity crossfade for mode-switched copy (zero movement) */
+@keyframes pf-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.pf-fade {
+  animation: pf-fade-in 260ms var(--ease-out) both;
+}
+
+/* ---------------------------------------------------------------- Minimal Centered Heading */
+
+.pf-head {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.pf-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 236, 0.5);
+}
+
+.pf-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(28px, 3.6vw, 42px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--pf-ink);
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------- Open Flow Diagram Grid */
+
+/* Fixed track widths on col 1, 3 and 5 lock BCH, Center Hub and Heirs so switching tabs causes 0px shift. */
+.pf-flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 164px 1fr 128px 1fr 196px;
+  align-items: center;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 0 42px;
+}
+
+.pf-source { grid-column: 1; }
+.pf-hub-col { grid-column: 3; }
+.pf-heirs { grid-column: 5; }
+
+/* Razor-thin SVG flow beams */
+.pf-beams {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.pf-track {
+  fill: none;
+  stroke: rgba(255, 248, 236, 0.11);
+  stroke-linecap: round;
+  transition: stroke 260ms ease, stroke-opacity 260ms ease;
+}
+.pf-out-group.is-pick .pf-track:not(.is-quiet) {
+  stroke-opacity: 0.38;
+}
+.pf-track.is-quiet {
+  stroke: rgba(255, 248, 236, 0.07);
+}
+.pf-track--ret {
+  stroke: rgba(47, 217, 166, 0.26);
+  transition: opacity 280ms ease;
+}
+.pf-ret-group {
+  opacity: 1;
+  transition: opacity 380ms var(--ease-out);
+}
+.pf-ret-group.is-hidden {
+  opacity: 0;
+}
+
+.pf-static {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.pf-pulse {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 22 114;
+  stroke-dashoffset: 24;
+  opacity: 0;
+  animation-duration: var(--pf-cycle);
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
+
+.pf-pulse--s1 { animation-name: pf-pulse-s1; }
+.pf-pulse--s2 { animation-name: pf-pulse-s2; }
+
+.pf-stage[data-live] .pf-pulse {
+  animation-play-state: running;
+}
+
+@keyframes pf-pulse-s1 {
+  0% { stroke-dashoffset: 24; opacity: 0; }
+  8% { opacity: 1; }
+  38% { opacity: 1; }
+  45% { stroke-dashoffset: -102; opacity: 0; }
+  100% { stroke-dashoffset: -102; opacity: 0; }
+}
+
+@keyframes pf-pulse-s2 {
+  0%, 35% { stroke-dashoffset: 24; opacity: 0; }
+  42% { opacity: 1; }
+  78% { opacity: 1; }
+  87% { stroke-dashoffset: -102; opacity: 0; }
+  100% { stroke-dashoffset: -102; opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- Floating Borderless Nodes */
+
+/* Shared dark floating circular node tile */
+.pf-node {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: #151b2d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 236, 0.08),
+    0 16px 34px -14px rgba(0, 0, 0, 0.8);
+}
+
+/* Source & Hub captions are absolutely anchored below their icons so all three centers lock on one horizontal axis */
+.pf-source {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pf-node--source {
+  width: 60px;
+  height: 60px;
+}
+
+.pf-bch {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.pf-source__text {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  white-space: nowrap;
+}
+.pf-source__text strong {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--pf-ink);
+}
+.pf-source__text span {
+  font-size: 12px;
+  color: var(--pf-muted);
+  white-space: nowrap;
+}
+
+/* Center Hub: glossy squircle */
+.pf-hub-col {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pf-hub {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 19px;
+  overflow: hidden;
+  box-shadow: 0 20px 44px -14px rgba(0, 0, 0, 0.85);
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.pf-hub:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) {
+  .pf-hub:hover { transform: translateY(-2px); }
+}
+
+.pf-hub__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.55),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.16);
+  transition: opacity 360ms var(--ease-out);
+}
+.pf-hub__fill--checkin {
+  opacity: 0;
+}
+.pf-stage[data-mode='checkin'] .pf-hub__fill--checkin {
+  opacity: 1;
+}
+
+.pf-hub__icon {
+  position: relative;
+  grid-area: 1 / 1;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  transition:
+    opacity 240ms var(--ease-out),
+    transform 280ms var(--ease-expo);
+}
+.pf-hub__icon svg { width: 24px; height: 24px; }
+.pf-hub__icon--payout {
+  color: #131b33;
+  opacity: 1;
+  transform: scale(1);
+}
+.pf-hub__icon--checkin {
+  color: #08201b;
+  opacity: 0;
+  transform: scale(0.84);
+}
+.pf-stage[data-mode='checkin'] .pf-hub__icon--payout {
+  opacity: 0;
+  transform: scale(0.84);
+}
+.pf-stage[data-mode='checkin'] .pf-hub__icon--checkin {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pf-tone--gold {
+  background: linear-gradient(225deg, #f5e2ad 0%, #cda45c 100%);
+}
+.pf-tone--green {
+  background: linear-gradient(225deg, #4ae6b8 0%, #0ac18e 100%);
+}
+
+.pf-hub__label {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 236, 0.58);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Right: Three borderless heir rows */
+.pf-heirs {
+  position: relative;
+  z-index: 2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.pf-heir {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 10px 4px 4px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--pf-ink);
+  text-align: left;
+  transition: opacity 240ms ease, transform var(--dur-press) var(--ease-out);
+}
+.pf-heir:active { transform: scale(0.97); }
+.pf-heir:focus-visible { outline: 2px solid var(--c); outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) {
+  .pf-heir:hover .pf-node--heir { transform: scale(1.05); }
+}
+
+.pf-stage[data-mode='checkin'] .pf-heir {
+  opacity: 0.52;
+}
+.pf-stage[data-mode='checkin'] .pf-heir.is-pick {
+  opacity: 0.82;
+}
+
+.pf-node--heir {
+  width: 52px;
+  height: 52px;
+  transition: transform 220ms var(--ease-out), box-shadow 220ms ease;
+}
+.pf-heir.is-pick .pf-node--heir {
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--c) 65%, transparent),
+    0 16px 34px -14px rgba(0, 0, 0, 0.85);
+}
+
+/* Glossy circular initial emblem nested cleanly inside each dark floating node */
+.pf-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.42),
+    0 6px 14px -6px rgba(0, 0, 0, 0.6);
+}
+.pf-avatar--1 { background: linear-gradient(225deg, #60a5fa 0%, #2563eb 100%); }
+.pf-avatar--2 { background: linear-gradient(225deg, #a78bfa 0%, #6d28d9 100%); }
+.pf-avatar--3 { background: linear-gradient(225deg, #22d3ee 0%, #0e7490 100%); }
+.pf-avatar--4 { background: linear-gradient(225deg, #f472b6 0%, #be185d 100%); }
+.pf-avatar--5 { background: linear-gradient(225deg, #a3e635 0%, #4d7c0f 100%); }
+
+.pf-heir__text {
+  display: grid;
+  gap: 2px;
+  min-width: 112px;
+}
+
+.pf-heir__name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--pf-ink);
+  transition: color 180ms ease;
+}
+.pf-heir:not(.is-pick) .pf-heir__name {
+  color: rgba(255, 248, 236, 0.84);
+}
+
+.pf-heir__val {
+  font-size: 13px;
+  color: var(--pf-muted);
+  white-space: nowrap;
+}
+.pf-heir.is-pick .pf-heir__val {
+  color: rgba(255, 248, 236, 0.86);
+}
+
+/* ---------------------------------------------------------------- Quiet Centered Footnote */
+
+/* Fixed min-height guarantees toggling modes never changes the stage's vertical height */
+.pf-foot {
+  max-width: 580px;
+  min-height: 44px;
+  margin: 42px auto 0;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 248, 236, 0.78);
+  text-wrap: pretty;
+}
+.pf-foot b {
+  font-weight: 600;
+  color: var(--pf-ink);
+}
+
+/* ---------------------------------------------------------------- Mobile (< 768px): Symmetrical Vertical Fan */
+
+@media (max-width: 767px) {
+  .pf-stage {
+    border-radius: 28px;
+    padding: 36px 20px 32px;
+  }
+
+  .pf-stage__orb {
+    bottom: -240px;
+    height: 340px;
+  }
+  .pf-stage__crest {
+    bottom: -274px;
+    height: 330px;
+  }
+
+  .pf-head {
+    margin-bottom: 34px;
+  }
+
+  .pf-flow {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 44px;
+    padding: 8px 0 12px;
+  }
+
+  .pf-source,
+  .pf-hub-col,
+  .pf-heirs {
+    grid-column: 1;
+  }
+
+  /* Place 12 BCH label above the circle on mobile so the vertical beam exits cleanly below with zero overlap */
+  .pf-source {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+  .pf-source__text {
+    position: static;
+    transform: none;
+  }
+
+  .pf-hub {
+    width: 58px;
+    height: 58px;
+    border-radius: 17px;
+  }
+  .pf-hub svg { width: 22px; height: 22px; }
+  .pf-hub__label {
+    display: none;
+  }
+
+  .pf-heirs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+
+  .pf-heir {
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    gap: 9px;
+    padding: 4px 2px;
+    text-align: center;
+  }
+
+  .pf-node--heir {
+    width: 48px;
+    height: 48px;
+  }
+  .pf-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 12.5px;
+  }
+
+  .pf-heir__text {
+    min-width: 0;
+  }
+  .pf-heir__name {
+    font-size: 14px;
+  }
+  .pf-heir__val {
+    font-size: 12px;
+  }
+
+  .pf-foot {
+    min-height: 62px;
+    margin-top: 30px;
+    font-size: 13px;
   }
 }
-.sb { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; }
-.sb__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 
-/* the spring */
-.sb__pool-bed { fill: rgba(255, 248, 236, 0.03); stroke: rgba(255, 248, 236, 0.14); stroke-width: 1.2; }
-.sb__pool { stroke: rgba(227, 202, 142, 0.4); stroke-width: 1; transition: opacity 600ms ease; }
-.sb__ripple { fill: none; stroke: rgba(255, 248, 236, 0.2); stroke-width: 1; }
-.sb[data-flow='on'] .sb__pool { opacity: 0.86; transition-delay: 300ms; }
-.sb__seed {
-  --text: #fff8ec;
-  --gold: #e3ca8e;
-  position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center;
-  filter: drop-shadow(0 0 12px rgba(243, 220, 158, 0.55));
+@media (max-width: 479px) {
+  .pf-seg {
+    width: 100%;
+    max-width: 360px;
+  }
+  .pf-seg__tab {
+    flex: 1 1 0;
+    padding: 0 12px;
+    font-size: 13.5px;
+  }
+  .pf-stage {
+    padding: 32px 14px 28px;
+  }
+  .pf-heir__val {
+    font-size: 11px;
+  }
 }
 
-/* canal and channels: a dry bed, the water (filled along the path), and a shimmer running with the flow */
-.sb__bed, .sb__water, .sb__glint { fill: none; }
-.sb__bed { stroke: rgba(255, 248, 236, 0.11); stroke-width: calc(var(--w) * 1px + 5px); stroke-linecap: round; }
-.sb__water {
-  stroke: var(--water); stroke-opacity: 0.9; stroke-width: calc(var(--w) * 1px);
-  stroke-dasharray: 1 1; stroke-dashoffset: 1;
-  transition: stroke-dashoffset 720ms cubic-bezier(0.45, 0, 0.25, 1);
-}
-.sb__run--ch .sb__water { stroke: color-mix(in srgb, var(--c) 28%, var(--water)); }
-.sb__run--ch.is-pick .sb__water { stroke: color-mix(in srgb, var(--c) 16%, #f4f7ff); }
-.sb__glint {
-  stroke: #fff8ec; stroke-opacity: 0; stroke-width: calc(var(--w) * 0.2px); stroke-linecap: round;
-  stroke-dasharray: 0.028 0.072; transition: stroke-opacity 300ms ease;
-}
-
-/* Paying: the gate opens, the canal runs, every channel at once, then every terrace at once. */
-.sb[data-flow='on'] .sb__run--canal .sb__water { stroke-dashoffset: 0; transition-delay: 260ms; }
-.sb[data-flow='on'] .sb__run--ch .sb__water { stroke-dashoffset: 0; transition-delay: 860ms; }
-.sb[data-flow='on'] .sb__glint { stroke-opacity: 0.5; transition: stroke-opacity 500ms ease 1500ms; }
-.sb[data-flow='on'][data-live] .sb__glint { animation: sb-run 3s linear infinite; }
-@keyframes sb-run { to { stroke-dashoffset: -0.1; } }
-/* "I'm still here": the other way round, fields first and the canal last, back into the spring. */
-.sb[data-flow='off'] .sb__run--ch .sb__water { transition-delay: 420ms; }
-.sb[data-flow='off'] .sb__run--canal .sb__water { transition-delay: 900ms; }
-
-/* the terraces */
-.sb__lip { fill: rgba(150, 118, 78, 0.24); }
-.sb__earth { fill: #14182a; stroke: rgba(255, 248, 236, 0.08); stroke-width: 1; transition: stroke 300ms ease; }
-.sb__rice { stroke: none; pointer-events: none; }
-.sb pattern path { fill: none; stroke: rgba(176, 214, 150, 0.34); stroke-width: 1; stroke-linecap: round; }
-.sb__shine { fill: none; stroke: #f2f5ff; stroke-opacity: 0.4; stroke-width: 1.4; stroke-linecap: round; }
-.sb__rim { fill: none; stroke: rgba(227, 202, 142, 0.5); stroke-width: 1.4; stroke-linecap: round; transition: stroke 300ms ease; }
-.sb__field.is-pick .sb__earth { stroke: color-mix(in srgb, var(--c) 70%, transparent); }
-.sb__field.is-pick .sb__rim { stroke: color-mix(in srgb, var(--c) 45%, #fff8ec); stroke-width: 2; }
-.sb__fill {
-  transform: translateX(-101%); transform-box: fill-box;
-  transition: transform 700ms cubic-bezier(0.4, 0, 0.6, 1);
-}
-.sb[data-flow='on'] .sb__fill { transform: none; transition: transform 1000ms cubic-bezier(0.25, 0.6, 0.3, 1) 1380ms; }
-/* the divider stone and the gate */
-.sb__divider { fill: #232a46; stroke: rgba(255, 248, 236, 0.4); stroke-width: 1.2; }
-.sb__gate-frame { fill: none; stroke: rgba(255, 248, 236, 0.55); stroke-width: 2.2; stroke-linecap: round; }
-.sb__gate-board { fill: #e3ca8e; transition: transform 420ms cubic-bezier(0.3, 0.7, 0.4, 1); }
-.sb[data-layout='wide'][data-flow='on'] .sb__gate-board { transform: translateY(-26px); }
-.sb[data-layout='tall'][data-flow='on'] .sb__gate-board { transform: translateX(-26px); }
-
-/* labels */
-.sb__label {
-  position: absolute; margin: 0; transform: translate(-50%, -50%);
-  display: grid; justify-items: center; gap: 3px; text-align: center; white-space: nowrap;
-}
-.sb__label[data-align='start'] { transform: translate(0, -50%); justify-items: start; text-align: left; }
-.sb__label--plan strong { font-size: 28px; font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; }
-.sb__label--gate strong { font-size: 15px; font-weight: 600; }
-.sb__label--gate span { font-size: 12.5px; color: var(--night-muted); }
-.sb__label--divider { font-size: 12.5px; line-height: 1.4; color: var(--night-muted); }
-
-/* the heirs, each one their whole terrace */
-.sb__heirs { list-style: none; margin: 0; padding: 0; }
-.sb__heirs li { position: absolute; }
-.sb__heir {
-  display: flex; align-items: center; gap: 10px; width: 100%; height: 100%; padding: 0 26px 0 44px;
-  border: 0; border-radius: 18px; background: transparent; color: var(--night-text);
-  font-size: 15px; text-align: left; text-shadow: 0 1px 10px rgba(5, 8, 20, 0.7);
-  transition: background-color 200ms ease, transform var(--dur-press) var(--ease-out);
-}
-.sb__heir:active { transform: scale(0.985); }
-.sb__heir:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .sb__heir:hover { background: rgba(255, 248, 236, 0.04); } }
-.sb__heir .np__heir-amt { font-size: 16px; }
-
-.sb[data-layout='tall'] .sb__label--plan strong { font-size: 24px; }
-.sb[data-layout='tall'] .sb__label--gate strong { font-size: 14px; }
-.sb[data-layout='tall'] .sb__label--gate span, .sb[data-layout='tall'] .sb__label--divider { font-size: 12px; }
-.sb[data-layout='tall'] .sb__heir { gap: 8px; padding: 0 14px 0 22px; font-size: 13.5px; }
-.sb[data-layout='tall'] .sb__heir .np__heir-amt { font-size: 14px; }
+/* ---------------------------------------------------------------- Reduced Motion */
 
 @media (prefers-reduced-motion: reduce) {
-  .sb__water, .sb__fill, .sb__gate-board, .sb__glint, .sb__pool,
-  .sb[data-flow] .sb__water, .sb[data-flow] .sb__fill, .sb[data-flow] .sb__glint { transition: none; }
+  .pf-seg__indicator,
+  .pf-horizon,
+  .pf-hub__fill,
+  .pf-hub__icon,
+  .pf-ret-group,
+  .pf-track,
+  .pf-heir,
+  .pf-hub,
+  .pf-node--heir {
+    transition: none;
+  }
+  .pf-horizon--payout,
+  .pf-horizon--checkin,
+  .pf-stage[data-mode='checkin'] .pf-horizon--payout,
+  .pf-stage[data-mode='checkin'] .pf-horizon--checkin,
+  .pf-hub__icon--payout,
+  .pf-hub__icon--checkin,
+  .pf-stage[data-mode='checkin'] .pf-hub__icon--payout,
+  .pf-stage[data-mode='checkin'] .pf-hub__icon--checkin {
+    transform: none;
+  }
+  .pf-fade,
+  .pf-pulse {
+    animation: none !important;
+  }
 }

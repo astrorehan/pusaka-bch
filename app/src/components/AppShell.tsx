@@ -3,21 +3,22 @@
 // The wallet button is the rightmost control on every width (organiser's rule).
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
-import { ExternalLink, Menu, Moon, Sun, Unplug, Wallet, X } from 'lucide-react';
+import { ExternalLink, Menu, MessageCircle, Moon, Sun, Unplug, Wallet, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { Button, ButtonLink } from './Button';
 import { Banner } from './Banner';
 import { CopyButton } from './CopyButton';
+import { NetworkSwitch } from './NetworkSwitch';
 import { Popover } from './Popover';
 import { Scrollbar } from './Scrollbar';
 import { useMedia } from './useMedia';
 import { DockNav } from './DockNav';
 import { usePillFx } from './pillFx';
-import { CODE_URL, DOCS_URL } from './banner-config';
+import { CODE_URL, DOCS_URL, TELEGRAM_HANDLE, TELEGRAM_URL } from './banner-config';
 import { useWallet } from '../lib/wallet';
 import { planService } from '../lib/planService';
 import { formatBch, formatUsd, shortAddress } from '../lib/format';
-import { NETWORK } from '../lib/networkName';
+import { NETWORK, otherNetworkHref } from '../lib/networkName';
 import { applyTheme, getTheme, type Theme } from '../lib/theme';
 import './shell.css';
 
@@ -172,6 +173,8 @@ function PhoneMenu({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () =
     setOpen(false);
   }
 
+  const switchHref = otherNetworkHref(location.pathname);
+
   return (
     <div className="phone-menu">
       <button
@@ -200,6 +203,21 @@ function PhoneMenu({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () =
                 GitHub <ExternalLink aria-hidden className="menu-item__ext" />
               </a>
             </li>
+            <li>
+              <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="menu-item">
+                <MessageCircle aria-hidden className="menu-item__icon" />
+                Need help? ({TELEGRAM_HANDLE})
+                <ExternalLink aria-hidden className="menu-item__ext" />
+              </a>
+            </li>
+            {switchHref && (
+              <li>
+                <a href={switchHref} className="menu-item">
+                  {NETWORK === 'chipnet' ? 'Switch to Mainnet' : 'Switch to Chipnet (testnet)'}
+                  <ExternalLink aria-hidden className="menu-item__ext" />
+                </a>
+              </li>
+            )}
           </ul>
         </nav>
         <div className="menu-sep" />
@@ -281,12 +299,7 @@ export function AppShell() {
                 <Logo size={26} />
                 <span className="brand__name">Pusaka</span>
               </Link>
-              {NETWORK === 'chipnet' && (
-                <div className="testnet-badge" role="note" title="Test network: no real money">
-                  Testnet
-                  <span className="sr-only">, no real money</span>
-                </div>
-              )}
+              <NetworkSwitch variant="shell" />
             </div>
             <DockNav />
             <div className="header__actions">

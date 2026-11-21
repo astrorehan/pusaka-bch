@@ -172,6 +172,14 @@
 .pw-balance-value, .pw-balance-intro { min-width: 0; }
 .pw-balance-number { font-size: clamp(34px, 5.1vw, 72px); font-weight: 580; line-height: 1.05; letter-spacing: -0.064em; overflow-wrap: anywhere; }
 .pw-balance-number span { font-size: 0.38em; font-weight: 590; letter-spacing: 0; color: var(--pw-ledger-gold); }
+.pw-balance-usd {
+  margin-top: 8px;
+  color: var(--pw-ledger-gold);
+  font-size: clamp(16px, 1.8vw, 20px);
+  font-weight: 560;
+  letter-spacing: -0.01em;
+}
+.pw-balance-usd span { color: var(--pw-ledger-muted); font-size: 0.8em; font-weight: 450; }
 .pw-balance-note, .pw-balance-intro p { max-width: 47ch; margin: 12px auto 0; color: var(--pw-ledger-muted); font-size: 16px; text-wrap: pretty; }
 .pw-balance-intro h2 { max-width: 19ch; margin-inline: auto; font: 660 clamp(30px, 3.8vw, 51px)/1.1 var(--font-body); letter-spacing: -0.057em; text-wrap: balance; }
 .pw-balance-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; width: 100%; margin-top: 9px; }
@@ -393,6 +401,7 @@
   .pw-heading { align-items: flex-start; flex-direction: column; }
   .pw-heading p { font-size: 15px; }
   .pw-card-link { min-height: 44px; }
+  .pw-story-footer-links a, .pw-info a { min-height: 36px; }
   .pw-sheet .sheet__footer { flex-direction: column-reverse; }
   .pw-sheet .sheet__footer .btn { width: 100%; }
   .pw-claim-banner { flex-wrap: wrap; }
@@ -402,7 +411,10 @@
 
 @media (max-width: 479px) {
   .pw-card { gap: 13px; }
-  .pw-balance { padding-block: 28px; }
+  .pw-balance { min-height: 290px; padding-block: 26px; border-radius: 18px; }
+  .pw-balance-seal { width: 62px; height: 62px; }
+  .pw-balance-number { font-size: clamp(28px, 8.2vw, 44px); }
+  .pw-loading-screen { min-height: 310px; }
   .pw-balance-art { object-position: 72% 65%; }
   .pw-balance-note, .pw-balance-intro p { max-width: 34ch; font-size: 15px; }
   .pw-balance-actions:has(.pw-balance-more) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -414,6 +426,9 @@
   .pw-row, .pw-share-link { gap: 7px; }
   .pw-row > .pw-symbol { width: 30px; height: 30px; }
   .pw-row > svg { display: none; }
+  .pw-row:has(.pw-badge) { flex-wrap: wrap; row-gap: 6px; }
+  .pw-row:has(.pw-badge) .pw-row-main { flex: 1 1 calc(100% - 88px); }
+  .pw-row:has(.pw-badge) .pw-badge { order: 4; margin-left: 37px; }
 }
 
 @media (max-width: 359px) {
@@ -486,6 +501,202 @@
   font-size: 14px;
 }
 .pw-story-footer a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-text); font-weight: 600; text-underline-offset: 3px; }
+.pw-story-footer-links { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+
+/* Live review countdown / readiness meter when a claim is waiting on BIP68 median block time. */
+.pw-review-meter {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.pw-review-meter__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.pw-review-meter__label { color: var(--text); font-size: 13px; font-weight: 620; }
+.pw-review-meter__refresh { font-size: 13px; }
+.pw-review-meter__track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+}
+.pw-review-meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--warning);
+  transition: width 300ms var(--ease-out);
+}
+.pw-review-meter__track--pending .pw-review-meter__fill {
+  animation: pw-pulse 1500ms ease-in-out infinite alternate;
+}
+.pw-review-meter__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Screenshot-ready beneficiary share card with scannable compact plan-link QR. */
+.pw-share-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 18px 16px;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--border));
+  border-radius: 14px;
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--gold) 10%, var(--surface)), var(--surface) 75%);
+  text-align: center;
+}
+.pw-share-card--compact { padding: 14px 12px; gap: 10px; }
+.pw-share-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+.pw-share-card__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 640;
+  color: var(--text);
+}
+.pw-share-card__meta {
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+.pw-share-card__qr { max-width: 100%; }
+.pw-share-card__note {
+  max-width: 44ch;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
 @media (max-width: 560px) {
   .pw-story-action .btn { flex: 1 1 auto; }
+}
+
+/* Branded wallet & live-demo loading screen: blooming seal + thin gold progress sweep. */
+.pw-loading-screen { min-height: clamp(380px, 54svh, 520px); }
+.pw-loading-bar {
+  position: relative;
+  width: 148px;
+  height: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--pw-ledger-gold) 24%, transparent);
+}
+.pw-loading-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 46%;
+  border-radius: inherit;
+  background: var(--pw-ledger-gold);
+  animation: pw-bar-sweep 1.25s var(--ease-in-out) infinite;
+}
+@keyframes pw-bar-sweep {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(310%); }
+}
+
+/* Snappy workspace motion: crisp GPU-only entrances (220 ms) and tactile hover feedback. */
+@keyframes pw-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pw-seal-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pw-dot-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@keyframes pw-ring-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.82; }
+}
+
+.pw-page-body > *,
+.pw-inspector > *,
+.pw-page-support > * {
+  animation: pw-enter 220ms var(--ease-out) both;
+}
+.pw-page-body > :nth-child(2),
+.pw-inspector > :nth-child(2),
+.pw-page-support > :nth-child(2) { animation-delay: 40ms; }
+.pw-page-body > :nth-child(3),
+.pw-inspector > :nth-child(3),
+.pw-page-support > :nth-child(3) { animation-delay: 80ms; }
+.pw-page-body > :nth-child(4),
+.pw-inspector > :nth-child(4),
+.pw-page-support > :nth-child(4) { animation-delay: 120ms; }
+.pw-page-body > :nth-child(n+5),
+.pw-inspector > :nth-child(n+5),
+.pw-page-support > :nth-child(n+5) { animation-delay: 150ms; }
+
+.pw-story-step { animation: pw-enter 220ms var(--ease-out) both; }
+.pw-story-step:nth-child(1) { animation-delay: 20ms; }
+.pw-story-step:nth-child(2) { animation-delay: 55ms; }
+.pw-story-step:nth-child(3) { animation-delay: 90ms; }
+.pw-story-step:nth-child(4) { animation-delay: 125ms; }
+.pw-story-step:nth-child(5) { animation-delay: 160ms; }
+.pw-story-step--now .pw-story-mark { animation: pw-ring-breathe 2.2s ease-in-out infinite; }
+
+.pw-balance-seal { animation: pw-seal-in 240ms var(--ease-out) both; }
+.pw-badge--success i,
+.pw-badge--warning i { animation: pw-dot-breathe 2.4s ease-in-out infinite; }
+
+.pw-card { transition: border-color 160ms ease; }
+.pw-card-link svg,
+.pw-info a svg,
+.pw-story-footer a svg,
+.pw-row-link { transition: transform 180ms var(--ease-out), background-color 150ms ease; }
+.pw-plan-map-leaves span { transition: transform 180ms var(--ease-out), border-color 160ms ease; }
+.pw-filters button { transition: background-color 150ms ease, color 150ms ease, transform var(--dur-press) var(--ease-out); }
+.pw-filters button:active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pw-card:hover { border-color: var(--border-strong); }
+  .pw-card-link:hover svg,
+  .pw-info a:hover svg,
+  .pw-story-footer a:hover svg { transform: translateX(3px); }
+  .pw-row-link:hover { transform: translateX(2px); }
+  .pw-plan-map-leaves span:hover { transform: translateY(-2px) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pw-review-meter__track--pending .pw-review-meter__fill,
+  .pw-loading-bar span,
+  .pw-page-body > *,
+  .pw-inspector > *,
+  .pw-page-support > *,
+  .pw-story-step,
+  .pw-story-step--now .pw-story-mark,
+  .pw-balance-seal,
+  .pw-badge--success i,
+  .pw-badge--warning i { animation: none; }
+  .pw-loading-bar span { width: 100%; opacity: 0.7; }
+  .pw-card-link:hover svg,
+  .pw-info a:hover svg,
+  .pw-story-footer a:hover svg,
+  .pw-row-link:hover,
+  .pw-plan-map-leaves span:hover { transform: none; }
 }

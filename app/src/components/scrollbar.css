@@ -40,3 +40,7 @@
   background: rgb(0 0 0 / 0.85);
   cursor: grabbing;
 }
+
+@media (hover: none), (pointer: coarse), (max-width: 767px) {
+  .scrollbar { display: none; }
+}

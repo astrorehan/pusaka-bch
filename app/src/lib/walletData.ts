@@ -1,6 +1,12 @@
 import { BASE } from './asset';
 import { NETWORK, openInOtherApp } from './networkName';
-import { decodePusakaV2PlanLink, encodePusakaV2PlanLink, readV2Metadata, type PusakaV2PlanMetadata } from './protocol/plan-metadata';
+import {
+  decodePusakaV2PlanLink,
+  encodeCompactPusakaV2PlanLink,
+  encodePusakaV2PlanLink,
+  readV2Metadata,
+  type PusakaV2PlanMetadata,
+} from './protocol/plan-metadata';
 
 const PLANS_KEY = `pusaka.v2.plans.${NETWORK}`;
 const HISTORY_KEY = `pusaka.v2.activity.${NETWORK}`;
@@ -71,7 +77,7 @@ export function savePlan(plan: PusakaV2PlanMetadata) {
 }
 
 export function planLink(plan: PusakaV2PlanMetadata) {
-  return encodePusakaV2PlanLink(plan, `${location.origin}${BASE}v2/plan`);
+  return encodeCompactPusakaV2PlanLink(plan, `${location.origin}${BASE}v2/plan`);
 }
 
 export function importPlan(fragment: string): PusakaV2PlanMetadata {

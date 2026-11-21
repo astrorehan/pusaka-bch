@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Check, ExternalLink, RefreshCw } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, ExternalLink, MessageCircle, RefreshCw } from 'lucide-react';
 import { Button } from '../../components/Button';
+import { TELEGRAM_HANDLE, TELEGRAM_URL } from '../../components/banner-config';
 import type * as api from '../../lib/chain/v2';
 import { demoTxids } from '../../lib/demo';
 import { altExplorerTxUrl, explorerTxUrl, formatDate, formatDuration } from '../../lib/format';
 import { NETWORK, OTHER_APP } from '../../lib/networkName';
-import type { PrepareAction } from './PlanOverview';
+import { ReviewReadiness, type PrepareAction } from './PlanOverview';
 import { Card } from './WalletUi';
 
 type Step = { title: string; detail: ReactNode; state: 'done' | 'now' | 'later'; txid?: string; action?: ReactNode };
@@ -38,14 +39,18 @@ export function DemoStory({
   metadata,
   data,
   busy,
+  loading = false,
   prepare,
+  onRefresh,
   exhausted,
   onNext,
 }: {
   metadata: api.PusakaV2PlanMetadata;
   data: api.LoadedPlan;
   busy: boolean;
+  loading?: boolean;
   prepare: PrepareAction;
+  onRefresh?: () => void;
   exhausted: boolean;
   onNext: () => void;
 }) {
@@ -94,11 +99,11 @@ export function DemoStory({
       // While the claim is open, its anchor sits at the opening transaction; after the payout, the record has it.
       txid: reviewing ? state.anchorUtxo?.txid ?? claim : paid ? claim : undefined,
       action: overdue && (canAct
-        ? <Button type="button" disabled={busy} onClick={() => void prepare('open', { selfFunded: true })}>Open the claim</Button>
+        ? <Button type="button" className="btn--gold-shine" disabled={busy} onClick={() => void prepare('open', { selfFunded: true })}>Open the claim</Button>
         : short),
     },
     {
-      title: 'Review ended',
+      title: paid || ready ? 'Review ended' : reviewing ? 'Waiting through the review period' : 'Review period',
       detail: paid || ready
         ? `The owner had ${reviewTime} to stop the claim, and didn’t.`
         : reviewing
@@ -107,6 +112,9 @@ export function DemoStory({
             : 'The review starts once the claim makes it into a block.'
           : `The owner will get ${reviewTime} to stop the claim.`,
       state: paid || ready ? 'done' : reviewing ? 'now' : 'later',
+      action: reviewing && !ready && review ? (
+        <ReviewReadiness review={review} loading={loading} onRefresh={onRefresh} />
+      ) : undefined,
     },
     {
       title: paid ? 'Heirs paid' : ready ? 'Your turn: pay the heirs' : 'Heirs get paid',
@@ -119,7 +127,7 @@ export function DemoStory({
       // The payout moved the plan's state on: its current location is the payout transaction.
       txid: paid ? state.planUtxo?.txid : undefined,
       action: ready && !paid && (canAct
-        ? <Button type="button" disabled={busy} icon={<ArrowUpRight />} onClick={() => void prepare('finalize', { selfFunded: true })}>Pay the heirs</Button>
+        ? <Button type="button" className="btn--gold-shine" disabled={busy} icon={<ArrowUpRight />} onClick={() => void prepare('finalize', { selfFunded: true })}>Pay the heirs</Button>
         : short),
     },
   ];
@@ -186,9 +194,14 @@ export function DemoStory({
           Want to try it from the start?{' '}
           <Link to="/wallet/new">Create your own plan</Link> with Paytaca or Cashonize.
         </span>
-        <Link to="/wallet">
-          Exit demo <ArrowRight aria-hidden size={14} />
-        </Link>
+        <div className="pw-story-footer-links">
+          <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" title={`Message ${TELEGRAM_HANDLE} on Telegram`}>
+            <MessageCircle size={14} aria-hidden /> Need help?
+          </a>
+          <Link to="/wallet">
+            Exit demo <ArrowRight aria-hidden size={14} />
+          </Link>
+        </div>
       </footer>
     </Card>
   );

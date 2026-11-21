@@ -1,7 +1,7 @@
 // Outbound links used by the home and How it works pages.
-import { BANNER, CODE_URL, DOCS_URL, REPO_URL, SOURCE_REF } from '../../components/banner-config';
+import { BANNER, CODE_URL, DOCS_URL, REPO_URL, SOURCE_REF, TELEGRAM_HANDLE, TELEGRAM_URL } from '../../components/banner-config';
 
-export { CODE_URL, DOCS_URL, REPO_URL };
+export { CODE_URL, DOCS_URL, REPO_URL, TELEGRAM_HANDLE, TELEGRAM_URL };
 /** The wallet's contracts: PusakaAssetPlan (the plan), PusakaV2Inbox, PusakaV2ReviewAnchor and PusakaTokenVault. */
 export const CONTRACT_URL = `${REPO_URL}/tree/${SOURCE_REF}/contract/contracts`;
 export const PLAN_CONTRACT_URL = `${REPO_URL}/blob/${SOURCE_REF}/contract/contracts/PusakaAssetPlan.scash`;

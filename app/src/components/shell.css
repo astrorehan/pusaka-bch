@@ -22,6 +22,60 @@
 }
 @media (max-width: 389px) { .testnet-badge { display: none; } }
 
+/* Compact Mainnet / Chipnet switcher when both networks are published together. */
+.net-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  flex: none;
+}
+.net-switch__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.net-switch__opt i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+.net-switch__opt--active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 620;
+  box-shadow: 0 1px 2px rgba(19, 27, 51, 0.08);
+}
+.net-switch__opt--test {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.net-switch__opt--test i { background: var(--warning); }
+@media (hover: hover) and (pointer: fine) {
+  a.net-switch__opt:hover { color: var(--text); background: var(--surface-hover); }
+}
+@media (max-width: 767px) {
+  .net-switch--shell .net-switch__opt:not(.net-switch__opt--active) { display: none; }
+}
+@media (max-width: 389px) {
+  .net-switch--shell { display: none; }
+}
+
 /* ---------------------------------------------------------------- header */
 
 .header {
@@ -74,6 +128,18 @@
   .header .brand, .header__start { justify-self: start; }
   .header__links { margin-left: 0; gap: var(--space-2); }
   .header__actions { justify-self: end; margin-left: 0; }
+}
+
+@media (max-width: 439.98px) {
+  .header { gap: 8px; padding-inline: 12px 10px; }
+  .header__start { gap: 8px; }
+  .header__actions { gap: 4px; }
+  .wallet-btn { padding-inline: 14px; }
+  .wallet-btn:not([aria-busy]) .btn__icon { display: none; }
+  .wallet-btn[aria-busy] .btn__label { display: none; }
+}
+@media (max-width: 359px) {
+  .brand__name { font-size: 18px; }
 }
 
 .icon-btn {
@@ -154,14 +220,58 @@
 .wallet-panel__bal { font-size: var(--text-16); }
 .wallet-panel__bal strong { font-weight: 600; }
 
-.wallet-pair { display: grid; justify-items: center; gap: var(--space-4); }
+.wallet-pair { display: grid; justify-items: center; gap: var(--space-3); }
 .wallet-pair canvas { display: block; border-radius: var(--radius-input); }
-.wallet-pair__link {
-  display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding-left: var(--space-3); border-radius: var(--radius-input);
-  background: var(--surface-2); color: var(--text-muted);
+.wallet-pair__qr,
+.qr-frame--button {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 10px 10px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out), border-color 150ms ease, box-shadow 150ms ease, color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
-
+.wallet-pair__qr:active,
+.qr-frame--button:active { transform: scale(0.985); }
+@media (hover: hover) and (pointer: fine) {
+  .wallet-pair__qr:hover,
+  .qr-frame--button:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+    color: var(--text);
+  }
+}
+.wallet-pair__qr[data-copy-state='copied'],
+.qr-frame--button[data-copy-state='copied'] {
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+}
+.wallet-pair__qr[data-copy-state='failed'],
+.qr-frame--button[data-copy-state='failed'] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.wallet-pair__qr-img,
+.qr-frame__img {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-input);
+  background: #ffffff;
+}
+.wallet-pair__qr-hint,
+.qr-frame__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-13);
+  font-weight: 550;
+  line-height: 1.2;
+}
 .wallet-note-live { position: absolute; right: 0; top: calc(100% + var(--space-2)); z-index: 40; }
 .wallet-note {
   width: max-content; max-width: min(280px, calc(100vw - 2 * var(--gutter)));

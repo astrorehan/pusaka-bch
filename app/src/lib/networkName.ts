@@ -14,6 +14,18 @@ export function otherAppUrl(planNetwork: string, route: string): string | null {
   return OTHER_APP + route.replace(/^\//, '');
 }
 
+/** Map the current in-app route onto the sibling network's published app, when this site hosts both. */
+export function otherNetworkHref(pathname: string): string | null {
+  if (!OTHER_APP) return null;
+  const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  // A shared plan link belongs to one network's contracts; land on the wallet hub when switching.
+  if (clean === '/v2/plan' || clean === '/plan' || clean === '/try') {
+    return `${OTHER_APP}wallet`;
+  }
+  const relative = clean.replace(/^\//, '');
+  return `${OTHER_APP}${relative}`;
+}
+
 /** Open a plan link made on the other network in that network's app. Returns true when the page is leaving. */
 export function openInOtherApp(planNetwork: string, route: string): boolean {
   const url = otherAppUrl(planNetwork, route);

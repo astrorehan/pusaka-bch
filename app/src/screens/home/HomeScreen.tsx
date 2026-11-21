@@ -46,7 +46,7 @@ export function HomeScreen() {
             A Bitcoin Cash wallet you spend from every day, with your inheritance plan built in. If you go quiet, your family receives their shares.
           </p>
           <div className="home-hero__ctas">
-            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx">
+            <ButtonLink {...(TRY_IT ?? { to: '/new' })} size="lg" className="pill-fx btn--gold-shine">
               {TRY_IT ? 'Try it now' : 'Create a plan'} <span className="home-cta__dot" aria-hidden><ArrowRight /></span>
             </ButtonLink>
             <ButtonLink to={TRY_IT ? '/new' : '/how-it-works'} variant="secondary" size="lg" className="pill-fx">

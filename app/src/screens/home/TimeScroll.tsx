@@ -406,7 +406,7 @@ function PinnedScene() {
 
 /** Phones, tablets and reduced motion: the copy, then the working plan card on a patch of the paddy. */
 function StackedScene() {
-  const [copyRef, seen] = useInView<HTMLDivElement>(0.15);
+  const [copyRef, seen] = useInView<HTMLDivElement>(0.05);
   return (
     <section className="ps ps--stacked" aria-label={TITLE_TEXT}>
       <div ref={copyRef} className="lp-wrap">

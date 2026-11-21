@@ -78,7 +78,7 @@ function SentUi() {
 const SCREENS = [HeirsUi, StillHereUi, SentUi];
 
 export function StepsFrame() {
-  const [ref, seen] = useInView<HTMLElement>(0.25);
+  const [ref, seen] = useInView<HTMLElement>(0.08);
   const [active, setActive] = useState(0);
   const [inView, setInView] = useState(false);
   const [paused, setPaused] = useState(false);
