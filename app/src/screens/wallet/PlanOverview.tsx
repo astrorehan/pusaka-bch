@@ -42,11 +42,17 @@ const STATUS: Record<
 export function PlanStatus({
   state,
   loading,
+  reviewEnded = false,
 }: {
   state?: PlanState;
   loading: boolean;
+  /** The review delay has passed: the heirs can be paid now. */
+  reviewEnded?: boolean;
 }) {
-  const status = state && STATUS[state.status];
+  const status =
+    state?.status === 'REVIEW' && reviewEnded
+      ? { label: 'Ready to pay heirs', tone: 'warning' as const }
+      : state && STATUS[state.status];
   return (
     <Badge tone={status?.tone} dot>
       {status?.label ?? (loading ? 'Checking network' : 'Status unavailable')}
@@ -132,7 +138,7 @@ export function PlanRules({
   return (
     <Card>
       <CardHeading title={planPath ? 'Inheritance plan' : 'Inheritance rules'}>
-        <PlanStatus state={state} loading={loading} />
+        <PlanStatus state={state} loading={loading} reviewEnded={Boolean(data?.review?.ready)} />
       </CardHeading>
       {planPath && <PlanMap metadata={metadata} />}
       <dl className="pw-rules">
@@ -153,7 +159,9 @@ export function PlanRules({
           <dt>
             {state?.status === 'PAID_OUT'
               ? 'Last inactivity deadline'
-              : 'Inactivity deadline'}
+              : state?.deadline && data && data.now > state.deadline
+                ? 'Inactivity deadline (passed)'
+                : 'Inactivity deadline'}
           </dt>
           <dd>
             {state?.deadline
