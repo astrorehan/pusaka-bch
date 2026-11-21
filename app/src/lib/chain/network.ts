@@ -16,9 +16,63 @@ let provider: ElectrumNetworkProvider | null = null;
 let providerNetwork: NetworkName | null = null;
 let freshProvider: ElectrumNetworkProvider | null = null;
 
+// Public mainnet Electrum servers, in order of preference. If the first does not answer when the app starts
+// reading, the next one is used, so one server's outage does not take the wallet or the demo down. Every
+// server here must also be allowed in the page's connect-src policy (vite.config.ts).
+export const MAINNET_SERVERS = ['bch.imaginary.cash', 'bch.loping.net', 'fulcrum.criptolayer.net', 'bch.soul-dev.com'];
+let mainnetServer = MAINNET_SERVERS[0];
+let chosen: Promise<void> | null = null;
+
+/** Whether an Electrum server answers a ping over a secure WebSocket within `ms`. */
+function answers(host: string, ms = 5000): Promise<boolean> {
+  return new Promise((resolve) => {
+    let socket: WebSocket | undefined;
+    const done = (ok: boolean) => {
+      clearTimeout(timer);
+      try {
+        socket?.close();
+      } catch {
+        // already closed
+      }
+      resolve(ok);
+    };
+    const timer = setTimeout(() => done(false), ms);
+    try {
+      socket = new WebSocket(`wss://${host}:50004`);
+    } catch {
+      done(false);
+      return;
+    }
+    socket.onopen = () => socket?.send(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'server.ping', params: [] }));
+    socket.onmessage = () => done(true);
+    socket.onerror = () => done(false);
+    socket.onclose = () => done(false);
+  });
+}
+
+/** Use the first mainnet server that answers. Readers await this once per page load before their first request. */
+export function chooseServer(network: NetworkName): Promise<void> {
+  if (network !== 'mainnet' || typeof WebSocket === 'undefined') return Promise.resolve();
+  chosen ??= (async () => {
+    for (const host of MAINNET_SERVERS) {
+      if (!(await answers(host))) continue;
+      if (host !== mainnetServer) {
+        mainnetServer = host;
+        provider = null;
+        freshProvider = null;
+      }
+      return;
+    }
+  })();
+  return chosen;
+}
+
 export function getProvider(network: NetworkName): ElectrumNetworkProvider {
   if (!provider || providerNetwork !== network) {
-    provider = new ElectrumNetworkProvider(network);
+    provider =
+      network === 'mainnet'
+        ? new ElectrumNetworkProvider(network, { hostname: mainnetServer })
+        : new ElectrumNetworkProvider(network);
     providerNetwork = network;
   }
   return provider;
@@ -26,7 +80,10 @@ export function getProvider(network: NetworkName): ElectrumNetworkProvider {
 
 export function getFreshProvider(network: NetworkName): ElectrumNetworkProvider {
   if (!freshProvider || freshProvider.network !== network) {
-    freshProvider = new ElectrumNetworkProvider(network, { listingCacheMilliseconds: 0 });
+    freshProvider =
+      network === 'mainnet'
+        ? new ElectrumNetworkProvider(network, { hostname: mainnetServer, listingCacheMilliseconds: 0 })
+        : new ElectrumNetworkProvider(network, { listingCacheMilliseconds: 0 });
   }
   return freshProvider;
 }

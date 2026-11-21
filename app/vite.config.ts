@@ -34,8 +34,8 @@ function productionHtml(pages: boolean, routes = pages): Plugin {
           "style-src 'self' 'unsafe-inline'",
           "font-src 'self'",
           "img-src 'self' data: blob:",
-          // CoinGecko, the two Electrum servers, and the default WizardConnect relays.
-          "connect-src 'self' https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest",
+          // CoinGecko, the Electrum servers (mainnet with its fallbacks, then Chipnet), and the default WizardConnect relays.
+          "connect-src 'self' https://api.coingecko.com wss://bch.imaginary.cash:50004 wss://bch.loping.net:50004 wss://fulcrum.criptolayer.net:50004 wss://bch.soul-dev.com:50004 wss://chipnet.bch.ninja:50004 wss://relay.riften.net wss://relay.cauldron.quest",
         ].join('; ')
         return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: policy }, injectTo: 'head-prepend' }]
       },

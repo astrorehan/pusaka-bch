@@ -27,6 +27,7 @@ import { shortAddress } from "../format";
 import { recordActivity, removePendingPlan, savePendingPlan, savePlan, type PendingPlanSubmission } from "../walletData";
 import { friendlyError, isInputConflict, isRejection, StaleReviewError, UnconfirmedPlanSubmission } from "./errors";
 import {
+  chooseServer,
   getFreshProvider,
   getProvider,
   medianTimePast,
@@ -48,6 +49,7 @@ import testPair from "../protocol/test-pair.json";
 export type { PusakaV2PlanMetadata, PusakaV2PolicyInput, Quote };
 
 export async function loadPlan(plan: PusakaV2PlanMetadata) {
+  await chooseServer(NETWORK);
   const provider = getProvider(NETWORK);
   // Use the same state read to verify the policy and display the balance.
   const handle = await attachPusakaV2Plan(plan, provider, { verifyOnChain: false });
@@ -209,6 +211,7 @@ async function sponsor(prompt: string, what: string) {
   return { sponsorUtxo: coin, sponsorUnlocker: unlocker, sponsorChangeAddress: w.ownerAddress() };
 }
 export async function prepareGather(): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const w = walletOnNetwork();
   const p = getProvider(NETWORK);
   const addresses = w.derivedAddresses();
@@ -253,6 +256,7 @@ export async function prepareCreate(
   policy: PusakaV2PolicyInput,
   initialDepositSats: bigint,
 ): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const feeBudget = BigInt(policy.feeBudget ?? DEFAULT_FEE_BUDGET);
   const funding = claimFunding(initialDepositSats, policy.heirs.map(({ share }) => BigInt(share)), feeBudget, feeBudget);
   if (funding.shortfall > 0n)
@@ -316,6 +320,7 @@ export async function prepareAction(
     policy?: PusakaV2PolicyInput;
   } = {},
 ): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const recipient = action === "send" && options.address ? paymentAddress(options.address, NETWORK) : null;
   const loaded = await loadPlan(metadata);
   const { handle, state, now } = loaded;
@@ -567,6 +572,7 @@ async function verifyAndSavePlan(record: PendingPlanSubmission) {
 }
 
 export async function checkPlanSubmission(record: PendingPlanSubmission) {
+  await chooseServer(NETWORK);
   const provider = getProvider(NETWORK);
   let raw;
   try {
@@ -582,6 +588,7 @@ export async function checkPlanSubmission(record: PendingPlanSubmission) {
 }
 
 export async function submit(prepared: Prepared): Promise<string> {
+  await chooseServer(NETWORK);
   if (prepared.validUntil && Date.now() > prepared.validUntil)
     throw new Error("Quote expired. Close this review and get a fresh quote.");
   const hex = await finalizeBuilderTxHex(prepared.builder);
@@ -640,6 +647,7 @@ export async function submit(prepared: Prepared): Promise<string> {
   return expectedTxid;
 }
 export async function getSwapQuote(amount: bigint, slippageBps: number) {
+  await chooseServer(NETWORK);
   if (NETWORK !== "chipnet" || !testPair.category)
     throw new Error(
       "The supported pair is a Chipnet test pair. Mainnet trading has not been qualified.",
@@ -658,6 +666,7 @@ export async function prepareSwap(
   metadata: PusakaV2PlanMetadata,
   quote: Quote,
 ): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const { handle, state, now } = await loadPlan(metadata),
     { w, unlocker } = signing("Pusaka: swap BCH into protected tokens");
   if (binToHex(pkhOfAddress(w.ownerAddress())) !== metadata.ownerPkhHex)
@@ -705,6 +714,7 @@ export async function prepareTokenPayout(
   metadata: PusakaV2PlanMetadata,
   receipt: Utxo,
 ): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const { handle, state } = await loadPlan(metadata),
     { w, unlocker } = signing("Pusaka: sponsor token inheritance payout");
   const sponsor = (await ownerCoins(w.ownerAddress())).find(
@@ -749,6 +759,7 @@ export async function prepareTokenSend(
   recipient: string,
   units: bigint,
 ): Promise<Prepared> {
+  await chooseServer(NETWORK);
   const destination = paymentAddress(recipient, NETWORK);
   const { handle, state, now } = await loadPlan(metadata),
     { w, unlocker } = signing("Pusaka: send protected tokens");
