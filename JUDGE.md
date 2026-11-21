@@ -8,7 +8,7 @@ is in the [README](README.md).
 | **Web app** (Bitcoin Cash mainnet) | https://astrorehan.github.io/pusaka-bch/ |
 | **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
 | **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ · [its demo](https://astrorehan.github.io/pusaka-bch/chipnet/wallet/demo) |
-| **Presentation** | [Pusaka-BCH-BLAZE-2026.pdf](docs/Pusaka-BCH-BLAZE-2026.pdf), also linked from the banner at the top of every page of the app |
+| **Presentation** | [Google Slides](https://docs.google.com/presentation/d/1xBfLkjmP-jgbWSFdYGgpf9XMxtuWoqXeuoXi-L64PpE/edit?usp=sharing) ([PDF copy](docs/Pusaka-BCH-BLAZE-2026.pdf)), also linked from the banner at the top of every page of the app |
 | **Code now** | [BLAZE release branch](https://github.com/astrorehan/pusaka-bch/tree/release/v2-readiness) |
 | **Code before BLAZE** | tag [`blaze-start`](https://github.com/astrorehan/pusaka-bch/tree/blaze-start) and [Pusaka on Monad](https://github.com/astrorehan/pusaka) |
 | **Demo before BLAZE** | [pusaka-faraid.vercel.app](https://pusaka-faraid.vercel.app) (the Monad version) |

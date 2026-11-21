@@ -18,7 +18,7 @@ Track and the Best SolidCash Application bounty.
 | **Judge path** (one button, a real transaction, no wallet needed) | https://astrorehan.github.io/pusaka-bch/wallet/demo |
 | **The same app on Chipnet** (test network) | https://astrorehan.github.io/pusaka-bch/chipnet/ |
 | **Guide for judges** | [JUDGE.md](JUDGE.md) |
-| **Presentation** | [Pusaka-BCH-BLAZE-2026.pdf](docs/Pusaka-BCH-BLAZE-2026.pdf) |
+| **Presentation** | [Google Slides](https://docs.google.com/presentation/d/1xBfLkjmP-jgbWSFdYGgpf9XMxtuWoqXeuoXi-L64PpE/edit?usp=sharing) ([PDF copy](docs/Pusaka-BCH-BLAZE-2026.pdf)) |
 | **On-chain record** | [`docs/proofs/v2-live.md`](docs/proofs/v2-live.md) |
 | **Feedback for SolidCash** | [`docs/solidcash-feedback.md`](docs/solidcash-feedback.md), from the dated [developer log](docs/solidcash-dx-log.md) |
 | **Prize and donation address** (CashTokens) | `bitcoincash:zp42zmv85mgnrh2qvwmgqjxcn2f9lewvdcpu8xadux` |

@@ -17,7 +17,7 @@ export const BANNER = {
   eventUrl: 'https://bchblaze.cash',
 
   /** The presentation in the organiser's template, as a PDF in the repository. A public Google Slides link works too. */
-  slidesUrl: `${REPO_URL}/blob/${sourceRef}/docs/Pusaka-BCH-BLAZE-2026.pdf`,
+  slidesUrl: 'https://docs.google.com/presentation/d/1xBfLkjmP-jgbWSFdYGgpf9XMxtuWoqXeuoXi-L64PpE/edit?usp=sharing',
 
   /** Pusaka as it was before the hackathon (Solidity on Monad). */
   before: {
